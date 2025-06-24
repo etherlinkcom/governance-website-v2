@@ -1,38 +1,38 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable } from 'mobx';
+import { TezosToolkit } from '@taquito/taquito';
+import { BeaconWallet } from '@taquito/beacon-wallet';
 
+export class WalletStore {
+  address: string | null = null;
+  balance: number = 0;
+  votingPower: Record<string, number> = {};
 
-//Example store, need to adjust
-
-class WalletStore {
-  votingPower: Record<'kernel' | 'sequencer' | 'security', number> = {
-    kernel: 0,
-    sequencer: 0,
-    security: 0
-  };
+  Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
+  wallet = new BeaconWallet({ name: 'Governance App' });
 
   constructor() {
     makeAutoObservable(this);
+    this.Tezos.setWalletProvider(this.wallet);
   }
 
-  async fetchVotingPower(
-    toolkit: any,
-    address: string,
-    contractAddress: string,
-    label: 'kernel' | 'sequencer' | 'security'
-  ) {
-    if (!toolkit || !address) return;
+  async connectWallet() {
+    await this.wallet.requestPermissions();
+    this.address = await this.wallet.getPKH();
+    await this.fetchBalance();
+  }
 
-    try {
-      const contract = await toolkit.wallet.at(contractAddress);
-      const storage: any = await contract.storage();
-      const power = await storage.voting_power.get(address);
+  async fetchBalance() {
+    if (!this.address) return;
+    const balance = await this.Tezos.tz.getBalance(this.address);
+    this.balance = balance.toNumber() / 1_000_000;
+  }
 
-      runInAction(() => {
-        this.votingPower[label] = power?.toNumber?.() || 0;
-      });
-    } catch (err) {
-      console.error(`[walletStore] Error fetching ${label} voting power:`, err);
-    }
+  async fetchVotingPower(contractAddress: string, label: 'kernel' | 'sequencer' | 'security') {
+    if (!this.address) return;
+    const contract = await this.Tezos.contract.at(contractAddress);
+    const storage: any = await contract.storage();
+    const power = await storage.voting_power.get(this.address);
+    this.votingPower[label] = power?.toNumber?.() || 0;
   }
 }
 
