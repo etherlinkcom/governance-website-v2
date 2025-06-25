@@ -5,35 +5,61 @@ import { BeaconWallet } from '@taquito/beacon-wallet';
 export class WalletStore {
   address: string | null = null;
   balance: number = 0;
-  votingPower: Record<string, number> = {};
+  votingPower: number = 0;  
+  winnerCandidate: string | null = null;
 
-  Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
-  wallet = new BeaconWallet({ name: 'Governance App' });
+  private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
+  private wallet: BeaconWallet;
 
   constructor() {
-    makeAutoObservable(this);
+    this.wallet = new BeaconWallet({ name: 'Governance App' });
     this.Tezos.setWalletProvider(this.wallet);
+    makeAutoObservable(this);
   }
 
-  async connectWallet() {
-    await this.wallet.requestPermissions();
+
+  async connect(): Promise<void> {
+    await this.wallet.requestPermissions({});
     this.address = await this.wallet.getPKH();
-    await this.fetchBalance();
+    await Promise.all([
+      this.refreshBalance(),
+      this.refreshVotingPower(),
+    ]);
   }
 
-  async fetchBalance() {
-    if (!this.address) return;
-    const balance = await this.Tezos.tz.getBalance(this.address);
-    this.balance = balance.toNumber() / 1_000_000;
+
+  async disconnect(): Promise<void> {
+    await this.wallet.clearActiveAccount();
+    this.address = null;
+    this.balance = 0;
+    this.votingPower = 0;
+    this.winnerCandidate = null;
   }
 
-  async fetchVotingPower(contractAddress: string, label: 'kernel' | 'sequencer' | 'security') {
+  async refreshBalance(): Promise<void> {
     if (!this.address) return;
-    const contract = await this.Tezos.contract.at(contractAddress);
-    const storage: any = await contract.storage();
-    const power = await storage.voting_power.get(this.address);
-    this.votingPower[label] = power?.toNumber?.() || 0;
+    const mutez = await this.Tezos.tz.getBalance(this.address);
+    this.balance = mutez.toNumber() / 1_000_000;
   }
+
+  async refreshVotingPower(): Promise<void> {
+    if (!this.address) return;
+    const addro = "tz3cqThj23Feu55KDynm7Vg81mCMpWDgzQZq"
+    try {
+      const url = `https://api.tzkt.io/v1/delegates/${this.address}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      }
+      console.log('Response from voting power API:', res);
+      const data: { stakingBalance?: number } = await res.json();
+      this.votingPower = data.stakingBalance ?? 0;
+    } catch (err) {
+      console.error('Error fetching voting power:', err);
+      this.votingPower = 0;
+    }
+  }
+
 }
 
 export const walletStore = new WalletStore();
