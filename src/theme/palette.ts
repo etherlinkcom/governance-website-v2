@@ -10,12 +10,12 @@ export const theme: PaletteOptions = {
     contrastText: '#FFFFFF',
   },
   background: {
-    default: '#1B1B1B',
+    default: '#101010',
     paper: '#1B1B1B',
   },
   text: {
-    primary: '#FFFFFF',    // For headings
-    secondary: '#9B9B9B',  // For p tags
+    primary: '#FFFFFF',
+    secondary: '#9B9B9B'
   },
   divider: '#38FF9C',
   common: {

@@ -1,4 +1,4 @@
-import { Components, Theme } from '@mui/material/styles';
+import { Components, Theme, alpha } from '@mui/material/styles';
 import { typography } from './typography';
 
 export const components: Components<Theme> = {
@@ -12,16 +12,20 @@ export const components: Components<Theme> = {
         letterSpacing: typography.button?.letterSpacing,
         verticalAlign: 'middle',
         textTransform: 'none',
-        borderRadius: 8,
+        borderRadius: '50px',
         padding: '12px 24px',
         transition: 'all 0.2s ease-in-out',
         border: '2px solid',
-        borderImageSource: 'radial-gradient(50% 32.35% at 0% 50%, #38FF9C 0%, rgba(56, 255, 156, 0) 100%)',
+        borderImageSource: `radial-gradient(50% 32.35% at 0% 50%, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0)} 100%)`,
+        gap: theme.spacing(1),
+        textAlign: 'center',
+        whiteSpace: 'normal',
+        wordWrap: 'break-word',
       }),
       contained: ({ theme }) => ({
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
-        boxShadow: `0px 0px 6px 0px ${theme.palette.primary.main}`,
+        boxShadow: `0px 0px 3px 0px ${theme.palette.primary.main}`,
         '&:hover': {
           backgroundColor: theme.palette.primary.main,
           boxShadow: `0px 0px 8px 2px ${theme.palette.primary.main}`,
@@ -31,9 +35,9 @@ export const components: Components<Theme> = {
       outlined: ({ theme }) => ({
         backgroundColor: 'transparent',
         color: theme.palette.primary.main,
-        boxShadow: `0px 0px 6px 0px ${theme.palette.primary.main}`,
+        boxShadow: `0px 0px 3px 0px ${theme.palette.primary.main}`,
         '&:hover': {
-          backgroundColor: `rgba(56, 255, 156, 0.1)`,
+          backgroundColor: alpha(theme.palette.primary.main, 0.1),
           transform: 'translateY(-1px)',
         },
       }),
@@ -46,7 +50,7 @@ export const components: Components<Theme> = {
         backdropFilter: 'blur(12px)',
         backgroundImage: 'none',
         border: '2px solid',
-        borderImageSource: 'radial-gradient(50% 32.35% at 0% 50%, #38FF9C 0%, rgba(56, 255, 156, 0) 100%)',
+        borderImageSource: `radial-gradient(50% 32.35% at 0% 50%, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0)} 100%)`,
         borderRadius: 12,
       }),
     },
@@ -57,7 +61,7 @@ export const components: Components<Theme> = {
         backgroundColor: theme.palette.background.paper,
         backdropFilter: 'blur(12px)',
         border: '2px solid',
-        borderImageSource: 'radial-gradient(50% 32.35% at 0% 50%, #38FF9C 0%, rgba(56, 255, 156, 0) 100%)',
+        borderImageSource: `radial-gradient(50% 32.35% at 0% 50%, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0)} 100%)`,
         borderRadius: 12,
       }),
     },
@@ -66,19 +70,19 @@ export const components: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         '& .MuiOutlinedInput-root': {
-          backgroundColor: 'rgba(27, 27, 27, 0.8)',
+          backgroundColor: alpha(theme.palette.background.default, 0.8),
           fontFamily: typography.fontFamily,
           fontSize: typography.body1?.fontSize,
           fontWeight: typography.body1?.fontWeight,
           '& fieldset': {
-            borderColor: 'rgba(56, 255, 156, 0.3)',
+            borderColor: alpha(theme.palette.primary.main, 0.3),
           },
           '&:hover fieldset': {
             borderColor: theme.palette.primary.main,
           },
           '&.Mui-focused fieldset': {
             borderColor: theme.palette.primary.main,
-            boxShadow: `0px 0px 4px 0px ${theme.palette.primary.main}`,
+            boxShadow: `0px 0px 3px 0px ${theme.palette.primary.main}`,
           },
         },
         '& .MuiInputLabel-root': {
@@ -128,25 +132,64 @@ export const components: Components<Theme> = {
         backgroundColor: theme.palette.background.default,
         color: theme.palette.text.primary,
         fontFamily: typography.fontFamily,
-        backgroundImage: 'url(/backgrounds/Background1.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
       },
       '*::-webkit-scrollbar': {
         width: '8px',
       },
-      '*::-webkit-scrollbar-track': {
-        backgroundColor: 'rgba(27, 27, 27, 0.1)',
-      },
-      '*::-webkit-scrollbar-thumb': {
-        backgroundColor: 'rgba(56, 255, 156, 0.3)',
-        borderRadius: '4px',
-      },
-      '*::-webkit-scrollbar-thumb:hover': {
-        backgroundColor: 'rgba(56, 255, 156, 0.5)',
-      },
     }),
+  },
+  MuiToggleButton: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        fontFamily: typography.fontFamily,
+        fontWeight: typography.button?.fontWeight,
+        fontSize: typography.button?.fontSize,
+        border: 'none',
+        borderRadius: '50px',
+        padding: '10px 18px',
+        color: theme.palette.text.secondary,
+        backgroundColor: theme.palette.background.paper,
+        textTransform: 'none',
+        position: 'relative',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          color: theme.palette.primary.main,
+          boxShadow: `0px 0px 3px 0px ${theme.palette.primary.main}`,
+        },
+        '&.Mui-selected': {
+          boxShadow: `0px 0px 3px 0px ${theme.palette.primary.main}`,
+          color: theme.palette.primary.main,
+          '&:hover': {
+            color: theme.palette.primary.main,
+          },
+        },
+      }),
+    },
+  },
+  MuiToggleButtonGroup: {
+    styleOverrides: {
+      root: {
+        gap: '16px',
+        border: 'none',
+        '& .MuiToggleButtonGroup-grouped': {
+          border: 'none',
+          '&:not(:first-of-type)': {
+            borderLeft: 'none',
+            borderRadius: '50px',
+          },
+          '&:first-of-type': {
+            borderRadius: '50px',
+          },
+        },
+      },
+    },
+  },
+    MuiAppBar: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        backgroundColor: theme.palette.background.default,
+        color: theme.palette.text.primary,
+      }),
+    },
   },
 };

@@ -41,7 +41,14 @@ export const typography: TypographyVariantsOptions = {
   h3: headingStyle,
   h4: headingStyle,
   h5: headingStyle,
-  h6: headingStyle,
+  h6: {
+    ...baseStyles,
+    fontWeight: 600,
+    fontSize: '1.25rem',
+    '@media (max-width:900px)': {
+      fontSize: '1rem',
+    },
+  },
 
   body1: bodyStyle,
   body2: bodyStyle,
