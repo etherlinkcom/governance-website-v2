@@ -1,40 +1,36 @@
-import { TypographyVariantsOptions } from "@mui/material";
+import { TypographyVariantsOptions } from '@mui/material/styles';
 
 const baseStyles = {
-  fontFamily: 'Inter',
-  lineHeight: '100%',
-  letterSpacing: '-2%',
+  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, "system-ui", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+  color: 'inherit',
 };
 
 const headingStyle = {
   ...baseStyles,
-  fontWeight: 600,
-  fontSize: '28px',
+  fontWeight: 700,
+  fontSize: '2.5rem',
+  '@media (max-width:900px)': {
+    fontSize: '2rem',
+  },
 };
 
 const bodyStyle = {
   ...baseStyles,
   fontWeight: 400,
-  fontSize: '18px',
+  fontSize: '1rem',
+  lineHeight: 1.6,
 };
 
 const buttonStyle = {
   ...baseStyles,
-  fontWeight: 600,
-  fontSize: '18px',
-  verticalAlign: 'middle',
-  textTransform: 'none' as const,
+  fontWeight: 500,
+  fontSize: '0.875rem',
+  lineHeight: 1.75,
+  letterSpacing: '0.02857em',
 };
 
 export const typography: TypographyVariantsOptions = {
-  fontFamily: [
-    'Inter',
-    '-apple-system',
-    'BlinkMacSystemFont',
-    'Segoe UI',
-    'Roboto',
-    'sans-serif',
-  ].join(','),
+  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, "system-ui", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
 
   h1: headingStyle,
   h2: headingStyle,
