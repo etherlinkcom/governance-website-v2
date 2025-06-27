@@ -1,52 +1,15 @@
-import { Box, Typography, Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, TableSortLabel } from '@mui/material';
-import { useState } from 'react';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
-import { useTheme, alpha } from '@mui/material/styles';
-
-type Order = 'asc' | 'desc';
-type OrderBy = 'baker' | 'votingPower' | 'proposal' | 'time';
+import ProposalsList from './ProposalsList';
+import UpvotersTable from './UpvotersTable';
 
 const ProposalsView = observer(() => {
   const { proposals, upvoters, quorum, loading, error } = contractStore;
-  const [order, setOrder] = useState<Order>('asc');
-  const [orderBy, setOrderBy] = useState<OrderBy>('baker');
-  const theme = useTheme();
 
-  const handleRequestSort = (property: OrderBy) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
+  const handleProposalClick = (proposal: any) => {
+    console.log('Clicked proposal:', proposal);
   };
-
-  const sortedUpvoters = upvoters.slice().sort((a, b) => {
-    let aValue: string | number = a[orderBy];
-    let bValue: string | number = b[orderBy];
-
-    if (orderBy === 'votingPower') {
-      const parseVotingPower = (value: string) => {
-        const num = parseFloat(value);
-        const multiplier = value.includes('T') ? 1000000000000 :
-                          value.includes('B') ? 1000000000 : 1;
-        return num * multiplier;
-      };
-      aValue = parseVotingPower(a.votingPower);
-      bValue = parseVotingPower(b.votingPower);
-    }
-
-    if (orderBy === 'time') {
-      aValue = new Date(a.time).getTime();
-      bValue = new Date(b.time).getTime();
-    }
-
-    if (bValue < aValue) {
-      return order === 'asc' ? 1 : -1;
-    }
-    if (bValue > aValue) {
-      return order === 'asc' ? -1 : 1;
-    }
-    return 0;
-  });
 
   if (loading) {
     return (
@@ -69,130 +32,18 @@ const ProposalsView = observer(() => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {/* Proposals Section */}
-      <Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5" component="h2">
-            Proposals
-          </Typography>
-          <Typography variant="body1">
-            Quorum: {quorum}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {proposals.map((proposal) => (
-            <Card
-              key={proposal.id}
-              sx={{
-                backgroundColor: 'background.paper',
-                boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
-                border: 'none',
-                borderRadius: '8px',
-                '&:hover': {
-                  boxShadow: `0px 0px 10px 2px ${theme.palette.custom.shadow.secondary}`,
-                  transform: 'translateY(-2px)',
-                  transition: 'all 0.2s ease-in-out',
-                },
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      {proposal.id}
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                      (by {proposal.author})
-                    </Typography>
-                    {proposal.title && (
-                      <Typography variant="body1">
-                        {proposal.title}
-                      </Typography>
-                    )}
-                  </Box>
-                  <Box sx={{ textAlign: 'right' }}>
-                    <Typography variant="subtitle1">
-                      Upvotes:
-                    </Typography>
-                    <Typography variant="h6">
-                      {proposal.upvotes}
-                    </Typography>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-      </Box>
+      <ProposalsList
+        proposals={proposals}
+        quorum={quorum}
+        onProposalClick={handleProposalClick}
+      />
 
       {/* Upvoters Section */}
       <Box>
         <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
           Upvoters
         </Typography>
-
-        <TableContainer component={Paper} sx={{ backgroundColor: 'background.paper' }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  <TableSortLabel
-                    active={orderBy === 'baker'}
-                    direction={orderBy === 'baker' ? order : 'asc'}
-                    onClick={() => handleRequestSort('baker')}
-                  >
-                    Baker
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel
-                    active={orderBy === 'votingPower'}
-                    direction={orderBy === 'votingPower' ? order : 'asc'}
-                    onClick={() => handleRequestSort('votingPower')}
-                  >
-                    Voting power
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel
-                    active={orderBy === 'proposal'}
-                    direction={orderBy === 'proposal' ? order : 'asc'}
-                    onClick={() => handleRequestSort('proposal')}
-                  >
-                    Proposal
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel
-                    active={orderBy === 'time'}
-                    direction={orderBy === 'time' ? order : 'asc'}
-                    onClick={() => handleRequestSort('time')}
-                  >
-                    Time
-                  </TableSortLabel>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sortedUpvoters.map((upvoter, index) => (
-                <TableRow key={index}>
-                  <TableCell className="baker-cell">
-                    {upvoter.baker}
-                  </TableCell>
-                  <TableCell className="voting-power-cell">
-                    {upvoter.votingPower}
-                  </TableCell>
-                  <TableCell className="proposal-cell">
-                    {upvoter.proposal}
-                  </TableCell>
-                  <TableCell className="time-cell">
-                    {upvoter.time}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <UpvotersTable upvoters={upvoters} />
       </Box>
     </Box>
   );
