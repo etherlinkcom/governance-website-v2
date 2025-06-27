@@ -140,7 +140,7 @@ class ContractStore {
     return {
       ...baseConfig,
       address,
-      title: `${this.currentContract.charAt(0).toUpperCase() + this.currentContract.slice(1)} Governance${networkSuffix}`
+      title: `${this.currentContract.charAt(0).toUpperCase() + this.currentContract.slice(1)} ${networkSuffix}`
     };
   }
 

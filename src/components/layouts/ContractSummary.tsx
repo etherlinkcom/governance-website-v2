@@ -11,7 +11,7 @@ const ContractSummary = observer(() => {
   if (!contractData) return null;
 
   return (
-    <Accordion defaultExpanded>
+    <Accordion >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography variant="h1" component="h1">
           {contractData.title}
