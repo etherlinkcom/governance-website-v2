@@ -6,16 +6,6 @@ import { contractStore } from '@/stores/ContractStore';
 import ContractSummary from '@/components/layouts/ContractSummary';
 import GovernanceDisplay from '@/components/layouts/GovernanceDisplay';
 
-
-
-/**
- *
- * TODO
- *
- * Add Time periods to choose from
- * Add proposal and promotion pages
- * Add tables to view voters
- */
 const Contract = observer(() => {
   const router = useRouter();
   const { contract } = router.query;
