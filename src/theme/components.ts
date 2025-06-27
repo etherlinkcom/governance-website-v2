@@ -102,8 +102,26 @@ export const components: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         fontFamily: typography.fontFamily,
-        '&.MuiTypography-linkText:hover': {
-          opacity: 0.8,
+        '&.MuiTypography-h1, &.MuiTypography-h2, &.MuiTypography-h3, &.MuiTypography-h4, &.MuiTypography-h5, &.MuiTypography-h6': {
+          color: theme.palette.text.primary,
+        },
+        '&.MuiTypography-body1, &.MuiTypography-body2': {
+          color: theme.palette.info.main,
+        },
+        '&.MuiTypography-caption, &.MuiTypography-subtitle1, &.MuiTypography-subtitle2': {
+          color: theme.palette.text.secondary,
+        },
+        '&.MuiTypography-linkText': {
+          color: theme.palette.primary.main,
+          '&:hover': {
+            opacity: 0.8,
+          },
+        },
+        '&.MuiTypography-code': {
+          color: theme.palette.info.main,
+        },
+        '&.MuiTypography-label': {
+          color: theme.palette.text.secondary,
         },
       }),
     },
@@ -176,11 +194,11 @@ export const components: Components<Theme> = {
   },
   MuiTableContainer: {
     styleOverrides: {
-      root: {
-        boxShadow: '0px 0px 6px 0px #38FF9C66',
+      root: ({ theme }) => ({
+        boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
         borderRadius: '8px',
         overflow: 'hidden',
-      },
+      }),
     },
   },
   MuiTable: {
@@ -193,11 +211,11 @@ export const components: Components<Theme> = {
   },
   MuiTableHead: {
     styleOverrides: {
-      root: {
+      root: ({ theme }) => ({
         '& .MuiTableCell-head': {
-          backgroundColor: '#151515',
+          backgroundColor: theme.palette.background.paper,
           borderBottom: 'none',
-          color: '#A3FFD1',
+          color: theme.palette.info.main,
           fontFamily: 'Inter',
           fontWeight: 700,
           fontSize: '14px',
@@ -205,24 +223,24 @@ export const components: Components<Theme> = {
           letterSpacing: '-0.02em',
           verticalAlign: 'middle',
         },
-      },
+      }),
     },
   },
   MuiTableBody: {
     styleOverrides: {
-      root: {
+      root: ({ theme }) => ({
         '& .MuiTableRow-root': {
           '&:nth-of-type(odd)': {
-            backgroundColor: '#1b1b1b',
+            backgroundColor: theme.palette.custom.tableBg.odd,
           },
           '&:nth-of-type(even)': {
-            backgroundColor: '#151515',
+            backgroundColor: theme.palette.custom.tableBg.even,
           },
           '&:hover': {
-            backgroundColor: '#2a2a2a !important',
+            backgroundColor: `${theme.palette.custom.tableBg.hover} !important`,
           },
         },
-      },
+      }),
     },
   },
   MuiTableCell: {
@@ -235,10 +253,10 @@ export const components: Components<Theme> = {
         fontWeight: 700,
         borderBottom: 'none',
       },
-      body: {
-        color: '#A3FFD1',
+      body: ({ theme }) => ({
+        color: theme.palette.info.main,
         '&.baker-cell': {
-          color: '#38FF9C',
+          color: theme.palette.primary.main,
           textDecoration: 'underline',
           cursor: 'pointer',
           '&:hover': {
@@ -248,7 +266,7 @@ export const components: Components<Theme> = {
         '&.proposal-cell': {
           fontFamily: 'monospace',
           fontSize: '0.75rem',
-          color: '#38FF9C',
+          color: theme.palette.primary.main,
           textDecoration: 'underline',
           maxWidth: '200px',
           overflow: 'hidden',
@@ -260,12 +278,12 @@ export const components: Components<Theme> = {
           },
         },
         '&.time-cell': {
-          color: '#A3FFD1',
+          color: theme.palette.info.main,
         },
         '&.voting-power-cell': {
-          color: '#A3FFD1',
+          color: theme.palette.info.main,
         },
-      },
+      }),
     },
   },
 };

@@ -1,26 +1,66 @@
 import { PaletteOptions } from '@mui/material/styles';
 
 export const theme: PaletteOptions = {
+  mode: 'dark',
   primary: {
     main: '#38FF9C',
-    contrastText: '#1B1B1B',
+    light: '#A3FFD1',
+    dark: '#2ECC7F',
+    contrastText: '#000000',
   },
   secondary: {
-    main: '#1B1B1B',
+    main: '#FF6B6B',
+    light: '#FF9999',
+    dark: '#E55555',
     contrastText: '#FFFFFF',
   },
   background: {
-    default: '#101010',
-    paper: '#1B1B1B',
+    default: '#0A0A0A',
+    paper: '#151515',
   },
   text: {
     primary: '#FFFFFF',
-    secondary: '#9B9B9B'
+    secondary: '#888888',
   },
-  divider: '#38FF9C',
-  common: {
-    white: '#FFFFFF',
-    black: '#1B1B1B',
+  info: {
+    main: '#A3FFD1',
+    light: '#CCFFE8',
+    dark: '#7AFFCA',
+    contrastText: '#000000',
+  },
+  warning: {
+    main: '#FFA726',
+    light: '#FFD54F',
+    dark: '#F57C00',
+    contrastText: '#000000',
+  },
+  error: {
+    main: '#FF6B6B',
+    light: '#FF9999',
+    dark: '#E55555',
+    contrastText: '#FFFFFF',
+  },
+  success: {
+    main: '#38FF9C',
+    light: '#A3FFD1',
+    dark: '#2ECC7F',
+    contrastText: '#000000',
+  },
+  divider: 'rgba(56, 255, 156, 0.4)',
+  custom: {
+    tableBg: {
+      odd: '#1b1b1b',
+      even: '#151515',
+      hover: '#2a2a2a',
+    },
+    border: {
+      primary: 'rgba(56, 255, 156, 0.4)',
+      secondary: 'rgba(56, 255, 156, 0.6)',
+    },
+    shadow: {
+      primary: 'rgba(56, 255, 156, 0.4)',
+      secondary: 'rgba(56, 255, 156, 0.6)',
+    },
   },
 };
 

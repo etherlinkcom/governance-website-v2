@@ -2,6 +2,7 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
+import { useTheme, alpha } from '@mui/material/styles';
 
 type Order = 'asc' | 'desc';
 type OrderBy = 'baker' | 'votingPower' | 'vote' | 'time';
@@ -10,6 +11,7 @@ const PromotionView = observer(() => {
   const { promotion, loading, error } = contractStore;
   const [order, setOrder] = useState<Order>('asc');
   const [orderBy, setOrderBy] = useState<OrderBy>('baker');
+  const theme = useTheme();
 
   const handleRequestSort = (property: OrderBy) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -80,9 +82,9 @@ const PromotionView = observer(() => {
       <Box>
         <Box sx={{ mb: 2 }}>
           <Typography variant="label">
-            Candidate{' '}
+            Candidate:
           </Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}>
+          <Typography variant="code" sx={{ mb: 1 }}>
             {promotion.candidate}
           </Typography>
           <Typography variant="linkText">
@@ -116,11 +118,11 @@ const PromotionView = observer(() => {
           <Box
             sx={{
               flex: 1,
-              border: '1px solid #38FF9C',
+              border: `1px solid ${theme.palette.success.main}`,
               borderRadius: '4px',
               p: 2,
               textAlign: 'center',
-              backgroundColor: 'rgba(56, 255, 156, 0.1)'
+              backgroundColor: alpha(theme.palette.success.main, 0.1)
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
@@ -128,15 +130,15 @@ const PromotionView = observer(() => {
                 width: 16,
                 height: 16,
                 borderRadius: '50%',
-                backgroundColor: '#38FF9C',
+                backgroundColor: theme.palette.success.main,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Typography sx={{ fontSize: '12px', color: 'black' }}>✓</Typography>
+                <Typography sx={{ fontSize: '12px', color: theme.palette.success.contrastText }}>✓</Typography>
               </Box>
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                {promotion.votes.yea.percentage}% ({promotion.votes.yea.count}{promotion.votes.yea.label})
+              <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main }}>
+                {promotion.votes.yea.percentage}% ({promotion.votes.yea.count} {promotion.votes.yea.label})
               </Typography>
             </Box>
             <Typography variant="subtitle2">
@@ -148,11 +150,11 @@ const PromotionView = observer(() => {
           <Box
             sx={{
               flex: 1,
-              border: '1px solid #FF6B6B',
+              border: `1px solid ${theme.palette.error.main}`,
               borderRadius: '4px',
               p: 2,
               textAlign: 'center',
-              backgroundColor: 'rgba(255, 107, 107, 0.1)'
+              backgroundColor: alpha(theme.palette.error.main, 0.1)
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
@@ -160,15 +162,15 @@ const PromotionView = observer(() => {
                 width: 16,
                 height: 16,
                 borderRadius: '50%',
-                backgroundColor: '#FF6B6B',
+                backgroundColor: theme.palette.error.main,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Typography sx={{ fontSize: '12px', color: 'white' }}>✕</Typography>
+                <Typography sx={{ fontSize: '12px', color: theme.palette.error.contrastText }}>✕</Typography>
               </Box>
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                {promotion.votes.nay.percentage}% ({promotion.votes.nay.count}{promotion.votes.nay.label})
+              <Typography variant="body1" sx={{ fontWeight: 600, color: `${theme.palette.error.main} !important` }}>
+                {promotion.votes.nay.percentage}% ({promotion.votes.nay.count} {promotion.votes.nay.label})
               </Typography>
             </Box>
             <Typography variant="subtitle2">
@@ -180,11 +182,11 @@ const PromotionView = observer(() => {
           <Box
             sx={{
               flex: 1,
-              border: '1px solid #FFA726',
+              border: `1px solid ${theme.palette.warning.main}`,
               borderRadius: '4px',
               p: 2,
               textAlign: 'center',
-              backgroundColor: 'rgba(255, 167, 38, 0.1)'
+              backgroundColor: alpha(theme.palette.warning.main, 0.1)
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
@@ -192,15 +194,15 @@ const PromotionView = observer(() => {
                 width: 16,
                 height: 16,
                 borderRadius: '50%',
-                backgroundColor: '#FFA726',
+                backgroundColor: theme.palette.warning.main,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Typography sx={{ fontSize: '12px', color: 'white' }}>–</Typography>
+                <Typography sx={{ fontSize: '12px', color: theme.palette.warning.contrastText }}>–</Typography>
               </Box>
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                {promotion.votes.pass.percentage}% ({promotion.votes.pass.count}{promotion.votes.pass.label})
+              <Typography variant="body1" sx={{ fontWeight: 600, color: `${theme.palette.warning.main} !important` }}>
+                {promotion.votes.pass.percentage}% ({promotion.votes.pass.count} {promotion.votes.pass.label})
               </Typography>
             </Box>
             <Typography variant="subtitle2">
@@ -267,7 +269,7 @@ const PromotionView = observer(() => {
                   <TableCell className="voting-power-cell">
                     {voter.votingPower}
                   </TableCell>
-                  <TableCell sx={{ color: '#38FF9C' }}>
+                  <TableCell sx={{ color: theme.palette.primary.main }}>
                     {voter.vote}
                   </TableCell>
                   <TableCell className="time-cell">

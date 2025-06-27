@@ -2,6 +2,7 @@ import { Box, Typography, Card, CardContent, Table, TableBody, TableCell, TableC
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
+import { useTheme, alpha } from '@mui/material/styles';
 
 type Order = 'asc' | 'desc';
 type OrderBy = 'baker' | 'votingPower' | 'proposal' | 'time';
@@ -10,6 +11,7 @@ const ProposalsView = observer(() => {
   const { proposals, upvoters, quorum, loading, error } = contractStore;
   const [order, setOrder] = useState<Order>('asc');
   const [orderBy, setOrderBy] = useState<OrderBy>('baker');
+  const theme = useTheme();
 
   const handleRequestSort = (property: OrderBy) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -83,11 +85,11 @@ const ProposalsView = observer(() => {
               key={proposal.id}
               sx={{
                 backgroundColor: 'background.paper',
-                boxShadow: '0px 0px 6px 0px #38FF9C66',
+                boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
                 border: 'none',
                 borderRadius: '8px',
                 '&:hover': {
-                  boxShadow: '0px 0px 10px 2px #38FF9C66',
+                  boxShadow: `0px 0px 10px 2px ${theme.palette.custom.shadow.secondary}`,
                   transform: 'translateY(-2px)',
                   transition: 'all 0.2s ease-in-out',
                 },

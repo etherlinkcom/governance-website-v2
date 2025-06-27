@@ -2,9 +2,11 @@ import { Box, Typography, Button, Stack, Accordion, AccordionSummary, AccordionD
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
+import { useTheme } from '@mui/material/styles';
 
 const ContractSummary = observer(() => {
   const { contractData } = contractStore;
+  const theme = useTheme();
 
   if (!contractData) return null;
 
@@ -13,7 +15,7 @@ const ContractSummary = observer(() => {
       defaultExpanded
       sx={{
         width: '100%',
-        boxShadow: '0px 0px 6px 0px #38FF9C66',
+        boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
         borderRadius: '10px',
         border: 'none',
         '&:before': {
@@ -22,7 +24,7 @@ const ContractSummary = observer(() => {
       }}
     >
       <AccordionSummary
-        expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}
+        expandIcon={<ExpandMoreIcon sx={{ color: theme.palette.primary.main }} />}
         sx={{
           borderRadius: '10px 10px 0 0',
           '& .MuiAccordionSummary-content': {
