@@ -184,12 +184,106 @@ export const components: Components<Theme> = {
       },
     },
   },
-    MuiAppBar: {
+  MuiAppBar: {
     styleOverrides: {
       root: ({ theme }) => ({
         backgroundColor: theme.palette.background.default,
         color: theme.palette.text.primary,
       }),
+    },
+  },
+  MuiTableContainer: {
+    styleOverrides: {
+      root: {
+        boxShadow: '0px 0px 6px 0px #38FF9C66',
+        borderRadius: '8px',
+        overflow: 'hidden',
+      },
+    },
+  },
+  MuiTable: {
+    styleOverrides: {
+      root: {
+        borderCollapse: 'separate',
+        borderSpacing: 0,
+      },
+    },
+  },
+  MuiTableHead: {
+    styleOverrides: {
+      root: {
+        '& .MuiTableCell-head': {
+          backgroundColor: '#151515',
+          borderBottom: 'none',
+          color: '#A3FFD1',
+          fontFamily: 'Inter',
+          fontWeight: 700,
+          fontSize: '14px',
+          lineHeight: '20px',
+          letterSpacing: '-0.02em',
+          verticalAlign: 'middle',
+        },
+      },
+    },
+  },
+  MuiTableBody: {
+    styleOverrides: {
+      root: {
+        '& .MuiTableRow-root': {
+          '&:nth-of-type(odd)': {
+            backgroundColor: '#1b1b1b',
+          },
+          '&:nth-of-type(even)': {
+            backgroundColor: '#151515',
+          },
+          '&:hover': {
+            backgroundColor: '#2a2a2a !important',
+          },
+        },
+      },
+    },
+  },
+  MuiTableCell: {
+    styleOverrides: {
+      root: {
+        borderBottom: 'none',
+        padding: '12px 16px',
+      },
+      head: {
+        fontWeight: 700,
+        borderBottom: 'none',
+      },
+      body: {
+        color: '#A3FFD1',
+        '&.baker-cell': {
+          color: '#38FF9C',
+          textDecoration: 'underline',
+          cursor: 'pointer',
+          '&:hover': {
+            opacity: 0.8,
+          },
+        },
+        '&.proposal-cell': {
+          fontFamily: 'monospace',
+          fontSize: '0.75rem',
+          color: '#38FF9C',
+          textDecoration: 'underline',
+          maxWidth: '200px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          cursor: 'pointer',
+          '&:hover': {
+            opacity: 0.8,
+          },
+        },
+        '&.time-cell': {
+          color: '#A3FFD1',
+        },
+        '&.voting-power-cell': {
+          color: '#A3FFD1',
+        },
+      },
     },
   },
 };

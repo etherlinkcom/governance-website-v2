@@ -1,4 +1,5 @@
 import { makeObservable, observable, computed, action } from 'mobx';
+import { FAKE_GOVERNANCE_DATA } from './mockData';
 
 interface ContractConfig {
   address: string;
@@ -15,6 +16,42 @@ interface Proposal {
   status: 'active' | 'passed' | 'failed' | 'pending';
   votes: { for: number; against: number };
   endTime: Date;
+  author: string;
+  upvotes: string;
+}
+
+interface Upvoter {
+  baker: string;
+  votingPower: string;
+  proposal: string;
+  time: string;
+}
+
+interface Voter {
+  baker: string;
+  votingPower: string;
+  vote: 'yea' | 'nay' | 'pass';
+  time: string;
+}
+
+interface PromotionData {
+  candidate: string;
+  title: string;
+  quorum: string;
+  supermajority: string;
+  votes: {
+    yea: { percentage: number; count: number; label: string };
+    nay: { percentage: number; count: number; label: string };
+    pass: { percentage: number; count: number; label: string };
+  };
+  voters: Voter[];
+}
+
+interface GovernanceData {
+  proposals: Proposal[];
+  upvoters: Upvoter[];
+  quorum: string;
+  promotion: PromotionData;
 }
 
 type GovernanceType = 'slow' | 'fast' | 'sequencer';
@@ -55,6 +92,9 @@ class ContractStore {
   currentNetwork: NetworkType = 'mainnet';
   currentContract: GovernanceType | null = null;
   proposals: Proposal[] = [];
+  promotion: PromotionData | null = null;
+  upvoters: Upvoter[] = [];
+  quorum = '0%';
   loading = false;
   error: string | null = null;
 
@@ -63,6 +103,9 @@ class ContractStore {
       currentNetwork: observable,
       currentContract: observable,
       proposals: observable,
+      promotion: observable,
+      upvoters: observable,
+      quorum: observable,
       loading: observable,
       error: observable,
       contractData: computed,
@@ -99,36 +142,25 @@ class ContractStore {
   }
 
   async loadProposals() {
-    if (!this.contractData) return;
+    if (!this.contractData || !this.currentContract) return;
 
     this.loading = true;
     this.error = null;
 
     try {
-      // TODO replace with real data
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      this.proposals = [
-        {
-          id: '1',
-          title: `Sample ${this.currentContract} proposal`,
-          description: 'This is a sample proposal for demonstration purposes.',
-          status: 'active',
-          votes: { for: 150, against: 30 },
-          endTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
-        },
-        {
-          id: '2',
-          title: 'Another proposal',
-          description: 'Another sample proposal.',
-          status: 'passed',
-          votes: { for: 200, against: 50 },
-          endTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
-        }
-      ];
+      // TODO: Replace with real API call
+      const fakeData = FAKE_GOVERNANCE_DATA[this.currentContract];
+      this.proposals = fakeData.proposals;
+      this.upvoters = fakeData.upvoters;
+      this.promotion = fakeData.promotion;
+      this.quorum = fakeData.quorum;
+
     } catch (err) {
-      this.error = 'Failed to load proposals';
-      console.error('Error loading proposals:', err);
+      this.error = 'Failed to load governance data';
+      console.error('Error loading governance data:', err);
     } finally {
       this.loading = false;
     }
