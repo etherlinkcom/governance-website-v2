@@ -26,7 +26,7 @@ const CandidateInfo = ({ candidate, title, quorum, supermajority }: CandidateInf
           <Typography variant="subtitle2">
             Quorum:
           </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          <Typography variant="body1">
             {quorum}
           </Typography>
         </Box>
@@ -34,7 +34,7 @@ const CandidateInfo = ({ candidate, title, quorum, supermajority }: CandidateInf
           <Typography variant="subtitle2">
             Supermajority:
           </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          <Typography variant="body1" >
             {supermajority}
           </Typography>
         </Box>

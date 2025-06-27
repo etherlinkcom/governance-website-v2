@@ -12,6 +12,6 @@ export const theme = createTheme({
   spacing,
   components,
   shape: {
-    borderRadius: 8,
+    borderRadius: '25px',
   },
 });

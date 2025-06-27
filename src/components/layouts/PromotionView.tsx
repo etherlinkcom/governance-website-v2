@@ -1,9 +1,9 @@
 import { Box, Typography, CircularProgress } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
-import CandidateInfo from './CandidateInfo';
-import VotingResults from './VotingResults';
-import VotersTable from './VotersTable';
+import CandidateInfo from '../cards/CandidateInfo';
+import VotingResults from '../cards/VotingResults';
+import VotersTable from '../tables/VotersTable';
 
 const PromotionView = observer(() => {
   const { promotion, loading, error } = contractStore;

@@ -1,8 +1,8 @@
 import { Box, Typography, CircularProgress } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
-import ProposalsList from './ProposalsList';
-import UpvotersTable from './UpvotersTable';
+import ProposalsList from '../cards/ProposalsList';
+import UpvotersTable from '../tables/UpvotersTable';
 
 const ProposalsView = observer(() => {
   const { proposals, upvoters, quorum, loading, error } = contractStore;

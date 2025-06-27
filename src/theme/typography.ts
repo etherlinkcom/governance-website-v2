@@ -50,14 +50,12 @@ export const typography: TypographyVariantsOptions = {
     fontWeight: 400,
     lineHeight: 1.4,
   },
-
   button: {
     fontSize: '0.875rem',
     fontWeight: 500,
     lineHeight: 1.4,
     textTransform: 'none' as const,
   },
-
   subtitle1: {
     fontSize: '1rem',
     fontWeight: 500,
@@ -68,4 +66,14 @@ export const typography: TypographyVariantsOptions = {
     fontWeight: 500,
     lineHeight: 1.4,
   },
+  link: {
+    fontFamily: 'Inter',
+    fontWeight: 400,
+    fontSize: '14px',
+    lineHeight: '18px',
+    letterSpacing: '-0.02em',
+    textDecoration: 'underline',
+    textDecorationStyle: 'solid',
+    verticalAlign: 'middle',
+  }
 };

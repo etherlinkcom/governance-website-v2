@@ -41,13 +41,19 @@ const VoteResultCard = ({ type, percentage, count, label }: VoteResultCardProps)
       sx={{
         flex: 1,
         border: `1px solid ${colors.main}`,
-        borderRadius: '4px',
-        p: 2,
+        borderRadius: theme.shape.borderRadius,
+        p: theme.spacing(2),
         textAlign: 'center',
         backgroundColor: alpha(colors.main, 0.1)
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: theme.spacing(1),
+        mb: theme.spacing(1)
+      }}>
         <Box sx={{
           width: 16,
           height: 16,
@@ -55,17 +61,29 @@ const VoteResultCard = ({ type, percentage, count, label }: VoteResultCardProps)
           backgroundColor: colors.main,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
         }}>
-          <Typography sx={{ fontSize: '12px', color: colors.contrast }}>
+          <Typography variant="caption" sx={{ color: colors.contrast }}>
             {colors.icon}
           </Typography>
         </Box>
-        <Typography variant="body1" sx={{ fontWeight: 600, color: `${colors.main} !important` }}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: `${colors.main} !important`,
+            fontWeight: theme.typography.subtitle1.fontWeight
+          }}
+        >
           {percentage}% ({count} {label})
         </Typography>
       </Box>
-      <Typography variant="subtitle2" sx={{ textTransform: 'capitalize' }}>
+      <Typography
+        variant="subtitle1"
+        sx={{
+          textTransform: 'capitalize',
+          color: colors.main
+        }}
+      >
         {type}
       </Typography>
     </Box>

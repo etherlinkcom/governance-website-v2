@@ -1,8 +1,8 @@
 import { Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import SortableTable from './SortableTable';
 import { useTableSort } from '@/hooks.ts/useTableSort';
 import { customSortComparator } from '@/utils/votingPowerUtils';
+import SortableTable from './SortableTable';
 
 interface Voter {
   baker: string;
@@ -34,13 +34,24 @@ const VotersTable = ({ voters }: VotersTableProps) => {
   const renderCell = (row: Voter, column: { id: keyof Voter; label: string; sortable?: boolean }) => {
     switch (column.id) {
       case 'baker':
-        return <span className="baker-cell">{row.baker}</span>;
+        return (
+          <Typography variant='link'>
+            {row.baker}
+          </Typography>
+        );
       case 'votingPower':
-        return <span className="voting-power-cell">{row.votingPower}</span>;
+        return row.votingPower;
       case 'vote':
-        return <Typography sx={{ color: theme.palette.primary.main }}>{row.vote}</Typography>;
+        return (
+          <span style={{
+            color: theme.palette.primary.main,
+            fontWeight: '600'
+          }}>
+            {row.vote}
+          </span>
+        );
       case 'time':
-        return <span className="time-cell">{row.time}</span>;
+        return row.time;
       default:
         return row[column.id];
     }

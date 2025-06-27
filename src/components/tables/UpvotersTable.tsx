@@ -1,6 +1,8 @@
-import { customSortComparator } from '@/utils/votingPowerUtils';
-import SortableTable from './SortableTable';
 import { useTableSort } from '@/hooks.ts/useTableSort';
+import { customSortComparator } from '@/utils/votingPowerUtils';
+import { useTheme } from '@mui/material/styles';
+import { Typography } from '@mui/material';
+import SortableTable from './SortableTable';
 
 interface Upvoter {
   baker: string;
@@ -14,6 +16,7 @@ interface UpvotersTableProps {
 }
 
 const UpvotersTable = ({ upvoters }: UpvotersTableProps) => {
+  const theme = useTheme();
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     upvoters,
     'baker',
@@ -30,13 +33,17 @@ const UpvotersTable = ({ upvoters }: UpvotersTableProps) => {
   const renderCell = (row: Upvoter, column: { id: keyof Upvoter; label: string; sortable?: boolean }) => {
     switch (column.id) {
       case 'baker':
-        return <span className="baker-cell">{row.baker}</span>;
+        return (
+          <Typography variant='link'>
+            {row.baker}
+          </Typography>
+        );
       case 'votingPower':
-        return <span className="voting-power-cell">{row.votingPower}</span>;
+        return row.votingPower;
       case 'proposal':
-        return <span className="proposal-cell">{row.proposal}</span>;
+        return row.proposal;
       case 'time':
-        return <span className="time-cell">{row.time}</span>;
+        return row.time;
       default:
         return row[column.id];
     }

@@ -22,7 +22,7 @@ const ProposalCard = ({ proposal, onClick }: ProposalCardProps) => {
         backgroundColor: 'background.paper',
         boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
         border: 'none',
-        borderRadius: '8px',
+        borderRadius: '25px',
         cursor: onClick ? 'pointer' : 'default',
         '&:hover': {
           boxShadow: `0px 0px 10px 2px ${theme.palette.custom.shadow.secondary}`,
@@ -51,7 +51,7 @@ const ProposalCard = ({ proposal, onClick }: ProposalCardProps) => {
             <Typography variant="subtitle2">
               Upvotes:
             </Typography>
-            <Typography variant="body2" sx={{ fontWeight: 600, display: 'block' }}>
+            <Typography variant="body1" sx={{ display: 'block' }}>
               {proposal.upvotes}
             </Typography>
           </Box>

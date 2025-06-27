@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Box, Container, CircularProgress } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
-import ContractSummary from '@/components/ContractSummary';
-import GovernanceDisplay from '@/components/GovernanceDisplay';
+import ContractSummary from '@/components/layouts/ContractSummary';
+import GovernanceDisplay from '@/components/layouts/GovernanceDisplay';
 
 
 

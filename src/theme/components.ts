@@ -105,10 +105,18 @@ export const components: Components<Theme> = {
         '&.MuiTypography-h1, &.MuiTypography-h2, &.MuiTypography-h3, &.MuiTypography-h4, &.MuiTypography-h5, &.MuiTypography-h6': {
           color: theme.palette.text.primary,
         },
+        '&.MuiTypography-link': {
+          color: theme.palette.primary.main,
+          '&:hover': {
+            color: theme.palette.primary.dark,
+            textDecorationThickness: '2px',
+            cursor: 'pointer',
+          },
+        },
         '&.MuiTypography-body1, &.MuiTypography-body2': {
           color: theme.palette.info.main,
         },
-        '&.MuiTypography-caption, &.MuiTypography-subtitle1, &.MuiTypography-subtitle2': {
+          '&.MuiTypography-subtitle1, &.MuiTypography-subtitle2': {
           color: theme.palette.text.secondary,
         },
       }),
@@ -184,7 +192,7 @@ export const components: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
-        borderRadius: '8px',
+        borderRadius: '25px',
         overflow: 'hidden',
       }),
     },
@@ -194,6 +202,7 @@ export const components: Components<Theme> = {
       root: {
         borderCollapse: 'separate',
         borderSpacing: 0,
+        padding: '12px'
       },
     },
   },
@@ -206,7 +215,7 @@ export const components: Components<Theme> = {
           color: theme.palette.info.main,
           fontFamily: 'Inter',
           fontWeight: 700,
-          fontSize: '14px',
+          fontSize: '16px',
           lineHeight: '20px',
           letterSpacing: '-0.02em',
           verticalAlign: 'middle',
@@ -237,40 +246,50 @@ export const components: Components<Theme> = {
         borderBottom: 'none',
         padding: '12px 16px',
       },
-      head: {
-        fontWeight: 700,
-        borderBottom: 'none',
-      },
       body: ({ theme }) => ({
         color: theme.palette.info.main,
-        '&.baker-cell': {
+        fontFamily: 'Inter',
+        fontWeight: 400,
+        fontSize: '14px',
+        lineHeight: '18px',
+        letterSpacing: '-0.02em',
+        verticalAlign: 'middle',
+      }),
+    },
+  },
+  MuiAccordion: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        width: '100%',
+        boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
+        borderRadius: theme.shape.borderRadius,
+        border: 'none',
+        '&:before': {
+          display: 'none',
+        },
+      }),
+    },
+  },
+  MuiAccordionSummary: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        borderRadius: `${theme.shape.borderRadius} 10px 0 0`,
+        padding: theme.spacing(1, 2),
+        '& .MuiAccordionSummary-content': {
+          margin: theme.spacing(1.5, 0),
+        },
+        '& .MuiAccordionSummary-expandIconWrapper': {
           color: theme.palette.primary.main,
-          textDecoration: 'underline',
-          cursor: 'pointer',
-          '&:hover': {
-            opacity: 0.8,
-          },
         },
-        '&.proposal-cell': {
-          fontFamily: 'monospace',
-          fontSize: '0.75rem',
-          color: theme.palette.primary.main,
-          textDecoration: 'underline',
-          maxWidth: '200px',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          cursor: 'pointer',
-          '&:hover': {
-            opacity: 0.8,
-          },
-        },
-        '&.time-cell': {
-          color: theme.palette.info.main,
-        },
-        '&.voting-power-cell': {
-          color: theme.palette.info.main,
-        },
+      }),
+    },
+  },
+  MuiAccordionDetails: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing(4),
       }),
     },
   },
