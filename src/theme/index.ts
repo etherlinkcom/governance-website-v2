@@ -5,6 +5,28 @@ import { breakpoints } from './breakpoints';
 import { spacing } from './spacing';
 import { components } from './components';
 
+declare module '@mui/material/styles' {
+  interface TypographyVariants {
+    code: React.CSSProperties;
+    linkText: React.CSSProperties;
+    label: React.CSSProperties;
+  }
+
+  interface TypographyVariantsOptions {
+    code?: React.CSSProperties;
+    linkText?: React.CSSProperties;
+    label?: React.CSSProperties;
+  }
+}
+
+declare module '@mui/material/Typography' {
+  interface TypographyPropsVariantOverrides {
+    code: true;
+    linkText: true;
+    label: true;
+  }
+}
+
 export const theme = createTheme({
   palette: paletteConfig,
   typography,

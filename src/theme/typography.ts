@@ -1,65 +1,101 @@
-import { TypographyVariantsOptions } from '@mui/material/styles';
-
-const baseStyles = {
-  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, "system-ui", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-  color: 'inherit',
-};
-
-const headingStyle = {
-  ...baseStyles,
-  fontWeight: 700,
-  fontSize: '2.5rem',
-  '@media (max-width:900px)': {
-    fontSize: '2rem',
-  },
-};
-
-const bodyStyle = {
-  ...baseStyles,
-  fontWeight: 400,
-  fontSize: '1rem',
-  lineHeight: 1.6,
-};
-
-const buttonStyle = {
-  ...baseStyles,
-  fontWeight: 500,
-  fontSize: '0.875rem',
-  lineHeight: 1.75,
-  letterSpacing: '0.02857em',
-};
+import { TypographyVariantsOptions } from "@mui/material";
 
 export const typography: TypographyVariantsOptions = {
-  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, "system-ui", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+  fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
 
-  h1: headingStyle,
-  h2: headingStyle,
-  h3: headingStyle,
-  h4: headingStyle,
-  h5: headingStyle,
-  h6: {
-    ...baseStyles,
+  h1: {
+    fontSize: '2rem',
+    fontWeight: 700,
+    lineHeight: 1.2,
+    color: '#FFFFFF',
+  },
+  h2: {
+    fontSize: '1.75rem',
+    fontWeight: 700,
+    lineHeight: 1.3,
+    color: '#FFFFFF',
+  },
+  h3: {
+    fontSize: '1.5rem',
     fontWeight: 600,
+    lineHeight: 1.3,
+    color: '#FFFFFF',
+  },
+  h4: {
     fontSize: '1.25rem',
-    '@media (max-width:900px)': {
-      fontSize: '1rem',
-    },
+    fontWeight: 600,
+    lineHeight: 1.4,
+    color: '#FFFFFF',
+  },
+  h5: {
+    fontSize: '1.125rem',
+    fontWeight: 600,
+    lineHeight: 1.4,
+    color: '#FFFFFF',
+  },
+  h6: {
+    fontSize: '1rem',
+    fontWeight: 600,
+    lineHeight: 1.4,
+    color: '#FFFFFF',
   },
 
-  body1: bodyStyle,
-  body2: bodyStyle,
-
-  button: buttonStyle,
-
+  body1: {
+    fontSize: '1rem',
+    fontWeight: 400,
+    lineHeight: 1.5,
+    color: '#A3FFD1',
+  },
+  body2: {
+    fontSize: '0.875rem',
+    fontWeight: 400,
+    lineHeight: 1.5,
+    color: '#A3FFD1',
+  },
   caption: {
-    ...baseStyles,
+    fontSize: '0.75rem',
     fontWeight: 400,
-    fontSize: '14px',
+    lineHeight: 1.4,
+    color: '#888888',
   },
 
-  overline: {
-    ...baseStyles,
+  button: {
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    lineHeight: 1.4,
+    textTransform: 'none' as const,
+  },
+
+  subtitle1: {
+    fontSize: '1rem',
+    fontWeight: 500,
+    lineHeight: 1.4,
+    color: '#888888',
+  },
+  subtitle2: {
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    lineHeight: 1.4,
+    color: '#888888',
+  },
+
+  code: {
+    fontFamily: 'monospace',
+    fontSize: '0.75rem',
+    color: '#A3FFD1',
+    wordBreak: 'break-all' as const,
+  },
+  linkText: {
+    fontSize: '1rem',
     fontWeight: 400,
-    fontSize: '12px',
+    color: '#38FF9C',
+    textDecoration: 'underline',
+    cursor: 'pointer',
+  },
+  label: {
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    color: '#888888',
+    marginBottom: '4px',
   },
 };

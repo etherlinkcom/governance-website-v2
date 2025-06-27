@@ -67,7 +67,7 @@ const PromotionView = observer(() => {
   if (!promotion) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="h6" sx={{ color: 'text.secondary' }}>
+        <Typography variant="h6">
           No promotion data available
         </Typography>
       </Box>
@@ -79,29 +79,13 @@ const PromotionView = observer(() => {
       {/* Candidate Section */}
       <Box>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-            Candidate:
+          <Typography variant="label">
+            Candidate{' '}
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              fontFamily: 'monospace',
-              color: 'text.secondary',
-              fontSize: '0.875rem',
-              mb: 1,
-              wordBreak: 'break-all'
-            }}
-          >
+          <Typography variant="body2" sx={{ mb: 1 }}>
             {promotion.candidate}
           </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'primary.main',
-              textDecoration: 'underline',
-              cursor: 'pointer'
-            }}
-          >
+          <Typography variant="linkText">
             {promotion.title}
           </Typography>
         </Box>
@@ -109,18 +93,18 @@ const PromotionView = observer(() => {
         {/* Stats */}
         <Box sx={{ display: 'flex', gap: 4, mb: 3 }}>
           <Box>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <Typography variant="label">
               Quorum:
             </Typography>
-            <Typography variant="body1" sx={{ color: 'primary.main', fontWeight: 600 }}>
+            <Typography variant="linkText" sx={{ fontWeight: 600 }}>
               {promotion.quorum}
             </Typography>
           </Box>
           <Box>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <Typography variant="label">
               Supermajority:
             </Typography>
-            <Typography variant="body1" sx={{ color: 'primary.main', fontWeight: 600 }}>
+            <Typography variant="linkText" sx={{ fontWeight: 600 }}>
               {promotion.supermajority}
             </Typography>
           </Box>
@@ -151,11 +135,11 @@ const PromotionView = observer(() => {
               }}>
                 <Typography sx={{ fontSize: '12px', color: 'black' }}>✓</Typography>
               </Box>
-              <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {promotion.votes.yea.percentage}% ({promotion.votes.yea.count} {promotion.votes.yea.label})
+              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                {promotion.votes.yea.percentage}% ({promotion.votes.yea.count}{promotion.votes.yea.label})
               </Typography>
             </Box>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <Typography variant="subtitle2">
               Yea
             </Typography>
           </Box>
@@ -183,11 +167,11 @@ const PromotionView = observer(() => {
               }}>
                 <Typography sx={{ fontSize: '12px', color: 'white' }}>✕</Typography>
               </Box>
-              <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {promotion.votes.nay.percentage}% ({promotion.votes.nay.count} {promotion.votes.nay.label})
+              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                {promotion.votes.nay.percentage}% ({promotion.votes.nay.count}{promotion.votes.nay.label})
               </Typography>
             </Box>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <Typography variant="subtitle2">
               Nay
             </Typography>
           </Box>
@@ -215,11 +199,11 @@ const PromotionView = observer(() => {
               }}>
                 <Typography sx={{ fontSize: '12px', color: 'white' }}>–</Typography>
               </Box>
-              <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 600 }}>
-                {promotion.votes.pass.percentage}% ({promotion.votes.pass.count} {promotion.votes.pass.label})
+              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                {promotion.votes.pass.percentage}% ({promotion.votes.pass.count}{promotion.votes.pass.label})
               </Typography>
             </Box>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <Typography variant="subtitle2">
               Pass
             </Typography>
           </Box>
@@ -228,7 +212,7 @@ const PromotionView = observer(() => {
 
       {/* Voters Section */}
       <Box>
-        <Typography variant="h5" component="h2" sx={{ color: 'text.primary', mb: 2 }}>
+        <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
           Voters
         </Typography>
 

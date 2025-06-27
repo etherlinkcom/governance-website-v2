@@ -69,10 +69,10 @@ const ProposalsView = observer(() => {
       {/* Proposals Section */}
       <Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5" component="h2" sx={{ color: 'text.primary' }}>
+          <Typography variant="h5" component="h2">
             Proposals
           </Typography>
-          <Typography variant="body2" sx={{ color: 'primary.main' }}>
+          <Typography variant="linkText">
             Quorum: {quorum}
           </Typography>
         </Box>
@@ -96,32 +96,23 @@ const ProposalsView = observer(() => {
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box sx={{ flex: 1 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontFamily: 'monospace',
-                        color: 'text.secondary',
-                        fontSize: '0.75rem',
-                        mb: 1,
-                        wordBreak: 'break-all'
-                      }}
-                    >
+                    <Typography variant="code" sx={{ mb: 1 }}>
                       {proposal.id}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
                       (by {proposal.author})
                     </Typography>
                     {proposal.title && (
-                      <Typography variant="h6" sx={{ color: 'primary.main', textDecoration: 'underline' }}>
+                      <Typography variant="linkText">
                         {proposal.title}
                       </Typography>
                     )}
                   </Box>
                   <Box sx={{ textAlign: 'right' }}>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                    <Typography variant="label">
                       Upvotes:
                     </Typography>
-                    <Typography variant="h6" sx={{ color: 'text.primary' }}>
+                    <Typography variant="h6">
                       {proposal.upvotes}
                     </Typography>
                   </Box>
@@ -134,7 +125,7 @@ const ProposalsView = observer(() => {
 
       {/* Upvoters Section */}
       <Box>
-        <Typography variant="h5" component="h2" sx={{ color: 'text.primary', mb: 2 }}>
+        <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
           Upvoters
         </Typography>
 

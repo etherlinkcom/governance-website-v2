@@ -40,21 +40,22 @@ const ContractSummary = observer(() => {
             {contractData.description}
           </Typography>
 
+          {/* Contract Information */}
           <Box sx={{ width: '100%' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               Contract Information
             </Typography>
             <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary">
+              <Typography variant="subtitle2">
                 Address
               </Typography>
-              <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
+              <Typography variant="body2">
                 {contractData.address}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 4 }}>
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant="subtitle2">
                   Voting Period
                 </Typography>
                 <Typography variant="body2">
@@ -62,7 +63,7 @@ const ContractSummary = observer(() => {
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant="subtitle2">
                   Quorum Threshold
                 </Typography>
                 <Typography variant="body2">

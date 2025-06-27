@@ -100,29 +100,11 @@ export const components: Components<Theme> = {
   },
   MuiTypography: {
     styleOverrides: {
-      h1: ({ theme }) => ({
-        color: theme.palette.text.primary,
-      }),
-      h2: ({ theme }) => ({
-        color: theme.palette.text.primary,
-      }),
-      h3: ({ theme }) => ({
-        color: theme.palette.text.primary,
-      }),
-      h4: ({ theme }) => ({
-        color: theme.palette.text.primary,
-      }),
-      h5: ({ theme }) => ({
-        color: theme.palette.text.primary,
-      }),
-      h6: ({ theme }) => ({
-        color: theme.palette.text.primary,
-      }),
-      body1: ({ theme }) => ({
-        color: theme.palette.text.secondary,
-      }),
-      body2: ({ theme }) => ({
-        color: theme.palette.text.secondary,
+      root: ({ theme }) => ({
+        fontFamily: typography.fontFamily,
+        '&.MuiTypography-linkText:hover': {
+          opacity: 0.8,
+        },
       }),
     },
   },
