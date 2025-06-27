@@ -1,12 +1,25 @@
 import { makeObservable, observable, computed, action } from 'mobx';
 import { FAKE_GOVERNANCE_DATA } from './mockData';
 
+
 interface ContractConfig {
   address: string;
   title: string;
   description: string;
   votingPeriod: number;
   quorumThreshold: number;
+}
+
+interface ContractInfo {
+  type: string;
+  address: string;
+  startedAtLevel: number;
+  periodLength: string;
+  adoptionPeriod: string;
+  upvotingLimit: number;
+  proposalQuorum: string;
+  promotionQuorum: string;
+  promotionSupermajority: string;
 }
 
 interface Proposal {
@@ -97,6 +110,7 @@ class ContractStore {
   quorum = '0%';
   loading = false;
   error: string | null = null;
+  contractInfo: ContractInfo | null = null;
 
   constructor() {
     makeObservable(this, {
@@ -106,6 +120,7 @@ class ContractStore {
       promotion: observable,
       upvoters: observable,
       quorum: observable,
+      contractInfo: observable,
       loading: observable,
       error: observable,
       contractData: computed,
@@ -157,6 +172,7 @@ class ContractStore {
       this.upvoters = fakeData.upvoters;
       this.promotion = fakeData.promotion;
       this.quorum = fakeData.quorum;
+      this.contractInfo = fakeData.contractInfo;
 
     } catch (err) {
       this.error = 'Failed to load governance data';

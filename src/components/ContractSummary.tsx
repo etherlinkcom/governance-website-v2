@@ -5,7 +5,7 @@ import { contractStore } from '@/stores/ContractStore';
 import { useTheme } from '@mui/material/styles';
 
 const ContractSummary = observer(() => {
-  const { contractData } = contractStore;
+  const { contractData, contractInfo } = contractStore;
   const theme = useTheme();
 
   if (!contractData) return null;
@@ -47,29 +47,86 @@ const ContractSummary = observer(() => {
             <Typography variant="h6" sx={{ mb: 2 }}>
               Contract Information
             </Typography>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2">
-                Address
-              </Typography>
-              <Typography variant="body2">
-                {contractData.address}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 4 }}>
+
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 3 }}>
               <Box>
-                <Typography variant="subtitle2">
-                  Voting Period
+                <Typography variant="subtitle1">
+                  Contract type
                 </Typography>
                 <Typography variant="body2">
-                  {contractData.votingPeriod} days
+                  {contractInfo?.type}
                 </Typography>
               </Box>
+
               <Box>
-                <Typography variant="subtitle2">
-                  Quorum Threshold
+                <Typography variant="subtitle1">
+                  Contract address
                 </Typography>
                 <Typography variant="body2">
-                  {(contractData.quorumThreshold * 100).toFixed(0)}%
+                  {contractInfo?.address}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle1">
+                  Started at level
+                </Typography>
+                <Typography variant="body1">
+                  {contractInfo?.startedAtLevel}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle1">
+                  Period length
+                </Typography>
+                <Typography variant="body1">
+                  {contractInfo?.periodLength}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle1">
+                  Adoption period
+                </Typography>
+                <Typography variant="body1">
+                  {contractInfo?.adoptionPeriod}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle1">
+                  Upvoting limit
+                </Typography>
+                <Typography variant="body1">
+                  {contractInfo?.upvotingLimit}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle1">
+                  Proposal quorum
+                </Typography>
+                <Typography variant="body1">
+                  {contractInfo?.proposalQuorum}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle1">
+                  Promotion quorum
+                </Typography>
+                <Typography variant="body1">
+                  {contractInfo?.promotionQuorum}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle1">
+                  Promotion supermajority
+                </Typography>
+                <Typography variant="body1">
+                  {contractInfo?.promotionSupermajority}
                 </Typography>
               </Box>
             </Box>

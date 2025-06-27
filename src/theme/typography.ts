@@ -68,21 +68,4 @@ export const typography: TypographyVariantsOptions = {
     fontWeight: 500,
     lineHeight: 1.4,
   },
-
-  code: {
-    fontFamily: 'monospace',
-    fontSize: '0.75rem',
-    wordBreak: 'break-all' as const,
-  },
-  linkText: {
-    fontSize: '1rem',
-    fontWeight: 400,
-    textDecoration: 'underline',
-    cursor: 'pointer',
-  },
-  label: {
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    marginBottom: '4px',
-  },
 };

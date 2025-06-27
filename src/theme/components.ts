@@ -111,18 +111,6 @@ export const components: Components<Theme> = {
         '&.MuiTypography-caption, &.MuiTypography-subtitle1, &.MuiTypography-subtitle2': {
           color: theme.palette.text.secondary,
         },
-        '&.MuiTypography-linkText': {
-          color: theme.palette.primary.main,
-          '&:hover': {
-            opacity: 0.8,
-          },
-        },
-        '&.MuiTypography-code': {
-          color: theme.palette.info.main,
-        },
-        '&.MuiTypography-label': {
-          color: theme.palette.text.secondary,
-        },
       }),
     },
   },

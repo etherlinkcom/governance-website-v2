@@ -74,7 +74,7 @@ const ProposalsView = observer(() => {
           <Typography variant="h5" component="h2">
             Proposals
           </Typography>
-          <Typography variant="linkText">
+          <Typography variant="body1">
             Quorum: {quorum}
           </Typography>
         </Box>
@@ -98,20 +98,20 @@ const ProposalsView = observer(() => {
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="code" sx={{ mb: 1 }}>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
                       {proposal.id}
                     </Typography>
                     <Typography variant="subtitle2" sx={{ mb: 1 }}>
                       (by {proposal.author})
                     </Typography>
                     {proposal.title && (
-                      <Typography variant="linkText">
+                      <Typography variant="body1">
                         {proposal.title}
                       </Typography>
                     )}
                   </Box>
                   <Box sx={{ textAlign: 'right' }}>
-                    <Typography variant="label">
+                    <Typography variant="subtitle1">
                       Upvotes:
                     </Typography>
                     <Typography variant="h6">

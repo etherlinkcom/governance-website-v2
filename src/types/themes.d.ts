@@ -36,24 +36,4 @@ declare module '@mui/material/styles' {
       };
     };
   }
-
-  interface TypographyVariants {
-    code: React.CSSProperties;
-    linkText: React.CSSProperties;
-    label: React.CSSProperties;
-  }
-
-  interface TypographyVariantsOptions {
-    code?: React.CSSProperties;
-    linkText?: React.CSSProperties;
-    label?: React.CSSProperties;
-  }
-}
-
-declare module '@mui/material/Typography' {
-  interface TypographyPropsVariantOverrides {
-    code: true;
-    linkText: true;
-    label: true;
-  }
 }

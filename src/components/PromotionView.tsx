@@ -81,13 +81,13 @@ const PromotionView = observer(() => {
       {/* Candidate Section */}
       <Box>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="label">
+          <Typography variant="subtitle1">
             Candidate:
           </Typography>
-          <Typography variant="code" sx={{ mb: 1 }}>
+          <Typography variant="body1" sx={{ mb: 1 }}>
             {promotion.candidate}
           </Typography>
-          <Typography variant="linkText">
+          <Typography variant="body2">
             {promotion.title}
           </Typography>
         </Box>
@@ -95,18 +95,18 @@ const PromotionView = observer(() => {
         {/* Stats */}
         <Box sx={{ display: 'flex', gap: 4, mb: 3 }}>
           <Box>
-            <Typography variant="label">
+            <Typography variant="subtitle1">
               Quorum:
             </Typography>
-            <Typography variant="linkText" sx={{ fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
               {promotion.quorum}
             </Typography>
           </Box>
           <Box>
-            <Typography variant="label">
+            <Typography variant="subtitle1">
               Supermajority:
             </Typography>
-            <Typography variant="linkText" sx={{ fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
               {promotion.supermajority}
             </Typography>
           </Box>

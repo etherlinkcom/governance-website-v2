@@ -1,5 +1,16 @@
 export const FAKE_GOVERNANCE_DATA = {
   slow: {
+    contractInfo: {
+      type: 'slow',
+      address: 'KT1FPG4NApqTJjwvmhWvqA14m5PJxu9qgpBK',
+      startedAtLevel: 7692289,
+      periodLength: '30720 blocks',
+      adoptionPeriod: '86400 seconds',
+      upvotingLimit: 20,
+      proposalQuorum: '1%',
+      promotionQuorum: '5%',
+      promotionSupermajority: '75%'
+    },
     proposals: [
       {
         id: '0x0008105ea6fb0e4331d7bbc93f0e8843ae91eeb235741054cb2b345ac2d19b9ec9',
@@ -56,6 +67,17 @@ export const FAKE_GOVERNANCE_DATA = {
     }
   },
   fast: {
+    contractInfo: {
+      type: 'fast',
+      address: 'KT1FastContractAddress123456789',
+      startedAtLevel: 7650000,
+      periodLength: '10240 blocks',
+      adoptionPeriod: '28800 seconds',
+      upvotingLimit: 50,
+      proposalQuorum: '2%',
+      promotionQuorum: '8%',
+      promotionSupermajority: '60%'
+    },
     proposals: [
       {
         id: '0x1234567890abcdef1234567890abcdef12345678901234567890abcdef1234567',
@@ -90,6 +112,17 @@ export const FAKE_GOVERNANCE_DATA = {
     }
   },
   sequencer: {
+    contractInfo: {
+      type: 'sequencer',
+      address: 'KT1SequencerContractAddress123456',
+      startedAtLevel: 7680000,
+      periodLength: '5120 blocks',
+      adoptionPeriod: '14400 seconds',
+      upvotingLimit: 100,
+      proposalQuorum: '3%',
+      promotionQuorum: '10%',
+      promotionSupermajority: '67%'
+    },
     proposals: [
       {
         id: '0x5678901234567890abcdef1234567890abcdef1234567890abcdef1234567890a',
