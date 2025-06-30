@@ -12,7 +12,7 @@ interface ProposalCardProps {
   proposal: Proposal;
 }
 
-const ProposalCard = ({ proposal}: ProposalCardProps) => {
+export const ProposalCard = ({ proposal}: ProposalCardProps) => {
   const theme = useTheme();
 
   return (
@@ -57,5 +57,3 @@ const ProposalCard = ({ proposal}: ProposalCardProps) => {
     </Card>
   );
 };
-
-export default ProposalCard;

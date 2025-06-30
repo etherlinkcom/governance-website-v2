@@ -3,10 +3,10 @@ import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Box, Container} from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
-import ContractSummary from '@/components/layouts/ContractSummary';
-import GovernanceDisplay from '@/components/layouts/GovernanceDisplay';
+import {ContractSummary} from '@/components/layouts/ContractSummary';
+import {GovernanceDisplay} from '@/components/layouts/GovernanceDisplay';
 
-const Contract = observer(() => {
+export const Contract = observer(() => {
   const router = useRouter();
   const { contract } = router.query;
 
@@ -36,5 +36,3 @@ const Contract = observer(() => {
     </Container>
   );
 });
-
-export default Contract;

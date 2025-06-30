@@ -8,7 +8,7 @@ interface VoteResultCardProps {
   label: string;
 }
 
-const VoteResultCard = ({ type, percentage, count, label }: VoteResultCardProps) => {
+export const VoteResultCard = ({ type, percentage, count, label }: VoteResultCardProps) => {
   const theme = useTheme();
 
   const getThemeColors = () => {
@@ -89,5 +89,3 @@ const VoteResultCard = ({ type, percentage, count, label }: VoteResultCardProps)
     </Box>
   );
 };
-
-export default VoteResultCard;

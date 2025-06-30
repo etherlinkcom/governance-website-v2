@@ -1,7 +1,7 @@
 import { contractStore } from '@/stores/ContractStore';
 import { Box, Typography, useTheme } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import ComponentLoading from '@/components/shared/ComponentLoading';
+import {ComponentLoading} from '@/components/shared/ComponentLoading';
 
 const CandidateInfoSkeleton = () => {
   const theme = useTheme();
@@ -32,7 +32,7 @@ const CandidateInfoSkeleton = () => {
   );
 };
 
-const CandidateInfo = observer(() => {
+export const CandidateInfo = observer(() => {
   const { promotion, isLoading } = contractStore;
 
   if (isLoading) return <CandidateInfoSkeleton />;
@@ -81,5 +81,3 @@ const CandidateInfo = observer(() => {
     </Box>
   );
 });
-
-export default CandidateInfo;

@@ -1,13 +1,12 @@
 import { Box, Typography } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
-import CandidateInfo from '../cards/CandidateInfo';
-import VotingResults from '../cards/VotingResults';
-import VotersTable from '../tables/VotersTable';
+import {CandidateInfo} from '../cards/CandidateInfo';
+import {VotingResults} from '../cards/VotingResults';
+import {VotersTable} from '../tables/VotersTable';
 
 
-const PromotionView = () => {
+export const PromotionView = () => {
   const { error } = contractStore;
-
 
   if (error) {
     return (
@@ -38,5 +37,3 @@ const PromotionView = () => {
     </Box>
   );
 };
-
-export default PromotionView;

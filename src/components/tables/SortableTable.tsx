@@ -17,7 +17,7 @@ interface SortableTableProps<T> {
   renderCell: (row: T, column: Column<T>) => React.ReactNode;
 }
 
-const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort, renderCell }: SortableTableProps<T>) => {
+export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort, renderCell }: SortableTableProps<T>) => {
   return (
     <TableContainer component={Paper}>
       <Table>
@@ -55,5 +55,3 @@ const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort, rende
     </TableContainer>
   );
 };
-
-export default SortableTable;

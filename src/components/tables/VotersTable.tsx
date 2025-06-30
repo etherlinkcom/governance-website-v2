@@ -1,11 +1,11 @@
 import { Table, TableHead, TableRow, TableCell, TableBody, useTheme, Typography } from '@mui/material';
-import ComponentLoading from '@/components/shared/ComponentLoading';
+import {ComponentLoading} from '@/components/shared/ComponentLoading';
 import { prettifyKey } from '@/utils/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
 import { useTableSort } from '@/hooks/useTableSort';
 import { customSortComparator } from '@/utils/votingPowerUtils';
-import SortableTable from './SortableTable';
+import {SortableTable} from './SortableTable';
 
 
 interface Voter {
@@ -54,7 +54,7 @@ const VotersTableSkeleton = () => {
   );
 };
 
-const VotersTable = observer(() => {
+export const VotersTable = observer(() => {
   const theme = useTheme();
   const { promotion, isLoading } = contractStore;
 
@@ -102,5 +102,3 @@ const VotersTable = observer(() => {
     />
   );
 });
-
-export default VotersTable;

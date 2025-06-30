@@ -22,7 +22,7 @@ const GOVERNANCES = [
   { value: 'sequencer', label: 'Sequencer Governance' },
 ];
 
-const Header = observer(({ currentPage = null }: HeaderProps) => {
+export const Header = observer(({ currentPage = null }: HeaderProps) => {
   const router = useRouter();
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -153,5 +153,3 @@ const Header = observer(({ currentPage = null }: HeaderProps) => {
     </AppBar>
   );
 });
-
-export default Header;

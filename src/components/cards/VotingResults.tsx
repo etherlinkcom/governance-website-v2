@@ -1,12 +1,10 @@
 import { Box, Card, CardContent } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import ComponentLoading from '@/components/shared/ComponentLoading';
-import VoteResultCard from './VoteResultCard';
+import {ComponentLoading} from '@/components/shared/ComponentLoading';
+import {VoteResultCard} from './VoteResultCard';
 import { contractStore } from '@/stores/ContractStore';
 import { observer } from 'mobx-react-lite';
 
-
-const VotingResultsSkeleton = () => {
+export const VotingResultsSkeleton = () => {
 
   return (
         <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
@@ -19,7 +17,7 @@ const VotingResultsSkeleton = () => {
   );
 };
 
-const VotingResults = observer(() => {
+export const VotingResults = observer(() => {
   const { promotion, isLoading } = contractStore;
 
   if (isLoading) return <VotingResultsSkeleton />;
@@ -61,5 +59,3 @@ const VotingResults = observer(() => {
     </Box>
   );
 });
-
-export default VotingResults;

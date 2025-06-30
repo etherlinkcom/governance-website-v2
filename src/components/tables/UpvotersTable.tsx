@@ -1,8 +1,8 @@
 import { useTableSort } from '@/hooks/useTableSort';
 import { customSortComparator } from '@/utils/votingPowerUtils';
 import { Table, TableHead, TableRow, TableCell, TableBody, Typography, useTheme } from '@mui/material';
-import SortableTable from './SortableTable';
-import ComponentLoading from '@/components/shared/ComponentLoading';
+import {SortableTable} from './SortableTable';
+import {ComponentLoading} from '@/components/shared/ComponentLoading';
 import { prettifyKey } from '@/utils/prettifyKey';
 import { contractStore } from '@/stores/ContractStore';
 import { observer } from 'mobx-react-lite';
@@ -52,7 +52,7 @@ const UpvotersTableSkeleton = () => {
   );
 };
 
-const UpvotersTable = observer(() => {
+export const UpvotersTable = observer(() => {
   const {upvoters, isLoading} = contractStore;
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     upvoters,
@@ -98,6 +98,3 @@ const UpvotersTable = observer(() => {
     />
   );
 });
-
-
-export default UpvotersTable;

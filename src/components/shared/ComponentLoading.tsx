@@ -6,7 +6,7 @@ interface ComponentLoadingProps {
   borderRadius?: number;
 }
 
-const ComponentLoading = ({
+export const ComponentLoading = ({
   width = '100%',
   height = 20,
   borderRadius = 1
@@ -33,5 +33,3 @@ const ComponentLoading = ({
     />
   );
 };
-
-export default ComponentLoading;

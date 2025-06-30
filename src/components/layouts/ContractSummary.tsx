@@ -3,7 +3,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
 import { useTheme} from '@mui/material/styles';
-import ComponentLoading from '@/components/shared/ComponentLoading';
+import {ComponentLoading} from '@/components/shared/ComponentLoading';
 import { useState, useEffect } from 'react';
 import { prettifyKey } from '@/utils/prettifyKey';
 
@@ -64,7 +64,7 @@ const ContractSummarySkeleton = () => {
   );
 };
 
-const ContractSummary = observer(() => {
+export const ContractSummary = observer(() => {
   const { contractData, contractInfo, isLoading } = contractStore;
   const theme = useTheme();
   const [expanded, setExpanded] = useState(() => {
@@ -149,5 +149,3 @@ const ContractSummary = observer(() => {
     </Accordion>
   );
 });
-
-export default ContractSummary;

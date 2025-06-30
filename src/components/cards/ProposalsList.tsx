@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
-import ProposalCard from './ProposalCard';
+import {ProposalCard} from './ProposalCard';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
-import ComponentLoading from '@/components/shared/ComponentLoading';
+import {ComponentLoading} from '@/components/shared/ComponentLoading';
 
 const ProposalsListSkeleton = () => (
   <Box>
@@ -18,7 +18,7 @@ const ProposalsListSkeleton = () => (
   </Box>
 );
 
-const ProposalsList = observer(() => {
+export const ProposalsList = observer(() => {
   const { proposals, quorum, isLoading } = contractStore;
 
   if (isLoading) return <ProposalsListSkeleton />;
@@ -45,5 +45,3 @@ const ProposalsList = observer(() => {
     </Box>
   );
 });
-
-export default ProposalsList;

@@ -1,8 +1,8 @@
 import { useState, useEffect, JSX } from 'react';
 import { Box, Tabs, Tab } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import ProposalsView from './ProposalsView';
-import PromotionView from './PromotionView';
+import {ProposalsView } from './ProposalsView';
+import {PromotionView} from './PromotionView';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -31,7 +31,7 @@ function clampTabIndex(index: number) {
   return index;
 }
 
-const GovernanceDisplay = observer(() => {
+export const GovernanceDisplay = observer(() => {
   const [activeTab, setActiveTab] = useState<number | null>(null);
 
   useEffect(() => {
@@ -50,7 +50,6 @@ const GovernanceDisplay = observer(() => {
     localStorage.setItem(TAB_STORAGE_KEY, String(newValue));
   };
 
-  // Don't render until we know the correct tab (avoids flicker)
   if (activeTab === null) return null;
 
   return (
@@ -87,5 +86,3 @@ const GovernanceDisplay = observer(() => {
     </Box>
   );
 });
-
-export default GovernanceDisplay;

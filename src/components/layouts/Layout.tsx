@@ -1,13 +1,13 @@
 import { Box, Container, Typography } from '@mui/material';
 import { ReactNode } from 'react';
 import { useRouter } from 'next/router';
-import Header from '../shared/Header';
+import {Header} from '../shared/Header';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-const Layout = ({ children }: LayoutProps) => {
+export const Layout = ({ children }: LayoutProps) => {
   const router = useRouter();
   const { contract } = router.query;
 
@@ -53,5 +53,3 @@ const Layout = ({ children }: LayoutProps) => {
     </Box>
   );
 };
-
-export default Layout;
