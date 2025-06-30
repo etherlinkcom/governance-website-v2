@@ -13,7 +13,7 @@ interface HeaderProps {
 
 const NETWORKS = [
   { value: 'mainnet', label: 'Mainnet' },
-  { value: 'testnet', label: 'Testnet' },
+  // { value: 'testnet', label: 'Testnet' },
 ];
 
 const GOVERNANCES = [
