@@ -116,7 +116,7 @@ const ContractSummary = observer(() => {
           }}>
 
           {contractInfo && Object.entries(contractInfo).map(([key, value]) => (
-            <Box key={key} sx={{overflow: 'hidden'}}> // TODO add hidden overflow to components
+            <Box key={key} sx={{overflow: 'hidden'}}>
               <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
                 {prettifyKey(key)}
               </Typography>

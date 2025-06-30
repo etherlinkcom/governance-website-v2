@@ -83,14 +83,7 @@ const VotersTable = observer(() => {
       case 'votingPower':
         return row.votingPower;
       case 'vote':
-        return (
-          <span style={{ // TODO typography
-            color: theme.palette.primary.main,
-            fontWeight: '600'
-          }}>
-            {row.vote}
-          </span>
-        );
+        return row.vote;
       case 'time':
         return row.time;
       default:
