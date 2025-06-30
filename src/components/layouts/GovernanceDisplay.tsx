@@ -1,8 +1,8 @@
 import { useState, useEffect, JSX } from 'react';
 import { Box, Tabs, Tab } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import {ProposalsView } from './ProposalsView';
-import {PromotionView} from './PromotionView';
+import {ProposalsView } from '@/components/proposal/ProposalsView';
+import {PromotionView} from '@/components/promotion/PromotionView';
 
 interface TabPanelProps {
   children?: React.ReactNode;

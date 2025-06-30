@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
-import {ProposalCard} from './ProposalCard';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
+import { ProposalCard } from '@/components/proposal/ProposalCard';
 
 const ProposalsListSkeleton = () => (
   <Box>

@@ -1,6 +1,6 @@
 import { Box, Card, CardContent } from '@mui/material';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
-import {VoteResultCard} from './VoteResultCard';
+import {VoteResultCard} from '@/components/promotion/VoteResultCard';
 import { contractStore } from '@/stores/ContractStore';
 import { observer } from 'mobx-react-lite';
 

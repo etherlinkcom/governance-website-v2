@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
-import {ProposalsList} from '../cards/ProposalsList';
-import {UpvotersTable} from '../tables/UpvotersTable';
+import {ProposalsList} from '@/components/proposal/ProposalsList';
+import {UpvotersTable} from '@/components/proposal/UpvotersTable';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
 
 const ProposalsViewSkeleton = () => {

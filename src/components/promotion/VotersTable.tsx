@@ -1,23 +1,25 @@
-import { useTableSort } from '@/hooks/useTableSort';
-import { customSortComparator } from '@/utils/votingPowerUtils';
-import { Table, TableHead, TableRow, TableCell, TableBody, Typography, useTheme } from '@mui/material';
-import {SortableTable} from './SortableTable';
+import { Table, TableHead, TableRow, TableCell, TableBody, useTheme, Typography } from '@mui/material';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
 import { prettifyKey } from '@/utils/prettifyKey';
-import { contractStore } from '@/stores/ContractStore';
 import { observer } from 'mobx-react-lite';
+import { contractStore } from '@/stores/ContractStore';
+import { useTableSort } from '@/hooks/useTableSort';
+import { customSortComparator } from '@/utils/votingPowerUtils';
+import {SortableTable} from '@/components/shared/SortableTable';
 
-interface Upvoter {
+
+interface Voter {
   baker: string;
   votingPower: string;
-  proposal: string;
+  vote: string;
   time: string;
 }
 
-const upvoterKeys: (keyof Upvoter)[] = ['baker', 'votingPower', 'proposal', 'time'];
+const voterKeys: (keyof Voter)[] = ['baker', 'votingPower', 'vote', 'time'];
 
-const UpvotersTableSkeleton = () => {
+const VotersTableSkeleton = () => {
   const theme = useTheme();
+
   return (
     <div style={{
       boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
@@ -29,7 +31,7 @@ const UpvotersTableSkeleton = () => {
       <Table>
         <TableHead>
           <TableRow>
-            {upvoterKeys.map(key => (
+            {voterKeys.map(key => (
               <TableCell key={key}>
                 {prettifyKey(key)}
               </TableCell>
@@ -39,7 +41,7 @@ const UpvotersTableSkeleton = () => {
         <TableBody>
           {[...Array(5)].map((_, rowIdx) => (
             <TableRow key={rowIdx}>
-              {upvoterKeys.map((key, colIdx) => (
+              {voterKeys.map((key, colIdx) => (
                 <TableCell key={colIdx}>
                   <ComponentLoading width="80%" height={18} />
                 </TableCell>
@@ -52,23 +54,25 @@ const UpvotersTableSkeleton = () => {
   );
 };
 
-export const UpvotersTable = observer(() => {
-  const {upvoters, isLoading} = contractStore;
+export const VotersTable = observer(() => {
+  const theme = useTheme();
+  const { promotion, isLoading } = contractStore;
+
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
-    upvoters,
+    promotion?.voters || [],
     'baker',
     customSortComparator
   );
 
-  if (isLoading) return <UpvotersTableSkeleton />;
+  if (isLoading) return <VotersTableSkeleton />;
 
-  const columns = upvoterKeys.map(key => ({
+  const columns = voterKeys.map(key => ({
     id: key,
     label: prettifyKey(key),
     sortable: true
   }));
 
-  const renderCell = (row: Upvoter, column: { id: keyof Upvoter; label: string; sortable?: boolean }) => {
+  const renderCell = (row: Voter, column: { id: keyof Voter; label: string; sortable?: boolean }) => {
     switch (column.id) {
       case 'baker':
         return (
@@ -78,8 +82,8 @@ export const UpvotersTable = observer(() => {
         );
       case 'votingPower':
         return row.votingPower;
-      case 'proposal':
-        return row.proposal;
+      case 'vote':
+        return row.vote;
       case 'time':
         return row.time;
       default:

@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
-import {CandidateInfo} from '../cards/CandidateInfo';
-import {VotingResults} from '../cards/VotingResults';
-import {VotersTable} from '../tables/VotersTable';
+import {CandidateInfo} from '@/components/promotion/CandidateInfo';
+import {VotingResults} from '@/components/promotion/VotingResults';
+import {VotersTable} from '@/components/promotion/VotersTable';
 
 
 export const PromotionView = () => {

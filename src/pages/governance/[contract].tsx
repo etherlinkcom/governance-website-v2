@@ -6,7 +6,7 @@ import { contractStore } from '@/stores/ContractStore';
 import {ContractSummary} from '@/components/layouts/ContractSummary';
 import {GovernanceDisplay} from '@/components/layouts/GovernanceDisplay';
 
-export const Contract = observer(() => {
+export default observer(() => {
   const router = useRouter();
   const { contract } = router.query;
 
