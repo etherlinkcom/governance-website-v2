@@ -1,40 +1,144 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Governance Website v2 - Styling Guide
 
-## Getting Started
+A Next.js governance application with Material-UI theming system and TypeScript.
 
-First, run the development server:
+# Themes
+<details>
+<summary>Theme Details</summary>
+
+## Overview
+<details>
+<summary>Directory Structure</summary>
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+src/theme/
+├── index.ts          # Main theme configuration
+├── palette.ts        # Color definitions
+├── typography.ts     # Typography variants
+├── components.ts     # Component style overrides
+└── breakpoints.ts    # Responsive breakpoints
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Key Features:**
+- Centralized styling in theme files
+- Custom color palette extensions
+- Component-level style overrides
+- Responsive design tokens
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+</details>
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## 🎯 Quick Reference
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+<details>
+<summary><strong>Colors</strong></summary>
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```typescript
+primary: '#38FF9C'        // Green - main actions
+secondary: '#FF6B6B'      // Red - secondary actions
+success: '#38FF9C'        // Green - "yea" votes
+error: '#FF6B6B'          // Red - "nay" votes
+warning: '#FFA726'        // Orange - "pass" votes
+background.default: '#0A0A0A'  // Pure black
+background.paper: '#151515'    // Card backgrounds
+```
 
-## Learn More
+</details>
 
-To learn more about Next.js, take a look at the following resources:
+<details>
+<summary><strong>Typography</strong></summary>
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+```tsx
+// Use semantic variants - avoid inline styles
+<Typography variant="h1">Main Title</Typography>
+<Typography variant="body1">Content</Typography>
+<Typography variant="caption">Labels</Typography>
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+// Font specs: Inter, 400/600/700 weights, responsive sizing
+```
 
-## Deploy on Vercel
+</details>
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+<details>
+<summary><strong>Components</strong></summary>
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+**Auto-styled via theme:**
+- **Buttons**: 50px border-radius, glowing effects
+- **Tables**: Headers 700 weight/16px, Body 400 weight/12px
+- **Cards**: 25px border-radius, primary shadows
+- **Forms**: Outlined style, primary focus states
+
+</details>
+
+## 📁 Component Organization
+
+```bash
+src/components/
+├── contract/     # ContractSummary
+├── proposals/    # ProposalsList, ProposalCard, ProposalsView
+├── voting/       # VotingResults, VoteResultCard, VotersTable
+└── ui/           # SortableTable, shared components
+```
+
+## ✅ Best Practices
+
+<details>
+<summary><strong>Do's and Dont's</strong></summary>
+
+**✅ Good:**
+```tsx
+// Use theme values
+<Box sx={{ p: theme.spacing(2), borderRadius: theme.shape.borderRadius }}>
+<Typography variant="subtitle1">Styled Text</Typography>
+<Button sx={{ color: theme.palette.primary.main }}>
+```
+
+**❌ Avoid:**
+```tsx
+// Don't hardcode values
+<Box sx={{ padding: '16px', borderRadius: '8px' }}>
+<Typography sx={{ fontSize: '14px', fontWeight: 'bold' }}>
+<Button sx={{ backgroundColor: '#3B82F6' }}>
+```
+
+</details>
+
+## 🚀 Development
+
+<details>
+<summary><strong>Getting Started</strong></summary>
+
+```bash
+npm install
+npm run dev
+```
+
+**Adding New Components:**
+1. Create in appropriate domain folder
+2. Use TypeScript interfaces
+3. Apply theme-based styling
+4. Add to barrel exports
+5. Test responsively
+
+**Modifying Theme:**
+- Colors: Edit `src/theme/palette.ts`
+- Typography: Edit `src/theme/typography.ts`
+- Component styles: Edit `src/theme/components.ts`
+
+</details>
+
+<details>
+<summary><strong>Troubleshooting</strong></summary>
+
+**Common Issues:**
+- **Typography not applying**: Check theme variants vs component overrides
+- **Colors wrong**: Verify palette values and semantic usage
+- **Responsive issues**: Use theme breakpoints consistently
+- **Style conflicts**: Check component overrides specificity
+
+</details>
+
+---
+
+**📚 Resources:** [Material-UI Docs](https://mui.com) | **🎯 Focus:** Use theme system, avoid hardcoded styles, organize by domain
+
+</details>
