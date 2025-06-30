@@ -1,4 +1,4 @@
-import { AppBar, Typography, Box, ToggleButton, ToggleButtonGroup, IconButton, Menu, MenuItem, useTheme, alpha } from '@mui/material';
+import { AppBar, Typography, Box, ToggleButton, ToggleButtonGroup, IconButton, Menu, MenuItem, useTheme} from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -10,6 +10,17 @@ import Link from 'next/link';
 interface HeaderProps {
   currentPage?: 'slow' | 'fast' | 'sequencer' | null;
 }
+
+const NETWORKS = [
+  { value: 'mainnet', label: 'Mainnet' },
+  { value: 'testnet', label: 'Testnet' },
+];
+
+const GOVERNANCES = [
+  { value: 'slow', label: 'Slow Governance' },
+  { value: 'fast', label: 'Fast Governance' },
+  { value: 'sequencer', label: 'Sequencer Governance' },
+];
 
 const Header = observer(({ currentPage = null }: HeaderProps) => {
   const router = useRouter();
@@ -91,8 +102,11 @@ const Header = observer(({ currentPage = null }: HeaderProps) => {
             size="small"
             sx={{ display: { xs: 'none', md: 'flex' } }}
           >
-            <ToggleButton value="mainnet">Mainnet</ToggleButton>
-            <ToggleButton value="testnet">Testnet</ToggleButton>
+            {NETWORKS.map((net) => (
+              <ToggleButton key={net.value} value={net.value}>
+                {net.label}
+              </ToggleButton>
+            ))}
           </ToggleButtonGroup>
         </Box>
 
@@ -101,66 +115,24 @@ const Header = observer(({ currentPage = null }: HeaderProps) => {
             <MenuIcon />
           </IconButton>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-            <MenuItem
-              onClick={() => contractStore.setNetwork('mainnet')}
-              sx={{
-                color: contractStore.currentNetwork === 'mainnet' ? 'primary.main' : 'inherit',
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                },
-              }}
-            >
-              Mainnet
-            </MenuItem>
-            <MenuItem
-              onClick={() => contractStore.setNetwork('testnet')}
-              sx={{
-                color: contractStore.currentNetwork === 'testnet' ? 'primary.main' : 'inherit',
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                },
-              }}
-            >
-              Testnet
-            </MenuItem>
-            <MenuItem
-              onClick={() => handleGovernanceSelect('slow')}
-              sx={{
-                color: currentPage === 'slow' ? 'primary.main' : 'inherit',
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                },
-              }}
-            >
-              Slow Governance
-            </MenuItem>
-            <MenuItem
-              onClick={() => handleGovernanceSelect('fast')}
-              sx={{
-                color: currentPage === 'fast' ? 'primary.main' : 'inherit',
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                },
-              }}
-            >
-              Fast Governance
-            </MenuItem>
-            <MenuItem
-              onClick={() => handleGovernanceSelect('sequencer')}
-              sx={{
-                color: currentPage === 'sequencer' ? 'primary.main' : 'inherit',
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                },
-              }}
-            >
-              Sequencer Governance
-            </MenuItem>
+            {NETWORKS.map((net) => (
+              <MenuItem
+                key={net.value}
+                onClick={() => contractStore.setNetwork(net.value as 'mainnet' | 'testnet')}
+                selected={contractStore.currentNetwork === net.value}
+              >
+                {net.label}
+              </MenuItem>
+            ))}
+            {GOVERNANCES.map((gov) => (
+              <MenuItem
+                key={gov.value}
+                onClick={() => handleGovernanceSelect(gov.value as 'slow' | 'fast' | 'sequencer')}
+                selected={currentPage === gov.value}
+              >
+                {gov.label}
+              </MenuItem>
+            ))}
           </Menu>
         </Box>
 
@@ -171,9 +143,11 @@ const Header = observer(({ currentPage = null }: HeaderProps) => {
           size="small"
           sx={{ display: { xs: 'none', md: 'flex' } }}
         >
-          <ToggleButton value="slow">Slow</ToggleButton>
-          <ToggleButton value="fast">Fast</ToggleButton>
-          <ToggleButton value="sequencer">Sequencer</ToggleButton>
+          {GOVERNANCES.map((gov) => (
+            <ToggleButton key={gov.value} value={gov.value}>
+              {gov.label.replace(' Governance', '')}
+            </ToggleButton>
+          ))}
         </ToggleButtonGroup>
       </Box>
     </AppBar>

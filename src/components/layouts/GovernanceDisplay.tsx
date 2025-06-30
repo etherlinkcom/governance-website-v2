@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, JSX } from 'react';
 import { Box, Tabs, Tab } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import ProposalsView from './ProposalsView';
@@ -18,12 +18,40 @@ function TabPanel({ children, value, index }: TabPanelProps) {
   );
 }
 
-const GovernanceDisplay = observer(() => {
-  const [activeTab, setActiveTab] = useState(0);
+const tabConfig: { label: string; component: JSX.Element }[] = [
+  { label: 'Proposals', component: <ProposalsView /> },
+  { label: 'Promotion', component: <PromotionView /> },
+];
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+const TAB_STORAGE_KEY = 'governance-active-tab';
+
+function clampTabIndex(index: number) {
+  if (Number.isNaN(index) || index < 0) return 0;
+  if (index >= tabConfig.length) return tabConfig.length - 1;
+  return index;
+}
+
+const GovernanceDisplay = observer(() => {
+  const [activeTab, setActiveTab] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(TAB_STORAGE_KEY);
+      if (stored !== null) {
+        setActiveTab(clampTabIndex(Number(stored)));
+      } else {
+        setActiveTab(0);
+      }
+    }
+  }, []);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+    localStorage.setItem(TAB_STORAGE_KEY, String(newValue));
   };
+
+  // Don't render until we know the correct tab (avoids flicker)
+  if (activeTab === null) return null;
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -37,31 +65,25 @@ const GovernanceDisplay = observer(() => {
             },
           }}
         >
-          <Tab
-            label="Proposals"
-            sx={{
-              textTransform: 'none',
-              fontSize: '1rem',
-              fontWeight: activeTab === 0 ? 600 : 400,
-            }}
-          />
-          <Tab
-            label="Promotion"
-            sx={{
-              textTransform: 'none',
-              fontSize: '1rem',
-              fontWeight: activeTab === 1 ? 600 : 400,
-            }}
-          />
+          {tabConfig.map((tab, idx) => (
+            <Tab
+              key={tab.label}
+              label={tab.label}
+              sx={{
+                textTransform: 'none',
+                fontSize: '1rem',
+                fontWeight: activeTab === idx ? 600 : 400,
+              }}
+            />
+          ))}
         </Tabs>
       </Box>
 
-      <TabPanel value={activeTab} index={0}>
-        <ProposalsView />
-      </TabPanel>
-      <TabPanel value={activeTab} index={1}>
-        <PromotionView />
-      </TabPanel>
+      {tabConfig.map((tab, idx) => (
+        <TabPanel key={tab.label} value={activeTab} index={idx}>
+          {tab.component}
+        </TabPanel>
+      ))}
     </Box>
   );
 });

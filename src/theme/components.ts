@@ -293,4 +293,14 @@ export const components: Components<Theme> = {
       }),
     },
   },
+  MuiMenuItem: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          backgroundColor: alpha(theme.palette.primary.main, 0.1),
+        },
+      }),
+    },
+  },
 };

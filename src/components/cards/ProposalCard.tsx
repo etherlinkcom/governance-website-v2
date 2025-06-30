@@ -10,10 +10,9 @@ interface Proposal {
 
 interface ProposalCardProps {
   proposal: Proposal;
-  onClick?: (proposal: Proposal) => void;
 }
 
-const ProposalCard = ({ proposal, onClick }: ProposalCardProps) => {
+const ProposalCard = ({ proposal}: ProposalCardProps) => {
   const theme = useTheme();
 
   return (
@@ -23,14 +22,12 @@ const ProposalCard = ({ proposal, onClick }: ProposalCardProps) => {
         boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
         border: 'none',
         borderRadius: '25px',
-        cursor: onClick ? 'pointer' : 'default',
         '&:hover': {
           boxShadow: `0px 0px 10px 2px ${theme.palette.custom.shadow.secondary}`,
           transform: 'translateY(-2px)',
           transition: 'all 0.2s ease-in-out',
         },
       }}
-      onClick={() => onClick?.(proposal)}
     >
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>

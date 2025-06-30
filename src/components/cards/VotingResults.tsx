@@ -1,37 +1,65 @@
-import { Box } from '@mui/material';
+import { Box, Card, CardContent } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import ComponentLoading from '@/components/shared/ComponentLoading';
 import VoteResultCard from './VoteResultCard';
+import { contractStore } from '@/stores/ContractStore';
+import { observer } from 'mobx-react-lite';
 
-interface VotingResultsProps {
-  votes: {
-    yea: { percentage: number; count: number; label: string };
-    nay: { percentage: number; count: number; label: string };
-    pass: { percentage: number; count: number; label: string };
-  };
-}
 
-const VotingResults = ({ votes }: VotingResultsProps) => {
+const VotingResultsSkeleton = () => {
+
+  return (
+        <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
+          {[1, 2, 3].map(i => (
+            <Box key={i} sx={{ flex: 1 }}>
+              <ComponentLoading width="100%" height={100} borderRadius={2} />
+            </Box>
+          ))}
+        </Box>
+  );
+};
+
+const VotingResults = observer(() => {
+  const { promotion, isLoading } = contractStore;
+
+  if (isLoading) return <VotingResultsSkeleton />;
+
+  if (!promotion) {
+    return (
+      <Box sx={{ mb: 2 }}>
+        <Card>
+          <CardContent>
+            <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+              No voting results available.
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
       <VoteResultCard
         type="yea"
-        percentage={votes.yea.percentage}
-        count={votes.yea.count}
-        label={votes.yea.label}
+        percentage={promotion.votes.yea.percentage}
+        count={promotion.votes.yea.count}
+        label={promotion.votes.yea.label}
       />
       <VoteResultCard
         type="nay"
-        percentage={votes.nay.percentage}
-        count={votes.nay.count}
-        label={votes.nay.label}
+        percentage={promotion.votes.nay.percentage}
+        count={promotion.votes.nay.count}
+        label={promotion.votes.nay.label}
       />
       <VoteResultCard
         type="pass"
-        percentage={votes.pass.percentage}
-        count={votes.pass.count}
-        label={votes.pass.label}
+        percentage={promotion.votes.pass.percentage}
+        count={promotion.votes.pass.count}
+        label={promotion.votes.pass.label}
       />
     </Box>
   );
-};
+});
 
 export default VotingResults;

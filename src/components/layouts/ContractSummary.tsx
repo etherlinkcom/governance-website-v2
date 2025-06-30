@@ -2,22 +2,101 @@ import { Box, Typography, Button, Stack, Accordion, AccordionSummary, AccordionD
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
-import { useTheme } from '@mui/material/styles';
+import { useTheme} from '@mui/material/styles';
+import ComponentLoading from '@/components/shared/ComponentLoading';
+import { useState, useEffect } from 'react';
+import { prettifyKey } from '@/utils/prettifyKey';
+
+const ACCORDION_KEY = 'contract-accordion-expanded';
+
+const ContractSummarySkeleton = () => {
+  const theme = useTheme();
+  const [expanded, setExpanded] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(ACCORDION_KEY) === 'true';
+    }
+    return false;
+  });
+
+  const handleChange = (_event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpanded(isExpanded);
+    localStorage.setItem(ACCORDION_KEY, String(isExpanded));
+  };
+
+  return (
+    <Accordion expanded={expanded} onChange={handleChange}>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <ComponentLoading width={300} height={32} borderRadius={2} />
+      </AccordionSummary>
+      <AccordionDetails>
+        <Box sx={{ p: theme.spacing(3) }}>
+          <Box sx={{ mb: 4 }}>
+            <ComponentLoading width="100%" height={20} borderRadius={1} />
+            <Box sx={{ mt: 1 }}>
+              <ComponentLoading width="75%" height={20} borderRadius={1} />
+            </Box>
+          </Box>
+          <Box sx={{ mb: 3 }}>
+            <ComponentLoading width={180} height={24} borderRadius={1} />
+          </Box>
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+            gap: theme.spacing(2),
+            mb: theme.spacing(4)
+          }}>
+            {[...Array(9)].map((_, index) => (
+              <Box key={index}>
+                <ComponentLoading width={80} height={14} borderRadius={0.5} />
+                <Box sx={{ mt: 0.5 }}>
+                  <ComponentLoading width={100} height={18} borderRadius={1} />
+                </Box>
+              </Box>
+            ))}
+          </Box>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            <ComponentLoading width={140} height={48} borderRadius={6} />
+            <ComponentLoading width={140} height={48} borderRadius={6} />
+          </Stack>
+        </Box>
+      </AccordionDetails>
+    </Accordion>
+  );
+};
 
 const ContractSummary = observer(() => {
-  const { contractData, contractInfo } = contractStore;
+  const { contractData, contractInfo, isLoading } = contractStore;
   const theme = useTheme();
+  const [expanded, setExpanded] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(ACCORDION_KEY) === 'true';
+    }
+    return false;
+  });
 
+  const handleChange = (_event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpanded(isExpanded);
+    localStorage.setItem(ACCORDION_KEY, String(isExpanded));
+  };
+
+  useEffect(() => {
+    const sync = () => {
+      setExpanded(localStorage.getItem(ACCORDION_KEY) === 'true');
+    };
+    window.addEventListener('storage', sync);
+    return () => window.removeEventListener('storage', sync);
+  }, []);
+
+  if (isLoading) return <ContractSummarySkeleton />;
   if (!contractData) return null;
 
   return (
-    <Accordion >
+    <Accordion expanded={expanded} onChange={handleChange}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography variant="h1" component="h1">
           {contractData.title}
         </Typography>
       </AccordionSummary>
-
       <AccordionDetails>
         <Typography variant="body1">
           {contractData.description}
@@ -35,86 +114,17 @@ const ContractSummary = observer(() => {
             gap: theme.spacing(2),
             mb: theme.spacing(3)
           }}>
-            <Box>
-              <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                Contract type
-              </Typography>
-              <Typography variant="body2" sx={{ color: theme.palette.primary.main }}>
-                {contractInfo?.type}
-              </Typography>
-            </Box>
 
-            <Box>
+          {contractInfo && Object.entries(contractInfo).map(([key, value]) => (
+            <Box key={key} sx={{overflow: 'hidden'}}> // TODO add hidden overflow to components
               <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                Contract address
-              </Typography>
-              <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                {contractInfo?.address}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                Started at level
+                {prettifyKey(key)}
               </Typography>
               <Typography variant="body2">
-                {contractInfo?.startedAtLevel}
+                {value}
               </Typography>
             </Box>
-
-            <Box>
-              <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                Period length
-              </Typography>
-              <Typography variant="body2">
-                {contractInfo?.periodLength}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                Adoption period
-              </Typography>
-              <Typography variant="body2">
-                {contractInfo?.adoptionPeriod}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                Upvoting limit
-              </Typography>
-              <Typography variant="body2">
-                {contractInfo?.upvotingLimit}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                Proposal quorum
-              </Typography>
-              <Typography variant="body2">
-                {contractInfo?.proposalQuorum}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                Promotion quorum
-              </Typography>
-              <Typography variant="body2">
-                {contractInfo?.promotionQuorum}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                Promotion supermajority
-              </Typography>
-              <Typography variant="body2">
-                {contractInfo?.promotionSupermajority}
-              </Typography>
-            </Box>
+          ))}
           </Box>
         </Box>
 

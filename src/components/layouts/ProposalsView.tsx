@@ -1,23 +1,36 @@
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { contractStore } from '@/stores/ContractStore';
 import ProposalsList from '../cards/ProposalsList';
 import UpvotersTable from '../tables/UpvotersTable';
+import ComponentLoading from '@/components/shared/ComponentLoading';
+
+const ProposalsViewSkeleton = () => {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {/* Proposals Section Skeleton */}
+      <Box>
+        <ComponentLoading width={150} height={28} />
+        <Box sx={{ mt: 2 }}>
+          <ComponentLoading width="100%" height={200} borderRadius={2} />
+        </Box>
+      </Box>
+
+      {/* Upvoters Section Skeleton */}
+      <Box>
+        <ComponentLoading width={100} height={28} />
+        <Box sx={{ mt: 2 }}>
+          <ComponentLoading width="100%" height={300} borderRadius={2} />
+        </Box>
+      </Box>
+    </Box>
+  );
+};
 
 const ProposalsView = observer(() => {
-  const { proposals, upvoters, quorum, loading, error } = contractStore;
 
-  const handleProposalClick = (proposal: any) => {
-    console.log('Clicked proposal:', proposal);
-  };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const {error} = contractStore;
 
   if (error) {
     return (
@@ -32,18 +45,14 @@ const ProposalsView = observer(() => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {/* Proposals Section */}
-      <ProposalsList
-        proposals={proposals}
-        quorum={quorum}
-        onProposalClick={handleProposalClick}
-      />
+      <ProposalsList/>
 
       {/* Upvoters Section */}
       <Box>
         <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
           Upvoters
         </Typography>
-        <UpvotersTable upvoters={upvoters} />
+        <UpvotersTable />
       </Box>
     </Box>
   );

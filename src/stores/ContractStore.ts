@@ -1,4 +1,4 @@
-import { makeObservable, observable, computed, action } from 'mobx';
+import { makeObservable, observable, computed, action, runInAction } from 'mobx';
 import { FAKE_GOVERNANCE_DATA } from './mockData';
 
 
@@ -130,6 +130,10 @@ class ContractStore {
     });
   }
 
+  get isLoading() {
+    return this.loading;
+  }
+
   get contractData(): ContractConfig | null {
     if (!this.currentContract) return null;
 
@@ -158,7 +162,6 @@ class ContractStore {
 
   async loadProposals() {
     if (!this.contractData || !this.currentContract) return;
-
     this.loading = true;
     this.error = null;
 
@@ -168,17 +171,24 @@ class ContractStore {
 
       // TODO: Replace with real API call
       const fakeData = FAKE_GOVERNANCE_DATA[this.currentContract];
-      this.proposals = fakeData.proposals;
-      this.upvoters = fakeData.upvoters;
-      this.promotion = fakeData.promotion;
-      this.quorum = fakeData.quorum;
-      this.contractInfo = fakeData.contractInfo;
+
+      runInAction(() => {
+        this.proposals = fakeData.proposals;
+        this.upvoters = fakeData.upvoters;
+        this.promotion = fakeData.promotion;
+        this.quorum = fakeData.quorum;
+        this.contractInfo = fakeData.contractInfo;
+      });
 
     } catch (err) {
-      this.error = 'Failed to load governance data';
+      runInAction(() => {
+        this.error = 'Failed to load governance data';
+      });
       console.error('Error loading governance data:', err);
     } finally {
-      this.loading = false;
+      runInAction(() => {
+        this.loading = false;
+      });
     }
   }
 }

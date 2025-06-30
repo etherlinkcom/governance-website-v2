@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Box, Container, CircularProgress } from '@mui/material';
+import { Box, Container} from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
 import ContractSummary from '@/components/layouts/ContractSummary';
 import GovernanceDisplay from '@/components/layouts/GovernanceDisplay';
@@ -16,16 +16,6 @@ const Contract = observer(() => {
       contractStore.setContract(governanceType);
     }
   }, [contract]);
-
-  if (!contractStore.contractData) {
-    return (
-      <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-          <CircularProgress />
-        </Box>
-      </Container>
-    );
-  }
 
   return (
     <Container maxWidth="lg">

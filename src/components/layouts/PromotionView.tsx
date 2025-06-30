@@ -1,20 +1,13 @@
-import { Box, Typography, CircularProgress } from '@mui/material';
-import { observer } from 'mobx-react-lite';
+import { Box, Typography } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
 import CandidateInfo from '../cards/CandidateInfo';
 import VotingResults from '../cards/VotingResults';
 import VotersTable from '../tables/VotersTable';
 
-const PromotionView = observer(() => {
-  const { promotion, loading, error } = contractStore;
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+const PromotionView = () => {
+  const { error } = contractStore;
+
 
   if (error) {
     return (
@@ -26,28 +19,13 @@ const PromotionView = observer(() => {
     );
   }
 
-  if (!promotion) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="h6">
-          No promotion data available
-        </Typography>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {/* Candidate Section */}
       <Box>
-        <CandidateInfo
-          candidate={promotion.candidate}
-          title={promotion.title}
-          quorum={promotion.quorum}
-          supermajority={promotion.supermajority}
-        />
-
-        <VotingResults votes={promotion.votes} />
+        <CandidateInfo/>
+        <VotingResults/>
       </Box>
 
       {/* Voters Section */}
@@ -55,10 +33,10 @@ const PromotionView = observer(() => {
         <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
           Voters
         </Typography>
-        <VotersTable voters={promotion.voters} />
+        <VotersTable />
       </Box>
     </Box>
   );
-});
+};
 
 export default PromotionView;
