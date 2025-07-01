@@ -60,6 +60,12 @@ export class ContractStore {
     });
   }
 
+  private async getContractAndStorage(label: 'kernel' | 'sequencer' | 'security') {
+    const contract = await this.Tezos.contract.at(this.contractAddresses[label]);
+    const storage: any = await contract.storage();
+    return { contract, storage };
+  }
+
   setAddress(label: 'kernel' | 'sequencer' | 'security', address: string) {
     this.contractAddresses[label] = address;
   }
@@ -69,9 +75,7 @@ export class ContractStore {
     this.clearError(`fetchVotingState_${label}`);
     
     try {
-      const contract = await this.Tezos.contract.at(this.contractAddresses[label]);
-      const storage: any = await contract.storage();
-
+      const { storage } = await this.getContractAndStorage(label);
       const votingContext = storage.voting_context;
       if (!votingContext) {
         console.log(`No voting context found for ${label}`);
@@ -203,15 +207,7 @@ export class ContractStore {
     });
     
     try {
-      const contractAddress = this.contractAddresses[label];
-      if (!contractAddress) {
-        console.error(`Contract address for ${label} is not set`);
-        return;
-      }
-
-      const contract = await this.Tezos.contract.at(contractAddress);
-      const storage: any = await contract.storage();
-
+      const { storage } = await this.getContractAndStorage(label);
       const rawVC = storage.voting_context;
       const vc = rawVC?.Some ?? rawVC;
 
@@ -253,9 +249,7 @@ export class ContractStore {
 
   async fetchProposals(label: 'kernel' | 'sequencer' | 'security') {
     try {
-      const contract = await this.Tezos.contract.at(this.contractAddresses[label]);
-      const storage: any = await contract.storage();
-
+      const { storage } = await this.getContractAndStorage(label);
       const votingContext = storage.voting_context;
       if (!votingContext) {
         console.log(`No voting context found for ${label}`);
@@ -328,9 +322,7 @@ export class ContractStore {
     this.clearError(`fetchVoters_${label}`);
     
     try {
-      const contract = await this.Tezos.contract.at(this.contractAddresses[label]);
-      const storage: any = await contract.storage();
-
+      const { storage } = await this.getContractAndStorage(label);
       const votingContext = storage.voting_context;
       if (!votingContext) {
         console.log(`No voting context found for ${label}`);
