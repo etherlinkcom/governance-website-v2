@@ -113,8 +113,11 @@ export const components: Components<Theme> = {
             cursor: 'pointer',
           },
         },
-        '&.MuiTypography-body1, &.MuiTypography-body2': {
-          color: theme.palette.info.main,
+        '&.MuiTypography-body1': {
+          color: theme.palette.text.primary,
+        },
+        '&.MuiTypography-body2': {
+          color: theme.palette.primary.main,
         },
           '&.MuiTypography-subtitle1, &.MuiTypography-subtitle2': {
           color: theme.palette.text.secondary,
@@ -213,7 +216,6 @@ export const components: Components<Theme> = {
           backgroundColor: theme.palette.background.paper,
           borderBottom: 'none',
           color: theme.palette.info.main,
-          fontFamily: 'Inter',
           fontWeight: 700,
           fontSize: '16px',
           lineHeight: '20px',
@@ -248,7 +250,6 @@ export const components: Components<Theme> = {
       },
       body: ({ theme }) => ({
         color: theme.palette.info.main,
-        fontFamily: 'Inter',
         fontWeight: 400,
         fontSize: '14px',
         lineHeight: '18px',

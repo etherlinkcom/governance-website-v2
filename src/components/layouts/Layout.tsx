@@ -44,7 +44,7 @@ export const Layout = ({ children }: LayoutProps) => {
               justifyContent: "center",
             }}
           >
-            <Typography variant="body2" sx={{ textAlign: "center" }}>
+            <Typography variant="body1" sx={{ textAlign: "center" }}>
               © 2025 Etherlink - Powered by Tezos Smart Rollup technology
             </Typography>
           </Box>

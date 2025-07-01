@@ -12,14 +12,14 @@ export const theme: PaletteOptions = {
     main: '#FF6B6B',
     light: '#FF9999',
     dark: '#E55555',
-    contrastText: '#FFFFFF',
+    contrastText: '#e9e9e9',
   },
   background: {
     default: '#0A0A0A',
     paper: '#151515',
   },
   text: {
-    primary: '#FFFFFF',
+    primary: '#e9e9e9',
     secondary: '#888888',
   },
   info: {
@@ -38,7 +38,7 @@ export const theme: PaletteOptions = {
     main: '#FF6B6B',
     light: '#FF9999',
     dark: '#E55555',
-    contrastText: '#FFFFFF',
+    contrastText: '#e9e9e9',
   },
   success: {
     main: '#38FF9C',
