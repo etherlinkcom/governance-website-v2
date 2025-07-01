@@ -34,6 +34,11 @@ export class ContractStore {
     sequencer: null,
     security: null,
   };
+  contractStorage: Record<'kernel' | 'sequencer' | 'security', any> = {
+    kernel: null,
+    sequencer: null,
+    security: null,
+  };
   loadingStates: Record<string, boolean> = {};
   errors: Record<string, string> = {};
   lastUpdated: Record<string, number> = {};
@@ -49,6 +54,7 @@ export class ContractStore {
       votingPowerMap: observable,
       winnerCandidate: observable,
       votingStates: observable,
+      contractStorage: observable,
       loadingStates: observable,
       errors: observable,
       lastUpdated: observable,
@@ -61,13 +67,118 @@ export class ContractStore {
   }
 
   private async getContractAndStorage(label: 'kernel' | 'sequencer' | 'security') {
+    if (this.contractStorage[label]) {
+      return { storage: this.contractStorage[label] };
+    }
+    
     const contract = await this.Tezos.contract.at(this.contractAddresses[label]);
     const storage: any = await contract.storage();
     return { contract, storage };
   }
 
+  async loadAllContractStorages() {
+    this.setLoading('loadAllContractStorages', true);
+    this.clearError('loadAllContractStorages');
+    
+    try {
+      console.log('Loading all contract storages...');
+      
+      const storages = await Promise.all([
+        this.Tezos.contract.at(this.contractAddresses.kernel).then(c => c.storage()),
+        this.Tezos.contract.at(this.contractAddresses.sequencer).then(c => c.storage()),
+        this.Tezos.contract.at(this.contractAddresses.security).then(c => c.storage()),
+      ]);
+
+      runInAction(() => {
+        this.contractStorage.kernel = storages[0];
+        this.contractStorage.sequencer = storages[1];
+        this.contractStorage.security = storages[2];
+        this.setLastUpdated('loadAllContractStorages');
+      });
+      
+      console.log('All contract storages loaded successfully');
+    } catch (error) {
+      const errorMessage = `Error loading contract storages: ${error}`;
+      console.error(errorMessage);
+      runInAction(() => {
+        this.setError('loadAllContractStorages', errorMessage);
+      });
+    } finally {
+      runInAction(() => {
+        this.setLoading('loadAllContractStorages', false);
+      });
+    }
+  }
+
+  async refreshContractStorage(label: 'kernel' | 'sequencer' | 'security') {
+    this.setLoading(`refreshStorage_${label}`, true);
+    this.clearError(`refreshStorage_${label}`);
+    
+    try {
+      console.log(`Refreshing contract storage for ${label}...`);
+      
+      const contract = await this.Tezos.contract.at(this.contractAddresses[label]);
+      const storage: any = await contract.storage();
+      
+      runInAction(() => {
+        this.contractStorage[label] = storage;
+        this.setLastUpdated(`refreshStorage_${label}`);
+      });
+      
+      console.log(`Contract storage refreshed for ${label}`);
+    } catch (error) {
+      const errorMessage = `Error refreshing contract storage for ${label}: ${error}`;
+      console.error(errorMessage);
+      runInAction(() => {
+        this.setError(`refreshStorage_${label}`, errorMessage);
+      });
+    } finally {
+      runInAction(() => {
+        this.setLoading(`refreshStorage_${label}`, false);
+      });
+    }
+  }
+
   setAddress(label: 'kernel' | 'sequencer' | 'security', address: string) {
     this.contractAddresses[label] = address;
+  }
+
+  setLoading(key: string, loading: boolean) {
+    this.loadingStates[key] = loading;
+  }
+
+  setError(key: string, error: string) {
+    this.errors[key] = error;
+  }
+
+  clearError(key: string) {
+    delete this.errors[key];
+  }
+
+  setLastUpdated(key: string) {
+    this.lastUpdated[key] = Date.now();
+  }
+
+  isLoading(key: string): boolean {
+    return this.loadingStates[key] || false;
+  }
+
+  isStorageLoaded(label: 'kernel' | 'sequencer' | 'security'): boolean {
+    return this.contractStorage[label] !== null;
+  }
+
+  areAllStoragesLoaded(): boolean {
+    return this.contractStorage.kernel !== null && 
+           this.contractStorage.sequencer !== null && 
+           this.contractStorage.security !== null;
+  }
+
+  getError(key: string): string | null {
+    return this.errors[key] || null;
+  }
+
+  getLastUpdated(key: string): number {
+    return this.lastUpdated[key] || 0;
   }
 
   async fetchVotingState(label: 'kernel' | 'sequencer' | 'security') {
@@ -158,6 +269,10 @@ export class ContractStore {
     console.log('Refreshing all contracts data...');
     
     try {
+      if (!this.areAllStoragesLoaded()) {
+        await this.loadAllContractStorages();
+      }
+      
       await Promise.all([
         this.refreshAllData('kernel'),
         this.refreshAllData('sequencer'),
@@ -170,33 +285,6 @@ export class ContractStore {
     }
   }
 
-  setLoading(key: string, loading: boolean) {
-    this.loadingStates[key] = loading;
-  }
-
-  setError(key: string, error: string) {
-    this.errors[key] = error;
-  }
-
-  clearError(key: string) {
-    delete this.errors[key];
-  }
-
-  setLastUpdated(key: string) {
-    this.lastUpdated[key] = Date.now();
-  }
-
-  isLoading(key: string): boolean {
-    return this.loadingStates[key] || false;
-  }
-
-  getError(key: string): string | null {
-    return this.errors[key] || null;
-  }
-
-  getLastUpdated(key: string): number {
-    return this.lastUpdated[key] || 0;
-  }
 
   async fetchWinner(label: 'kernel' | 'sequencer' | 'security'): Promise<void> {
     this.setLoading(`fetchWinner_${label}`, true);
@@ -452,6 +540,7 @@ export class ContractStore {
       
       console.log(`Vote confirmed for ${label}`);
       
+      await this.refreshContractStorage(label);
       await this.fetchVotingState(label);
       
       runInAction(() => {
