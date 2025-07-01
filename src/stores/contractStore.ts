@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeObservable, observable, computed, action, runInAction } from 'mobx';
 import { TezosToolkit } from '@taquito/taquito';
 
 export class ContractStore {
@@ -42,7 +42,22 @@ export class ContractStore {
   Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
 
   constructor() {
-    makeAutoObservable(this);
+    makeObservable(this, {
+      contractAddresses: observable,
+      proposals: observable,
+      voters: observable,
+      votingPowerMap: observable,
+      winnerCandidate: observable,
+      votingStates: observable,
+      loadingStates: observable,
+      errors: observable,
+      lastUpdated: observable,
+      setAddress: action,
+      setLoading: action,
+      setError: action,
+      clearError: action,
+      setLastUpdated: action,
+    });
   }
 
   setAddress(label: 'kernel' | 'sequencer' | 'security', address: string) {
@@ -60,7 +75,9 @@ export class ContractStore {
       const votingContext = storage.voting_context;
       if (!votingContext) {
         console.log(`No voting context found for ${label}`);
-        this.votingStates[label] = null;
+        runInAction(() => {
+          this.votingStates[label] = null;
+        });
         return;
       }
 
@@ -69,7 +86,9 @@ export class ContractStore {
 
       if (!period) {
         console.log(`No period found for ${label}`);
-        this.votingStates[label] = null;
+        runInAction(() => {
+          this.votingStates[label] = null;
+        });
         return;
       }
 
@@ -96,15 +115,21 @@ export class ContractStore {
         votingState.pass_voting_power = promotionPeriod.pass_voting_power?.toNumber() || 0;
       }
 
-      this.votingStates[label] = votingState;
-      this.setLastUpdated(`fetchVotingState_${label}`);
+      runInAction(() => {
+        this.votingStates[label] = votingState;
+        this.setLastUpdated(`fetchVotingState_${label}`);
+      });
       console.log(`Voting state for ${label}:`, votingState);
     } catch (error) {
       const errorMessage = `Error fetching voting state for ${label}: ${error}`;
       console.error(errorMessage);
-      this.setError(`fetchVotingState_${label}`, errorMessage);
+      runInAction(() => {
+        this.setError(`fetchVotingState_${label}`, errorMessage);
+      });
     } finally {
-      this.setLoading(`fetchVotingState_${label}`, false);
+      runInAction(() => {
+        this.setLoading(`fetchVotingState_${label}`, false);
+      });
     }
   }
 
@@ -170,7 +195,13 @@ export class ContractStore {
   }
 
   async fetchWinner(label: 'kernel' | 'sequencer' | 'security'): Promise<void> {
-    this.winnerCandidate = null;
+    this.setLoading(`fetchWinner_${label}`, true);
+    this.clearError(`fetchWinner_${label}`);
+    
+    runInAction(() => {
+      this.winnerCandidate = null;
+    });
+    
     try {
       const contractAddress = this.contractAddresses[label];
       if (!contractAddress) {
@@ -201,15 +232,23 @@ export class ContractStore {
         raw = String(winner);
       }
 
-      this.winnerCandidate = raw.startsWith('0x') ? raw : `0x${raw}`;
+      runInAction(() => {
+        this.winnerCandidate = raw.startsWith('0x') ? raw : `0x${raw}`;
+        this.setLastUpdated(`fetchWinner_${label}`);
+      });
+      console.log(`Winner candidate for ${label}:`, this.winnerCandidate);
     } catch (error) {
-      console.error('Error fetching winner_candidate:', error);
-      this.winnerCandidate = null;
+      const errorMessage = `Error fetching winner_candidate for ${label}: ${error}`;
+      console.error(errorMessage);
+      runInAction(() => {
+        this.setError(`fetchWinner_${label}`, errorMessage);
+        this.winnerCandidate = null;
+      });
+    } finally {
+      runInAction(() => {
+        this.setLoading(`fetchWinner_${label}`, false);
+      });
     }
-  }
-
-  async fetchWinnerForContract(label: 'kernel' | 'sequencer' | 'security'): Promise<void> {
-    await this.fetchWinner(label);
   }
 
   async fetchProposals(label: 'kernel' | 'sequencer' | 'security') {
@@ -220,7 +259,9 @@ export class ContractStore {
       const votingContext = storage.voting_context;
       if (!votingContext) {
         console.log(`No voting context found for ${label}`);
-        this.proposals[label] = [];
+        runInAction(() => {
+          this.proposals[label] = [];
+        });
         return;
       }
 
@@ -229,7 +270,9 @@ export class ContractStore {
 
       if (!period) {
         console.log(`No period found for ${label}`);
-        this.proposals[label] = [];
+        runInAction(() => {
+          this.proposals[label] = [];
+        });
         return;
       }
 
@@ -268,15 +311,22 @@ export class ContractStore {
         }];
       }
 
-      this.proposals[label] = proposals;
+      runInAction(() => {
+        this.proposals[label] = proposals;
+      });
       console.log(`Fetched ${proposals.length} proposals for ${label}:`, proposals);
     } catch (error) {
       console.error(`Error fetching proposals for ${label}:`, error);
-      this.proposals[label] = [];
+      runInAction(() => {
+        this.proposals[label] = [];
+      });
     }
   }
 
   async fetchVoters(label: 'kernel' | 'sequencer' | 'security') {
+    this.setLoading(`fetchVoters_${label}`, true);
+    this.clearError(`fetchVoters_${label}`);
+    
     try {
       const contract = await this.Tezos.contract.at(this.contractAddresses[label]);
       const storage: any = await contract.storage();
@@ -284,8 +334,10 @@ export class ContractStore {
       const votingContext = storage.voting_context;
       if (!votingContext) {
         console.log(`No voting context found for ${label}`);
-        this.voters[label] = [];
-        this.votingPowerMap[label] = {};
+        runInAction(() => {
+          this.voters[label] = [];
+          this.votingPowerMap[label] = {};
+        });
         return;
       }
 
@@ -294,8 +346,10 @@ export class ContractStore {
 
       if (!period) {
         console.log(`No period found for ${label}`);
-        this.voters[label] = [];
-        this.votingPowerMap[label] = {};
+        runInAction(() => {
+          this.voters[label] = [];
+          this.votingPowerMap[label] = {};
+        });
         return;
       }
 
@@ -354,13 +408,24 @@ export class ContractStore {
         }
       }
 
-      this.voters[label] = voters;
-      this.votingPowerMap[label] = votingPowerMap;
+      runInAction(() => {
+        this.voters[label] = voters;
+        this.votingPowerMap[label] = votingPowerMap;
+        this.setLastUpdated(`fetchVoters_${label}`);
+      });
       console.log(`Fetched ${voters.length} voters for ${label}:`, { voters, votingPowerMap });
     } catch (error) {
-      console.error(`Error fetching voters for ${label}:`, error);
-      this.voters[label] = [];
-      this.votingPowerMap[label] = {};
+      const errorMessage = `Error fetching voters for ${label}: ${error}`;
+      console.error(errorMessage);
+      runInAction(() => {
+        this.setError(`fetchVoters_${label}`, errorMessage);
+        this.voters[label] = [];
+        this.votingPowerMap[label] = {};
+      });
+    } finally {
+      runInAction(() => {
+        this.setLoading(`fetchVoters_${label}`, false);
+      });
     }
   }
 
@@ -369,19 +434,16 @@ export class ContractStore {
     this.clearError(`vote_${label}`);
     
     try {
-      // Vérifier que l'adresse du contrat est configurée
       const contractAddress = this.contractAddresses[label];
       if (!contractAddress) {
         throw new Error(`Contract address for ${label} is not set`);
       }
 
-      // Vérifier que nous sommes en période de promotion
       const votingState = this.votingStates[label];
       if (!votingState || votingState.period_type !== 'promotion') {
         throw new Error(`Cannot vote: not in promotion period for ${label}`);
       }
 
-      // Récupérer la proposition actuelle (winner candidate)
       const currentProposal = votingState.current_winner;
       if (!currentProposal) {
         throw new Error(`No current proposal to vote on for ${label}`);
@@ -389,30 +451,33 @@ export class ContractStore {
 
       console.log(`Voting ${voteType} on proposal ${currentProposal} for ${label}`);
 
-      // Effectuer le vote
       const contract = await this.Tezos.wallet.at(contractAddress);
       const op = await contract.methods.vote(voteType).send();
       
       console.log(`Vote transaction sent: ${op.opHash}`);
       
-      // Attendre la confirmation
       await op.confirmation();
       
       console.log(`Vote confirmed for ${label}`);
       
-      // Rafraîchir les données après le vote
       await this.fetchVotingState(label);
       
-      this.setLastUpdated(`vote_${label}`);
+      runInAction(() => {
+        this.setLastUpdated(`vote_${label}`);
+      });
       
       return op.opHash;
     } catch (error) {
       const errorMessage = `Error voting ${voteType} for ${label}: ${error}`;
       console.error(errorMessage);
-      this.setError(`vote_${label}`, errorMessage);
+      runInAction(() => {
+        this.setError(`vote_${label}`, errorMessage);
+      });
       throw error;
     } finally {
-      this.setLoading(`vote_${label}`, false);
+      runInAction(() => {
+        this.setLoading(`vote_${label}`, false);
+      });
     }
   }
 }
