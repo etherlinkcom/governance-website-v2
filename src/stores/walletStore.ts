@@ -6,7 +6,6 @@ export class WalletStore {
   address: string | null = null;
   balance: number = 0;
   votingPower: number = 0;  
-  winnerCandidate: string | null = null;
 
   private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
   private wallet: BeaconWallet;
@@ -34,7 +33,6 @@ export class WalletStore {
     this.address = null;
     this.balance = 0;
     this.votingPower = 0;
-    this.winnerCandidate = null;
   }
 
   async refreshBalance(): Promise<void> {
