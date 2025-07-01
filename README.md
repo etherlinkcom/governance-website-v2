@@ -52,8 +52,6 @@ background.paper: '#151515'    // Card backgrounds
 <Typography variant="h1">Main Title</Typography>
 <Typography variant="body1">Content</Typography>
 <Typography variant="caption">Labels</Typography>
-
-// Font specs: Inter, 400/600/700 weights, responsive sizing
 ```
 
 </details>
