@@ -51,7 +51,6 @@ export class WalletStore {
       // fetch own liquid balance first (delegators endpoint does not return own liquid balance)
       try {
         ownLiquid = (await this.Tezos.tz.getBalance(address)).toNumber();
-        console.log('Own liquid balance:', ownLiquid);
       } catch (e) {
         console.warn('Failed to fetch own liquid balance:', e);
       }
@@ -63,14 +62,12 @@ export class WalletStore {
         1: null
       });
       const delegates: string[] = await view.executeView({ viewCaller: address });
-      console.log('Delegators from on-chain view:', delegates);
   
       // If no delegators returned, check delegate endpoint
       if (delegates.length === 0) {
         const url = `https://api.tzkt.io/v1/delegates/${address}`;
         const res = await fetch(url);
         const raw = await res.text();
-        console.log('VotingPower API:', res.status, raw);
         if (res.ok && raw.trim() !== '') {
           const data = JSON.parse(raw);
           const staking = data.stakingBalance ?? 0;
