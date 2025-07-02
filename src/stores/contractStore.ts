@@ -1,11 +1,49 @@
 import { makeObservable, observable, computed, action, runInAction } from 'mobx';
 import { TezosToolkit } from '@taquito/taquito';
 
+interface ContractVersion {
+  kernel: string;
+  sequencer: string;
+  security: string;
+  startDate: Date;
+  endDate?: Date;
+  level: number;
+}
+
 export class ContractStore {
+  private static readonly CONTRACT_HISTORY: ContractVersion[] = [
+    {
+      level: 5316609,
+      kernel: 'KT1H5pCmFuhAwRExzNNrPQFKpunJx1yEVa6J',
+      sequencer: 'KT1NcZQ3y9Wv32BGiUfD2ZciSUz9cY1DBDGF',
+      security: 'KT1N5MHQW5fkqXkW9GPjRYfn5KwbuYrvsY1g',
+      startDate: new Date('2024-03-25T17:25:00Z'),
+      endDate: new Date('2025-01-20T09:57:00Z'),
+    },
+    {
+      level: 7692289,
+      kernel: 'KT1FPG4NApqTJjwvmhWvqA14m5PJxu9qgpBK',
+      sequencer: 'KT1UvCsnXpLAssgeJmrbQ6qr3eFkYXxsTG9U',
+      security: 'KT1GRAN26ni19mgd6xpL6tsH52LNnhKSQzP2',
+      startDate: new Date('2025-01-20T09:57:00Z'),
+      endDate: new Date('2025-05-01T13:07:00Z'),
+    },
+    {
+      level: 8767489,
+      kernel: 'KT1XdSAYGXrUDE1U5GNqUKKscLWrMhzyjNeh',
+      sequencer: 'KT1NnH9DCAoY1pfPNvb9cw9XPKQnHAFYFHXa',
+      security: 'KT1D1fRgZVdjTj5sUZKcSTPPnuR7LRxVYnDL',
+      startDate: new Date('2025-05-01T13:07:00Z'),
+      endDate: undefined, // Waiting for V4
+    },
+  ];
+
+  selectedDate: Date = new Date();
+  
   contractAddresses: Record<'kernel' | 'sequencer' | 'security', string> = {
-    kernel: 'KT1FPG4NApqTJjwvmhWvqA14m5PJxu9qgpBK',
-    sequencer: 'KT1UvCsnXpLAssgeJmrbQ6qr3eFkYXxsTG9U',
-    security: 'KT1GRAN26ni19mgd6xpL6tsH52LNnhKSQzP2',
+    kernel: 'KT1XdSAYGXrUDE1U5GNqUKKscLWrMhzyjNeh',
+    sequencer: 'KT1NnH9DCAoY1pfPNvb9cw9XPKQnHAFYFHXa',
+    security: 'KT1D1fRgZVdjTj5sUZKcSTPPnuR7LRxVYnDL',
   };
   proposals: Record<string, any[]> = {
     kernel: [],
@@ -49,6 +87,7 @@ export class ContractStore {
   constructor() {
     makeObservable(this, {
       contractAddresses: observable,
+      selectedDate: observable,
       proposals: observable,
       voters: observable,
       votingPowerMap: observable,
@@ -59,11 +98,14 @@ export class ContractStore {
       errors: observable,
       lastUpdated: observable,
       setAddress: action,
+      setSelectedDate: action,
       setLoading: action,
       setError: action,
       clearError: action,
       setLastUpdated: action,
     });
+
+    this.updateContractAddressesForDate(this.selectedDate);
   }
 
   private async getContractAndStorage(label: 'kernel' | 'sequencer' | 'security') {
@@ -74,6 +116,40 @@ export class ContractStore {
     const contract = await this.Tezos.contract.at(this.contractAddresses[label]);
     const storage: any = await contract.storage();
     return { contract, storage };
+  }
+
+  private updateContractAddressesForDate(date: Date) {
+    const version = this.getContractVersionForDate(date);
+    
+    runInAction(() => {
+      this.contractAddresses = {
+        kernel: version.kernel,
+        sequencer: version.sequencer,
+        security: version.security,
+      };
+      
+      this.contractStorage = {
+        kernel: null,
+        sequencer: null,
+        security: null,
+      };
+      
+      this.proposals = { kernel: [], sequencer: [], security: [] };
+      this.voters = { kernel: [], sequencer: [], security: [] };
+      this.votingPowerMap = { kernel: {}, sequencer: {}, security: {} };
+      this.votingStates = { kernel: null, sequencer: null, security: null };
+      this.winnerCandidate = null;
+    });
+  }
+
+  private getContractVersionForDate(date: Date): ContractVersion {
+    for (const version of ContractStore.CONTRACT_HISTORY) {
+      if (date >= version.startDate && (!version.endDate || date < version.endDate)) {
+        return version;
+      }
+    }
+    
+    return ContractStore.CONTRACT_HISTORY[ContractStore.CONTRACT_HISTORY.length - 1];
   }
 
   async loadAllContractStorages() {
@@ -139,8 +215,41 @@ export class ContractStore {
     }
   }
 
+  async setSelectedDateAndRefresh(date: Date) {
+    this.setSelectedDate(date);
+    await this.refreshAllContractsData();
+  }
+
   setAddress(label: 'kernel' | 'sequencer' | 'security', address: string) {
     this.contractAddresses[label] = address;
+  }
+
+  setSelectedDate(date: Date) {
+    this.selectedDate = date;
+    this.updateContractAddressesForDate(date);
+  }
+
+  getCurrentContractVersion(): ContractVersion {
+    return this.getContractVersionForDate(this.selectedDate);
+  }
+
+  getContractHistory(): ContractVersion[] {
+    return ContractStore.CONTRACT_HISTORY;
+  }
+
+  getCurrentVersionInfo() {
+    const version = this.getCurrentContractVersion();
+    return {
+      level: version.level,
+      startDate: version.startDate,
+      endDate: version.endDate,
+      isCurrent: !version.endDate,
+      addresses: {
+        kernel: version.kernel,
+        sequencer: version.sequencer,
+        security: version.security,
+      }
+    };
   }
 
   setLoading(key: string, loading: boolean) {
