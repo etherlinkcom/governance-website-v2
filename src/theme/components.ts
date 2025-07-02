@@ -21,6 +21,7 @@ export const components: Components<Theme> = {
         textAlign: 'center',
         whiteSpace: 'normal',
         wordWrap: 'break-word',
+        height: 40,
       }),
       contained: ({ theme }) => ({
         backgroundColor: theme.palette.primary.main,
@@ -131,6 +132,7 @@ export const components: Components<Theme> = {
         backgroundColor: theme.palette.background.default,
         color: theme.palette.text.primary,
         fontFamily: typography.fontFamily,
+        minWidth: '415px'
       },
       '*::-webkit-scrollbar': {
         width: '8px',
@@ -151,6 +153,10 @@ export const components: Components<Theme> = {
         textTransform: 'none',
         position: 'relative',
         transition: 'all 0.2s ease-in-out',
+        whiteSpace: 'nowrap',
+        wordBreak: 'normal',
+        minWidth: 64,
+        height: 40,
         '&:hover': {
           color: theme.palette.primary.main,
           boxShadow: `0px 0px 3px 0px ${theme.palette.primary.main}`,
@@ -192,14 +198,18 @@ export const components: Components<Theme> = {
     },
   },
   MuiTableContainer: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
-        borderRadius: '25px',
-        overflow: 'hidden',
-      }),
-    },
+  styleOverrides: {
+    root: ({ theme }) => ({
+      boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
+      borderRadius: '25px',
+      overflow: 'auto',
+      width: '100%',
+      WebkitOverflowScrolling: 'touch',
+      boxSizing: 'content-box',
+
+    }),
   },
+},
   MuiTable: {
     styleOverrides: {
       root: {
@@ -228,6 +238,7 @@ export const components: Components<Theme> = {
   MuiTableBody: {
     styleOverrides: {
       root: ({ theme }) => ({
+
         '& .MuiTableRow-root': {
           '&:nth-of-type(odd)': {
             backgroundColor: theme.palette.custom.tableBg.odd,
@@ -245,7 +256,10 @@ export const components: Components<Theme> = {
   MuiTableCell: {
     styleOverrides: {
       root: {
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
         borderBottom: 'none',
+        maxWidth: '200px',
         padding: '12px 16px',
       },
       body: ({ theme }) => ({

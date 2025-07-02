@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ConnectButton } from './ConnectButton';
 
 interface HeaderProps {
   currentPage?: 'slow' | 'fast' | 'sequencer' | null;
@@ -61,7 +62,7 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
       <Box
         sx={{
           height: '84px',
-          px: { xs: 2, md: '104px' },
+          px: {  lg: '104px' },
           py: '24px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -110,8 +111,11 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
           </ToggleButtonGroup>
         </Box>
 
-        <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-          <IconButton onClick={handleMenuOpen} color="primary" size="large">
+
+
+        <Box sx={{ display: { sm: 'block', md: 'none' } }}>
+        <ConnectButton />
+          <IconButton sx={{ ml: 1 }} onClick={handleMenuOpen} color="primary" size="large">
             <MenuIcon />
           </IconButton>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
@@ -148,6 +152,7 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
               {gov.label.replace(' Governance', '')}
             </ToggleButton>
           ))}
+       <ConnectButton/>
         </ToggleButtonGroup>
       </Box>
     </AppBar>
