@@ -2,9 +2,9 @@ import { makeObservable, observable, computed, action, runInAction } from 'mobx'
 import { TezosToolkit } from '@taquito/taquito';
 
 interface ContractVersion {
-  kernel: string;
+  slow: string;
   sequencer: string;
-  security: string;
+  fast: string;
   startDate: Date;
   endDate?: Date;
   level: number;
@@ -14,68 +14,76 @@ export class ContractStore {
   private static readonly CONTRACT_HISTORY: ContractVersion[] = [
     {
       level: 5316609,
-      kernel: 'KT1H5pCmFuhAwRExzNNrPQFKpunJx1yEVa6J',
+      slow: 'KT1H5pCmFuhAwRExzNNrPQFKpunJx1yEVa6J',
       sequencer: 'KT1NcZQ3y9Wv32BGiUfD2ZciSUz9cY1DBDGF',
-      security: 'KT1N5MHQW5fkqXkW9GPjRYfn5KwbuYrvsY1g',
+      fast: 'KT1N5MHQW5fkqXkW9GPjRYfn5KwbuYrvsY1g',
       startDate: new Date('2024-03-25T17:25:00Z'),
       endDate: new Date('2025-01-20T09:57:00Z'),
     },
     {
       level: 7692289,
-      kernel: 'KT1FPG4NApqTJjwvmhWvqA14m5PJxu9qgpBK',
+      slow: 'KT1FPG4NApqTJjwvmhWvqA14m5PJxu9qgpBK',
       sequencer: 'KT1UvCsnXpLAssgeJmrbQ6qr3eFkYXxsTG9U',
-      security: 'KT1GRAN26ni19mgd6xpL6tsH52LNnhKSQzP2',
+      fast: 'KT1GRAN26ni19mgd6xpL6tsH52LNnhKSQzP2',
       startDate: new Date('2025-01-20T09:57:00Z'),
       endDate: new Date('2025-05-01T13:07:00Z'),
     },
     {
       level: 8767489,
-      kernel: 'KT1XdSAYGXrUDE1U5GNqUKKscLWrMhzyjNeh',
+      slow: 'KT1XdSAYGXrUDE1U5GNqUKKscLWrMhzyjNeh',
       sequencer: 'KT1NnH9DCAoY1pfPNvb9cw9XPKQnHAFYFHXa',
-      security: 'KT1D1fRgZVdjTj5sUZKcSTPPnuR7LRxVYnDL',
+      fast: 'KT1D1fRgZVdjTj5sUZKcSTPPnuR7LRxVYnDL',
       startDate: new Date('2025-05-01T13:07:00Z'),
-      endDate: undefined, // Waiting for V4
+      endDate: new Date('2025-07-01T10:00:00Z'),
+    },
+    {
+      level: 8767489, // Waiting for real level
+      slow: 'KT1VZVNCNnhUp7s15d9RsdycP7C1iwYhAQ8r',
+      sequencer: 'KT1WckZ2uiLfHCfQyNp1mtqeRcC1X6Jg2Qzf',
+      fast: 'KT1DxndcFitAbxLdJCN3C1pPivqbC3RJxD1R',
+      startDate: new Date('2025-07-01T10:00:00Z'),
+      endDate: undefined,
     },
   ];
 
   selectedDate: Date = new Date();
   
-  contractAddresses: Record<'kernel' | 'sequencer' | 'security', string> = {
-    kernel: 'KT1XdSAYGXrUDE1U5GNqUKKscLWrMhzyjNeh',
-    sequencer: 'KT1NnH9DCAoY1pfPNvb9cw9XPKQnHAFYFHXa',
-    security: 'KT1D1fRgZVdjTj5sUZKcSTPPnuR7LRxVYnDL',
+  contractAddresses: Record<'slow' | 'sequencer' | 'fast', string> = {
+    slow: 'KT1VZVNCNnhUp7s15d9RsdycP7C1iwYhAQ8r',
+    sequencer: 'KT1WckZ2uiLfHCfQyNp1mtqeRcC1X6Jg2Qzf',
+    fast: 'KT1DxndcFitAbxLdJCN3C1pPivqbC3RJxD1R',
   };
   proposals: Record<string, any[]> = {
-    kernel: [],
+    slow: [],
     sequencer: [],
-    security: []
+    fast: []
   };
   voters: Record<string, string[]> = {
-    kernel: [],
+    slow: [],
     sequencer: [],
-    security: []
+    fast: []
   };
   votingPowerMap: Record<string, Record<string, number>> = {
-    kernel: {},
+    slow: {},
     sequencer: {},
-    security: {}
+    fast: {}
   };
   winnerCandidate: string | null = null;
-  votingStates: Record<'kernel' | 'sequencer' | 'security', {
+  votingStates: Record<'slow' | 'sequencer' | 'fast', {
     period_type: 'proposal' | 'promotion' | null;
     period_index: number;
     total_voting_power: number;
     current_winner: string | null;
     period_end_level?: number;
   } | null> = {
-    kernel: null,
+    slow: null,
     sequencer: null,
-    security: null,
+    fast: null,
   };
-  contractStorage: Record<'kernel' | 'sequencer' | 'security', any> = {
-    kernel: null,
+  contractStorage: Record<'slow' | 'sequencer' | 'fast', any> = {
+    slow: null,
     sequencer: null,
-    security: null,
+    fast: null,
   };
   loadingStates: Record<string, boolean> = {};
   errors: Record<string, string> = {};
@@ -107,7 +115,7 @@ export class ContractStore {
     this.updateContractAddressesForDate(this.selectedDate);
   }
 
-  private async getContractAndStorage(label: 'kernel' | 'sequencer' | 'security') {
+  private async getContractAndStorage(label: 'slow' | 'sequencer' | 'fast') {
     if (this.contractStorage[label]) {
       return { storage: this.contractStorage[label] };
     }
@@ -122,21 +130,21 @@ export class ContractStore {
     
     runInAction(() => {
       this.contractAddresses = {
-        kernel: version.kernel,
+        slow: version.slow,
         sequencer: version.sequencer,
-        security: version.security,
+        fast: version.fast,
       };
       
       this.contractStorage = {
-        kernel: null,
+        slow: null,
         sequencer: null,
-        security: null,
+        fast: null,
       };
       
-      this.proposals = { kernel: [], sequencer: [], security: [] };
-      this.voters = { kernel: [], sequencer: [], security: [] };
-      this.votingPowerMap = { kernel: {}, sequencer: {}, security: {} };
-      this.votingStates = { kernel: null, sequencer: null, security: null };
+      this.proposals = { slow: [], sequencer: [], fast: [] };
+      this.voters = { slow: [], sequencer: [], fast: [] };
+      this.votingPowerMap = { slow: {}, sequencer: {}, fast: {} };
+      this.votingStates = { slow: null, sequencer: null, fast: null };
       this.winnerCandidate = null;
     });
   }
@@ -159,15 +167,15 @@ export class ContractStore {
       console.log('Loading all contract storages...');
       
       const storages = await Promise.all([
-        this.Tezos.contract.at(this.contractAddresses.kernel).then(c => c.storage()),
+        this.Tezos.contract.at(this.contractAddresses.slow).then(c => c.storage()),
         this.Tezos.contract.at(this.contractAddresses.sequencer).then(c => c.storage()),
-        this.Tezos.contract.at(this.contractAddresses.security).then(c => c.storage()),
+        this.Tezos.contract.at(this.contractAddresses.fast).then(c => c.storage()),
       ]);
 
       runInAction(() => {
-        this.contractStorage.kernel = storages[0];
+        this.contractStorage.slow = storages[0];
         this.contractStorage.sequencer = storages[1];
-        this.contractStorage.security = storages[2];
+        this.contractStorage.fast = storages[2];
         this.setLastUpdated('loadAllContractStorages');
       });
       
@@ -185,7 +193,7 @@ export class ContractStore {
     }
   }
 
-  async refreshContractStorage(label: 'kernel' | 'sequencer' | 'security') {
+  async refreshContractStorage(label: 'slow' | 'sequencer' | 'fast') {
     this.setLoading(`refreshStorage_${label}`, true);
     this.clearError(`refreshStorage_${label}`);
     
@@ -240,9 +248,9 @@ export class ContractStore {
       endDate: version.endDate,
       isCurrent: !version.endDate,
       addresses: {
-        kernel: version.kernel,
+        slow: version.slow,
         sequencer: version.sequencer,
-        security: version.security,
+        fast: version.fast,
       }
     };
   }
@@ -268,9 +276,9 @@ export class ContractStore {
   }
 
   areAllStoragesLoaded(): boolean {
-    return this.contractStorage.kernel !== null && 
+    return this.contractStorage.slow !== null && 
            this.contractStorage.sequencer !== null && 
-           this.contractStorage.security !== null;
+           this.contractStorage.fast !== null;
   }
 
   getError(key: string): string | null {
@@ -281,7 +289,7 @@ export class ContractStore {
     return this.lastUpdated[key] || 0;
   }
 
-  async fetchVotingState(label: 'kernel' | 'sequencer' | 'security') {
+  async fetchVotingState(label: 'slow' | 'sequencer' | 'fast') {
     this.setLoading(`fetchVotingState_${label}`, true);
     this.clearError(`fetchVotingState_${label}`);
     
@@ -348,7 +356,7 @@ export class ContractStore {
     }
   }
 
-  async refreshAllData(label: 'kernel' | 'sequencer' | 'security') {
+  async refreshAllData(label: 'slow' | 'sequencer' | 'fast') {
     console.log(`Refreshing all data for ${label}...`);
     
     try {
@@ -374,9 +382,9 @@ export class ContractStore {
       }
       
       await Promise.all([
-        this.refreshAllData('kernel'),
+        this.refreshAllData('slow'),
         this.refreshAllData('sequencer'),
-        this.refreshAllData('security'),
+        this.refreshAllData('fast'),
       ]);
       
       console.log('All contracts data refreshed');
@@ -386,7 +394,7 @@ export class ContractStore {
   }
 
 
-  async fetchWinner(label: 'kernel' | 'sequencer' | 'security'): Promise<void> {
+  async fetchWinner(label: 'slow' | 'sequencer' | 'fast'): Promise<void> {
     this.setLoading(`fetchWinner_${label}`, true);
     this.clearError(`fetchWinner_${label}`);
     
@@ -435,7 +443,7 @@ export class ContractStore {
     }
   }
 
-  async fetchProposals(label: 'kernel' | 'sequencer' | 'security') {
+  async fetchProposals(label: 'slow' | 'sequencer' | 'fast') {
     try {
       const { storage } = await this.getContractAndStorage(label);
       const votingContext = storage.voting_context;
@@ -505,7 +513,7 @@ export class ContractStore {
     }
   }
 
-  async fetchVoters(label: 'kernel' | 'sequencer' | 'security') {
+  async fetchVoters(label: 'slow' | 'sequencer' | 'fast') {
     this.setLoading(`fetchVoters_${label}`, true);
     this.clearError(`fetchVoters_${label}`);
     
@@ -609,7 +617,7 @@ export class ContractStore {
     }
   }
 
-  async vote(label: 'kernel' | 'sequencer' | 'security', voteType: 'yea' | 'nay' | 'pass') {
+  async vote(label: 'slow' | 'sequencer' | 'fast', voteType: 'yea' | 'nay' | 'pass') {
     this.setLoading(`vote_${label}`, true);
     this.clearError(`vote_${label}`);
     
