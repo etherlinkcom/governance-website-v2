@@ -97,7 +97,6 @@ export class ContractStore {
       loadingStates: observable,
       errors: observable,
       lastUpdated: observable,
-      setAddress: action,
       setSelectedDate: action,
       setLoading: action,
       setError: action,
@@ -220,10 +219,6 @@ export class ContractStore {
     await this.refreshAllContractsData();
   }
 
-  setAddress(label: 'kernel' | 'sequencer' | 'security', address: string) {
-    this.contractAddresses[label] = address;
-  }
-
   setSelectedDate(date: Date) {
     this.selectedDate = date;
     this.updateContractAddressesForDate(date);
@@ -270,10 +265,6 @@ export class ContractStore {
 
   isLoading(key: string): boolean {
     return this.loadingStates[key] || false;
-  }
-
-  isStorageLoaded(label: 'kernel' | 'sequencer' | 'security'): boolean {
-    return this.contractStorage[label] !== null;
   }
 
   areAllStoragesLoaded(): boolean {
