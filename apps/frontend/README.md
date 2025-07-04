@@ -71,10 +71,10 @@ background.paper: '#151515'    // Card backgrounds
 
 ```bash
 src/components/
-├── contract/     # ContractSummary
-├── proposals/    # ProposalsList, ProposalCard, ProposalsView
-├── voting/       # VotingResults, VoteResultCard, VotersTable
-└── ui/           # SortableTable, shared components
+├── layouts/        # ContractSummary, GovernanceDisplay, Layout
+├── proposal/       # Proposal related components
+├── promotion/      # Promotion related components
+└── shared/         # Loading, Headers, Sortable table
 ```
 
 ## ✅ Best Practices

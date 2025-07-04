@@ -9,7 +9,7 @@
   "main": "src/index.ts",
   "scripts": {
     "migrate": "ts-node src/migrate.ts",
-    "getGovernancePeriods": "ts-node src/cron/getGovernancePeriods.ts"
+    "cron:getGovernancePeriods": "ts-node src/cron/getGovernancePeriods.ts"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.0",
