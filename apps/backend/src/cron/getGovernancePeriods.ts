@@ -1,0 +1,1 @@
+console.log('This file is used to get governance periods from the database.');
