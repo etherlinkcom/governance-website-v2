@@ -44,14 +44,14 @@ export const ProposalsView = observer(() => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {/* Proposals Section */}
-      <ProposalsList/>
+      {/* <ProposalsList/> */}
 
       {/* Upvoters Section */}
       <Box>
-        <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
+        {/* <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
           Upvoters
         </Typography>
-        <UpvotersTable />
+        <UpvotersTable /> */}
       </Box>
     </Box>
   );

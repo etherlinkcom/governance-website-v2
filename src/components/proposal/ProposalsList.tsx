@@ -19,13 +19,13 @@ const ProposalsListSkeleton = () => (
 );
 
 export const ProposalsList = observer(() => {
-  const { proposals, quorum, isLoading } = contractStore;
+  // const { proposals, quorum, isLoading } = contractStore;
 
-  if (isLoading) return <ProposalsListSkeleton />;
+  // if (isLoading) return <ProposalsListSkeleton />;
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h5" component="h2">
           Proposals
         </Typography>
@@ -41,7 +41,7 @@ export const ProposalsList = observer(() => {
             proposal={proposal}
           />
         ))}
-      </Box>
+      </Box> */}
     </Box>
   );
 });

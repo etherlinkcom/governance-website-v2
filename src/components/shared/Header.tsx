@@ -1,6 +1,6 @@
 import { AppBar, Typography, Box, ToggleButton, ToggleButtonGroup, IconButton, Menu, MenuItem, useTheme} from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { contractStore } from '@/stores/ContractStore';
+import { contractStore, GovernanceType, NetworkType } from '@/stores/ContractStore';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
@@ -12,16 +12,16 @@ interface HeaderProps {
   currentPage?: 'slow' | 'fast' | 'sequencer' | null;
 }
 
-const NETWORKS = [
-  { value: 'mainnet', label: 'Mainnet' },
-  // { value: 'testnet', label: 'Testnet' },
-];
+const NETWORKS: {[key: string]: NetworkType} = {
+  mainnet: 'mainnet',
+  // testnet: 'testnet',
+};
 
-const GOVERNANCES = [
-  { value: 'slow', label: 'Slow Governance' },
-  { value: 'fast', label: 'Fast Governance' },
-  { value: 'sequencer', label: 'Sequencer Governance' },
-];
+const GOVERNANCES: { [key: string]: GovernanceType } = {
+  slow: 'slow',
+  fast: 'fast',
+  sequencer: 'sequencer',
+};
 
 export const Header = observer(({ currentPage = null }: HeaderProps) => {
   const router = useRouter();
@@ -34,31 +34,26 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
 
   const handleMenuClose = () => setAnchorEl(null);
 
-  const handleGovernanceSelect = (type: 'slow' | 'fast' | 'sequencer') => {
-    contractStore.setContract(type);
-    router.push(`/governance/${type}`);
-    handleMenuClose();
-  };
-
   const handleNetworkChange = (
     event: React.MouseEvent<HTMLElement>,
-    newNetwork: 'mainnet' | 'testnet'
+    newNetwork: NetworkType
   ) => {
     if (newNetwork !== null) contractStore.setNetwork(newNetwork);
   };
 
   const handleGovernanceChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newGovernance: 'slow' | 'fast' | 'sequencer'
+    newGovernance: GovernanceType
   ) => {
     if (newGovernance !== null) {
       contractStore.setContract(newGovernance);
       router.push(`/governance/${newGovernance}`);
+      handleMenuClose();
     }
   };
 
   return (
     <AppBar position="static" elevation={0}>
+      {/* TODO components */}
       <Box
         sx={{
           height: '84px',
@@ -103,15 +98,13 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
             size="small"
             sx={{ display: { xs: 'none', md: 'flex' } }}
           >
-            {NETWORKS.map((net) => (
-              <ToggleButton key={net.value} value={net.value}>
-                {net.label}
+            {Object.entries(NETWORKS).map(([key, value]) => (
+              <ToggleButton key={key} value={value}>
+                {key.charAt(0).toUpperCase() + key.slice(1)}
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
         </Box>
-
-
 
         <Box sx={{ display: { sm: 'block', md: 'none' } }}>
         <ConnectButton />
@@ -119,22 +112,22 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
             <MenuIcon />
           </IconButton>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-            {NETWORKS.map((net) => (
+            {Object.entries(NETWORKS).map(([key, value]) => (
               <MenuItem
-                key={net.value}
-                onClick={() => contractStore.setNetwork(net.value as 'mainnet' | 'testnet')}
-                selected={contractStore.currentNetwork === net.value}
+                key={key}
+                onClick={() => contractStore.setNetwork(value)}
+                selected={contractStore.currentNetwork === value}
               >
-                {net.label}
+                {key}
               </MenuItem>
             ))}
-            {GOVERNANCES.map((gov) => (
+            {Object.entries(GOVERNANCES).map(([key, value]) => (
               <MenuItem
-                key={gov.value}
-                onClick={() => handleGovernanceSelect(gov.value as 'slow' | 'fast' | 'sequencer')}
-                selected={currentPage === gov.value}
+                key={key}
+                onClick={() => handleGovernanceChange(value)}
+                selected={currentPage === value}
               >
-                {gov.label}
+                {value.charAt(0).toUpperCase() + value.slice(1)} Governance
               </MenuItem>
             ))}
           </Menu>
@@ -143,13 +136,13 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
         <ToggleButtonGroup
           value={currentPage}
           exclusive
-          onChange={handleGovernanceChange}
+          onChange={(_event, value) => value && handleGovernanceChange(value)}
           size="small"
           sx={{ display: { xs: 'none', md: 'flex' } }}
         >
-          {GOVERNANCES.map((gov) => (
-            <ToggleButton key={gov.value} value={gov.value}>
-              {gov.label.replace(' Governance', '')}
+          {Object.entries(GOVERNANCES).map(([key, value]) => (
+            <ToggleButton key={key} value={value}>
+              {key.charAt(0).toUpperCase() + key.slice(1)}
             </ToggleButton>
           ))}
        <ConnectButton/>

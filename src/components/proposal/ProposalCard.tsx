@@ -1,15 +1,10 @@
+import { formatNumberShort } from '@/utils/formatNumberShort';
+import { ProcessedProposal } from '@/utils/getProposals';
 import { Card, CardContent, Box, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-interface Proposal {
-  id: string;
-  title?: string;
-  author: string;
-  upvotes: string;
-}
-
 interface ProposalCardProps {
-  proposal: Proposal;
+  proposal: ProcessedProposal;
 }
 
 export const ProposalCard = ({ proposal}: ProposalCardProps) => {
@@ -17,6 +12,7 @@ export const ProposalCard = ({ proposal}: ProposalCardProps) => {
 
   return (
     <Card
+    // TODO components
       sx={{
         backgroundColor: 'background.paper',
         boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
@@ -33,23 +29,19 @@ export const ProposalCard = ({ proposal}: ProposalCardProps) => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box sx={{ flex: 1 }}>
             <Typography variant="body2" sx={{ mb: 1, display: 'block' }}>
-              {proposal.id}
+              {"0x" + proposal.key?.toString()}
             </Typography>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              (by {proposal.author})
+            {/* TODO abstract url */}
+            <Typography variant="subtitle2" component='a' target='_blank' href={`https://tzkt.io/${proposal.proposer}/operations/`} sx={{ mb: 1 }}>
+              (by {proposal.proposer})
             </Typography>
-            {proposal.title && (
-              <Typography variant="body1">
-                {proposal.title}
-              </Typography>
-            )}
           </Box>
           <Box sx={{ textAlign: 'right' }}>
             <Typography variant="subtitle2">
               Upvotes:
             </Typography>
             <Typography variant="body1" sx={{ display: 'block' }}>
-              {proposal.upvotes}
+              {formatNumberShort(proposal.upvotesVotingPower)}
             </Typography>
           </Box>
         </Box>

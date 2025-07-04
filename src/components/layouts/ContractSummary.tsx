@@ -65,7 +65,7 @@ const ContractSummarySkeleton = () => {
 };
 
 export const ContractSummary = observer(() => {
-  const { contractData, contractInfo, isLoading } = contractStore;
+  const { contractConfig, contractType, contractAddress, isLoading } = contractStore;
   const theme = useTheme();
   const [expanded, setExpanded] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -88,19 +88,16 @@ export const ContractSummary = observer(() => {
   }, []);
 
   if (isLoading) return <ContractSummarySkeleton />;
-  if (!contractData) return null;
+  if (!contractConfig) return null;
 
   return (
     <Accordion expanded={expanded} onChange={handleChange}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography variant="h1" component="h1">
-          {contractData.title}
+          {contractType && contractType.charAt(0).toUpperCase() + contractType.slice(1)} Governance
         </Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <Typography variant="body1">
-          {contractData.description}
-        </Typography>
 
         {/* Contract Information */}
         <Box sx={{ width: '100%' }}>
@@ -115,13 +112,22 @@ export const ContractSummary = observer(() => {
             mb: theme.spacing(3)
           }}>
 
-          {contractInfo && Object.entries(contractInfo).map(([key, value]) => (
+            <Box sx={{overflow: 'hidden'}}>
+              <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
+                Contract Address
+              </Typography>
+              <Typography variant="body2">
+                {contractAddress}
+            </Typography>
+            </Box>
+
+          {contractConfig && Object.entries(contractConfig).map(([key, value]) => (
             <Box key={key} sx={{overflow: 'hidden'}}>
               <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
                 {prettifyKey(key)}
               </Typography>
               <Typography variant="body2">
-                {value}
+                {value}{key.includes('quorum') || key.includes('supermajority') ? '%' : ''}
               </Typography>
             </Box>
           ))}

@@ -1,129 +1,51 @@
 import { makeObservable, observable, computed, action, runInAction } from 'mobx';
-import { FAKE_GOVERNANCE_DATA } from './mockData';
+import { GovernanceContractConfig } from './types';
+import { TezosToolkit } from '@taquito/taquito';
 
+export type GovernanceType = 'slow' | 'fast' | 'sequencer';
+export type NetworkType = 'mainnet'
+// Kernel = Slow
+// Security = Fast
 
-interface ContractConfig {
-  address: string;
-  title: string;
-  description: string;
-  votingPeriod: number;
-  quorumThreshold: number;
+// TODO load on app start and cache data
+export type GovernanceContractConfigProcessed = {
+  started_at_level: number;
+  period_length: number;
+  adoption_period_sec: number;
+  upvoting_limit: number;
+  scale: number;
+  proposal_quorum: number;
+  promotion_quorum: number;
+  promotion_supermajority: number;
 }
-
-interface ContractInfo {
-  type: string;
-  address: string;
-  startedAtLevel: number;
-  periodLength: string;
-  adoptionPeriod: string;
-  upvotingLimit: number;
-  proposalQuorum: string;
-  promotionQuorum: string;
-  promotionSupermajority: string;
-}
-
-interface Proposal {
-  id: string;
-  title: string;
-  description: string;
-  status: 'active' | 'passed' | 'failed' | 'pending';
-  votes: { for: number; against: number };
-  endTime: Date;
-  author: string;
-  upvotes: string;
-}
-
-interface Upvoter {
-  baker: string;
-  votingPower: string;
-  proposal: string;
-  time: string;
-}
-
-interface Voter {
-  baker: string;
-  votingPower: string;
-  vote: 'yea' | 'nay' | 'pass';
-  time: string;
-}
-
-interface PromotionData {
-  candidate: string;
-  title: string;
-  quorum: string;
-  supermajority: string;
-  votes: {
-    yea: { percentage: number; count: number; label: string };
-    nay: { percentage: number; count: number; label: string };
-    pass: { percentage: number; count: number; label: string };
-  };
-  voters: Voter[];
-}
-
-interface GovernanceData {
-  proposals: Proposal[];
-  upvoters: Upvoter[];
-  quorum: string;
-  promotion: PromotionData;
-}
-
-type GovernanceType = 'slow' | 'fast' | 'sequencer';
-type NetworkType = 'mainnet' | 'testnet';
 
 class ContractStore {
-  private static readonly BASE_CONFIGS: Record<GovernanceType, Omit<ContractConfig, 'address' | 'title'>> = {
-    slow: {
-      description: 'Major protocol upgrades and significant changes that require careful consideration and extended voting periods.',
-      votingPeriod: 14,
-      quorumThreshold: 0.6
-    },
-    fast: {
-      description: 'Routine updates and minor changes that can be implemented quickly with shorter voting periods.',
-      votingPeriod: 3,
-      quorumThreshold: 0.4
-    },
-    sequencer: {
-      description: 'Sequencer management including validator selection, performance metrics, and operational parameters.',
-      votingPeriod: 7,
-      quorumThreshold: 0.5
-    }
-  };
-
+  // TODO place in own file
   private static readonly ADDRESSES = {
     mainnet: {
-      slow: '0x1234567890abcdef1234567890abcdef12345678',
-      fast: '0x2345678901bcdef12345678901cdef123456789a',
-      sequencer: '0x3456789012cdef123456789012def123456789ab'
+      slow: 'KT1H5pCmFuhAwRExzNNrPQFKpunJx1yEVa6J',
+      fast: 'KT1N5MHQW5fkqXkW9GPjRYfn5KwbuYrvsY1g',
+      sequencer: 'KT1NcZQ3y9Wv32BGiUfD2ZciSUz9cY1DBDGF'
     },
-    testnet: {
-      slow: '0xabcdef1234567890abcdef1234567890abcdef12',
-      fast: '0xbcdef12345678901bcdef12345678901cdef1234',
-      sequencer: '0xcdef123456789012cdef123456789012def12345'
-    }
   };
 
   currentNetwork: NetworkType = 'mainnet';
-  currentContract: GovernanceType | null = null;
-  proposals: Proposal[] = [];
-  promotion: PromotionData | null = null;
-  upvoters: Upvoter[] = [];
-  quorum = '0%';
-  loading = false;
+  contractType: GovernanceType | null = null;
+  contractAddress: string | null = null;
+
+  contractConfig: GovernanceContractConfigProcessed | null = null;
+  Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com'); // TODO env
+
   error: string | null = null;
-  contractInfo: ContractInfo | null = null;
+  loading: boolean = false;
 
   constructor() {
     makeObservable(this, {
       currentNetwork: observable,
-      currentContract: observable,
-      proposals: observable,
-      promotion: observable,
-      upvoters: observable,
-      quorum: observable,
-      contractInfo: observable,
-      loading: observable,
+      contractType: observable,
+      contractConfig: observable,
+      contractAddress: observable,
       error: observable,
-      contractData: computed,
       setNetwork: action,
       setContract: action,
       loadProposals: action,
@@ -134,35 +56,61 @@ class ContractStore {
     return this.loading;
   }
 
-  get contractData(): ContractConfig | null {
-    if (!this.currentContract) return null;
-
-    const baseConfig = ContractStore.BASE_CONFIGS[this.currentContract];
-    const address = ContractStore.ADDRESSES[this.currentNetwork][this.currentContract];
-    const networkSuffix = this.currentNetwork === 'testnet' ? ' (Testnet)' : '';
-
-    return {
-      ...baseConfig,
-      address,
-      title: `${this.currentContract.charAt(0).toUpperCase() + this.currentContract.slice(1)} ${networkSuffix}`
-    };
-  }
-
   setNetwork(network: NetworkType) {
     this.currentNetwork = network;
-    if (this.currentContract) {
+    if (this.contractType) {
       this.loadProposals();
     }
   }
 
-  setContract(type: GovernanceType) {
-    this.currentContract = type;
-    this.loadProposals();
+  async setContract(type: GovernanceType) {
+    runInAction(async () => {
+    try {
+      this.loading = true;
+      this.contractType = type;
+      this.contractAddress = ContractStore.ADDRESSES[this.currentNetwork][this.contractType];
+      await this.setContractDetails();
+      // await this.loadProposals();
+    } catch (error) {
+      console.error('Error setting contract:', error);
+      runInAction(() => {
+        this.error = 'Failed to set contract';
+      });
+    } finally {
+      this.loading = false;
+    }});
+  }
+
+  setConfig(config: GovernanceContractConfig) {
+    runInAction(() => {
+    this.contractConfig = {
+      started_at_level: config?.started_at_level.toNumber() || 0,
+      period_length: config?.period_length.toNumber() || 0,
+      adoption_period_sec: config?.adoption_period_sec.toNumber() || 0,
+      upvoting_limit: config?.upvoting_limit.toNumber() || 0,
+      scale: config?.scale.toNumber() || 0,
+      proposal_quorum: config?.proposal_quorum.toNumber() || 0,
+      promotion_quorum: config?.promotion_quorum.toNumber() || 0,
+      promotion_supermajority: config?.promotion_supermajority.toNumber() || 0,
+    };
+    });
+  }
+
+  async setContractDetails() {
+    try {
+      if (!this.contractAddress) return;
+      console.log('Fetching contract details for:', this.contractAddress);
+
+      const contract = await this.Tezos.contract.at(this.contractAddress);
+      const storage: any = await contract.storage();
+      this.setConfig(storage.config);
+    } catch (err) {
+      console.error('Failed to fetch', err);
+    }
   }
 
   async loadProposals() {
-    if (!this.contractData || !this.currentContract) return;
-    this.loading = true;
+    if (!this.contractConfig || !this.contractType) return;
     this.error = null;
 
     try {
@@ -170,14 +118,8 @@ class ContractStore {
       await new Promise(resolve => setTimeout(resolve, 800));
 
       // TODO: Replace with real API call
-      const fakeData = FAKE_GOVERNANCE_DATA[this.currentContract];
 
       runInAction(() => {
-        this.proposals = fakeData.proposals;
-        this.upvoters = fakeData.upvoters;
-        this.promotion = fakeData.promotion;
-        this.quorum = fakeData.quorum;
-        this.contractInfo = fakeData.contractInfo;
       });
 
     } catch (err) {
