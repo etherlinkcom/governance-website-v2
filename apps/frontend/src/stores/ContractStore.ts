@@ -2,6 +2,8 @@ import { makeObservable, observable, computed, action, runInAction } from 'mobx'
 import { FAKE_GOVERNANCE_DATA } from './mockData';
 
 
+
+// TODO wallet store and connect wallet
 interface ContractConfig {
   address: string;
   title: string;
