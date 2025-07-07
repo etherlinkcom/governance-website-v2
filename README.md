@@ -1,142 +1,43 @@
-# Governance Website v2 - Styling Guide
+# Etherlink Governance Website Monorepo
 
-A Next.js governance application with Material-UI theming system and TypeScript.
+This monorepo contains:
 
-# Themes
-<details>
-<summary>Theme Details</summary>
+- **Frontend**: A Next.js app for the Etherlink governance website (`/apps/frontend`)
+- **Backend**: Scripts for migrations and governance data ETL/cronjobs (`/apps/backend`)
+- **Types**: Shared TypeScript types for both frontend and backend (`/packages/types`)
 
-## Overview
-<details>
-<summary>Directory Structure</summary>
+## Structure
 
-```bash
-src/theme/
-├── index.ts          # Main theme configuration
-├── palette.ts        # Color definitions
-├── typography.ts     # Typography variants
-├── components.ts     # Component style overrides
-└── breakpoints.ts    # Responsive breakpoints
+```
+/apps
+  /frontend      # Next.js frontend
+  /backend       # Migrations and backend/cron scripts
+/packages
+  /types         # Shared TypeScript types
 ```
 
-**Key Features:**
-- Centralized styling in theme files
-- Custom color palette extensions
-- Component-level style overrides
-- Responsive design tokens
+## Getting Started
 
-</details>
+1. **Install dependencies (from the repo root):**
+   ```sh
+   npm install
+   ```
 
-## 🎯 Quick Reference
+2. **Run the frontend:**
+   ```sh
+   cd apps/frontend
+   npm run dev
+   ```
 
-<details>
-<summary><strong>Colors</strong></summary>
+3. **Run backend scripts:**
+   ```sh
+   cd apps/backend
+   npm run migrate
+   npm run getGovernancePeriods
+   ```
 
-```typescript
-primary: '#38FF9C'        // Green - main actions
-secondary: '#FF6B6B'      // Red - secondary actions
-success: '#38FF9C'        // Green - "yea" votes
-error: '#FF6B6B'          // Red - "nay" votes
-warning: '#FFA726'        // Orange - "pass" votes
-background.default: '#0A0A0A'  // Pure black
-background.paper: '#151515'    // Card backgrounds
-```
+## Development
 
-</details>
-
-<details>
-<summary><strong>Typography</strong></summary>
-
-```tsx
-// Use semantic variants - avoid inline styles
-<Typography variant="h1">Main Title</Typography>
-<Typography variant="body1">Content</Typography>
-<Typography variant="caption">Labels</Typography>
-```
-
-</details>
-
-<details>
-<summary><strong>Components</strong></summary>
-
-**Auto-styled via theme:**
-- **Buttons**: 50px border-radius, glowing effects
-- **Tables**: Headers 700 weight/16px, Body 400 weight/12px
-- **Cards**: 25px border-radius, primary shadows
-- **Forms**: Outlined style, primary focus states
-
-</details>
-
-## 📁 Component Organization
-
-```bash
-src/components/
-├── contract/     # ContractSummary
-├── proposals/    # ProposalsList, ProposalCard, ProposalsView
-├── voting/       # VotingResults, VoteResultCard, VotersTable
-└── ui/           # SortableTable, shared components
-```
-
-## ✅ Best Practices
-
-<details>
-<summary><strong>Do's and Dont's</strong></summary>
-
-**✅ Good:**
-```tsx
-// Use theme values
-<Box sx={{ p: theme.spacing(2), borderRadius: theme.shape.borderRadius }}>
-<Typography variant="subtitle1">Styled Text</Typography>
-<Button sx={{ color: theme.palette.primary.main }}>
-```
-
-**❌ Avoid:**
-```tsx
-// Don't hardcode values
-<Box sx={{ padding: '16px', borderRadius: '8px' }}>
-<Typography sx={{ fontSize: '14px', fontWeight: 'bold' }}>
-<Button sx={{ backgroundColor: '#3B82F6' }}>
-```
-
-</details>
-
-## 🚀 Development
-
-<details>
-<summary><strong>Getting Started</strong></summary>
-
-```bash
-npm install
-npm run dev
-```
-
-**Adding New Components:**
-1. Create in appropriate domain folder
-2. Use TypeScript interfaces
-3. Apply theme-based styling
-4. Add to barrel exports
-5. Test responsively
-
-**Modifying Theme:**
-- Colors: Edit `src/theme/palette.ts`
-- Typography: Edit `src/theme/typography.ts`
-- Component styles: Edit `src/theme/components.ts`
-
-</details>
-
-<details>
-<summary><strong>Troubleshooting</strong></summary>
-
-**Common Issues:**
-- **Typography not applying**: Check theme variants vs component overrides
-- **Colors wrong**: Verify palette values and semantic usage
-- **Responsive issues**: Use theme breakpoints consistently
-- **Style conflicts**: Check component overrides specificity
-
-</details>
-
----
-
-**📚 Resources:** [Material-UI Docs](https://mui.com) | **🎯 Focus:** Use theme system, avoid hardcoded styles, organize by domain
-
-</details>
+- Shared types are imported from `@trilitech/types`.
+- Use npm workspaces for dependency management.
+- See individual app/package READMEs for more details.

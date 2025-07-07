@@ -1,6 +1,6 @@
 import { makeObservable, observable, computed, action, runInAction } from 'mobx';
 import { FAKE_GOVERNANCE_DATA } from './mockData';
-
+import { GovernanceType, NetworkType } from '@trilitech/types';
 
 interface ContractConfig {
   address: string;
@@ -67,8 +67,6 @@ interface GovernanceData {
   promotion: PromotionData;
 }
 
-type GovernanceType = 'slow' | 'fast' | 'sequencer';
-type NetworkType = 'mainnet' | 'testnet';
 
 class ContractStore {
   private static readonly BASE_CONFIGS: Record<GovernanceType, Omit<ContractConfig, 'address' | 'title'>> = {
@@ -144,7 +142,7 @@ class ContractStore {
     return {
       ...baseConfig,
       address,
-      title: `${this.currentContract.charAt(0).toUpperCase() + this.currentContract.slice(1)} ${networkSuffix}`
+      title: this.currentContract
     };
   }
 

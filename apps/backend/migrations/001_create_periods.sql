@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `${projectId}.${dataset}.periods` (
+  id INT64 NOT NULL,
+  governance_type STRING NOT NULL,
+  level_start INT64 NOT NULL,
+  level_end INT64 NOT NULL,
+  date_start TIMESTAMP NOT NULL,
+  date_end TIMESTAMP NOT NULL,
+  started_at_level INT64 NOT NULL,
+  period_length INT64 NOT NULL,
+  adoption_period_sec INT64 NOT NULL,
+  upvoting_limit INT64 NOT NULL,
+  proposers_governance_contract STRING,
+  scale INT64 NOT NULL,
+  proposal_quorum INT64 NOT NULL,
+  promotion_quorum INT64 NOT NULL,
+  promotion_supermajority INT64 NOT NULL,
+  proposals ARRAY<INT64>,
+  promotions ARRAY<INT64>,
+  PRIMARY KEY(id)
+);

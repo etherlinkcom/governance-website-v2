@@ -93,7 +93,7 @@ export const ContractSummary = observer(() => {
   return (
     <Accordion expanded={expanded} onChange={handleChange}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="h1" component="h1">
+        <Typography variant="h1" component="h1" sx={{ textTransform: 'capitalize' }}>
           {contractData.title}
         </Typography>
       </AccordionSummary>
@@ -117,10 +117,10 @@ export const ContractSummary = observer(() => {
 
           {contractInfo && Object.entries(contractInfo).map(([key, value]) => (
             <Box key={key} sx={{overflow: 'hidden'}}>
-              <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
+              <Typography variant="caption" sx={{ display: 'block', mb: 0.5, textTransform: 'capitalize' }}>
                 {prettifyKey(key)}
               </Typography>
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{textTransform: 'capitalize'}}>
                 {value}
               </Typography>
             </Box>

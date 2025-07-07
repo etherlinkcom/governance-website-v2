@@ -1,0 +1,23 @@
+{
+  "name": "etherlink-governance-website-v2-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "src/index.ts",
+  "scripts": {
+    "migrate": "ts-node src/migrate.ts",
+    "cron:getGovernancePeriods": "ts-node src/cron/getGovernancePeriods.ts"
+  },
+  "dependencies": {
+    "@google-cloud/bigquery": "^8.1.0",
+    "@trilitech/types": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "ts-node": "^10",
+    "typescript": "^5"
+  }
+}
