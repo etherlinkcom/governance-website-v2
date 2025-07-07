@@ -41,7 +41,7 @@ export type Promotion = {
   // Indexes: proposal_id, period_id, governance_type
 };
 
-export type Upvoter = {
+export type Upvote = {
   id: number;
   proposal_id: number; // Foreign key to Proposal
   baker: string;
@@ -50,7 +50,7 @@ export type Upvoter = {
   // Indexes: proposal_id, baker
 };
 
-export type Voter = {
+export type Vote = {
   id: number;
   promotion_id: number; // Foreign key to Promotion
   baker: string;
