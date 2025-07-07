@@ -18,7 +18,10 @@
     "next": "15.3.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@trilitech/types": "*"
+    "@trilitech/types": "*",
+    "@airgap/beacon-types": "^4.6.0",
+    "@taquito/beacon-wallet": "^22.0.0",
+    "@taquito/taquito": "^22.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
