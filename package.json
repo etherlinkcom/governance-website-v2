@@ -4,5 +4,10 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@airgap/beacon-types": "^4.6.0",
+    "@taquito/beacon-wallet": "^22.0.0",
+    "@taquito/taquito": "^22.0.0"
+  }
 }

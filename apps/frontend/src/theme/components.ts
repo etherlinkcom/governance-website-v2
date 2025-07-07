@@ -131,6 +131,7 @@ export const components: Components<Theme> = {
         backgroundColor: theme.palette.background.default,
         color: theme.palette.text.primary,
         fontFamily: typography.fontFamily,
+        minWidth: '415px'
       },
       '*::-webkit-scrollbar': {
         width: '8px',

@@ -1,3 +1,4 @@
+export type NetworkType = 'mainnet' | 'testnet';
 export type GovernanceType = 'slow' | 'fast' | 'sequencer';
 export type Period = {
   id: number;
