@@ -295,14 +295,23 @@ export const components: Components<Theme> = {
       }),
     },
   },
-  MuiMenuItem: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        transition: 'all 0.2s ease-in-out',
+MuiMenuItem: {
+  styleOverrides: {
+    root: ({ theme }) => ({
+      transition: 'all 0.2s ease-in-out',
+      '&:hover': {
+        backgroundColor: 'inherit',
+        color: theme.palette.primary.main,
+      },
+      '&.Mui-selected': {
+        color: theme.palette.primary.main,
+        backgroundColor: 'inherit',
         '&:hover': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.1),
+          backgroundColor: 'inherit',
+          color: theme.palette.primary.main,
         },
-      }),
-    },
+      },
+    }),
   },
+},
 };

@@ -99,8 +99,8 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
             sx={{ display: { xs: 'none', md: 'flex' } }}
           >
             {Object.entries(NETWORKS).map(([key, value]) => (
-              <ToggleButton key={key} value={value}>
-                {key.charAt(0).toUpperCase() + key.slice(1)}
+              <ToggleButton key={key} value={value} sx={{ textTransform: 'capitalize' }}>
+                {key}
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
@@ -117,6 +117,7 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
                 key={key}
                 onClick={() => contractStore.setNetwork(value)}
                 selected={contractStore.currentNetwork === value}
+                sx={{ textTransform: 'capitalize' }}
               >
                 {key}
               </MenuItem>
@@ -126,8 +127,9 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
                 key={key}
                 onClick={() => handleGovernanceChange(value)}
                 selected={currentPage === value}
+                sx={{ textTransform: 'capitalize' }}
               >
-                {value.charAt(0).toUpperCase() + value.slice(1)} Governance
+                {value} Governance
               </MenuItem>
             ))}
           </Menu>
@@ -141,8 +143,8 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
           sx={{ display: { xs: 'none', md: 'flex' } }}
         >
           {Object.entries(GOVERNANCES).map(([key, value]) => (
-            <ToggleButton key={key} value={value}>
-              {key.charAt(0).toUpperCase() + key.slice(1)}
+            <ToggleButton key={key} value={value} sx={{ textTransform: 'capitalize' }}>
+              {key}
             </ToggleButton>
           ))}
        <ConnectButton/>
