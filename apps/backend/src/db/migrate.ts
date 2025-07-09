@@ -1,8 +1,10 @@
 import { BigQuery } from '@google-cloud/bigquery';
 import fs from 'fs';
 import path from 'path';
-import { projectId, dataset } from './config';
 
+// TODO sql not bigquer
+const projectId = ''
+const dataset = ''
 const migrationsDir = path.join(__dirname, '../migrations');
 
 const bq = new BigQuery({ projectId });

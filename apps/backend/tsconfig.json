@@ -1,7 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "module": "CommonJS",
     "noEmit": true,
+    "moduleResolution": "node",
     "paths": {
       "@/*": ["./src/*"]
     }

@@ -47,3 +47,15 @@ This package contains:
      "syncProposals": "ts-node src/cron/syncProposals.ts"
    }
    ```
+
+
+
+## TODO
+Get storage data from contract x
+Create upvotes, votes, proposals, promotions arrays x
+Store upvotes, votes, proposal, promotions in db
+Get voting periods
+Store voting periods in db
+switch db from bigquery to MySQL
+Schedule to run on timer or listen to contract changes
+Only run updates on current periods

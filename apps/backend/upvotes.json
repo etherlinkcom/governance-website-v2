@@ -1,0 +1,108 @@
+[
+  {
+    "level": 9498246,
+    "time": "2025-07-08T20:10:32Z",
+    "transaction_hash": "ooXwNGqmj9iGvhMLHKMsyxBxBi77BbDhAbqbsF9qMakzWMsPnrS",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1S5WxdZR5f9NzsPXhr7L9L1vrEb5spZFur",
+    "alias": "Baking Benjamins",
+    "voting_power": 0
+  },
+  {
+    "level": 9496234,
+    "time": "2025-07-08T15:42:16Z",
+    "transaction_hash": "oo64R5McMH9zE9hVxpGqLX75Aw9ZPxLh8sMeyLGtJxsLJ9xNR8J",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1aRoaRhSpRYvFdyvgWLL6TGyRoGF51wDjM",
+    "alias": "Everstake",
+    "voting_power": 0
+  },
+  {
+    "level": 9487973,
+    "time": "2025-07-07T21:16:40Z",
+    "transaction_hash": "oozdURf1yLUZVzu3ZzuSTEUpVt1smZcQCAQJd3LBN4Yc7nWG9GW",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1RMtwyUqVYUEMKgMi49Zu6UfjGCxsHiiU6",
+    "alias": "MIDL.dev baker",
+    "voting_power": 0
+  },
+  {
+    "level": 9485532,
+    "time": "2025-07-07T15:50:24Z",
+    "transaction_hash": "ooVqqxfrgFZ1dJCQKCDSPrxQSn2NTNqb9yTZQARvHyoRKUScJdq",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1RQBCiyXKZimFoRaw5x3XwRQEvX8AM3k4Z",
+    "alias": "TrapDesuUwU Baker",
+    "voting_power": 0
+  },
+  {
+    "level": 9483569,
+    "time": "2025-07-07T11:28:16Z",
+    "transaction_hash": "oo6vd1fq4kijam3UFQhGy2suM7jnnM795HWUXTraZz2DjZPnnaD",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1Q7eNkwYGTKZNqQ2mq31rcZtNvCjwhTwU2",
+    "alias": "Bakerman_CH",
+    "voting_power": 0
+  },
+  {
+    "level": 9480883,
+    "time": "2025-07-07T05:29:44Z",
+    "transaction_hash": "opXJGNNk34sWbAemPd93BzX55opSjZQyS3YjcMHCYGp6AmM9k5C",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1KkkHxdHByHRB7x1qMUthmU38fUmCrwnZW",
+    "alias": "ASICBAKER",
+    "voting_power": 0
+  },
+  {
+    "level": 9479791,
+    "time": "2025-07-07T03:03:48Z",
+    "transaction_hash": "op9VqenYLxbXZP6oWQMWL56XxTWhgkxryfXhuKQ7qX4JA4TRZLk",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1hk59GLCY65onRt4vT75d57CMVutsLtFsx",
+    "alias": "Anon Bakery",
+    "voting_power": 0
+  },
+  {
+    "level": 9477693,
+    "time": "2025-07-06T22:23:20Z",
+    "transaction_hash": "opMs5fJDnZi6ajFw222Gh1LUjJmLMSfz8mBVY4U3HfvuQAMFo7n",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1R4PuhxUxBBZhfLJDx2nNjbr7WorAPX1oC",
+    "alias": "Baktz",
+    "voting_power": 0
+  },
+  {
+    "level": 9477528,
+    "time": "2025-07-06T22:01:20Z",
+    "transaction_hash": "ooFjmQFHHe1AEyTgY12hTsS2i87thpqMSrLX6r1NqqyM4tadGbo",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz3RtWwMQEkC2pGW6CZUYSP4P6jiEyHYd143",
+    "voting_power": 0
+  },
+  {
+    "level": 9475375,
+    "time": "2025-07-06T17:14:16Z",
+    "transaction_hash": "ooiKhFoauAKvZM7oXcPmAJzX75DvTnGAv6SbsL3RdAnHUKrpvKQ",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1i36vhJwdv75p4zfRu3TPyqhaXyxDWGoz9",
+    "alias": "LibertéZ",
+    "voting_power": 0
+  },
+  {
+    "level": 9474494,
+    "time": "2025-07-06T15:16:24Z",
+    "transaction_hash": "ooQj6UkvLzs7zVmAR2oHbnGJRoeeRHGZQEFAsyL1MckhzXTCYLc",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1T1fRJmpPp1pN2z45sivxdbKNQtyatzCVx",
+    "alias": "Zir0h's bakery",
+    "voting_power": 0
+  },
+  {
+    "level": 9474351,
+    "time": "2025-07-06T14:57:20Z",
+    "transaction_hash": "oniAr9g1JVAYsXQ3VpGuxqgJ4hza7Qu5rh5vT1NMszncZRLrHLr",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1LkzdCUHLm5BDphDfjjNHZstUkG7yfmSph",
+    "voting_power": 0
+  }
+]

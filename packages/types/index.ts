@@ -1,17 +1,12 @@
 export type NetworkType = 'mainnet' | 'testnet';
 export type GovernanceType = 'slow' | 'fast' | 'sequencer';
-
+export type VoteOption = 'yea' | 'nay' | 'pass';
 // storageHistory = https://api.tzkt.io/v1/contracts/KT1FPG4NApqTJjwvmhWvqA14m5PJxu9qgpBK/storage/history?limit=1000
 // operations = /v1/operations/transactions/{hash})
 
-export type Period = {
-  id: number;
-  governance_type: GovernanceType; // Manual entrance
-  level_start: number; // ((currentBlock - contractConfig.level_start) / contractConfig.period_length) - currentBlock
-  level_end: number; // level_start + contractConfig.period_length
-  date_start: Date; // https://api.tzkt.io/v1/blocks/{level_start}/timestamp
-  date_end: Date; // https://api.tzkt.io/v1/blocks/{level_end}/timestamp
-  /** Contract Configuration (Could be own table) */
+export type Contract = {
+  constract_address: string;
+  governance_type: GovernanceType;
   started_at_level: number;
   period_length: number;
   adoption_period_sec: number;
@@ -21,58 +16,68 @@ export type Period = {
   proposal_quorum: number;
   promotion_quorum: number;
   promotion_supermajority: number;
+}
+
+export type Period = {
+  id?: number; // self assigned in SQL
+  contract_voting_index: number;
+  governance_type: GovernanceType;
+  contract_address: string;
+  level_start: number;
+  level_end: number;
+  date_start: Date;
+  date_end: Date;
 
   // Relations
-  proposals?: string[]; // Calculated
-  promotions?: string; // Calculated
+  proposal_keys?: string[]; // Calculated
+  promotion_key?: string; // Calculated
 };
-
-export type ProposalStatus = 'pending' | 'promoted' | 'rejected';
 
 export type Proposal = {
-  id: number;
+  id?: number; // self assigned in SQL
+  contract_period_index: number; // SH.value.period_index
+  level: number;
+  time: string;
   key: string; // SH.operation.param.value
+  transaction_hash: string;
   proposer: string; // operations.sender.address
-  period_id: number; // SH.value.period_index
+  alias?: string; // operations.sender.alias
   governance_type: GovernanceType; // ContractConfig.governance_type
-  // Indexes: key, proposer, period_id, governance_type
+  // Indexes: key, proposer, period_index, governance_type
 };
 
-/**
-
-promotion_quorum
-total_voting_power
-max_upvotes_voting_power
-
-
-max_upvotes_voting_power / total_voting_power > promotion_quorum ?
-Check if a proposal.period_id.level_start and level_end
- */
 export type Promotion = {
-  id: number;
-  proposal_id: string; // Foreign key to Proposal
-  period_id: number;   // Foreign key to Period
+  id?: number; // self assigned in SQL
+  proposal_key: string; // Foreign key to Proposal
+  contract_period_index: number;   // Foreign key to Period
   governance_type: GovernanceType;
-  // Indexes: proposal_id, period_id, governance_type
+  transaction_hash: string; // SH.operation.hash
+  level: number; // SH.operation.level
+  time: string; // ISO date string
+  // Indexes: proposal_id, period_index, governance_type
 };
 
 export type Upvote = {
-  id: number;
-  proposal_id: string; // SH.operation.param.value
+  id?: number; // self assigned in SQL
+  level: number;
+  time: string; // ISO date string
+  proposal_key: string; // SH.operation.param.value
   baker: string; // operations.sender.address
   alias?: string; // operations.sender.alias
   voting_power: number; // Calculated using Adrians function
-  time: Date;
+  transaction_hash: string; // SH.operation.hash
   // Indexes: proposal_id, baker
 };
 
 export type Vote = {
   id: number;
-  promotion_id: number; // SH.value.voting_context.period.promotion.winning_candidate
+  proposal_key: string; // SH.value.voting_context.period.promotion.winning_candidate
   baker: string; // operations.sender.address
   alias?: string; // operations.sender.alias
   voting_power: number; // Calculated using Adrians function
-  vote: 'yea' | 'nay' | 'pass'; // SH.operation.parameter.value
-  time: Date;
+  vote: VoteOption; // SH.operation.parameter.value
+  time: string;
+  level: number;
+  transaction_hash: string; // SH.operation.hash
   // Indexes: promotion_id, baker
 };

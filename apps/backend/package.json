@@ -9,11 +9,13 @@
   "main": "src/index.ts",
   "scripts": {
     "migrate": "ts-node src/migrate.ts",
-    "cron:getGovernancePeriods": "ts-node src/cron/getGovernancePeriods.ts"
+    "getGovernancePeriods": "ts-node src/GovernanceContractIndexer.ts"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.0",
-    "@trilitech/types": "*"
+    "@trilitech/types": "*",
+    "logform": "^2.7.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/node": "^20",
