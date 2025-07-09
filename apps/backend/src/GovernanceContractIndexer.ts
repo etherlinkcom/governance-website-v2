@@ -3,8 +3,26 @@ import { Contract, ContractConfig, SenderAlias, TzktStorageHistory } from "./typ
 import fs from 'fs/promises'; // TODO remove in prod
 import {logger} from './utils/logger'
 import { LRUCache } from "./utils/cache";
+import { ContractResponse, RpcClient } from "@taquito/rpc";
+import { TezosToolkit } from '@taquito/taquito';
 
+export class HistoricalRpcClient extends RpcClient {
+  private blockLevel: number;
 
+  constructor(url: string, blockLevel: number) {
+    super(url);
+    this.blockLevel = blockLevel;
+  }
+
+  setBlockLevel(blockLevel: number) {
+    this.blockLevel = blockLevel;
+  }
+
+  getContract(address: string, _?: { block: string; } | undefined): Promise<ContractResponse> {
+    return super.getContract(address, { block: this.blockLevel.toString(10) })
+  }
+
+}
 // Run on all contracts
 
 // create db
@@ -65,9 +83,104 @@ const contracts: Contract[] = [
 export class GovernanceContractIndexer {
     base_url: string = 'https://api.tzkt.io/v1';
     cache: LRUCache<any> | undefined = undefined;
+    delegate_view_contract: string = 'KT1Ut6kfrTV9tK967tDYgQPMvy9t578iN7iH';
+    tezos_rpc_url: string = 'https://rpc.tzkt.io/mainnet';
 
     constructor(cache?: LRUCache<any>) {
         this.cache = cache;
+    }
+
+
+    public async getStorageHistoryForContracts(contracts: Contract[]): Promise<void[]> {
+        logger.info(`getStorageHistoryForContracts(${contracts.length} contracts)`);
+        return Promise.all(contracts.map(contract => this.getStorageHistoryForContract(contract)));
+    }
+
+    public async getStorageHistoryForContract(contract: Contract): Promise<void> {
+        // TODO start level and end level?
+        logger.info(`getStorageHistoryForContract(${contract.address})`);
+        const data: TzktStorageHistory[] = await this.fetchJson<TzktStorageHistory[]>(
+            `${this.base_url}/contracts/${contract.address}/storage/history`,
+            { limit: '1000' }
+        );
+
+        logger.info(`Fetching storage history for ${contract.type} contract at ${contract.address}...`);
+        if (!data || data.length === 0) {
+            logger.info(`No storage history found for contract ${contract.address}`);
+            return;
+        }
+        if (data.length >= 1000) throw new Error(`Storage history for contract ${contract.address} exceeds 1000 entries. Add pagination.`);
+        if (!data[0].value.config) throw new Error(`No config found in storage history for contract ${contract.address}`);
+
+        const contract_config = data[0].value.config as ContractConfig;
+        const periods: PeriodIndexToPeriod = await this.getContractPeriodsWithoutProposalsOrPromotions(
+            contract_config,
+            contract.address,
+            contract.type
+        );
+
+        const { promotions, proposals, upvotes, votes } = await this.createProposalsPromotionsVotesAndUpvotes(
+            contract,
+            periods,
+            data
+        );
+        // TODO database
+        await fs.writeFile('proposals.json', JSON.stringify(proposals, null, 2));
+        await fs.writeFile('upvotes.json', JSON.stringify(upvotes, null, 2));
+        await fs.writeFile('promotions.json', JSON.stringify(promotions, null, 2));
+        await fs.writeFile('votes.json', JSON.stringify(votes, null, 2));
+
+        logger.info(
+            `Processed ${data.length} entries for contract ${contract.address}. Found: ` +
+            `${proposals.length} proposals, ` +
+            `${upvotes.length} upvotes, ` +
+            `${promotions.length} promotions, ` +
+            `${votes.length} votes.`
+        );
+        logger.info('Proposals[0]:', proposals[0]);
+        logger.info('Upvotes[0]:', upvotes[0]);
+        logger.info('Promotions[0]:', promotions[0]);
+        logger.info('Votes[0]:', votes[0]);
+    }
+
+    public async getDelegateVotingPowerForAddress(address: string, level: number, global_voting_index: number): Promise<number> {
+        logger.info(`getDelegateVotingPowerForAddress(${address}, ${level}, ${global_voting_index})`);
+        const cacheKey = `delegates_${address}_${global_voting_index}`;
+
+        if (this.cache) {
+            const cached = this.cache.get(cacheKey);
+            if (cached) return cached;
+        }
+        const rpc_client = new HistoricalRpcClient(this.tezos_rpc_url, level);
+        const tezos_toolkit = new TezosToolkit(rpc_client);
+        const contract = await tezos_toolkit.contract.at(this.delegate_view_contract);
+        const view = contract.contractViews.list_voters({
+            0: address,
+            1: null
+        });
+        const delegates: string[] = await view.executeView({ viewCaller: address });
+
+        if (delegates.length === 0) {
+            logger.info(`No delegates found for address ${address}`);
+            return 0;
+        }
+
+        const delegate_totals = await Promise.allSettled(
+            delegates.map(async (addr) => {
+               return this.getVotingPowerForAddress(addr, global_voting_index)
+            })
+        );
+
+        const delegate_sum: number =  delegate_totals.reduce((total, result) => {
+            if (result.status === 'fulfilled') {
+                return total + result.value;
+            } else {
+                logger.error(`Error fetching voting power for delegate: ${result.reason}`);
+                throw new Error(`Error fetching voting power for delegate: ${result.reason}`);
+            }
+        }, 0);
+        if (this.cache) this.cache.set(cacheKey, delegate_sum);
+        return delegate_sum;
     }
 
     private async getDateFromLevel(level: number): Promise<Date> {
@@ -82,7 +195,7 @@ export class GovernanceContractIndexer {
     }
 
     private async getCurrentLevel(): Promise<number> {
-        logger.info('getCurrentLevel()')
+        logger.info(`getCurrentLevel()`);
         const isoDate = new Date().toISOString();
         return await this.fetchJson<number>(
             `${this.base_url}/blocks/${isoDate}/level`
@@ -108,7 +221,7 @@ export class GovernanceContractIndexer {
 
             const period: Period = {
                 contract_voting_index: contract_voting_index,
-                governance_type: governance_type,
+                governance_type: governance_type, // TODO contract address and lookup in contracts table to find the type
                 contract_address: contract_address,
                 level_start: i,
                 level_end: level_end,
@@ -142,18 +255,16 @@ export class GovernanceContractIndexer {
         return data[0].index;
     }
 
-    private async getVotingPowerForAddress(address: string, start_level: number, end_level: number): Promise<number> {
-        logger.info(`getVotingPowerForAddress(${address}, ${start_level}, ${end_level})`);
-        const votingPeriodIndex = await this.getGlobalVotingPeriodIndex(start_level, end_level);
-        const data = await this.fetchJson<{ delegate: { address: string }; votingPower: number }[]>(
-            `${this.base_url}/voting/periods/${votingPeriodIndex}/voters`,
-            { limit: '10000' }
+    private async getVotingPowerForAddress(address: string, global_voting_index: number): Promise<number> {
+        logger.info(`getVotingPowerForAddress(${address}, ${global_voting_index})`);
+        let voting_power = 0;
+        const data = await this.fetchJson<{ delegate: { address: string }; votingPower: number }>(
+            `${this.base_url}/voting/periods/${global_voting_index}/voters/${address}`
         );
-        if (!data) throw new Error(`No data found for address ${address} at start_level ${start_level}`);
-        const voter = data.find((v: { delegate: { address: string }; votingPower: number }) => v.delegate.address === address);
-        if (!voter) throw new Error(`No voter found for address ${address} at start_level ${start_level}`);
-        if (!voter.votingPower) throw new Error(`No voting power found for address ${address} at start_level ${start_level}`);
-        return voter.votingPower;
+        if (!data) return voting_power;
+        if (!data) throw new Error(`No voter found for address ${address} at global_voting_index ${global_voting_index}`);
+        if (!data.votingPower) throw new Error(`No voting power found for address ${address} at global_voting_index ${global_voting_index}`);
+        return data.votingPower;
     }
 
     private async getWinningCandidateAtLevel(contract_address: string, level: number, period_index: number): Promise<string> {
@@ -182,57 +293,72 @@ export class GovernanceContractIndexer {
         const proposals: Proposal[] = [];
         const upvotes: Upvote[] = [];
         const votes: Vote[] = [];
+        const current_level = await this.getCurrentLevel();
 
         for (const entry of data) {
             if (entry.operation?.parameter?.entrypoint === 'new_proposal') {
                 const { sender, alias } = await this.getSenderFromHash(entry.operation.hash) || { sender: 'unknown', alias: undefined };
                 const period_index = Number(entry.value.voting_context.period_index);
-                const proposal_key = entry.operation.parameter.value;
+                const proposal_hash = entry.operation.parameter.value;
                 proposals.push({
                     contract_period_index: period_index,
                     level: entry.level,
                     time: entry.timestamp,
-                    key: entry.operation.parameter.value,
+                    proposal_hash: entry.operation.parameter.value,
                     transaction_hash: entry.operation.hash,
-                    governance_type: contract.type,
+                    governance_type: contract.type, // TODO contract address and lookup in contracts table to find the type
                     proposer: sender,
                     alias: alias,
                 });
-                periods[period_index].proposal_keys = periods[period_index].proposal_keys || [];
-                periods[period_index].proposal_keys.push(proposal_key);
+                periods[period_index].proposal_hashes = periods[period_index].proposal_hashes || [];
+                periods[period_index].proposal_hashes.push(proposal_hash);
 
-                if (periods[period_index].promotion_key) continue;
+                if (periods[period_index].promotion_hash) continue;
 
                 const promotion_start_level = periods[period_index].level_end + 1;
                 const winning_candidate = await this.getWinningCandidateAtLevel(contract.address, promotion_start_level, period_index);
                 if (!winning_candidate) continue;
 
-                periods[period_index].promotion_key = winning_candidate;
+                periods[period_index].promotion_hash = winning_candidate;
+
+                if (current_level < promotion_start_level) continue;
+                promotions.push({
+                    proposal_hash: winning_candidate,
+                    contract_period_index: period_index + 1,
+                    governance_type: contract.type, // TODO contract address and lookup in contracts table to find the type
+                    transaction_hash: '',
+                    level: promotion_start_level,
+                    time: 'TODO',
+                });
                 continue;
             }
             if (entry.operation?.parameter?.entrypoint === 'upvote_proposal') {
                 const { sender, alias } = await this.getSenderFromHash(entry.operation.hash);
-                const voting_power = await this.getVotingPowerForAddress(sender, entry.level, entry.level + 1);
+                const global_voting_index = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
+                const voting_power = await this.getVotingPowerForAddress(sender, global_voting_index);
+                const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
                 upvotes.push({
                     level: entry.level,
                     time: entry.timestamp,
                     transaction_hash: entry.operation.hash,
-                    proposal_key: entry.operation.parameter.value,
+                    proposal_hash: entry.operation.parameter.value,
                     baker: sender,
                     alias: alias,
-                    voting_power: voting_power,
+                    voting_power: voting_power + delegate_voting_power,
                 });
                 continue;
             }
             if (entry.operation?.parameter?.entrypoint === 'vote') {
                 const { sender, alias } = await this.getSenderFromHash(entry.operation.hash) || { sender: 'unknown', alias: undefined };
-                const voting_power = await this.getVotingPowerForAddress(sender, entry.level, entry.level + 1);
+                const global_voting_index = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
+                const voting_power = await this.getVotingPowerForAddress(sender, global_voting_index);
+                const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
                 votes.push({
                     id: entry.id,
-                    proposal_key: entry.value.voting_context.period.promotion?.winner_candidate || '',
+                    proposal_hash: entry.value.voting_context.period.promotion?.winner_candidate || '',
                     baker: sender,
                     alias: alias,
-                    voting_power: voting_power,
+                    voting_power: voting_power + delegate_voting_power,
                     vote: entry.operation.parameter.value as VoteOption,
                     transaction_hash: entry.operation.hash,
                     level: entry.level,
@@ -243,51 +369,6 @@ export class GovernanceContractIndexer {
         }
 
         return { promotions, proposals, upvotes, votes };
-    }
-
-    public async getStorageHistoryForContract(contract: Contract): Promise<void> {
-        logger.info(`getStorageHistoryForContract(${contract.address})`);
-        const data: TzktStorageHistory[] = await this.fetchJson<TzktStorageHistory[]>(
-            `${this.base_url}/contracts/${contract.address}/storage/history`,
-            { limit: '1000' }
-        );
-
-        logger.info(`Fetching storage history for ${contract.type} contract at ${contract.address}...`);
-        if (!data || data.length === 0) {
-            logger.info(`No storage history found for contract ${contract.address}`);
-            return;
-        }
-        if (data.length >= 1000) throw new Error(`Storage history for contract ${contract.address} exceeds 1000 entries. Add pagination.`);
-        if (!data[0].value.config) throw new Error(`No config found in storage history for contract ${contract.address}`);
-
-        const contract_config = data[0].value.config as ContractConfig;
-        const periods: PeriodIndexToPeriod = await this.getContractPeriodsWithoutProposalsOrPromotions(
-            contract_config,
-            contract.address,
-            contract.type
-        );
-
-        const { promotions, proposals, upvotes, votes } = await this.createProposalsPromotionsVotesAndUpvotes(
-            contract,
-            periods,
-            data
-        );
-        await fs.writeFile('proposals.json', JSON.stringify(proposals, null, 2));
-        await fs.writeFile('upvotes.json', JSON.stringify(upvotes, null, 2));
-        await fs.writeFile('promotions.json', JSON.stringify(promotions, null, 2));
-        await fs.writeFile('votes.json', JSON.stringify(votes, null, 2));
-
-        logger.info(
-            `Processed ${data.length} entries for contract ${contract.address}. Found: ` +
-            `${proposals.length} proposals, ` +
-            `${upvotes.length} upvotes, ` +
-            `${promotions.length} promotions, ` +
-            `${votes.length} votes.`
-        );
-        logger.info('Proposals[0]:', proposals[0]);
-        logger.info('Upvotes[0]:', upvotes[0]);
-        logger.info('Promotions[0]:', promotions[0]);
-        logger.info('Votes[0]:', votes[0]);
     }
 
     protected async fetchJson<T>(
@@ -317,3 +398,6 @@ export class GovernanceContractIndexer {
         return data;
     }
 }
+
+const governanceContractIndexer = new GovernanceContractIndexer(new LRUCache())
+governanceContractIndexer.getStorageHistoryForContract(contracts[0])

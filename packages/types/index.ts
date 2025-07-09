@@ -29,8 +29,8 @@ export type Period = {
   date_end: Date;
 
   // Relations
-  proposal_keys?: string[]; // Calculated
-  promotion_key?: string; // Calculated
+  proposal_hashes?: string[]; // Calculated
+  promotion_hash?: string; // Calculated
 };
 
 export type Proposal = {
@@ -38,7 +38,7 @@ export type Proposal = {
   contract_period_index: number; // SH.value.period_index
   level: number;
   time: string;
-  key: string; // SH.operation.param.value
+  proposal_hash: string; // SH.operation.param.value
   transaction_hash: string;
   proposer: string; // operations.sender.address
   alias?: string; // operations.sender.alias
@@ -48,7 +48,7 @@ export type Proposal = {
 
 export type Promotion = {
   id?: number; // self assigned in SQL
-  proposal_key: string; // Foreign key to Proposal
+  proposal_hash: string; // Foreign key to Proposal
   contract_period_index: number;   // Foreign key to Period
   governance_type: GovernanceType;
   transaction_hash: string; // SH.operation.hash
@@ -61,7 +61,7 @@ export type Upvote = {
   id?: number; // self assigned in SQL
   level: number;
   time: string; // ISO date string
-  proposal_key: string; // SH.operation.param.value
+  proposal_hash: string; // SH.operation.param.value
   baker: string; // operations.sender.address
   alias?: string; // operations.sender.alias
   voting_power: number; // Calculated using Adrians function
@@ -71,7 +71,7 @@ export type Upvote = {
 
 export type Vote = {
   id: number;
-  proposal_key: string; // SH.value.voting_context.period.promotion.winning_candidate
+  proposal_hash: string; // SH.value.voting_context.period.promotion.winning_candidate
   baker: string; // operations.sender.address
   alias?: string; // operations.sender.alias
   voting_power: number; // Calculated using Adrians function
