@@ -5,7 +5,7 @@ export type VoteOption = 'yea' | 'nay' | 'pass';
 // operations = /v1/operations/transactions/{hash})
 
 export type Contract = {
-  constract_address: string;
+  contract_address: string;
   governance_type: GovernanceType;
   started_at_level: number;
   period_length: number;
@@ -70,7 +70,7 @@ export type Upvote = {
 };
 
 export type Vote = {
-  id: number;
+  id?: number;
   proposal_hash: string; // SH.value.voting_context.period.promotion.winning_candidate
   baker: string; // operations.sender.address
   alias?: string; // operations.sender.alias

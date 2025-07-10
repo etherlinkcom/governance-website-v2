@@ -1,12 +1,29 @@
 [
   {
+    "level": 9504814,
+    "time": "2025-07-09T10:48:04Z",
+    "transaction_hash": "opFEsBaA9v9sZi39Vjx9WBV9VkgR5UhQNsTGF2shTNFY5xhpBjr",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1iuWAe6hYCewe1N7me6aekitsH6fFE3i4P",
+    "voting_power": 41115496290
+  },
+  {
+    "level": 9503200,
+    "time": "2025-07-09T07:11:52Z",
+    "transaction_hash": "oobQUeT4xgq38o1J6h7cPXjBswzPhucKsN8JHiFBhX65nKk6S3U",
+    "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
+    "baker": "tz1NEKxGEHsFufk87CVZcrqWu8o22qh46GK6",
+    "alias": "Money Every Day",
+    "voting_power": 2263201807350
+  },
+  {
     "level": 9498246,
     "time": "2025-07-08T20:10:32Z",
     "transaction_hash": "ooXwNGqmj9iGvhMLHKMsyxBxBi77BbDhAbqbsF9qMakzWMsPnrS",
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1S5WxdZR5f9NzsPXhr7L9L1vrEb5spZFur",
     "alias": "Baking Benjamins",
-    "voting_power": 0
+    "voting_power": 1244537810322
   },
   {
     "level": 9496234,
@@ -15,7 +32,7 @@
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1aRoaRhSpRYvFdyvgWLL6TGyRoGF51wDjM",
     "alias": "Everstake",
-    "voting_power": 0
+    "voting_power": 36531050316094
   },
   {
     "level": 9487973,
@@ -24,7 +41,7 @@
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1RMtwyUqVYUEMKgMi49Zu6UfjGCxsHiiU6",
     "alias": "MIDL.dev baker",
-    "voting_power": 0
+    "voting_power": 11422600526
   },
   {
     "level": 9485532,
@@ -33,7 +50,7 @@
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1RQBCiyXKZimFoRaw5x3XwRQEvX8AM3k4Z",
     "alias": "TrapDesuUwU Baker",
-    "voting_power": 0
+    "voting_power": 94725737900
   },
   {
     "level": 9483569,
@@ -42,7 +59,7 @@
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1Q7eNkwYGTKZNqQ2mq31rcZtNvCjwhTwU2",
     "alias": "Bakerman_CH",
-    "voting_power": 0
+    "voting_power": 8606381098023
   },
   {
     "level": 9480883,
@@ -51,7 +68,7 @@
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1KkkHxdHByHRB7x1qMUthmU38fUmCrwnZW",
     "alias": "ASICBAKER",
-    "voting_power": 0
+    "voting_power": 397882586794
   },
   {
     "level": 9479791,
@@ -60,7 +77,7 @@
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1hk59GLCY65onRt4vT75d57CMVutsLtFsx",
     "alias": "Anon Bakery",
-    "voting_power": 0
+    "voting_power": 1030389338854
   },
   {
     "level": 9477693,
@@ -69,7 +86,7 @@
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1R4PuhxUxBBZhfLJDx2nNjbr7WorAPX1oC",
     "alias": "Baktz",
-    "voting_power": 0
+    "voting_power": 4993413736753
   },
   {
     "level": 9477528,
@@ -77,7 +94,7 @@
     "transaction_hash": "ooFjmQFHHe1AEyTgY12hTsS2i87thpqMSrLX6r1NqqyM4tadGbo",
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz3RtWwMQEkC2pGW6CZUYSP4P6jiEyHYd143",
-    "voting_power": 0
+    "voting_power": 100264639030
   },
   {
     "level": 9475375,
@@ -86,7 +103,7 @@
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1i36vhJwdv75p4zfRu3TPyqhaXyxDWGoz9",
     "alias": "LibertéZ",
-    "voting_power": 0
+    "voting_power": 91632094913
   },
   {
     "level": 9474494,
@@ -95,7 +112,7 @@
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1T1fRJmpPp1pN2z45sivxdbKNQtyatzCVx",
     "alias": "Zir0h's bakery",
-    "voting_power": 0
+    "voting_power": 393561959318
   },
   {
     "level": 9474351,
@@ -103,6 +120,6 @@
     "transaction_hash": "oniAr9g1JVAYsXQ3VpGuxqgJ4hza7Qu5rh5vT1NMszncZRLrHLr",
     "proposal_key": "0001010d789e7cccc25c785cf73a658574ed0995ef36b8416a46ab0ddc6b058b39",
     "baker": "tz1LkzdCUHLm5BDphDfjjNHZstUkG7yfmSph",
-    "voting_power": 0
+    "voting_power": 28682282161
   }
 ]

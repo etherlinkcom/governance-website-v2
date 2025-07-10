@@ -1,5 +1,5 @@
 {
-  "name": "etherlink-governance-website-v2-backend",
+  "name": "etherlink-governance-website-v2-indexer",
   "version": "0.1.0",
   "private": true,
   "description": "",
@@ -9,7 +9,7 @@
   "main": "src/index.ts",
   "scripts": {
     "migrate": "ts-node src/migrate.ts",
-    "getGovernancePeriods": "ts-node src/GovernanceContractIndexer.ts"
+    "start": "ts-node src/index.ts"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.0",
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/ws": "^8.18.1",
     "ts-node": "^10",
     "typescript": "^5"
   }

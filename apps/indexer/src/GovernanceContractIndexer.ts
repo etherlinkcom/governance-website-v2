@@ -3,82 +3,15 @@ import { Contract, ContractConfig, SenderAlias, TzktStorageHistory } from "./typ
 import fs from 'fs/promises'; // TODO remove in prod
 import {logger} from './utils/logger'
 import { LRUCache } from "./utils/cache";
-import { ContractResponse, RpcClient } from "@taquito/rpc";
+
 import { TezosToolkit } from '@taquito/taquito';
+import { HistoricalRpcClient } from "./utils/HistoricalRpcClient";
 
-export class HistoricalRpcClient extends RpcClient {
-  private blockLevel: number;
 
-  constructor(url: string, blockLevel: number) {
-    super(url);
-    this.blockLevel = blockLevel;
-  }
-
-  setBlockLevel(blockLevel: number) {
-    this.blockLevel = blockLevel;
-  }
-
-  getContract(address: string, _?: { block: string; } | undefined): Promise<ContractResponse> {
-    return super.getContract(address, { block: this.blockLevel.toString(10) })
-  }
-
-}
-// Run on all contracts
-
-// create db
-// Save contract config to database
-// Create listener for each newest contract
-// Save to db
 
 type PeriodIndexToPeriod = {
     [period_index: number]: Period
 }
-
-/**
-contracts: {
-    5316609: [
-      {
-        address: 'KT1H5pCmFuhAwRExzNNrPQFKpunJx1yEVa6J',
-        name: 'kernel'
-      }, {
-        address: 'KT1N5MHQW5fkqXkW9GPjRYfn5KwbuYrvsY1g',
-        name: 'security'
-      }, {
-        address: 'KT1NcZQ3y9Wv32BGiUfD2ZciSUz9cY1DBDGF',
-        name: 'sequencer'
-      }],
-    7692289: [{
-      address: 'KT1FPG4NApqTJjwvmhWvqA14m5PJxu9qgpBK',
-      name: 'kernel'
-    }, {
-      address: 'KT1GRAN26ni19mgd6xpL6tsH52LNnhKSQzP2',
-      name: 'security'
-    }, {
-      address: 'KT1UvCsnXpLAssgeJmrbQ6qr3eFkYXxsTG9U',
-      name: 'sequencer'
-    }],
-    8767489: [{
-      address: 'KT1XdSAYGXrUDE1U5GNqUKKscLWrMhzyjNeh',
-      name: 'kernel'
-    }, {
-      address: 'KT1D1fRgZVdjTj5sUZKcSTPPnuR7LRxVYnDL',
-      name: 'security'
-    }, {
-      address: 'KT1NnH9DCAoY1pfPNvb9cw9XPKQnHAFYFHXa',
-      name: 'sequencer'
-    }]
-  },
- */
-const contracts: Contract[] = [
-    {
-        type: 'slow',
-        address: 'KT1XdSAYGXrUDE1U5GNqUKKscLWrMhzyjNeh',
-    },
-    {
-        type: 'slow',
-        address: 'KT1FPG4NApqTJjwvmhWvqA14m5PJxu9qgpBK',
-    },
-]
 
 export class GovernanceContractIndexer {
     base_url: string = 'https://api.tzkt.io/v1';
@@ -242,7 +175,7 @@ export class GovernanceContractIndexer {
         return { sender: data[0]?.sender.address, alias: data[0]?.sender.alias || undefined };
     }
 
-    private async getGlobalVotingPeriodIndex(start_level: number, end_level: number): Promise<number> {
+    public async getGlobalVotingPeriodIndex(start_level: number, end_level: number): Promise<number> {
         logger.info(`getGlobalVotingPeriodIndex(${start_level}, ${end_level})`);
         const data = await this.fetchJson<{ index: number }[]>(
             `${this.base_url}/voting/periods`,
@@ -255,7 +188,7 @@ export class GovernanceContractIndexer {
         return data[0].index;
     }
 
-    private async getVotingPowerForAddress(address: string, global_voting_index: number): Promise<number> {
+    public async getVotingPowerForAddress(address: string, global_voting_index: number): Promise<number> {
         logger.info(`getVotingPowerForAddress(${address}, ${global_voting_index})`);
         let voting_power = 0;
         const data = await this.fetchJson<{ delegate: { address: string }; votingPower: number }>(
@@ -398,6 +331,3 @@ export class GovernanceContractIndexer {
         return data;
     }
 }
-
-const governanceContractIndexer = new GovernanceContractIndexer(new LRUCache())
-governanceContractIndexer.getStorageHistoryForContract(contracts[0])
