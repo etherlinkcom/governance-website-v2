@@ -4,7 +4,7 @@ export type VoteOption = 'yea' | 'nay' | 'pass';
 // storageHistory = https://api.tzkt.io/v1/contracts/KT1FPG4NApqTJjwvmhWvqA14m5PJxu9qgpBK/storage/history?limit=1000
 // operations = /v1/operations/transactions/{hash})
 
-export type Contract = {
+export type ContractAndConfig = {
   contract_address: string;
   governance_type: GovernanceType;
   started_at_level: number;
@@ -21,7 +21,6 @@ export type Contract = {
 export type Period = {
   id?: number; // self assigned in SQL
   contract_voting_index: number;
-  governance_type: GovernanceType;
   contract_address: string;
   level_start: number;
   level_end: number;
@@ -42,7 +41,7 @@ export type Proposal = {
   transaction_hash: string;
   proposer: string; // operations.sender.address
   alias?: string; // operations.sender.alias
-  governance_type: GovernanceType; // ContractConfig.governance_type
+  contract_address: string;
   // Indexes: key, proposer, period_index, governance_type
 };
 
@@ -50,10 +49,12 @@ export type Promotion = {
   id?: number; // self assigned in SQL
   proposal_hash: string; // Foreign key to Proposal
   contract_period_index: number;   // Foreign key to Period
-  governance_type: GovernanceType;
-  transaction_hash: string; // SH.operation.hash
-  level: number; // SH.operation.level
-  time: string; // ISO date string
+  // transaction_hash: string; // SH.operation.hash
+  contract_address: string;
+  yea_voting_power: number;
+  nay_voting_power: number;
+  pass_voting_power: number;
+  total_voting_power: number;
   // Indexes: proposal_id, period_index, governance_type
 };
 
@@ -66,6 +67,7 @@ export type Upvote = {
   alias?: string; // operations.sender.alias
   voting_power: number; // Calculated using Adrians function
   transaction_hash: string; // SH.operation.hash
+  contract_address: string;
   // Indexes: proposal_id, baker
 };
 
@@ -79,5 +81,6 @@ export type Vote = {
   time: string;
   level: number;
   transaction_hash: string; // SH.operation.hash
+  contract_address: string;
   // Indexes: promotion_id, baker
 };

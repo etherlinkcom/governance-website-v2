@@ -7,7 +7,7 @@ import { LRUCache } from "./utils/cache";
 import { TezosToolkit } from '@taquito/taquito';
 import { HistoricalRpcClient } from "./utils/HistoricalRpcClient";
 
-
+// TODO contracts table
 
 type PeriodIndexToPeriod = {
     [period_index: number]: Period
@@ -15,14 +15,21 @@ type PeriodIndexToPeriod = {
 
 export class GovernanceContractIndexer {
     base_url: string = 'https://api.tzkt.io/v1';
-    cache: LRUCache<any> | undefined = undefined;
+    cache: LRUCache<any> = new LRUCache();
     delegate_view_contract: string = 'KT1Ut6kfrTV9tK967tDYgQPMvy9t578iN7iH';
     tezos_rpc_url: string = 'https://rpc.tzkt.io/mainnet';
 
-    constructor(cache?: LRUCache<any>) {
-        this.cache = cache;
-    }
+    constructor() {}
 
+
+    public async indexContracts(contracts: Contract[]): Promise<void> {
+        logger.info(`indexContracts(${contracts.length} contracts)`);
+        // TODO get contract config from tzkt
+        // store contract config in database
+        // order by starting level ascending
+        // take into account ending block level (the next contracts starting level of same governance type: slow, fast, sequencer)
+        await this.getStorageHistoryForContracts(contracts);
+    }
 
     public async getStorageHistoryForContracts(contracts: Contract[]): Promise<void[]> {
         logger.info(`getStorageHistoryForContracts(${contracts.length} contracts)`);
@@ -78,61 +85,64 @@ export class GovernanceContractIndexer {
 
     public async getDelegateVotingPowerForAddress(address: string, level: number, global_voting_index: number): Promise<number> {
         logger.info(`getDelegateVotingPowerForAddress(${address}, ${level}, ${global_voting_index})`);
-        const cacheKey = `delegates_${address}_${global_voting_index}`;
+        try {
 
-        if (this.cache) {
-            const cached = this.cache.get(cacheKey);
-            if (cached) return cached;
-        }
-        const rpc_client = new HistoricalRpcClient(this.tezos_rpc_url, level);
-        const tezos_toolkit = new TezosToolkit(rpc_client);
-        const contract = await tezos_toolkit.contract.at(this.delegate_view_contract);
-        const view = contract.contractViews.list_voters({
-            0: address,
-            1: null
-        });
-        const delegates: string[] = await view.executeView({ viewCaller: address });
+            const cacheKey = `delegates_${address}_${global_voting_index}`;
 
-        if (delegates.length === 0) {
-            logger.info(`No delegates found for address ${address}`);
-            return 0;
-        }
-
-        const delegate_totals = await Promise.allSettled(
-            delegates.map(async (addr) => {
-               return this.getVotingPowerForAddress(addr, global_voting_index)
-            })
-        );
-
-        const delegate_sum: number =  delegate_totals.reduce((total, result) => {
-            if (result.status === 'fulfilled') {
-                return total + result.value;
-            } else {
-                logger.error(`Error fetching voting power for delegate: ${result.reason}`);
-                throw new Error(`Error fetching voting power for delegate: ${result.reason}`);
+            if (this.cache) {
+                const cached = this.cache.get(cacheKey);
+                if (cached) return cached;
             }
-        }, 0);
-        if (this.cache) this.cache.set(cacheKey, delegate_sum);
-        return delegate_sum;
+            const rpc_client = new HistoricalRpcClient(this.tezos_rpc_url, level);
+            const tezos_toolkit = new TezosToolkit(rpc_client);
+            const contract = await tezos_toolkit.contract.at(this.delegate_view_contract);
+            const view = contract.contractViews.list_voters({
+                0: address,
+                1: null
+            });
+            const delegates: string[] = await view.executeView({ viewCaller: address });
+
+            if (delegates.length === 0) {
+                logger.info(`No delegates found for address ${address}`);
+                return 0;
+            }
+
+            const delegate_totals = await Promise.allSettled(
+                delegates.map(async (addr) => {
+                    return this.getVotingPowerForAddress(addr, global_voting_index)
+                })
+            );
+
+            const delegate_sum: number =  delegate_totals.reduce((total, result) => {
+                if (result.status === 'fulfilled') {
+                    return total + result.value;
+                } else {
+                    logger.error(`Error fetching voting power for delegate: ${result.reason}`);
+                    throw new Error(`Error fetching voting power for delegate: ${result.reason}`);
+                }
+            }, 0);
+            if (this.cache) this.cache.set(cacheKey, delegate_sum);
+            return delegate_sum;
+        } catch (error) {
+            logger.error(`Error getting delegate voting power for address ${address} at level ${level}: ${error}`);
+        }
+        return 0;
     }
 
     private async getDateFromLevel(level: number): Promise<Date> {
         logger.info(`getDateFromLevel(${level})`);
-        const utc = await this.fetchJson<string>(
-            `${this.base_url}/blocks/${level}/timestamp`
-        );
-        const date = new Date(utc);
-        // Add 4 hours for Dubai time // TODO remove in prod
-        const dubaiDate = new Date(date.getTime() + 4 * 60 * 60 * 1000);
-        return dubaiDate;
+            const utc = await this.fetchJson<string>(`${this.base_url}/blocks/${level}/timestamp`);
+            const date = new Date(utc);
+            // Add 4 hours for Dubai time // TODO remove in prod
+            const dubaiDate = new Date(date.getTime() + 4 * 60 * 60 * 1000);
+            return dubaiDate;
+
     }
 
     private async getCurrentLevel(): Promise<number> {
         logger.info(`getCurrentLevel()`);
         const isoDate = new Date().toISOString();
-        return await this.fetchJson<number>(
-            `${this.base_url}/blocks/${isoDate}/level`
-        );
+        return await this.fetchJson<number>(`${this.base_url}/blocks/${isoDate}/level`);
     }
 
     private async getContractPeriodsWithoutProposalsOrPromotions(
@@ -154,7 +164,6 @@ export class GovernanceContractIndexer {
 
             const period: Period = {
                 contract_voting_index: contract_voting_index,
-                governance_type: governance_type, // TODO contract address and lookup in contracts table to find the type
                 contract_address: contract_address,
                 level_start: i,
                 level_end: level_end,
@@ -203,16 +212,15 @@ export class GovernanceContractIndexer {
     private async getWinningCandidateAtLevel(contract_address: string, level: number, period_index: number): Promise<string> {
         logger.info(`getWinningCandidateAtLevel(${contract_address}, ${level}, ${period_index})`);
         const url = `${this.base_url}/contracts/${contract_address}/storage`;
-        logger.info(`Fetching winning candidate from ${url} at level ${level} for period index ${period_index}`);
-        const data = await this.fetchJson<{ voting_context: { period: { proposal: { winner_candidate: string }; }; period_index: string  } }>(
+        const data = await this.fetchJson<{ voting_context: { period: { proposal?: { winner_candidate: string }; promotion?: { winner_candidate: string } }; period_index: string  } }>(
             url,
             { level: String(level) }
         );
         if (!data) throw new Error(`No data found for contract ${contract_address}`);
-        const winner_candidate = data.voting_context?.period?.proposal?.winner_candidate;
+        const winner_candidate = data.voting_context?.period?.proposal?.winner_candidate || data.voting_context?.period?.promotion?.winner_candidate;
         if (!winner_candidate) throw new Error(`No winning candidate found for contract ${contract_address} at level ${level}`);
         if (!data.voting_context?.period_index) throw new Error(`No period index found for contract ${contract_address} at level ${level}`);
-        if (period_index !== parseInt(data.voting_context?.period_index)) throw new Error(`Period index mismatch for contract ${contract_address} at level ${level}`);
+        if (period_index !== parseInt(data.voting_context?.period_index)) throw new Error(`Period index mismatch for contract ${contract_address} at level ${level} expecting ${parseInt(data.voting_context?.period_index)}`);
         return winner_candidate;
     }
 
@@ -222,13 +230,14 @@ export class GovernanceContractIndexer {
         data: TzktStorageHistory[]
     ): Promise<{ promotions: Promotion[], proposals: Proposal[], upvotes: Upvote[], votes: Vote[] }> {
         logger.info(`createProposalsPromotionsVotesAndUpvotes(${contract.address}, ${periods}, ${data.length} entries)`);
-        const promotions: Promotion[] = [];
+        const promotions_hash_to_promotion: Record<string, Promotion> = {};
         const proposals: Proposal[] = [];
         const upvotes: Upvote[] = [];
         const votes: Vote[] = [];
         const current_level = await this.getCurrentLevel();
 
-        for (const entry of data) {
+        for (let i = data.length - 1; i >= 0; i--) {
+            const entry = data[i];
             if (entry.operation?.parameter?.entrypoint === 'new_proposal') {
                 const { sender, alias } = await this.getSenderFromHash(entry.operation.hash) || { sender: 'unknown', alias: undefined };
                 const period_index = Number(entry.value.voting_context.period_index);
@@ -239,11 +248,13 @@ export class GovernanceContractIndexer {
                     time: entry.timestamp,
                     proposal_hash: entry.operation.parameter.value,
                     transaction_hash: entry.operation.hash,
-                    governance_type: contract.type, // TODO contract address and lookup in contracts table to find the type
+                    contract_address: contract.address,
                     proposer: sender,
                     alias: alias,
                 });
                 periods[period_index].proposal_hashes = periods[period_index].proposal_hashes || [];
+                periods[period_index].proposal_hashes.push(proposal_hash);
+                // TODO check for the next period if there is a promotion
                 periods[period_index].proposal_hashes.push(proposal_hash);
 
                 if (periods[period_index].promotion_hash) continue;
@@ -251,18 +262,21 @@ export class GovernanceContractIndexer {
                 const promotion_start_level = periods[period_index].level_end + 1;
                 const winning_candidate = await this.getWinningCandidateAtLevel(contract.address, promotion_start_level, period_index);
                 if (!winning_candidate) continue;
+                const promotion_start_time = await this.getDateFromLevel(promotion_start_level);
+                if (!promotion_start_time) continue;
 
                 periods[period_index].promotion_hash = winning_candidate;
 
                 if (current_level < promotion_start_level) continue;
-                promotions.push({
+                promotions_hash_to_promotion[winning_candidate] = {
                     proposal_hash: winning_candidate,
                     contract_period_index: period_index + 1,
-                    governance_type: contract.type, // TODO contract address and lookup in contracts table to find the type
-                    transaction_hash: '',
-                    level: promotion_start_level,
-                    time: 'TODO',
-                });
+                    contract_address: contract.address,
+                    yea_voting_power: 0,
+                    nay_voting_power: 0,
+                    pass_voting_power: 0,
+                    total_voting_power: 0,
+                };
                 continue;
             }
             if (entry.operation?.parameter?.entrypoint === 'upvote_proposal') {
@@ -278,6 +292,7 @@ export class GovernanceContractIndexer {
                     baker: sender,
                     alias: alias,
                     voting_power: voting_power + delegate_voting_power,
+                    contract_address: contract.address,
                 });
                 continue;
             }
@@ -288,19 +303,49 @@ export class GovernanceContractIndexer {
                 const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
                 votes.push({
                     id: entry.id,
+                    level: entry.level,
+                    time: entry.timestamp,
                     proposal_hash: entry.value.voting_context.period.promotion?.winner_candidate || '',
                     baker: sender,
                     alias: alias,
                     voting_power: voting_power + delegate_voting_power,
                     vote: entry.operation.parameter.value as VoteOption,
                     transaction_hash: entry.operation.hash,
-                    level: entry.level,
-                    time: entry.timestamp,
+                    contract_address: contract.address,
                 });
+                // Update promotion as well
+                // Find promotion
+                const new_promotion = entry.value.voting_context.period.promotion;
+                if (!new_promotion) continue;
+                const promotion = promotions_hash_to_promotion[new_promotion?.winner_candidate];
+                if (promotion) {
+                    promotion.yea_voting_power = Number(new_promotion.yea_voting_power);
+                    promotion.nay_voting_power = Number(new_promotion.nay_voting_power);
+                    promotion.pass_voting_power = Number(new_promotion.pass_voting_power);
+                    promotion.total_voting_power = Number(new_promotion.total_voting_power);
+                }
                 continue;
             }
+            // if (entry.operation?.parameter?.entrypoint === 'trigger_kernel_upgrade') {
+            //     const period_index = Number(entry.value.voting_context.period_index);
+            //     const promotion_hash = entry.value.last_winner?.payload || '';
+            //     periods[period_index].promotion_hash = promotion_hash;
+            //     promotions_hash_to_promotion[promotion_hash] = {
+            //         proposal_hash: promotion_hash,
+            //         contract_period_index: period_index,
+            //         contract_address: contract.address,
+            //         transaction_hash: entry.operation.hash,
+            //         level: entry.level,
+            //         time: entry.timestamp,
+            //         yea_voting_power: 0,
+            //         nay_voting_power: 0,
+            //         pass_voting_power: 0,
+            //         total_voting_power: 0,
+            //     };
+            // }
         }
 
+        const promotions: Promotion[] = Object.values(promotions_hash_to_promotion);
         return { promotions, proposals, upvotes, votes };
     }
 

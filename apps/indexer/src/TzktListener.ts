@@ -208,7 +208,7 @@ export class TzktListener {
         time: operation.timestamp,
         proposal_hash: operation.parameter?.value,
         transaction_hash: operation.hash,
-        governance_type: contract.type,
+        contract_address: contract.address,
         proposer: operation.sender.address,
         alias: operation.sender.alias,
     }
@@ -226,6 +226,7 @@ export class TzktListener {
       time: operation.timestamp,
       proposal_hash: operation.parameter?.value,
       voting_power: voting_power + delegate_voting_power,
+      contract_address: contract.address,
       baker: operation.sender.address,
       alias: operation.sender.alias,
       transaction_hash: operation.hash,
@@ -242,6 +243,7 @@ export class TzktListener {
       proposal_hash: operation.parameter?.value.proposal_hash,
       baker: operation.sender.address,
       alias: operation.sender.alias,
+      contract_address: contract.address,
       voting_power: voting_power + delegate_voting_power,
       vote: operation.parameter?.value, // Assuming vote is a string like 'YEA', 'NAY', etc.
       time: operation.timestamp,
@@ -257,10 +259,11 @@ export class TzktListener {
     const promotion: Promotion = {
       proposal_hash: operation.parameter?.value.proposal_hash,
       contract_period_index: contract_period_index,
-      governance_type: contract.type,
-      transaction_hash: operation.hash,
-      level: operation.level,
-      time: operation.timestamp,
+      contract_address: contract.address,
+      yea_voting_power: 0,
+      nay_voting_power: 0,
+      pass_voting_power: 0,
+      total_voting_power: 0,
     }
     return promotion;
   }
