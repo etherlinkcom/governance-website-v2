@@ -11,7 +11,6 @@ export type ContractAndConfig = {
   period_length: number;
   adoption_period_sec: number;
   upvoting_limit: number;
-  proposers_governance_contract?: string;
   scale: number;
   proposal_quorum: number;
   promotion_quorum: number;

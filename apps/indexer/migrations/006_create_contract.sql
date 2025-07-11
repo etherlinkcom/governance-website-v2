@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS contracts (
   period_length INT NOT NULL,
   adoption_period_sec INT NOT NULL,
   upvoting_limit INT NOT NULL,
-  proposers_governance_contract VARCHAR(100),
   scale INT NOT NULL,
   proposal_quorum INT NOT NULL,
   promotion_quorum INT NOT NULL,

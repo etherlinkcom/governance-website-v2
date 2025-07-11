@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `${projectId}.${dataset}.votes` (
+CREATE TABLE IF NOT EXISTS votes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   tzkt_id INT UNIQUE NOT NULL,
   proposal_hash VARCHAR(100) NOT NULL,

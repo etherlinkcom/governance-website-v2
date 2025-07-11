@@ -1,4 +1,4 @@
-import { GovernanceType, Period, Promotion, Proposal, Upvote, Vote, VoteOption } from "packages/types";
+import { ContractAndConfig, Period, Promotion, Proposal, Upvote, Vote, VoteOption } from "packages/types";
 import { Contract, ContractConfig, SenderAlias, TzktStorageHistory } from "./types";
 import fs from 'fs/promises'; // TODO remove in prod
 import {logger} from './utils/logger'
@@ -6,6 +6,7 @@ import { LRUCache } from "./utils/cache";
 
 import { TezosToolkit } from '@taquito/taquito';
 import { HistoricalRpcClient } from "./utils/HistoricalRpcClient";
+import { Database } from "./db/Database";
 
 type PeriodIndexToPeriod = {
     [period_index: number]: Period
@@ -13,9 +14,10 @@ type PeriodIndexToPeriod = {
 
 export class GovernanceContractIndexer {
     base_url: string = 'https://api.tzkt.io/v1';
-    cache: LRUCache<any> = new LRUCache();
     delegate_view_contract: string = 'KT1Ut6kfrTV9tK967tDYgQPMvy9t578iN7iH';
     tezos_rpc_url: string = 'https://rpc.tzkt.io/mainnet';
+    cache: LRUCache<any> = new LRUCache();
+    database: Database = new Database();
 
     constructor() {}
 
@@ -41,35 +43,36 @@ export class GovernanceContractIndexer {
         if (!data[0].value.config) throw new Error(`No config found in storage history for contract ${contract.address}`);
 
         const contract_config = data[0].value.config as ContractConfig;
-        const periods: PeriodIndexToPeriod = await this.getContractPeriodsWithoutProposalsOrPromotions(
-            contract_config,
-            contract.address,
-            contract.type
-        );
+        const contract_and_config: ContractAndConfig = {
+            contract_address: contract.address,
+            governance_type: contract.type,
+            started_at_level: Number(contract_config.started_at_level),
+            period_length: Number(contract_config.period_length),
+            adoption_period_sec: Number(contract_config.adoption_period_sec),
+            upvoting_limit: Number(contract_config.upvoting_limit),
+            scale: Number(contract_config.scale),
+            proposal_quorum: Number(contract_config.proposal_quorum),
+            promotion_quorum: Number(contract_config.promotion_quorum),
+            promotion_supermajority: Number(contract_config.promotion_supermajority),
+
+        }
+        const periods: PeriodIndexToPeriod = await this.getContractPeriodsWithoutProposalsOrPromotions(contract_and_config);
 
         const { promotions, proposals, upvotes, votes } = await this.createProposalsPromotionsVotesAndUpvotes(
             contract,
             periods,
             data
         );
-        // TODO database
-        await fs.writeFile('proposals.json', JSON.stringify(proposals, null, 2));
-        await fs.writeFile('upvotes.json', JSON.stringify(upvotes, null, 2));
-        await fs.writeFile('promotions.json', JSON.stringify(promotions, null, 2));
-        await fs.writeFile('votes.json', JSON.stringify(votes, null, 2));
 
-        logger.info(
-            `[GovernanceContractIndexer] Processed ${data.length} entries for contract ${contract.address}. Found: ` +
-            `${proposals.length} proposals, ` +
-            `${upvotes.length} upvotes, ` +
-            `${promotions.length} promotions, ` +
-            `${votes.length} votes.`
-        );
-        logger.info('Proposals[0]:', proposals[0]);
-        logger.info('Upvotes[0]:', upvotes[0]);
-        logger.info('Promotions[0]:', promotions[0]);
-        logger.info('Votes[0]:', votes[0]);
-        logger.info(`Contract config: ${contract_config}`)
+        await this.saveToDatabase({
+            proposals: proposals,
+            votes: votes,
+            upvotes: upvotes,
+            promotions: promotions,
+            contracts: [contract_and_config],
+            periods: Object.values(periods),
+        })
+
     }
 
     public async getDelegateVotingPowerForAddress(address: string, level: number, global_voting_index: number): Promise<number> {
@@ -135,15 +138,13 @@ export class GovernanceContractIndexer {
     }
 
     private async getContractPeriodsWithoutProposalsOrPromotions(
-        contract_config: ContractConfig,
-        contract_address: string,
-        governance_type: GovernanceType
+        contract_and_config: ContractAndConfig,
     ): Promise<PeriodIndexToPeriod> {
-        logger.info(`[GovernanceContractIndexer] getContractPeriodsWithoutProposalsOrPromotions(${JSON.stringify(contract_config, null, 2)}, ${contract_address}, ${governance_type})`);
+        logger.info(`[GovernanceContractIndexer] getContractPeriodsWithoutProposalsOrPromotions(${JSON.stringify(contract_and_config)})`);
         const periods: PeriodIndexToPeriod = {};
-        const current_level = await this.getCurrentLevel();
-        const period_length = Number(contract_config.period_length);
-        const started_at_level = Number(contract_config.started_at_level);
+        const current_level: number = await this.getCurrentLevel();
+        const period_length: number = contract_and_config.period_length;
+        const started_at_level: number = contract_and_config.started_at_level;
 
         for (let i = started_at_level; i <= current_level; i += period_length + 1) {
             const level_end = i + period_length;
@@ -153,7 +154,7 @@ export class GovernanceContractIndexer {
 
             const period: Period = {
                 contract_voting_index: contract_voting_index,
-                contract_address: contract_address,
+                contract_address: contract_and_config.contract_address,
                 level_start: i,
                 level_end: level_end,
                 date_start: date_start,
@@ -364,4 +365,30 @@ export class GovernanceContractIndexer {
         if (this.cache) this.cache.set(url, data);
         return data;
     }
+
+
+private async saveToDatabase(data: {
+    proposals: Proposal[];
+    votes: Vote[];
+    upvotes: Upvote[];
+    promotions: Promotion[];
+    contracts: ContractAndConfig[];
+    periods: Period[];
+  }): Promise<void> {
+    logger.info(`[GovernanceContractIndexer] Saving to database: ${data.proposals.length} proposals, ${data.votes.length} votes, ${data.upvotes.length} upvotes, ${data.promotions.length} promotions`);
+
+    try {
+      await this.database.upsertProposals(data.proposals);
+      await this.database.upsertVotes(data.votes);
+      await this.database.upsertUpvotes(data.upvotes);
+      await this.database.upsertPromotions(data.promotions);
+      await this.database.upsertContracts(data.contracts);
+      await this.database.upsertPeriods(data.periods);
+
+      logger.info('[GovernanceContractIndexer] Successfully saved all data to database');
+    } catch (error) {
+      logger.error(`[GovernanceContractIndexer] Error saving to database: ${error}`);
+      throw error;
+    }
+  }
 }

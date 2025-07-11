@@ -12,5 +12,6 @@ CREATE TABLE IF NOT EXISTS `${projectId}.${dataset}.upvotes` (
   INDEX idx_proposal_hash (proposal_hash),
   INDEX idx_baker (baker),
   INDEX idx_transaction_hash (transaction_hash),
-  INDEX idx_level (level)
+  INDEX idx_level (level),
+  UNIQUE KEY unique_upvote (transaction_hash)
 );

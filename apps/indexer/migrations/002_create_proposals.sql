@@ -14,5 +14,6 @@ CREATE TABLE IF NOT EXISTS `${projectId}.${dataset}.proposals` (
   INDEX idx_proposal_hash (proposal_hash),
   INDEX idx_contract_address (contract_address),
   INDEX idx_proposer (proposer),
-  INDEX idx_transaction_hash (transaction_hash)
+  INDEX idx_transaction_hash (transaction_hash),
+  UNIQUE KEY unique_proposal (transaction_hash)
 );

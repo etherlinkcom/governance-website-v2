@@ -12,5 +12,6 @@ CREATE TABLE IF NOT EXISTS promotions (
 
   INDEX idx_proposal_hash (proposal_hash),
   INDEX idx_period (contract_period_index),
-  INDEX idx_contract_address (contract_address)
+  INDEX idx_contract_address (contract_address),
+  UNIQUE KEY unique_promotion (proposal_hash, contract_period_index)
 );

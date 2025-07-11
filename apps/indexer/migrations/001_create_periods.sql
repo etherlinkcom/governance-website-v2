@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `${projectId}.${dataset}.periods` (
+CREATE TABLE IF NOT EXISTS periods (
   id INT AUTO_INCREMENT PRIMARY KEY,
   contract_voting_index INT NOT NULL,
   governance_type ENUM('fast', 'slow', 'sequencer') NOT NULL,
@@ -15,5 +15,6 @@ CREATE TABLE IF NOT EXISTS `${projectId}.${dataset}.periods` (
   INDEX idx_contract_voting (contract_voting_index),
   INDEX idx_governance_type (governance_type),
   INDEX idx_contract_address (contract_address),
-  INDEX idx_levels (level_start, level_end)
+  INDEX idx_levels (level_start, level_end),
+  UNIQUE KEY unique_period (contract_voting_index, contract_address)
 );
