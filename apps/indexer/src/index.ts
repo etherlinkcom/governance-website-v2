@@ -24,4 +24,4 @@ const contracts: Contract[] = [
   },
 ]
 const indexer = new GovernanceContractIndexer();
-indexer.getStorageHistoryForContract(contracts[0])
+indexer.indexContract(contracts[0])

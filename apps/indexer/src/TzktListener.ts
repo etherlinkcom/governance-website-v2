@@ -93,7 +93,7 @@ export class TzktListener {
 
   private setupWebSocket() {
     this.ws.on('open', () => {
-      logger.info('🔗 Connected to TzKT WebSocket');
+      logger.info(`[TzktListener] setupWebSocket()`);
       this.subscribeToContracts();
       this.startHeartbeat();
     });
@@ -103,18 +103,18 @@ export class TzktListener {
         const message = JSON.parse(data.toString());
         this.handleMessage(message);
       } catch (error) {
-        logger.error('❌ Error parsing message:', error);
+        logger.error(`[TzktListener] Error parsing message: ${error}`);
       }
     });
 
     this.ws.on('close', (code, reason) => {
-      logger.info(`🔌 WebSocket closed: ${code} - ${reason}`);
+      logger.info(`[TzktListener] WebSocket closed: ${code} - ${reason}`);
       this.cleanup();
       this.scheduleReconnect();
     });
 
     this.ws.on('error', (error) => {
-      logger.error('❌ WebSocket error:', error);
+      logger.error(`[TzktListener] WebSocket error: ${error}`);
       this.cleanup();
       this.scheduleReconnect();
     });
@@ -133,24 +133,25 @@ export class TzktListener {
         }
       };
 
-      logger.info(`📡 Subscribing to contract: ${contract.address}`);
+      logger.info(`[TzktListener] Subscribing to contract: ${contract.address}`);
       this.ws.send(JSON.stringify(subscription));
     });
   }
 
   private handleMessage(message: any) {
+    logger.info(`[TzktListener] handleMessage(${JSON.stringify(message)})`);
     if (message.type === 'operation') {
       const operation: TzktTransactionEvent = message.data;
       this.processOperation(operation);
     } else if (message.type === 'subscribed') {
-      logger.info(`✅ Subscription confirmed: ${message.channel}`);
+      logger.info(`[TzktListener] Subscription confirmed: ${message.channel}`);
     } else if (message.type === 'heartbeat') {
-      logger.info('💓 Heartbeat received');
+      logger.info(`[TzktListener] Heartbeat received`);
     }
   }
 
   private processOperation(operation: TzktTransactionEvent) {
-    // Find which contract this operation belongs to
+    logger.info(`[TzktListener] processOperation(${operation.type}, ${operation.id})`);
     const contract = this.contracts.find(c => c.address === operation.target.address);
 
     if (!contract) return;
@@ -163,19 +164,10 @@ export class TzktListener {
   }
 
   private handleContractFunction(contract: Contract, operation: TzktTransactionEvent, functionName: string) {
-    logger.info('\n🎯 Contract Function Called!');
-    logger.info('==========================================');
-    logger.info(`📋 Contract: ${contract.address}`);
-    logger.info(`🔧 Function: ${functionName}`);
-    logger.info(`👤 Sender: ${operation.sender.address}`);
-    logger.info(`⏰ Timestamp: ${operation.timestamp}`);
-    logger.info(`🏗️  Block Level: ${operation.level}`);
-    logger.info(`📦 Transaction Hash: ${operation.hash}`);
-    logger.info(`💰 Amount: ${operation.amount / 1000000} tz`);
-    logger.info(`✅ Status: ${operation.status}`);
+    logger.info(`[TzktListener] handleContractFunction(${contract.address}, ${operation.id}, ${functionName})`);
 
     if (operation.parameter?.value) {
-      logger.info(`📝 Parameters:`, JSON.stringify(operation.parameter.value, null, 2));
+      logger.info(`[TzktListener] Parameters:`, JSON.stringify(operation.parameter.value, null, 2));
     }
 
     switch (functionName) {
@@ -193,14 +185,14 @@ export class TzktListener {
         this.handleTriggerKernelUpgrade(operation, contract);
         break;
       default:
-        logger.info(`🔍 Unknown function: ${functionName}`);
+        logger.info(`[TzktListener] Unknown function: ${functionName}`);
     }
 
-    logger.info('==========================================\n');
+    logger.info(`[TzktListener] End of handleContractFunction(${contract.address}, ${operation.id}, ${functionName})`);
   }
 
   private async handleNewProposal(operation: TzktTransactionEvent, contract: Contract): Promise<Proposal> {
-    logger.info('🆕 NEW PROPOSAL DETECTED!');
+    logger.info(`[TzktListener] handleNewProposal(${operation.id}, ${contract})`);
     const period_index = 1; // TODO: Get the current period index from GovernanceContractIndexer or calculate it based on operation.level
     const proposal: Proposal = {
         contract_period_index: period_index,
@@ -217,7 +209,7 @@ export class TzktListener {
   }
 
   private async handleUpvoteProposal(operation: TzktTransactionEvent, contract: Contract): Promise<Upvote> {
-    logger.info('👍 PROPOSAL UPVOTE DETECTED!');
+    logger.info(`[TzktListener] handleUpvoteProposal(${operation.id}, ${contract})`);
     const global_voting_index = await this.governanceContractIndexer.getGlobalVotingPeriodIndex(operation.level, operation.level + 1);
     const voting_power = await this.governanceContractIndexer.getVotingPowerForAddress(operation.sender.address, global_voting_index);
     const delegate_voting_power = await this.governanceContractIndexer.getDelegateVotingPowerForAddress(operation.sender.address, operation.level, global_voting_index);
@@ -235,7 +227,7 @@ export class TzktListener {
   }
 
   private async handleVote(operation: TzktTransactionEvent, contract: Contract): Promise<Vote> {
-    logger.info('🗳️  VOTE DETECTED!');
+    logger.info(`[TzktListener] handleVote(${operation.id}, ${contract})`);
     const global_voting_index = await this.governanceContractIndexer.getGlobalVotingPeriodIndex(operation.level, operation.level + 1);
     const voting_power = await this.governanceContractIndexer.getVotingPowerForAddress(operation.sender.address, global_voting_index);
     const delegate_voting_power = await this.governanceContractIndexer.getDelegateVotingPowerForAddress(operation.sender.address, operation.level, global_voting_index);
@@ -254,7 +246,7 @@ export class TzktListener {
   }
 
   private async handleTriggerKernelUpgrade(operation: TzktTransactionEvent, contract: Contract): Promise<Promotion> {
-    logger.info('🔄 TRIGGER KERNEL UPGRADE DETECTED!');
+    logger.info(`[TzktListener] handleTriggerKernelUpgrade(${operation.id}, ${contract})`);
     const contract_period_index = 1; // TODO
     const promotion: Promotion = {
       proposal_hash: operation.parameter?.value.proposal_hash,
@@ -290,7 +282,7 @@ export class TzktListener {
 
   private scheduleReconnect() {
     this.reconnectTimeout = setTimeout(() => {
-      logger.info('🔄 Attempting to reconnect...');
+      logger.info(`[TzktListener] scheduleReconnect()`);
       this.ws = new WebSocket('wss://api.tzkt.io/v1/ws');
       this.setupWebSocket();
     }, this.reconnectInterval);
@@ -301,6 +293,6 @@ export class TzktListener {
     if (this.ws.readyState === WebSocket.OPEN) {
       this.ws.close();
     }
-    logger.info('🛑 Listener stopped');
+    logger.info(`[TzktListener] Listener stopped`);
   }
 }

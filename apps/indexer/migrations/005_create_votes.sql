@@ -1,11 +1,19 @@
 CREATE TABLE IF NOT EXISTS `${projectId}.${dataset}.votes` (
-  id INT64 NOT NULL,
-  promotion_id INT64 NOT NULL,
-  baker STRING NOT NULL,
-  voting_power INT64 NOT NULL,
-  vote STRING NOT NULL,
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  tzkt_id INT UNIQUE NOT NULL,
+  proposal_hash VARCHAR(100) NOT NULL,
+  baker VARCHAR(100) NOT NULL,
+  alias VARCHAR(255),
+  voting_power BIGINT NOT NULL,
+  vote ENUM('yea', 'nay', 'pass') NOT NULL,
+  transaction_hash VARCHAR(100) NOT NULL,
+  level INT NOT NULL,
   time TIMESTAMP NOT NULL,
-  PRIMARY KEY(id)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_proposal_hash (proposal_hash),
+  INDEX idx_baker (baker),
+  INDEX idx_vote (vote),
+  INDEX idx_transaction_hash (transaction_hash),
+  INDEX idx_level (level)
 );
-CREATE INDEX IF NOT EXISTS idx_voter_promotion_id ON `${projectId}.${dataset}` (promotion_id);
-CREATE INDEX IF NOT EXISTS idx_voter_baker ON `${projectId}.${dataset}` (baker);

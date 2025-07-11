@@ -1,13 +1,18 @@
 CREATE TABLE IF NOT EXISTS `${projectId}.${dataset}.proposals` (
-  id INT64 NOT NULL,
-  key STRING NOT NULL,
-  proposer STRING NOT NULL,
-  period_id INT64 NOT NULL,
-  governance_type STRING NOT NULL,
-  status STRING NOT NULL,
-  PRIMARY KEY(id)
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  contract_period_index INT NOT NULL,
+  level INT NOT NULL,
+  time TIMESTAMP NOT NULL,
+  proposal_hash VARCHAR(100) NOT NULL,
+  transaction_hash VARCHAR(100) NOT NULL,
+  contract_address VARCHAR(100) NOT NULL,
+  proposer VARCHAR(100) NOT NULL,
+  alias VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_period (contract_period_index),
+  INDEX idx_proposal_hash (proposal_hash),
+  INDEX idx_contract_address (contract_address),
+  INDEX idx_proposer (proposer),
+  INDEX idx_transaction_hash (transaction_hash)
 );
-CREATE INDEX IF NOT EXISTS idx_proposal_key ON `${projectId}.${dataset}.proposals` (key);
-CREATE INDEX IF NOT EXISTS idx_proposal_proposer ON `${projectId}.${dataset}.proposals` (proposer);
-CREATE INDEX IF NOT EXISTS idx_proposal_period_id ON `${projectId}.${dataset}.proposals` (period_id);
-CREATE INDEX IF NOT EXISTS idx_proposal_governance_type ON `${projectId}.${dataset}.proposals` (governance_type);

@@ -7,8 +7,6 @@ import { LRUCache } from "./utils/cache";
 import { TezosToolkit } from '@taquito/taquito';
 import { HistoricalRpcClient } from "./utils/HistoricalRpcClient";
 
-// TODO contracts table
-
 type PeriodIndexToPeriod = {
     [period_index: number]: Period
 }
@@ -22,31 +20,21 @@ export class GovernanceContractIndexer {
     constructor() {}
 
 
-    public async indexContracts(contracts: Contract[]): Promise<void> {
-        logger.info(`indexContracts(${contracts.length} contracts)`);
-        // TODO get contract config from tzkt
-        // store contract config in database
-        // order by starting level ascending
-        // take into account ending block level (the next contracts starting level of same governance type: slow, fast, sequencer)
-        await this.getStorageHistoryForContracts(contracts);
+    public async indexContracts(contracts: Contract[]): Promise<void[]> {
+        logger.info(`[GovernanceContractIndexer] indexContracts(${contracts.length} contracts)`);
+        return Promise.all(contracts.map(contract => this.indexContract(contract)));
     }
 
-    public async getStorageHistoryForContracts(contracts: Contract[]): Promise<void[]> {
-        logger.info(`getStorageHistoryForContracts(${contracts.length} contracts)`);
-        return Promise.all(contracts.map(contract => this.getStorageHistoryForContract(contract)));
-    }
-
-    public async getStorageHistoryForContract(contract: Contract): Promise<void> {
-        // TODO start level and end level?
-        logger.info(`getStorageHistoryForContract(${contract.address})`);
+    public async indexContract(contract: Contract): Promise<void> {
+        logger.info(`[GovernanceContractIndexer] indexContract(${contract.address})`);
         const data: TzktStorageHistory[] = await this.fetchJson<TzktStorageHistory[]>(
             `${this.base_url}/contracts/${contract.address}/storage/history`,
             { limit: '1000' }
         );
 
-        logger.info(`Fetching storage history for ${contract.type} contract at ${contract.address}...`);
+        logger.info(`[GovernanceContractIndexer] Fetching storage history for ${contract.type} contract at ${contract.address}...`);
         if (!data || data.length === 0) {
-            logger.info(`No storage history found for contract ${contract.address}`);
+            logger.info(`[GovernanceContractIndexer] No storage history found for contract ${contract.address}`);
             return;
         }
         if (data.length >= 1000) throw new Error(`Storage history for contract ${contract.address} exceeds 1000 entries. Add pagination.`);
@@ -71,7 +59,7 @@ export class GovernanceContractIndexer {
         await fs.writeFile('votes.json', JSON.stringify(votes, null, 2));
 
         logger.info(
-            `Processed ${data.length} entries for contract ${contract.address}. Found: ` +
+            `[GovernanceContractIndexer] Processed ${data.length} entries for contract ${contract.address}. Found: ` +
             `${proposals.length} proposals, ` +
             `${upvotes.length} upvotes, ` +
             `${promotions.length} promotions, ` +
@@ -81,10 +69,11 @@ export class GovernanceContractIndexer {
         logger.info('Upvotes[0]:', upvotes[0]);
         logger.info('Promotions[0]:', promotions[0]);
         logger.info('Votes[0]:', votes[0]);
+        logger.info(`Contract config: ${contract_config}`)
     }
 
     public async getDelegateVotingPowerForAddress(address: string, level: number, global_voting_index: number): Promise<number> {
-        logger.info(`getDelegateVotingPowerForAddress(${address}, ${level}, ${global_voting_index})`);
+        logger.info(`[GovernanceContractIndexer] getDelegateVotingPowerForAddress(${address}, ${level}, ${global_voting_index})`);
         try {
 
             const cacheKey = `delegates_${address}_${global_voting_index}`;
@@ -103,7 +92,7 @@ export class GovernanceContractIndexer {
             const delegates: string[] = await view.executeView({ viewCaller: address });
 
             if (delegates.length === 0) {
-                logger.info(`No delegates found for address ${address}`);
+                logger.info(`[GovernanceContractIndexer] No delegates found for address ${address}`);
                 return 0;
             }
 
@@ -130,7 +119,7 @@ export class GovernanceContractIndexer {
     }
 
     private async getDateFromLevel(level: number): Promise<Date> {
-        logger.info(`getDateFromLevel(${level})`);
+        logger.info(`[GovernanceContractIndexer] getDateFromLevel(${level})`);
             const utc = await this.fetchJson<string>(`${this.base_url}/blocks/${level}/timestamp`);
             const date = new Date(utc);
             // Add 4 hours for Dubai time // TODO remove in prod
@@ -140,7 +129,7 @@ export class GovernanceContractIndexer {
     }
 
     private async getCurrentLevel(): Promise<number> {
-        logger.info(`getCurrentLevel()`);
+        logger.info(`[GovernanceContractIndexer] getCurrentLevel()`);
         const isoDate = new Date().toISOString();
         return await this.fetchJson<number>(`${this.base_url}/blocks/${isoDate}/level`);
     }
@@ -150,7 +139,7 @@ export class GovernanceContractIndexer {
         contract_address: string,
         governance_type: GovernanceType
     ): Promise<PeriodIndexToPeriod> {
-        logger.info(`getContractPeriodsWithoutProposalsOrPromotions(${JSON.stringify(contract_config, null, 2)}, ${contract_address}, ${governance_type})`);
+        logger.info(`[GovernanceContractIndexer] getContractPeriodsWithoutProposalsOrPromotions(${JSON.stringify(contract_config, null, 2)}, ${contract_address}, ${governance_type})`);
         const periods: PeriodIndexToPeriod = {};
         const current_level = await this.getCurrentLevel();
         const period_length = Number(contract_config.period_length);
@@ -176,7 +165,7 @@ export class GovernanceContractIndexer {
     }
 
     private async getSenderFromHash(hash: string): Promise<SenderAlias> {
-        logger.info(`getSenderFromHash(${hash})`);
+        logger.info(`[GovernanceContractIndexer] getSenderFromHash(${hash})`);
         const data = await this.fetchJson<{ sender: { address: string; alias?: string } }[]>(
             `${this.base_url}/operations/transactions/${hash}`
         );
@@ -185,20 +174,20 @@ export class GovernanceContractIndexer {
     }
 
     public async getGlobalVotingPeriodIndex(start_level: number, end_level: number): Promise<number> {
-        logger.info(`getGlobalVotingPeriodIndex(${start_level}, ${end_level})`);
+        logger.info(`[GovernanceContractIndexer] getGlobalVotingPeriodIndex(${start_level}, ${end_level})`);
         const data = await this.fetchJson<{ index: number }[]>(
             `${this.base_url}/voting/periods`,
             { 'firstLevel.le': String(start_level), 'lastLevel.ge': String(end_level) }
         );
         if (!data || data.length === 0) throw new Error(`No voting period found for start level ${start_level} and end level ${end_level}`);
         if (data.length > 1) {
-            logger.warn(`Multiple voting periods found for start level ${start_level} and end level ${end_level}. Using the first one.`);
+            logger.warn(`[GovernanceContractIndexer] Multiple voting periods found for start level ${start_level} and end level ${end_level}. Using the first one.`);
         }
         return data[0].index;
     }
 
     public async getVotingPowerForAddress(address: string, global_voting_index: number): Promise<number> {
-        logger.info(`getVotingPowerForAddress(${address}, ${global_voting_index})`);
+        logger.info(`[GovernanceContractIndexer] getVotingPowerForAddress(${address}, ${global_voting_index})`);
         let voting_power = 0;
         const data = await this.fetchJson<{ delegate: { address: string }; votingPower: number }>(
             `${this.base_url}/voting/periods/${global_voting_index}/voters/${address}`
@@ -210,7 +199,7 @@ export class GovernanceContractIndexer {
     }
 
     private async getWinningCandidateAtLevel(contract_address: string, level: number, period_index: number): Promise<string> {
-        logger.info(`getWinningCandidateAtLevel(${contract_address}, ${level}, ${period_index})`);
+        logger.info(`[GovernanceContractIndexer] getWinningCandidateAtLevel(${contract_address}, ${level}, ${period_index})`);
         const url = `${this.base_url}/contracts/${contract_address}/storage`;
         const data = await this.fetchJson<{ voting_context: { period: { proposal?: { winner_candidate: string }; promotion?: { winner_candidate: string } }; period_index: string  } }>(
             url,
@@ -229,7 +218,7 @@ export class GovernanceContractIndexer {
         periods: PeriodIndexToPeriod,
         data: TzktStorageHistory[]
     ): Promise<{ promotions: Promotion[], proposals: Proposal[], upvotes: Upvote[], votes: Vote[] }> {
-        logger.info(`createProposalsPromotionsVotesAndUpvotes(${contract.address}, ${periods}, ${data.length} entries)`);
+        logger.info(`[GovernanceContractIndexer] createProposalsPromotionsVotesAndUpvotes(${contract.address}, ${periods}, ${data.length} entries)`);
         const promotions_hash_to_promotion: Record<string, Promotion> = {};
         const proposals: Proposal[] = [];
         const upvotes: Upvote[] = [];
@@ -354,19 +343,19 @@ export class GovernanceContractIndexer {
         params?: Record<string, string>,
         fetchParams: RequestInit = { cache: 'no-store' }
     ): Promise<T> {
-        logger.info(`fetchJson(${endpoint}, ${JSON.stringify(params)}, ${JSON.stringify(fetchParams)})`);
+        logger.info(`[GovernanceContractIndexer] fetchJson(${endpoint}, ${JSON.stringify(params)}, ${JSON.stringify(fetchParams)})`);
         let url = endpoint;
         if (params) url = `${url}?${new URLSearchParams(params).toString()}`;
 
         if (this.cache) {
             const cached = this.cache.get(url);
             if (cached) {
-                logger.info(`Cache hit for ${url}`);
+                logger.info(`[GovernanceContractIndexer] Cache hit for ${url}`);
                 return cached;
             }
         }
 
-        logger.info(`Fetching URL: ${url}`);
+        logger.info(`[GovernanceContractIndexer] Fetching URL: ${url}`);
 
         const res = await fetch(url, fetchParams);
         if (!res.ok) throw new Error(`Unexpected status ${res.status} for ${url}`);
