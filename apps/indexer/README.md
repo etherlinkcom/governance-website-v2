@@ -35,10 +35,4 @@ This package contains:
 
 
 ## TODO
-Get storage data from contract x
-Create upvotes, votes, proposals, promotions arrays x
-Store upvotes, votes, proposal, promotions in db
-Get voting periods x
-Store voting periods in db
-switch db from bigquery to MySQL
-listen to contract changes x
+Save listened updates to database
