@@ -9,7 +9,7 @@ export class WalletStore {
   votingPower: number = 0;
 
   // TODO env var
-  private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
+  public Tezos = new TezosToolkit('https://ghostnet.tezos.ecadinfra.com');
   private wallet: BeaconWallet;
   private delegatesViewContractAddress: string = process.env.NEXT_PUBLIC_VOTING_RIGHTS_DELEGATION_CONTRACT!;
   private readonly tzktApiUrl: string = 'https://api.tzkt.io/v1';
@@ -19,6 +19,7 @@ export class WalletStore {
         name: 'Etherlink Governance App',
         colorMode: ColorMode.DARK,
         iconUrl: '/favicon.ico',
+        preferredNetwork: 'ghostnet'
     });
     this.Tezos.setWalletProvider(this.wallet);
     makeAutoObservable(this);

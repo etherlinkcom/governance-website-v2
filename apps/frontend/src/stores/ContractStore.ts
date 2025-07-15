@@ -1,6 +1,10 @@
 import { makeObservable, observable, computed, action, runInAction } from 'mobx';
 import { FAKE_GOVERNANCE_DATA } from './mockData';
-import { GovernanceType, NetworkType } from '@trilitech/types';
+import { TezosToolkit } from '@taquito/taquito';
+import { getWalletStore } from './WalletStore';
+
+type GovernanceType = 'slow' | 'fast' | 'sequencer';
+type NetworkType = 'mainnet' | 'testnet';
 
 interface ContractConfig {
   address: string;
@@ -94,13 +98,18 @@ class ContractStore {
       sequencer: '0x3456789012cdef123456789012def123456789ab'
     },
     testnet: {
-      slow: '0xabcdef1234567890abcdef1234567890abcdef12',
-      fast: '0xbcdef12345678901bcdef12345678901cdef1234',
-      sequencer: '0xcdef123456789012cdef123456789012def12345'
+      slow: 'KT1LyTGFFmi4zEyrDozxGdEAEdwTEY7b3Wzi',
+      fast: 'KT1LyTGFFmi4zEyrDozxGdEAEdwTEY7b3Wzi',
+      sequencer: 'KT1LyTGFFmi4zEyrDozxGdEAEdwTEY7b3Wzi'
     }
   };
 
-  currentNetwork: NetworkType = 'mainnet';
+  get Tezos(): TezosToolkit {
+    const walletStore = getWalletStore();
+    return walletStore ? walletStore.Tezos : new TezosToolkit('https://ghostnet.tezos.ecadinfra.com');
+  }
+
+  currentNetwork: NetworkType = 'testnet';
   currentContract: GovernanceType | null = null;
   proposals: Proposal[] = [];
   promotion: PromotionData | null = null;
@@ -109,6 +118,7 @@ class ContractStore {
   loading = false;
   error: string | null = null;
   contractInfo: ContractInfo | null = null;
+  lastUpdated: Record<string, number> = {};
 
   constructor() {
     makeObservable(this, {
@@ -121,15 +131,12 @@ class ContractStore {
       contractInfo: observable,
       loading: observable,
       error: observable,
+      lastUpdated: observable,
       contractData: computed,
       setNetwork: action,
       setContract: action,
       loadProposals: action,
     });
-  }
-
-  get isLoading() {
-    return this.loading;
   }
 
   get contractData(): ContractConfig | null {
@@ -183,6 +190,46 @@ class ContractStore {
         this.error = 'Failed to load governance data';
       });
       console.error('Error loading governance data:', err);
+    } finally {
+      runInAction(() => {
+        this.loading = false;
+      });
+    }
+  }
+
+  async newProposal(label: GovernanceType, kernelRootHash: string) {
+    this.loading = true;
+    this.error = null;
+    
+    try {
+      const contractAddress = ContractStore.ADDRESSES[this.currentNetwork][label];
+      if (!contractAddress) {
+        throw new Error(`Contract address for ${label} is not set`);
+      }
+
+      console.log(`Creating new proposal with kernel root hash ${kernelRootHash} for ${label}`);
+
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      const op = await contract.methodsObject.new_proposal(kernelRootHash).send();
+      
+      console.log(`New proposal transaction sent: ${op.opHash}`);
+      
+      await op.confirmation();
+      
+      console.log(`New proposal confirmed for ${label}`);
+      
+      runInAction(() => {
+        this.lastUpdated[`newProposal_${label}`] = Date.now();
+      });
+      
+      return op.opHash;
+    } catch (error) {
+      const errorMessage = `Error creating new proposal for ${label}: ${error}`;
+      console.error(errorMessage);
+      runInAction(() => {
+        this.error = errorMessage;
+      });
+      throw error;
     } finally {
       runInAction(() => {
         this.loading = false;
