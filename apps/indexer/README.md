@@ -35,4 +35,5 @@ This package contains:
 
 
 ## TODO
-Save listened updates to database
+populate db
+connect front end to db

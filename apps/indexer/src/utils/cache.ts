@@ -5,7 +5,7 @@ export class LRUCache<T> {
     private readonly maxSize: number;
     private readonly ttl: number;
 
-    constructor(maxSize = 200, ttl = 5 * 60 * 1000) {
+    constructor(maxSize = 1000, ttl = 5 * 60 * 1000) {
         this.maxSize = maxSize;
         this.ttl = ttl;
     }

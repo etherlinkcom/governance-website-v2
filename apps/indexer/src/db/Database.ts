@@ -3,16 +3,21 @@ import fs from 'fs';
 import path from 'path';
 import { logger } from '../utils/logger';
 import { ContractAndConfig, Period, Promotion, Proposal, Upvote, Vote } from 'packages/types';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export class Database {
   private connection: mysql.Connection | null = null;
-  private migrationsDir: string = path.join(__dirname, '../../migrations');
+  private migrationsDir: string = path.join(__dirname, './migrations');
   private connectionConfig: mysql.ConnectionOptions = {
-      host: process.env.DB_HOST || 'localhost',
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'governance',
-      port: parseInt(process.env.DB_PORT || '3306')
+      host: process.env.DB_HOST!,
+      user: process.env.DB_USER!,
+      password: process.env.DB_PASSWORD!,
+      database: process.env.DB_NAME!,
+      port: parseInt(process.env.DB_PORT!),
+      timezone: 'Z',
+      dateStrings: false
     };
 
   constructor() {}
@@ -28,6 +33,7 @@ export class Database {
     logger.info('[Database] connect()');
     if (!this.connection) {
       this.connection = await mysql.createConnection(this.connectionConfig);
+      await this.connection.execute("SET time_zone = '+00:00'");
       logger.info('[Database] Connected to MySQL database');
     }
   }
@@ -111,7 +117,35 @@ export class Database {
     };
   }
 
+  private formatDateForMySQL(isoString: string): string {
+    const date = new Date(isoString);
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+  }
+
+  private sanitizeValues(values: any[]): any[] {
+    return values.map(value => {
+      // Convert undefined to null
+      if (value === undefined) return null;
+
+      // Convert empty strings to null for optional fields (if desired)
+      if (value === '') return null;
+
+      return value;
+    });
+  }
+
   async upsertProposal(proposal: Proposal): Promise<void> {
+    const values = [
+      proposal.contract_period_index,
+      proposal.level,
+      this.formatDateForMySQL(proposal.time),
+      proposal.proposal_hash,
+      proposal.transaction_hash,
+      proposal.contract_address,
+      proposal.proposer,
+      proposal.alias
+    ];
+
     await this.upsert(
       `INSERT INTO proposals (
         contract_period_index,
@@ -130,20 +164,23 @@ export class Database {
          proposer = VALUES(proposer),
          alias = VALUES(alias),
          updated_at = CURRENT_TIMESTAMP`,
-      [
-        proposal.contract_period_index,
-        proposal.level,
-        proposal.time,
-        proposal.proposal_hash,
-        proposal.transaction_hash,
-        proposal.contract_address,
-        proposal.proposer,
-        proposal.alias
-      ]
+      this.sanitizeValues(values)
     );
   }
 
   async upsertVote(vote: Vote): Promise<void> {
+    const values = [
+      vote.id,
+      vote.proposal_hash,
+      vote.baker,
+      vote.alias,
+      vote.voting_power,
+      vote.vote,
+      vote.transaction_hash,
+      vote.level,
+      this.formatDateForMySQL(vote.time)
+    ];
+
     await this.upsert(
       `INSERT INTO votes (
         tzkt_id,
@@ -162,21 +199,21 @@ export class Database {
          vote = VALUES(vote),
          alias = VALUES(alias),
          updated_at = CURRENT_TIMESTAMP`,
-      [
-        vote.id,
-        vote.proposal_hash,
-        vote.baker,
-        vote.alias,
-        vote.voting_power,
-        vote.vote,
-        vote.transaction_hash,
-        vote.level,
-        vote.time
-      ]
+      this.sanitizeValues(values)
     );
   }
 
   async upsertPromotion(promotion: Promotion): Promise<void> {
+    const values = [
+      promotion.proposal_hash,
+      promotion.contract_period_index,
+      promotion.contract_address,
+      promotion.yea_voting_power,
+      promotion.nay_voting_power,
+      promotion.pass_voting_power,
+      promotion.total_voting_power
+    ];
+
     await this.upsert(
       `INSERT INTO promotions (
         proposal_hash,
@@ -194,19 +231,21 @@ export class Database {
          pass_voting_power = VALUES(pass_voting_power),
          total_voting_power = VALUES(total_voting_power),
          updated_at = CURRENT_TIMESTAMP`,
-      [
-        promotion.proposal_hash,
-        promotion.contract_period_index,
-        promotion.contract_address,
-        promotion.yea_voting_power,
-        promotion.nay_voting_power,
-        promotion.pass_voting_power,
-        promotion.total_voting_power
-      ]
+      this.sanitizeValues(values)
     );
   }
 
   async upsertUpvote(upvote: Upvote): Promise<void> {
+    const values = [
+      upvote.level,
+      this.formatDateForMySQL(upvote.time),
+      upvote.transaction_hash,
+      upvote.proposal_hash,
+      upvote.baker,
+      upvote.alias,
+      upvote.voting_power
+    ];
+
     await this.upsert(
       `INSERT INTO upvotes (level, time, transaction_hash, proposal_hash, baker, alias, voting_power)
        VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -214,12 +253,24 @@ export class Database {
          voting_power = VALUES(voting_power),
          alias = VALUES(alias),
          updated_at = CURRENT_TIMESTAMP`,
-      [upvote.level, upvote.time, upvote.transaction_hash, upvote.proposal_hash, upvote.baker, upvote.alias, upvote.voting_power]
+      this.sanitizeValues(values)
     );
   }
 
-
   async upsertContract(contract: ContractAndConfig): Promise<void> {
+    const values = [
+      contract.contract_address,
+      contract.governance_type,
+      contract.started_at_level,
+      contract.period_length,
+      contract.adoption_period_sec,
+      contract.upvoting_limit,
+      contract.scale,
+      contract.proposal_quorum,
+      contract.promotion_quorum,
+      contract.promotion_supermajority
+    ];
+
     await this.upsert(
       `INSERT INTO contracts (
         contract_address,
@@ -233,9 +284,8 @@ export class Database {
         promotion_quorum,
         promotion_supermajority
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
-         governance_type = VALUES(governance_type),
          started_at_level = VALUES(started_at_level),
          period_length = VALUES(period_length),
          adoption_period_sec = VALUES(adoption_period_sec),
@@ -245,22 +295,22 @@ export class Database {
          promotion_quorum = VALUES(promotion_quorum),
          promotion_supermajority = VALUES(promotion_supermajority),
          updated_at = CURRENT_TIMESTAMP`,
-      [
-        contract.contract_address,
-        contract.governance_type,
-        contract.started_at_level,
-        contract.period_length,
-        contract.adoption_period_sec,
-        contract.upvoting_limit,
-        contract.scale,
-        contract.proposal_quorum,
-        contract.promotion_quorum,
-        contract.promotion_supermajority
-      ]
+      this.sanitizeValues(values)
     );
   }
 
   async upsertPeriod(period: Period): Promise<void> {
+    const values = [
+      period.contract_voting_index,
+      period.contract_address,
+      period.level_start,
+      period.level_end,
+      period.date_start ? this.formatDateForMySQL(period.date_start.toString()) : null,
+      period.date_end ? this.formatDateForMySQL(period.date_end.toString()) : null,
+      JSON.stringify(period.proposal_hashes || []),
+      period.promotion_hash
+    ];
+
     await this.upsert(
       `INSERT INTO periods (
         contract_voting_index,
@@ -281,16 +331,7 @@ export class Database {
          proposal_hashes = VALUES(proposal_hashes),
          promotion_hash = VALUES(promotion_hash),
          updated_at = CURRENT_TIMESTAMP`,
-      [
-        period.contract_voting_index,
-        period.contract_address,
-        period.level_start,
-        period.level_end,
-        period.date_start,
-        period.date_end,
-        JSON.stringify(period.proposal_hashes || []),
-        period.promotion_hash
-      ]
+      this.sanitizeValues(values)
     );
   }
 

@@ -65,3 +65,70 @@ export type TzktStorageHistory= {
     };
   };
 };
+
+
+export interface TzktTransactionEvent {
+  type: string;
+  id: number;
+  level: number;
+  timestamp: string;
+  block: string;
+  hash: string;
+  counter: number;
+  initiator?: {
+    alias?: string;
+    address: string;
+  };
+  sender: {
+    alias?: string;
+    address: string;
+  };
+  senderCodeHash: number;
+  nonce: number;
+  gasLimit: number;
+  gasUsed: number;
+  storageLimit: number;
+  storageUsed: number;
+  bakerFee: number;
+  storageFee: number;
+  allocationFee: number;
+  target: {
+    alias?: string;
+    address: string;
+  };
+  targetCodeHash: number;
+  amount: number;
+  parameter?: {
+    entrypoint: string;
+    value: any;
+  };
+  storage?: any;
+  diffs?: {
+    bigmap: number;
+    path: string;
+    action: string;
+    content: {
+      hash: string;
+      key: any;
+      value: any;
+    };
+  }[];
+  status: string;
+  errors?: {
+    type: string;
+  }[];
+  hasInternals: boolean;
+  tokenTransfersCount: number;
+  ticketTransfersCount: number;
+  eventsCount: number;
+  quote?: {
+    btc: number;
+    eur: number;
+    usd: number;
+    cny: number;
+    jpy: number;
+    krw: number;
+    eth: number;
+    gbp: number;
+  };
+}

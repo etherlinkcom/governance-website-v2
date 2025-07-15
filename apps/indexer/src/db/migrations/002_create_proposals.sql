@@ -1,14 +1,15 @@
-CREATE TABLE IF NOT EXISTS `${projectId}.${dataset}.proposals` (
+CREATE TABLE IF NOT EXISTS proposals (
   id INT AUTO_INCREMENT PRIMARY KEY,
   contract_period_index INT NOT NULL,
-  level INT NOT NULL,
-  time TIMESTAMP NOT NULL,
+  level BIGINT NOT NULL,
+  time DATETIME NOT NULL,
   proposal_hash VARCHAR(100) NOT NULL,
   transaction_hash VARCHAR(100) NOT NULL,
   contract_address VARCHAR(100) NOT NULL,
   proposer VARCHAR(100) NOT NULL,
   alias VARCHAR(255),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP(),
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
 
   INDEX idx_period (contract_period_index),
   INDEX idx_proposal_hash (proposal_hash),

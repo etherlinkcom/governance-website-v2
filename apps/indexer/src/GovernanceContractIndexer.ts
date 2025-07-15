@@ -13,7 +13,7 @@ type PeriodIndexToPeriod = {
 }
 
 export class GovernanceContractIndexer {
-    base_url: string = 'https://api.tzkt.io/v1';
+    tzkt_api_url: string = 'https://api.tzkt.io/v1';
     delegate_view_contract: string = 'KT1Ut6kfrTV9tK967tDYgQPMvy9t578iN7iH';
     tezos_rpc_url: string = 'https://rpc.tzkt.io/mainnet';
     cache: LRUCache<any> = new LRUCache();
@@ -21,6 +21,11 @@ export class GovernanceContractIndexer {
 
     constructor() {}
 
+    async initialize(): Promise<void> {
+        logger.info('[GovernanceContractIndexer] Initializing...');
+        await this.database.initialize();
+        logger.info('[GovernanceContractIndexer] Initialized successfully');
+    }
 
     public async indexContracts(contracts: Contract[]): Promise<void[]> {
         logger.info(`[GovernanceContractIndexer] indexContracts(${contracts.length} contracts)`);
@@ -29,8 +34,9 @@ export class GovernanceContractIndexer {
 
     public async indexContract(contract: Contract): Promise<void> {
         logger.info(`[GovernanceContractIndexer] indexContract(${contract.address})`);
+
         const data: TzktStorageHistory[] = await this.fetchJson<TzktStorageHistory[]>(
-            `${this.base_url}/contracts/${contract.address}/storage/history`,
+            `${this.tzkt_api_url}/contracts/${contract.address}/storage/history`,
             { limit: '1000' }
         );
 
@@ -123,18 +129,14 @@ export class GovernanceContractIndexer {
 
     private async getDateFromLevel(level: number): Promise<Date> {
         logger.info(`[GovernanceContractIndexer] getDateFromLevel(${level})`);
-            const utc = await this.fetchJson<string>(`${this.base_url}/blocks/${level}/timestamp`);
-            const date = new Date(utc);
-            // Add 4 hours for Dubai time // TODO remove in prod
-            const dubaiDate = new Date(date.getTime() + 4 * 60 * 60 * 1000);
-            return dubaiDate;
-
+            const utc = await this.fetchJson<string>(`${this.tzkt_api_url}/blocks/${level}/timestamp`);
+            return new Date(utc);
     }
 
     private async getCurrentLevel(): Promise<number> {
         logger.info(`[GovernanceContractIndexer] getCurrentLevel()`);
         const isoDate = new Date().toISOString();
-        return await this.fetchJson<number>(`${this.base_url}/blocks/${isoDate}/level`);
+        return await this.fetchJson<number>(`${this.tzkt_api_url}/blocks/${isoDate}/level`);
     }
 
     private async getContractPeriodsWithoutProposalsOrPromotions(
@@ -168,7 +170,7 @@ export class GovernanceContractIndexer {
     private async getSenderFromHash(hash: string): Promise<SenderAlias> {
         logger.info(`[GovernanceContractIndexer] getSenderFromHash(${hash})`);
         const data = await this.fetchJson<{ sender: { address: string; alias?: string } }[]>(
-            `${this.base_url}/operations/transactions/${hash}`
+            `${this.tzkt_api_url}/operations/transactions/${hash}`
         );
         if (!data) throw new Error(`No data found for transaction hash ${hash}`);
         return { sender: data[0]?.sender.address, alias: data[0]?.sender.alias || undefined };
@@ -177,7 +179,7 @@ export class GovernanceContractIndexer {
     public async getGlobalVotingPeriodIndex(start_level: number, end_level: number): Promise<number> {
         logger.info(`[GovernanceContractIndexer] getGlobalVotingPeriodIndex(${start_level}, ${end_level})`);
         const data = await this.fetchJson<{ index: number }[]>(
-            `${this.base_url}/voting/periods`,
+            `${this.tzkt_api_url}/voting/periods`,
             { 'firstLevel.le': String(start_level), 'lastLevel.ge': String(end_level) }
         );
         if (!data || data.length === 0) throw new Error(`No voting period found for start level ${start_level} and end level ${end_level}`);
@@ -191,7 +193,7 @@ export class GovernanceContractIndexer {
         logger.info(`[GovernanceContractIndexer] getVotingPowerForAddress(${address}, ${global_voting_index})`);
         let voting_power = 0;
         const data = await this.fetchJson<{ delegate: { address: string }; votingPower: number }>(
-            `${this.base_url}/voting/periods/${global_voting_index}/voters/${address}`
+            `${this.tzkt_api_url}/voting/periods/${global_voting_index}/voters/${address}`
         );
         if (!data) return voting_power;
         if (!data) throw new Error(`No voter found for address ${address} at global_voting_index ${global_voting_index}`);
@@ -201,16 +203,30 @@ export class GovernanceContractIndexer {
 
     private async getWinningCandidateAtLevel(contract_address: string, level: number, period_index: number): Promise<string> {
         logger.info(`[GovernanceContractIndexer] getWinningCandidateAtLevel(${contract_address}, ${level}, ${period_index})`);
-        const url = `${this.base_url}/contracts/${contract_address}/storage`;
-        const data = await this.fetchJson<{ voting_context: { period: { proposal?: { winner_candidate: string }; promotion?: { winner_candidate: string } }; period_index: string  } }>(
-            url,
-            { level: String(level) }
+        const url = `${this.tzkt_api_url}/contracts/${contract_address}/storage`;
+        const data = await this.fetchJson<
+            {
+                voting_context: { period: {
+                    proposal?: { winner_candidate: string };
+                    promotion?: { winner_candidate: string }
+                };
+                period_index: string  }
+            }
+            >(
+                url,
+                { level: String(level) }
         );
         if (!data) throw new Error(`No data found for contract ${contract_address}`);
         const winner_candidate = data.voting_context?.period?.proposal?.winner_candidate || data.voting_context?.period?.promotion?.winner_candidate;
         if (!winner_candidate) throw new Error(`No winning candidate found for contract ${contract_address} at level ${level}`);
         if (!data.voting_context?.period_index) throw new Error(`No period index found for contract ${contract_address} at level ${level}`);
-        if (period_index !== parseInt(data.voting_context?.period_index)) throw new Error(`Period index mismatch for contract ${contract_address} at level ${level} expecting ${parseInt(data.voting_context?.period_index)}`);
+        if (period_index !== parseInt(data.voting_context?.period_index)) {
+            throw new Error(
+                `Period index mismatch for contract ${contract_address} at level ${level}
+                expecting ${period_index}
+                got ${parseInt(data.voting_context?.period_index)}`
+            );
+        }
         return winner_candidate;
     }
 
@@ -244,20 +260,35 @@ export class GovernanceContractIndexer {
                 });
                 periods[period_index].proposal_hashes = periods[period_index].proposal_hashes || [];
                 periods[period_index].proposal_hashes.push(proposal_hash);
-                // TODO check for the next period if there is a promotion
-                periods[period_index].proposal_hashes.push(proposal_hash);
+
+                const global_voting_index = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
+                const voting_power = await this.getVotingPowerForAddress(sender, global_voting_index);
+                const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
+                const total_voting_power = voting_power + delegate_voting_power;
+
+                upvotes.push({
+                    level: entry.level,
+                    time: entry.timestamp,
+                    transaction_hash: entry.operation.hash,
+                    proposal_hash: entry.operation.parameter.value,
+                    baker: sender,
+                    alias: alias,
+                    voting_power: total_voting_power,
+                    contract_address: contract.address,
+                });
 
                 if (periods[period_index].promotion_hash) continue;
 
                 const promotion_start_level = periods[period_index].level_end + 1;
+                if (current_level < promotion_start_level) continue;
+
                 const winning_candidate = await this.getWinningCandidateAtLevel(contract.address, promotion_start_level, period_index);
                 if (!winning_candidate) continue;
+
                 const promotion_start_time = await this.getDateFromLevel(promotion_start_level);
                 if (!promotion_start_time) continue;
 
                 periods[period_index].promotion_hash = winning_candidate;
-
-                if (current_level < promotion_start_level) continue;
                 promotions_hash_to_promotion[winning_candidate] = {
                     proposal_hash: winning_candidate,
                     contract_period_index: period_index + 1,
@@ -274,6 +305,7 @@ export class GovernanceContractIndexer {
                 const global_voting_index = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
                 const voting_power = await this.getVotingPowerForAddress(sender, global_voting_index);
                 const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
+                const total_voting_power = voting_power + delegate_voting_power;
                 upvotes.push({
                     level: entry.level,
                     time: entry.timestamp,
@@ -281,7 +313,7 @@ export class GovernanceContractIndexer {
                     proposal_hash: entry.operation.parameter.value,
                     baker: sender,
                     alias: alias,
-                    voting_power: voting_power + delegate_voting_power,
+                    voting_power: total_voting_power,
                     contract_address: contract.address,
                 });
                 continue;
@@ -316,23 +348,6 @@ export class GovernanceContractIndexer {
                 }
                 continue;
             }
-            // if (entry.operation?.parameter?.entrypoint === 'trigger_kernel_upgrade') {
-            //     const period_index = Number(entry.value.voting_context.period_index);
-            //     const promotion_hash = entry.value.last_winner?.payload || '';
-            //     periods[period_index].promotion_hash = promotion_hash;
-            //     promotions_hash_to_promotion[promotion_hash] = {
-            //         proposal_hash: promotion_hash,
-            //         contract_period_index: period_index,
-            //         contract_address: contract.address,
-            //         transaction_hash: entry.operation.hash,
-            //         level: entry.level,
-            //         time: entry.timestamp,
-            //         yea_voting_power: 0,
-            //         nay_voting_power: 0,
-            //         pass_voting_power: 0,
-            //         total_voting_power: 0,
-            //     };
-            // }
         }
 
         const promotions: Promotion[] = Object.values(promotions_hash_to_promotion);
@@ -345,6 +360,7 @@ export class GovernanceContractIndexer {
         fetchParams: RequestInit = { cache: 'no-store' }
     ): Promise<T> {
         logger.info(`[GovernanceContractIndexer] fetchJson(${endpoint}, ${JSON.stringify(params)}, ${JSON.stringify(fetchParams)})`);
+        const maxRetries = 5;
         let url = endpoint;
         if (params) url = `${url}?${new URLSearchParams(params).toString()}`;
 
@@ -356,39 +372,73 @@ export class GovernanceContractIndexer {
             }
         }
 
-        logger.info(`[GovernanceContractIndexer] Fetching URL: ${url}`);
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+            logger.info(`[GovernanceContractIndexer] Fetching URL (attempt ${attempt}): ${url}`);
 
-        const res = await fetch(url, fetchParams);
-        if (!res.ok) throw new Error(`Unexpected status ${res.status} for ${url}`);
+            const res = await fetch(url, fetchParams);
 
-        const data = await res.json() as T;
-        if (this.cache) this.cache.set(url, data);
-        return data;
+            // Handle rate limiting
+            if (res.status === 429) {
+                const retryAfter = res.headers.get('Retry-After');
+                const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, attempt) * 1000;
+
+                logger.warn(`[GovernanceContractIndexer] Rate limited. Retrying after ${delay}ms (attempt ${attempt}/${maxRetries})`);
+
+                if (attempt === maxRetries) {
+                throw new Error(`Rate limited after ${maxRetries} attempts for ${url}`);
+                }
+
+                await this.sleep(delay);
+                continue;
+            }
+
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText} for ${url}`);
+            }
+
+            const data = await res.json() as T;
+            if (this.cache) this.cache.set(url, data);
+            return data;
+
+            } catch (error) {
+            if (attempt === maxRetries) throw error;
+
+            const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+            logger.warn(`[GovernanceContractIndexer] Request failed, retrying after ${delay}ms: ${error}`);
+            await this.sleep(delay);
+            }
+        }
+            throw new Error(`Failed to fetch after ${maxRetries} attempts: ${url}`);
+        }
+
+    private async sleep(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
 
-private async saveToDatabase(data: {
-    proposals: Proposal[];
-    votes: Vote[];
-    upvotes: Upvote[];
-    promotions: Promotion[];
-    contracts: ContractAndConfig[];
-    periods: Period[];
-  }): Promise<void> {
-    logger.info(`[GovernanceContractIndexer] Saving to database: ${data.proposals.length} proposals, ${data.votes.length} votes, ${data.upvotes.length} upvotes, ${data.promotions.length} promotions`);
+    private async saveToDatabase(data: {
+        proposals: Proposal[];
+        votes: Vote[];
+        upvotes: Upvote[];
+        promotions: Promotion[];
+        contracts: ContractAndConfig[];
+        periods: Period[];
+    }): Promise<void> {
+        logger.info(`[GovernanceContractIndexer] Saving to database: ${data.proposals.length} proposals, ${data.votes.length} votes, ${data.upvotes.length} upvotes, ${data.promotions.length} promotions`);
 
-    try {
-      await this.database.upsertProposals(data.proposals);
-      await this.database.upsertVotes(data.votes);
-      await this.database.upsertUpvotes(data.upvotes);
-      await this.database.upsertPromotions(data.promotions);
-      await this.database.upsertContracts(data.contracts);
-      await this.database.upsertPeriods(data.periods);
+        try {
+        await this.database.upsertProposals(data.proposals);
+        await this.database.upsertVotes(data.votes);
+        await this.database.upsertUpvotes(data.upvotes);
+        await this.database.upsertPromotions(data.promotions);
+        await this.database.upsertContracts(data.contracts);
+        await this.database.upsertPeriods(data.periods);
 
-      logger.info('[GovernanceContractIndexer] Successfully saved all data to database');
-    } catch (error) {
-      logger.error(`[GovernanceContractIndexer] Error saving to database: ${error}`);
-      throw error;
+        logger.info('[GovernanceContractIndexer] Successfully saved all data to database');
+        } catch (error) {
+        logger.error(`[GovernanceContractIndexer] Error saving to database: ${error}`);
+        throw error;
+        }
     }
-  }
 }

@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS contracts (
   proposal_quorum INT NOT NULL,
   promotion_quorum INT NOT NULL,
   promotion_supermajority INT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP(),
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
 
   INDEX idx_contract_address (contract_address),
   INDEX idx_governance_type (governance_type),

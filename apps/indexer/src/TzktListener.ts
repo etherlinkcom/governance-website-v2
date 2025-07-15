@@ -2,77 +2,13 @@ import WebSocket from 'ws';
 import { GovernanceContractIndexer } from './GovernanceContractIndexer';
 import { logger } from './utils/logger';
 import { Promotion, Proposal, Upvote, Vote } from 'packages/types';
-import { Contract} from './types'
-
-interface TzktTransactionEvent {
-  type: string;
-  id: number;
-  level: number;
-  timestamp: string;
-  block: string;
-  hash: string;
-  counter: number;
-  initiator?: {
-    alias?: string;
-    address: string;
-  };
-  sender: {
-    alias?: string;
-    address: string;
-  };
-  senderCodeHash: number;
-  nonce: number;
-  gasLimit: number;
-  gasUsed: number;
-  storageLimit: number;
-  storageUsed: number;
-  bakerFee: number;
-  storageFee: number;
-  allocationFee: number;
-  target: {
-    alias?: string;
-    address: string;
-  };
-  targetCodeHash: number;
-  amount: number;
-  parameter?: {
-    entrypoint: string;
-    value: any;
-  };
-  storage?: any;
-  diffs?: {
-    bigmap: number;
-    path: string;
-    action: string;
-    content: {
-      hash: string;
-      key: any;
-      value: any;
-    };
-  }[];
-  status: string;
-  errors?: {
-    type: string;
-  }[];
-  hasInternals: boolean;
-  tokenTransfersCount: number;
-  ticketTransfersCount: number;
-  eventsCount: number;
-  quote?: {
-    btc: number;
-    eur: number;
-    usd: number;
-    cny: number;
-    jpy: number;
-    krw: number;
-    eth: number;
-    gbp: number;
-  };
-}
+import { Contract, TzktTransactionEvent} from './types'
+import { Database } from './db/Database';
 
 export class TzktListener {
-  private ws: WebSocket;
   private contracts: Contract[];
+  private readonly websocketUrl: string = 'wss://api.tzkt.io/v1/ws';
+  private ws = new WebSocket(this.websocketUrl);
   private reconnectInterval: number = 5000;
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private reconnectTimeout: NodeJS.Timeout | null = null;
@@ -80,14 +16,13 @@ export class TzktListener {
     'new_proposal',
     'upvote_proposal',
     'vote',
-    'trigger_kernel_upgrade'
+    // 'trigger_kernel_upgrade' // TODO this needs to change to calculate the promotion period after the proposal index
   ];
-  private governanceContractIndexer: GovernanceContractIndexer;
+  private governanceContractIndexer = new GovernanceContractIndexer();
+  private database: Database = new Database();
 
   constructor(contracts: Contract[]) {
     this.contracts = contracts;
-    this.governanceContractIndexer = new GovernanceContractIndexer();
-    this.ws = new WebSocket('wss://api.tzkt.io/v1/ws');
     this.setupWebSocket();
   }
 
@@ -191,7 +126,7 @@ export class TzktListener {
     logger.info(`[TzktListener] End of handleContractFunction(${contract.address}, ${operation.id}, ${functionName})`);
   }
 
-  private async handleNewProposal(operation: TzktTransactionEvent, contract: Contract): Promise<Proposal> {
+  private async handleNewProposal(operation: TzktTransactionEvent, contract: Contract): Promise<void> {
     logger.info(`[TzktListener] handleNewProposal(${operation.id}, ${contract})`);
     const period_index = 1; // TODO: Get the current period index from GovernanceContractIndexer or calculate it based on operation.level
     const proposal: Proposal = {
@@ -204,11 +139,10 @@ export class TzktListener {
         proposer: operation.sender.address,
         alias: operation.sender.alias,
     }
-    return proposal;
-    // TODO save in db
+    await this.database.upsertProposals([proposal]);
   }
 
-  private async handleUpvoteProposal(operation: TzktTransactionEvent, contract: Contract): Promise<Upvote> {
+  private async handleUpvoteProposal(operation: TzktTransactionEvent, contract: Contract): Promise<void> {
     logger.info(`[TzktListener] handleUpvoteProposal(${operation.id}, ${contract})`);
     const global_voting_index = await this.governanceContractIndexer.getGlobalVotingPeriodIndex(operation.level, operation.level + 1);
     const voting_power = await this.governanceContractIndexer.getVotingPowerForAddress(operation.sender.address, global_voting_index);
@@ -223,10 +157,10 @@ export class TzktListener {
       alias: operation.sender.alias,
       transaction_hash: operation.hash,
     }
-    return upvote;
+    await this.database.upsertUpvotes([upvote]);
   }
 
-  private async handleVote(operation: TzktTransactionEvent, contract: Contract): Promise<Vote> {
+  private async handleVote(operation: TzktTransactionEvent, contract: Contract): Promise<void> {
     logger.info(`[TzktListener] handleVote(${operation.id}, ${contract})`);
     const global_voting_index = await this.governanceContractIndexer.getGlobalVotingPeriodIndex(operation.level, operation.level + 1);
     const voting_power = await this.governanceContractIndexer.getVotingPowerForAddress(operation.sender.address, global_voting_index);
@@ -242,10 +176,10 @@ export class TzktListener {
       transaction_hash: operation.hash,
       level: operation.level,
     }
-    return vote;
+    await this.database.upsertVotes([vote]);
   }
 
-  private async handleTriggerKernelUpgrade(operation: TzktTransactionEvent, contract: Contract): Promise<Promotion> {
+  private async handleTriggerKernelUpgrade(operation: TzktTransactionEvent, contract: Contract): Promise<void> {
     logger.info(`[TzktListener] handleTriggerKernelUpgrade(${operation.id}, ${contract})`);
     const contract_period_index = 1; // TODO
     const promotion: Promotion = {
@@ -257,7 +191,7 @@ export class TzktListener {
       pass_voting_power: 0,
       total_voting_power: 0,
     }
-    return promotion;
+    await this.database.upsertPromotions([promotion]);
   }
 
   private startHeartbeat() {
@@ -283,7 +217,7 @@ export class TzktListener {
   private scheduleReconnect() {
     this.reconnectTimeout = setTimeout(() => {
       logger.info(`[TzktListener] scheduleReconnect()`);
-      this.ws = new WebSocket('wss://api.tzkt.io/v1/ws');
+      this.ws = new WebSocket(this.websocketUrl);
       this.setupWebSocket();
     }, this.reconnectInterval);
   }
