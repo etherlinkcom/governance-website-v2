@@ -49,3 +49,8 @@ next-env.d.ts
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+
+promotions.json
+proposals.json
+upvotes.json
+votes.json
