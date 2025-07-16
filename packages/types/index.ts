@@ -15,6 +15,7 @@ export type ContractAndConfig = {
   proposal_quorum: number;
   promotion_quorum: number;
   promotion_supermajority: number;
+  ended_at_level?: number;
 }
 
 export type Period = {
