@@ -11,27 +11,27 @@ export class LRUCache<T> {
     }
 
     get(key: string): T | null {
-        logger.info(`Cache get: ${key}`);
+        logger.info(`[LRUCache] Cache get: ${key}`);
         const entry = this.cache.get(key);
         if (!entry || Date.now() > entry.expiry) {
-            logger.info(`Cache miss/expired: ${key}`);
+            logger.info(`[LRUCache] Cache miss/expired: ${key}`);
             this.cache.delete(key);
             return null;
         }
 
         // Move to end (most recently used)
-        logger.info(`Cache hit: ${key}`);
+        logger.info(`[LRUCache] Cache hit: ${key}`);
         this.cache.delete(key);
         this.cache.set(key, entry);
         return entry.data;
     }
 
     set(key: string, data: T): void {
-        logger.info(`Cache set: ${key}`);
+        logger.info(`[LRUCache] Cache set: ${key}`);
         // Remove oldest if at capacity
         if (this.cache.size >= this.maxSize) {
             const firstKey = this.cache.keys().next().value;
-            logger.info(`Cache size limit reached, removing oldest entry: ${firstKey}`);
+            logger.info(`[LRUCache] Cache size limit reached, removing oldest entry: ${firstKey}`);
             if (firstKey) this.cache.delete(firstKey);
         }
 

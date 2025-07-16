@@ -3,6 +3,7 @@ import { GovernanceType } from "packages/types";
 export type Contract = {
     type: GovernanceType;
     address: string;
+    active?: boolean
 }
 export type SenderAlias = {
     sender: string;

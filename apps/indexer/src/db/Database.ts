@@ -17,7 +17,13 @@ export class Database {
       database: process.env.DB_NAME!,
       port: parseInt(process.env.DB_PORT!),
       timezone: 'Z',
-      dateStrings: false
+      dateStrings: false,
+      connectionLimit: 10,
+      queueLimit: 0,
+      connectTimeout: 10000,
+      keepAliveInitialDelay: 0,
+      idleTimeout: 300000,
+      maxIdle: 10,
     };
 
   constructor() {}

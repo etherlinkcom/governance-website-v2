@@ -1,7 +1,7 @@
 import { ContractAndConfig, Period, Promotion, Proposal, Upvote, Vote, VoteOption } from "packages/types";
 import { Contract, ContractConfig, SenderAlias, TzktStorageHistory } from "./types";
 import {logger} from './utils/logger'
-import { LRUCache } from "./utils/cache";
+import { LRUCache } from "./utils/LRUCache";
 
 import { TezosToolkit } from '@taquito/taquito';
 import { HistoricalRpcClient } from "./utils/HistoricalRpcClient";
@@ -26,170 +26,44 @@ export class GovernanceContractIndexer {
         logger.info('[GovernanceContractIndexer] Initialized successfully');
     }
 
-    public async extractContractConfigs(contracts: Contract[]): Promise<ContractAndConfig[]> {
-    logger.info(`[GovernanceContractIndexer] extractContractConfigs(${contracts.length} contracts)`);
-
-    const contractsWithConfigs: ContractAndConfig[] = [];
-
-    for (const contract of contracts) {
-      try {
-        logger.info(`[GovernanceContractIndexer] Extracting config for ${contract.address} (${contract.type})`);
-
-        const data: TzktStorageHistory[] = await this.fetchJson<TzktStorageHistory[]>(
-          `${this.tzkt_api_url}/contracts/${contract.address}/storage/history`,
-          { limit: '1' }
-        );
-
-        if (!data || data.length === 0) {
-          logger.warn(`[GovernanceContractIndexer] No storage found for contract ${contract.address}`);
-          continue;
-        }
-
-        if (!data[0].value.config) {
-          logger.warn(`[GovernanceContractIndexer] No config found for contract ${contract.address}`);
-          continue;
-        }
-
-        const contract_config = data[0].value.config as ContractConfig;
-        const contract_and_config: ContractAndConfig = {
-          contract_address: contract.address,
-          governance_type: contract.type,
-          started_at_level: Number(contract_config.started_at_level),
-          period_length: Number(contract_config.period_length),
-          adoption_period_sec: Number(contract_config.adoption_period_sec),
-          upvoting_limit: Number(contract_config.upvoting_limit),
-          scale: Number(contract_config.scale),
-          proposal_quorum: Number(contract_config.proposal_quorum),
-          promotion_quorum: Number(contract_config.promotion_quorum),
-          promotion_supermajority: Number(contract_config.promotion_supermajority),
-        };
-
-        contractsWithConfigs.push(contract_and_config);
-
-        logger.info(`[GovernanceContractIndexer] ✅ ${contract.address} starts at level ${contract_and_config.started_at_level}`);
-
-      } catch (error) {
-        logger.error(`[GovernanceContractIndexer] Failed to extract config for ${contract.address}: ${error}`);
-      }
-    }
-
-    return contractsWithConfigs;
-  }
-
-  public determineContractLifecycles(contractsWithConfigs: ContractAndConfig[]): ContractAndConfig[] {
-    logger.info(`[GovernanceContractIndexer] determineContractLifecycles(${contractsWithConfigs.length} contracts)`);
-
-    const type_groups: { [key: string]: ContractAndConfig[] } = {};
-
-    for (const contract of contractsWithConfigs) {
-      if (!type_groups[contract.governance_type]) {
-        type_groups[contract.governance_type] = [];
-      }
-      type_groups[contract.governance_type].push(contract);
-    }
-
-    const processed_contracts: ContractAndConfig[] = [];
-
-    for (const [type, contracts] of Object.entries(type_groups)) {
-      logger.info(`[GovernanceContractIndexer] Processing ${contracts.length} ${type} contracts`);
-
-      const sorted_contracts = contracts.sort((a, b) =>
-        a.started_at_level - b.started_at_level
-      );
-
-      for (let i = 0; i < sorted_contracts.length; i++) {
-        const contract = sorted_contracts[i];
-        const nextContract = sorted_contracts[i + 1];
-
-        if (nextContract) {
-          contract.ended_at_level = nextContract.started_at_level - 1;
-          logger.info(`[GovernanceContractIndexer] ${contract.contract_address} (${type}): ${contract.started_at_level} → ${contract.ended_at_level} [COMPLETED]`);
-        } else {
-          contract.ended_at_level = undefined;
-          logger.info(`[GovernanceContractIndexer] ${contract.contract_address} (${type}): ${contract.started_at_level} → current [ACTIVE]`);
-        }
-
-        processed_contracts.push(contract);
-      }
-    }
-
-    return processed_contracts;
-  }
-
-  private prioritizeContractsForIndexing(contracts: ContractAndConfig[]): ContractAndConfig[] {
-    return contracts.sort((a, b) => {
-      if (a.ended_at_level && !b.ended_at_level) return -1;
-      if (!a.ended_at_level && b.ended_at_level) return 1;
-
-      return b.started_at_level - a.started_at_level;
-    });
-  }
 
     public async indexContracts(contracts: Contract[]): Promise<void[]> {
         logger.info(`[GovernanceContractIndexer] indexContracts(${contracts.length} contracts)`);
-
-        const contracts_with_configs = await this.extractContractConfigs(contracts);
-        const contracts_with_lifecycles = this.determineContractLifecycles(contracts_with_configs);
-        const prioritized_contracts = this.prioritizeContractsForIndexing(contracts_with_lifecycles);
-
-        await this.logIndexingPlan(prioritized_contracts);
-
-        const results: Promise<void>[] = [];
-
-        for (const contract of prioritized_contracts) {
-            results.push(this.indexContract(contract));
-        }
-
-        return Promise.all(results);
+        return Promise.all(contracts.map(contract => this.indexContract(contract)));
     }
 
-    private async logIndexingPlan(contract_and_config: ContractAndConfig[]): Promise<void> {
-        logger.info(`[GovernanceContractIndexer] === INDEXING PLAN ===`);
+    public async indexContract(contract: Contract): Promise<void> {
+        logger.info(`[GovernanceContractIndexer] indexContract(${contract.address})`);
 
-        const active_contracts = contract_and_config.filter(c => !c.ended_at_level);
-        const completed_contracts = contract_and_config.filter(c => c.ended_at_level);
-
-        logger.info(`[GovernanceContractIndexer] Active Contracts (${active_contracts.length}):`);
-        for (const contract of active_contracts) {
-            logger.info(`[GovernanceContractIndexer]   📍 ${contract.contract_address} (${contract.governance_type}) - Level ${contract.started_at_level} → current`);
-        }
-
-        logger.info(`[GovernanceContractIndexer] Completed Contracts (${completed_contracts.length}):`);
-        const current_level = await this.getCurrentLevel();
-        for (const contract of completed_contracts) {
-            const range = contract.ended_at_level ? contract.ended_at_level - contract.started_at_level + 1 : current_level - contract.started_at_level + 1;
-            logger.info(`[GovernanceContractIndexer]   ✅ ${contract.contract_address} (${contract.governance_type}) - Level ${contract.started_at_level} → ${contract.ended_at_level} (${range.toLocaleString()} levels)`);
-        }
-
-        logger.info(`[GovernanceContractIndexer] === END PLAN ===`);
-    }
-
-    public async indexContract(contract_and_config: ContractAndConfig): Promise<void> {
-        logger.info(`[GovernanceContractIndexer] indexContract(${contract_and_config.contract_address})`);
-
-        const startLevel = contract_and_config.started_at_level;
-        const endLevel = contract_and_config.ended_at_level || await this.getCurrentLevel();
-
-
-        logger.info(`[GovernanceContractIndexer] Fetching storage history for ${contract_and_config.governance_type} contract at ${contract_and_config.contract_address}...`);
         const data: TzktStorageHistory[] = await this.fetchJson<TzktStorageHistory[]>(
-            `${this.tzkt_api_url}/contracts/${contract_and_config.contract_address}/storage/history`,
-            {
-                'level.gte': startLevel.toString(),
-                'level.lte': endLevel.toString(),
-                'limit': '1000'
-            }
+            `${this.tzkt_api_url}/contracts/${contract.address}/storage/history`,
+            { 'limit': '1000' }
         );
 
         if (!data || data.length === 0) {
-            logger.info(`[GovernanceContractIndexer] No storage history found for contract ${contract_and_config.contract_address}`);
+            logger.info(`[GovernanceContractIndexer] No storage history found for contract ${contract.address}`);
             return;
         }
-        if (data.length >= 1000) throw new Error(`Storage history for contract ${contract_and_config.contract_address} exceeds 1000 entries. Add pagination.`);
-        if (!data[0].value.config) throw new Error(`No config found in storage history for contract ${contract_and_config.contract_address}`);
+        if (data.length >= 1000) throw new Error(`Storage history for contract ${contract.address} exceeds 1000 entries. Add pagination.`);
+        if (!data[0].value.config) throw new Error(`No config found in storage history for contract ${contract.address}`);
 
+        const contract_config = data[0].value.config as ContractConfig;
+        const contract_and_config: ContractAndConfig = {
+            contract_address: contract.address,
+            governance_type: contract.type,
+            started_at_level: Number(contract_config.started_at_level),
+            period_length: Number(contract_config.period_length),
+            adoption_period_sec: Number(contract_config.adoption_period_sec),
+            upvoting_limit: Number(contract_config.upvoting_limit),
+            scale: Number(contract_config.scale),
+            proposal_quorum: Number(contract_config.proposal_quorum),
+            promotion_quorum: Number(contract_config.promotion_quorum),
+            promotion_supermajority: Number(contract_config.promotion_supermajority),
+            active: contract.active || false,
+        }
 
-        const periods: PeriodIndexToPeriod = await this.getContractPeriodsWithoutProposalsOrPromotions(contract_and_config);
+        const last_level_activity = data[0].level;
+        const periods: PeriodIndexToPeriod = await this.getContractPeriodsWithoutProposalsOrPromotions(contract_and_config, last_level_activity);
 
         const { promotions, proposals, upvotes, votes } = await this.createProposalsPromotionsVotesAndUpvotes(
             contract_and_config,
@@ -205,7 +79,6 @@ export class GovernanceContractIndexer {
             contracts: [contract_and_config],
             periods: Object.values(periods),
         })
-
     }
 
     public async getDelegateVotingPowerForAddress(address: string, level: number, global_voting_index: number): Promise<number> {
@@ -268,10 +141,11 @@ export class GovernanceContractIndexer {
 
     private async getContractPeriodsWithoutProposalsOrPromotions(
         contract_and_config: ContractAndConfig,
+        last_level_activity: number
     ): Promise<PeriodIndexToPeriod> {
         logger.info(`[GovernanceContractIndexer] getContractPeriodsWithoutProposalsOrPromotions(${JSON.stringify(contract_and_config)})`);
         const periods: PeriodIndexToPeriod = {};
-        const end_level: number = contract_and_config.ended_at_level || await this.getCurrentLevel();
+        const end_level: number = contract_and_config.active ? await this.getCurrentLevel() : last_level_activity;
         const period_length: number = contract_and_config.period_length;
         const started_at_level: number = contract_and_config.started_at_level;
 
@@ -373,7 +247,7 @@ export class GovernanceContractIndexer {
         const proposals: Proposal[] = [];
         const upvotes: Upvote[] = [];
         const votes: Vote[] = [];
-        const ended_at_level = contract_and_config.ended_at_level || await this.getCurrentLevel();
+        const current_level: number = await this.getCurrentLevel();
 
         for (let i = data.length - 1; i >= 0; i--) {
             const entry = data[i];
@@ -391,6 +265,7 @@ export class GovernanceContractIndexer {
                     proposer: sender,
                     alias: alias,
                 });
+
                 periods[period_index].proposal_hashes = periods[period_index].proposal_hashes || [];
                 periods[period_index].proposal_hashes.push(proposal_hash);
 
@@ -411,10 +286,10 @@ export class GovernanceContractIndexer {
                 });
 
                 const promotion_period_index = period_index + 1;
-                if (periods[promotion_period_index].promotion_hash) continue;
+                if (!periods[promotion_period_index] || periods[promotion_period_index]?.promotion_hash) continue;
 
                 const promotion_start_level = periods[period_index].level_end + 1;
-                if (ended_at_level < promotion_start_level) continue;
+                if (current_level < promotion_start_level) continue;
 
                 const winning_candidate = await this.getWinningCandidateAtLevel(contract_and_config.contract_address, promotion_start_level, period_index);
                 if (!winning_candidate) continue;

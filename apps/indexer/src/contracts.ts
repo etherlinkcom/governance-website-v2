@@ -35,14 +35,17 @@ export const latest_contracts: Contract[] = [
     {
         type: 'slow',
         address: 'KT1XdSAYGXrUDE1U5GNqUKKscLWrMhzyjNeh',
+        active: true
     },
     {
         type: 'fast',
         address: 'KT1D1fRgZVdjTj5sUZKcSTPPnuR7LRxVYnDL',
+        active: true
     },
     {
         type: 'sequencer',
         address: 'KT1NnH9DCAoY1pfPNvb9cw9XPKQnHAFYFHXa',
+        active: true
     }
 ]
 

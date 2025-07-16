@@ -16,7 +16,6 @@ export class TzktListener {
     'new_proposal',
     'upvote_proposal',
     'vote',
-    // 'trigger_kernel_upgrade' // TODO this needs to change to calculate the promotion period after the proposal index
   ];
   private governanceContractIndexer = new GovernanceContractIndexer();
   private database: Database = new Database();
@@ -108,16 +107,12 @@ export class TzktListener {
     switch (functionName) {
       case 'new_proposal':
         this.handleNewProposal(operation, contract);
-
         break;
       case 'upvote_proposal':
         this.handleUpvoteProposal(operation, contract);
         break;
       case 'vote':
         this.handleVote(operation, contract);
-        break;
-      case 'trigger_kernel_upgrade':
-        this.handleTriggerKernelUpgrade(operation, contract);
         break;
       default:
         logger.info(`[TzktListener] Unknown function: ${functionName}`);
@@ -171,27 +166,12 @@ export class TzktListener {
       alias: operation.sender.alias,
       contract_address: contract.address,
       voting_power: voting_power + delegate_voting_power,
-      vote: operation.parameter?.value, // Assuming vote is a string like 'YEA', 'NAY', etc.
+      vote: operation.parameter?.value,
       time: operation.timestamp,
       transaction_hash: operation.hash,
       level: operation.level,
     }
     await this.database.upsertVotes([vote]);
-  }
-
-  private async handleTriggerKernelUpgrade(operation: TzktTransactionEvent, contract: Contract): Promise<void> {
-    logger.info(`[TzktListener] handleTriggerKernelUpgrade(${operation.id}, ${contract})`);
-    const contract_period_index = 1; // TODO
-    const promotion: Promotion = {
-      proposal_hash: operation.parameter?.value.proposal_hash,
-      contract_period_index: contract_period_index,
-      contract_address: contract.address,
-      yea_voting_power: 0,
-      nay_voting_power: 0,
-      pass_voting_power: 0,
-      total_voting_power: 0,
-    }
-    await this.database.upsertPromotions([promotion]);
   }
 
   private startHeartbeat() {

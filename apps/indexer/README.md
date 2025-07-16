@@ -34,6 +34,3 @@ This package contains:
 2. Run `npm run migrate` to apply it.
 
 
-## TODO
-populate db
-connect front end to db
