@@ -92,9 +92,9 @@ export const ContractInfoModal = ({ open, onClose, contract }: ContractInfoModal
               </IconButton>
             </Box>
 
-            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+            <Box sx={{ display: 'flex', gap: 1, mb: 2, textTransform: 'capitalize' }}>
               <Chip
-                label={contract.governance_type.toUpperCase()}
+                label={contract.governance_type}
                 size="small"
                 variant="outlined"
               />

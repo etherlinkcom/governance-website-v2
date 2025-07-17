@@ -3,10 +3,10 @@ import { GovernanceType, Period, ContractAndConfig } from '@trilitech/types';
 
 class ContractStore {
   currentGovernance: GovernanceType | null = null;
-  contracts: ContractAndConfig[] = [];
-  periods: Record<string, Period[]> = {}; // contractAddress -> periods
-  loading: boolean = false;
-  loadingPeriods: Record<string, boolean> = {}; // contractAddress -> loading
+  contractsByGovernance: Partial<Record<GovernanceType, ContractAndConfig[]>> = {};
+  periodsByGovernance: Partial<Record<GovernanceType, Record<string, Period[]>>> = {};
+  loadingByGovernance: Partial<Record<GovernanceType, boolean>> = {};
+  loadingPeriodsByGovernance: Partial<Record<GovernanceType, Record<string, boolean>>> = {};
   error: string | null = null;
 
   constructor() {
@@ -16,16 +16,23 @@ class ContractStore {
   async setGovernance(governanceType: GovernanceType) {
     this.currentGovernance = governanceType;
     this.error = null;
-    this.contracts = [];
-    this.periods = {};
-    this.loadingPeriods = {};
-    await this.getContracts();
+
+    if (!this.periodsByGovernance[governanceType]) {
+      this.periodsByGovernance[governanceType] = {};
+    }
+    if (!this.loadingPeriodsByGovernance[governanceType]) {
+      this.loadingPeriodsByGovernance[governanceType] = {};
+    }
+
+    if (!this.contractsByGovernance[governanceType]) {
+      await this.getContracts();
+    }
   }
 
   async getContracts() {
     if (!this.currentGovernance) return;
 
-    this.loading = true;
+    this.loadingByGovernance[this.currentGovernance] = true;
     this.error = null;
 
     try {
@@ -37,20 +44,29 @@ class ContractStore {
       }
 
       const data = await response.json();
-      this.contracts = data.contracts;
+      this.contractsByGovernance[this.currentGovernance] = data.contracts;
 
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Unknown error';
-      this.contracts = [];
+      this.contractsByGovernance[this.currentGovernance] = [];
     } finally {
-      this.loading = false;
+      this.loadingByGovernance[this.currentGovernance] = false;
     }
   }
 
   async getPeriods(contractAddress: string) {
-    if (this.loadingPeriods[contractAddress]) return; // Already loading
+    if (!this.currentGovernance) return;
 
-    this.loadingPeriods[contractAddress] = true;
+    if (!this.periodsByGovernance[this.currentGovernance]) {
+      this.periodsByGovernance[this.currentGovernance] = {};
+    }
+    if (!this.loadingPeriodsByGovernance[this.currentGovernance]) {
+      this.loadingPeriodsByGovernance[this.currentGovernance] = {};
+    }
+
+    if (this.loadingPeriodsByGovernance[this.currentGovernance]![contractAddress]) return;
+
+    this.loadingPeriodsByGovernance[this.currentGovernance]![contractAddress] = true;
     this.error = null;
 
     try {
@@ -62,14 +78,22 @@ class ContractStore {
       }
 
       const data = await response.json();
-      this.periods[contractAddress] = data.periods;
+      this.periodsByGovernance[this.currentGovernance]![contractAddress] = data.periods;
 
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Unknown error loading periods';
-      this.periods[contractAddress] = [];
+      this.periodsByGovernance[this.currentGovernance]![contractAddress] = [];
     } finally {
-      this.loadingPeriods[contractAddress] = false;
+      this.loadingPeriodsByGovernance[this.currentGovernance]![contractAddress] = false;
     }
+  }
+
+  get contracts(): ContractAndConfig[] {
+    return this.currentGovernance ? this.contractsByGovernance[this.currentGovernance] || [] : [];
+  }
+
+  get loading(): boolean {
+    return this.currentGovernance ? this.loadingByGovernance[this.currentGovernance] || false : false;
   }
 
   get totalContracts(): number {
@@ -77,19 +101,21 @@ class ContractStore {
   }
 
   getPeriodsForContract(contractAddress: string): Period[] {
-    return this.periods[contractAddress] || [];
+    return this.currentGovernance ? this.periodsByGovernance[this.currentGovernance]?.[contractAddress] || [] : [];
   }
 
   isLoadingPeriods(contractAddress: string): boolean {
-    return this.loadingPeriods[contractAddress] || false;
+    return this.currentGovernance ? this.loadingPeriodsByGovernance[this.currentGovernance]?.[contractAddress] || false : false;
   }
 
   hasPeriodsLoaded(contractAddress: string): boolean {
-    return contractAddress in this.periods;
+    if (!this.currentGovernance) return false;
+    return contractAddress in (this.periodsByGovernance[this.currentGovernance] || {});
   }
 
   get allPeriods(): Period[] {
-    return Object.values(this.periods).flat();
+    if (!this.currentGovernance) return [];
+    return Object.values(this.periodsByGovernance[this.currentGovernance] || {}).flat();
   }
 
   get totalPeriods(): number {

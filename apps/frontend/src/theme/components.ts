@@ -60,9 +60,16 @@ export const components: Components<Theme> = {
       root: ({ theme }) => ({
         backgroundColor: theme.palette.background.paper,
         backdropFilter: 'blur(12px)',
-        border: '2px solid',
+        boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
+        border: 'none',
         borderImageSource: `radial-gradient(50% 32.35% at 0% 50%, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0)} 100%)`,
-        borderRadius: 12,
+        borderRadius: '25px',
+        '&:hover': {
+          boxShadow: `0px 0px 10px 2px ${theme.palette.custom.shadow.secondary}`,
+          transform: 'translateY(-2px)',
+          transition: 'all 0.2s ease-in-out',
+        },
+
       }),
     },
   },
@@ -263,7 +270,6 @@ export const components: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         width: '100%',
-        boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
         borderRadius: theme.shape.borderRadius,
         border: 'none',
         '&:before': {
@@ -275,7 +281,7 @@ export const components: Components<Theme> = {
   MuiAccordionSummary: {
     styleOverrides: {
       root: ({ theme }) => ({
-        borderRadius: `${theme.shape.borderRadius} 10px 0 0`,
+        borderRadius: theme.shape.borderRadius,
         padding: theme.spacing(1, 2),
         '& .MuiAccordionSummary-content': {
           margin: theme.spacing(1.5, 0),

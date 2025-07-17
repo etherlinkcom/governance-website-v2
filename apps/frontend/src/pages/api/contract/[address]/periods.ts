@@ -12,7 +12,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<PeriodsResponse>
 ) {
-  // Disable caching
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
@@ -26,10 +25,9 @@ export default async function handler(
   }
 
   try {
-    const { contract } = req.query;
-    const contractAddress = contract as string;
+    const { address } = req.query;
+    const contractAddress = address as string;
 
-    // Validate contract address
     if (!contractAddress || typeof contractAddress !== 'string') {
       return res.status(400).json({
         periods: [],

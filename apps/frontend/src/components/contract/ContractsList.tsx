@@ -32,7 +32,6 @@ export const ContractsList = observer(() => {
   return (
     <Box sx={{ width: '100%'}}>
 
-
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {contracts.map((contract) => (
           <ContractCard

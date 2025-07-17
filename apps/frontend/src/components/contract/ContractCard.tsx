@@ -1,9 +1,11 @@
 import { Accordion, AccordionSummary, AccordionDetails, Box, Typography, Chip, IconButton } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ContractAndConfig } from '@trilitech/types';
-import { useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { ContractInfoModal } from './ContractInfoModal';
 import { InfoIcon } from '../shared/InfoIcon';
+import { contractStore } from '@/stores/ContractStore';
+import { PeriodCard } from '../period/PeriodCard';
 
 interface ContractCardProps {
   contract: ContractAndConfig;
@@ -19,7 +21,6 @@ export const ContractCard = ({ contract, expanded, onChange }: ContractCardProps
     onChange(contract.contract_address);
   };
 
-
   const handleInfoClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     setModalOpen(true);
@@ -29,6 +30,14 @@ export const ContractCard = ({ contract, expanded, onChange }: ContractCardProps
     setModalOpen(false);
   };
 
+  useEffect(() => {
+    if (expanded && !contractStore.hasPeriodsLoaded(contract.contract_address)) {
+      contractStore.getPeriods(contract.contract_address);
+    }
+  }, [expanded, contract.contract_address]);
+
+  const periods = contractStore.getPeriodsForContract(contract.contract_address);
+  const isLoadingPeriods = contractStore.isLoadingPeriods(contract.contract_address);
 
   return (
     <>
@@ -73,7 +82,42 @@ export const ContractCard = ({ contract, expanded, onChange }: ContractCardProps
 
       <AccordionDetails>
 
-      Periods to go here
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
+        {isLoadingPeriods ? (
+          <Typography variant="body2" color="text.secondary">
+            Loading periods...
+          </Typography>
+        ) : periods.length > 0 ? (
+          <>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Periods with proposals / promotions ({periods.length})
+            </Typography>
+            {periods.map((period, index) => {
+              const nextPeriod = periods[index + 1];
+              const hasGap = nextPeriod && (period.contract_voting_index - nextPeriod.contract_voting_index) > 1;
+
+              return (
+                <Fragment key={period.contract_voting_index}>
+                <PeriodCard period={period} />
+                  {hasGap && (
+                    <Typography
+                      variant="subtitle2"
+                      color="text.secondary"
+                      sx={{ textAlign: 'center', py: 1, fontStyle: 'italic' }}
+                    >
+                      No proposals or promotions for periods {nextPeriod.contract_voting_index + 1} - {period.contract_voting_index - 1}
+                    </Typography>
+                  )}
+                </Fragment>
+              );
+            })}
+          </>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            No periods with proposals or promotions found.
+          </Typography>
+        )}
+      </Box>
       </AccordionDetails>
     </Accordion>
     <ContractInfoModal

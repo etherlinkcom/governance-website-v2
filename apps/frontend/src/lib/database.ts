@@ -45,7 +45,7 @@ export class Database {
     }
   }
 
-  async getContracts(governanceType: GovernanceType): Promise<ContractAndConfig[]> {
+   async getContracts(governanceType: GovernanceType): Promise<ContractAndConfig[]> {
     console.log(`[Database] Fetching contracts for ${governanceType} governance`);
 
     const rows = await this.query<any>(
@@ -63,10 +63,9 @@ export class Database {
         promotion_supermajority
       FROM contracts
       WHERE governance_type = ?
-      ORDER BY started_at_level DESC`,
+      ORDER BY active DESC, started_at_level DESC`,
       [governanceType]
     );
-    // TODO and active first
 
     const contracts: ContractAndConfig[] = rows.map((row: any) => ({
       contract_address: row.contract_address,
@@ -86,43 +85,43 @@ export class Database {
     return contracts;
   }
 
-  async getPeriods(contractAddress: string): Promise<Period[]> {
-    console.log(`[Database] Fetching periods for contract ${contractAddress}`);
+   async getPeriods(contractAddress: string): Promise<Period[]> {
+  console.log(`[Database] Fetching periods for contract ${contractAddress}`);
 
-    const rows = await this.query<any>(
-      `SELECT
-        contract_voting_index,
-        contract_address,
-        level_start,
-        level_end,
-        date_start,
-        date_end,
-        proposal_hashes,
-        promotion_hash
-      FROM periods
-      WHERE contract_address = ?
-        AND (
-          (proposal_hashes IS NOT NULL AND proposal_hashes != '[]' AND proposal_hashes != '' AND proposal_hashes != 'null')
-          OR (promotion_hash IS NOT NULL AND promotion_hash != '' AND promotion_hash != 'null')
-        )
-      ORDER BY contract_voting_index DESC`,
-      [contractAddress]
-    );
+  const rows = await this.query<any>(
+    `SELECT
+      contract_voting_index,
+      contract_address,
+      level_start,
+      level_end,
+      date_start,
+      date_end,
+      proposal_hashes,
+      promotion_hash
+    FROM periods
+    WHERE contract_address = ?
+      AND (
+        JSON_LENGTH(proposal_hashes) > 0
+        OR (promotion_hash IS NOT NULL AND promotion_hash != '')
+      )
+    ORDER BY contract_voting_index DESC`,
+    [contractAddress]
+  );
 
-    const periods: Period[] = rows.map((row: any) => ({
-      contract_voting_index: row.contract_voting_index,
-      contract_address: row.contract_address,
-      level_start: row.level_start,
-      level_end: row.level_end,
-      date_start: row.date_start,
-      date_end: row.date_end,
-      proposal_hashes: row.proposal_hashes ? JSON.parse(row.proposal_hashes) : [],
-      promotion_hash: row.promotion_hash || undefined,
-    }));
+  const periods: Period[] = rows.map((row: any) => ({
+    contract_voting_index: row.contract_voting_index,
+    contract_address: row.contract_address,
+    level_start: row.level_start,
+    level_end: row.level_end,
+    date_start: row.date_start,
+    date_end: row.date_end,
+    proposal_hashes: row.proposal_hashes || [],
+    promotion_hash: row.promotion_hash || undefined,
+  }));
 
-    console.log(`[Database] Returned ${periods.length} periods for contract ${contractAddress}`);
-    return periods;
-  }
+  console.log(`[Database] Returned ${periods.length} periods for contract ${contractAddress}`);
+  return periods;
+}
 
   async close(): Promise<void> {
     if (this.connection) {
