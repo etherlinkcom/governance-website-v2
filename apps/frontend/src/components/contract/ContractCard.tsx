@@ -6,6 +6,7 @@ import { ContractInfoModal } from '@/components/contract/ContractInfoModal';
 import { InfoIcon } from '@/components/shared/InfoIcon';
 import { contractStore } from '@/stores/ContractStore';
 import { PeriodCard } from '@/components/period/PeriodCard';
+import { observer } from 'mobx-react-lite';
 
 interface ContractCardProps {
   contract: ContractAndConfig;
@@ -13,7 +14,7 @@ interface ContractCardProps {
   onChange: (contractAddress: string) => void;
 }
 
-export const ContractCard = ({ contract, expanded, onChange }: ContractCardProps) => {
+export const ContractCard = observer(({ contract, expanded, onChange }: ContractCardProps) => {
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -90,7 +91,7 @@ export const ContractCard = ({ contract, expanded, onChange }: ContractCardProps
         ) : periods.length > 0 ? (
           <>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Periods with proposals / promotions ({periods.length})
+              Periods with proposals / promotions {periods.length}
             </Typography>
             {periods.map((period, index) => {
               const nextPeriod = periods[index + 1];
@@ -127,4 +128,4 @@ export const ContractCard = ({ contract, expanded, onChange }: ContractCardProps
       />
     </>
   );
-};
+});
