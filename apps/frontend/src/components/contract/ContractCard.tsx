@@ -1,12 +1,12 @@
 import { Accordion, AccordionSummary, AccordionDetails, Box, Typography, Chip, IconButton } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ContractAndConfig } from '@trilitech/types';
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import { ContractInfoModal } from '@/components/contract/ContractInfoModal';
 import { InfoIcon } from '@/components/shared/InfoIcon';
 import { contractStore } from '@/stores/ContractStore';
-import { PeriodCard } from '@/components/period/PeriodCard';
-import { observer } from 'mobx-react-lite';
+import { PeriodsList } from '@/components/period/PeriodList';
 
 interface ContractCardProps {
   contract: ContractAndConfig;
@@ -15,7 +15,6 @@ interface ContractCardProps {
 }
 
 export const ContractCard = observer(({ contract, expanded, onChange }: ContractCardProps) => {
-
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleChange = () => {
@@ -42,86 +41,56 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
 
   return (
     <>
-    <Accordion expanded={expanded} onChange={handleChange}>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography
-              variant="body1"
-              sx={{
-                fontFamily: 'monospace',
-                fontWeight: 'medium',
-                mb: 0.5
-              }}
-            >
-              {contract.contract_address}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Level: {contract.started_at_level.toLocaleString()}
-            </Typography>
-          </Box>
+      <Accordion expanded={expanded} onChange={handleChange}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 2 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontFamily: 'monospace',
+                  fontWeight: 'medium',
+                  mb: 0.5
+                }}
+              >
+                {contract.contract_address}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Level: {contract.started_at_level.toLocaleString()}
+              </Typography>
+            </Box>
 
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {Boolean(contract.active) && (
-              <Chip
-                label={'Active'}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {Boolean(contract.active) && (
+                <Chip
+                  label={'Active'}
+                  size="small"
+                  color={'success'}
+                />
+              )}
+
+              <IconButton
                 size="small"
-                color={'success'}
-              />
-            )}
-
-            <IconButton
-              size="small"
-              onClick={handleInfoClick}
-              sx={{ ml: 1, color: 'primary.main' }}
-            >
-              <InfoIcon />
-            </IconButton>
+                onClick={handleInfoClick}
+                sx={{ ml: 1, color: 'primary.main' }}
+              >
+                <InfoIcon />
+              </IconButton>
+            </Box>
           </Box>
-        </Box>
-      </AccordionSummary>
+        </AccordionSummary>
 
-      <AccordionDetails>
+        <AccordionDetails>
+          <Box sx={{ width: '100%' }}>
+            <PeriodsList
+              periods={periods}
+              isLoading={isLoadingPeriods}
+            />
+          </Box>
+        </AccordionDetails>
+      </Accordion>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
-        {isLoadingPeriods ? (
-          <Typography variant="body2" color="text.secondary">
-            Loading periods...
-          </Typography>
-        ) : periods.length > 0 ? (
-          <>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Periods with proposals / promotions {periods.length}
-            </Typography>
-            {periods.map((period, index) => {
-              const nextPeriod = periods[index + 1];
-              const hasGap = nextPeriod && (period.contract_voting_index - nextPeriod.contract_voting_index) > 1;
-
-              return (
-                <Fragment key={period.contract_voting_index}>
-                <PeriodCard period={period} />
-                  {hasGap && (
-                    <Typography
-                      variant="subtitle2"
-                      color="text.secondary"
-                      sx={{ textAlign: 'center', py: 1, fontStyle: 'italic' }}
-                    >
-                      No proposals or promotions for periods {nextPeriod.contract_voting_index + 1} - {period.contract_voting_index - 1}
-                    </Typography>
-                  )}
-                </Fragment>
-              );
-            })}
-          </>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            No periods with proposals or promotions found.
-          </Typography>
-        )}
-      </Box>
-      </AccordionDetails>
-    </Accordion>
-    <ContractInfoModal
+      <ContractInfoModal
         open={modalOpen}
         onClose={handleModalClose}
         contract={contract}

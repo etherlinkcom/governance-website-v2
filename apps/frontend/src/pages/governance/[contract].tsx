@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Box, Container, Typography, CircularProgress } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
 import { GovernanceType } from '@trilitech/types';
 import { ContractsList } from '@/components/contract/ContractsList';
@@ -17,18 +17,6 @@ export default observer(() => {
     }
   }, [contract]);
 
-  if (contractStore.loading) {
-    return (
-      <Container maxWidth="lg">
-        <Box display="flex" justifyContent="center" p={4}>
-          <CircularProgress />
-          <Typography sx={{ ml: 2 }}>
-            Loading {contractStore.currentGovernance} contracts...
-          </Typography>
-        </Box>
-      </Container>
-    );
-  }
 
   if (contractStore.error) {
     return (

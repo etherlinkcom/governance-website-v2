@@ -94,15 +94,6 @@ export default function Home() {
           >
             Etherlink documentation
           </Button>
-
-          <Button
-            variant="outlined"
-            href="https://docs.etherlink.com/governance"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Governance documentation
-          </Button>
         </Stack>
       </Box>
     </Container>

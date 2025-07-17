@@ -28,7 +28,6 @@ export default async function handler(
     const { type } = req.query;
     const governanceType = type as GovernanceType;
 
-    // Todo DO WE need this?
     if (!['slow', 'fast', 'sequencer'].includes(governanceType)) {
       return res.status(400).json({
         contracts: [],

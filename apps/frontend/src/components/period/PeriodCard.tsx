@@ -28,7 +28,7 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
               Period {period.contract_voting_index}
             </Typography>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Level: {period.level_start} - {period.level_end}
+              Levels: {period.level_start.toLocaleString()} - {period.level_end.toLocaleString()}
             </Typography>
             <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
               Start: {formatDate(period.date_start)} - End: {formatDate(period.date_end)}

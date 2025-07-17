@@ -2,18 +2,37 @@ import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { useState } from 'react';
 import { contractStore } from '@/stores/ContractStore';
-import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { ContractCard } from '@/components/contract/ContractCard';
+import { ComponentLoading } from '@/components/shared/ComponentLoading';
+
+const ContractCardSkeleton = () => (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      py: 2,
+      px: 0,
+    }}
+  >
+    <Box sx={{ flex: 1 }}>
+      <ComponentLoading width="60%" height={24} borderRadius={1} />
+      <Box sx={{ mt: 0.5 }}>
+        <ComponentLoading width="40%" height={20} borderRadius={1} />
+      </Box>
+    </Box>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
+      <ComponentLoading width={60} height={24} borderRadius={3} />
+      <ComponentLoading width={32} height={32} borderRadius={50} />
+    </Box>
+  </Box>
+);
 
 const ContractsListSkeleton = () => (
-  <Box>
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-      <ComponentLoading width={120} height={32} />
-      <ComponentLoading width={80} height={24} />
-    </Box>
+  <Box sx={{ width: '100%' }}>
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {[...Array(3)].map((_, idx) => (
-        <ComponentLoading key={idx} width="100%" height={80} borderRadius={2} />
+      {[...Array(4)].map((_, idx) => (
+        <ContractCardSkeleton key={idx} />
       ))}
     </Box>
   </Box>
@@ -21,17 +40,24 @@ const ContractsListSkeleton = () => (
 
 export const ContractsList = observer(() => {
   const { contracts, loading, currentGovernance } = contractStore;
-  const [expandedContract, setExpandedContract] = useState<string | null>(null);
+  const [userExpandedContract, setUserExpandedContract] = useState<string | null>(null);
+
+  const getExpandedContract = () => {
+    if (userExpandedContract !== null) return userExpandedContract;
+    const activeContract = contracts.find(contract => contract.active);
+    return activeContract?.contract_address || null;
+  };
+
+  const expandedContract = getExpandedContract();
 
   const handleAccordionChange = (contractAddress: string) => {
-    setExpandedContract(expandedContract === contractAddress ? null : contractAddress);
+    setUserExpandedContract(expandedContract === contractAddress ? null : contractAddress);
   };
 
   if (loading) return <ContractsListSkeleton />;
 
   return (
     <Box sx={{ width: '100%'}}>
-
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {contracts.map((contract) => (
           <ContractCard
