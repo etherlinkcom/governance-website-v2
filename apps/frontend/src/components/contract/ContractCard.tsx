@@ -17,18 +17,13 @@ interface ContractCardProps {
 export const ContractCard = observer(({ contract, expanded, onChange }: ContractCardProps) => {
   const [modalOpen, setModalOpen] = useState(false);
 
-  const handleChange = () => {
-    onChange(contract.contract_address);
-  };
-
   const handleInfoClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     setModalOpen(true);
   };
 
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
+  const handleChange = () => onChange(contract.contract_address);
+  const handleModalClose = () => setModalOpen(false);
 
   useEffect(() => {
     if (expanded && !contractStore.hasPeriodsLoaded(contract.contract_address)) {

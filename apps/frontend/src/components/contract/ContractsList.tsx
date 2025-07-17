@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { contractStore } from '@/stores/ContractStore';
 import { ContractCard } from '@/components/contract/ContractCard';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
@@ -41,9 +41,11 @@ const ContractsListSkeleton = () => (
 export const ContractsList = observer(() => {
   const { contracts, loading, currentGovernance } = contractStore;
   const [userExpandedContract, setUserExpandedContract] = useState<string | null>(null);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
   const getExpandedContract = () => {
-    if (userExpandedContract !== null) return userExpandedContract;
+    if (hasUserInteracted) return userExpandedContract;
+
     const activeContract = contracts.find(contract => contract.active);
     return activeContract?.contract_address || null;
   };
@@ -51,8 +53,14 @@ export const ContractsList = observer(() => {
   const expandedContract = getExpandedContract();
 
   const handleAccordionChange = (contractAddress: string) => {
+    setHasUserInteracted(true);
     setUserExpandedContract(expandedContract === contractAddress ? null : contractAddress);
   };
+
+  useEffect(() => {
+    setHasUserInteracted(false);
+    setUserExpandedContract(null);
+  }, [currentGovernance]);
 
   if (loading) return <ContractsListSkeleton />;
 

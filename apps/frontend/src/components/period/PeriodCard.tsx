@@ -95,6 +95,11 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
                   variant="outlined"
                 />
               )}
+              {!hasProposals && !hasPromotion && (
+                <Typography variant="body1" color="text.secondary">
+                  No Proposals or Promotions for current period
+                </Typography>
+              )}
             </Box>
 
             {hasProposals && (
