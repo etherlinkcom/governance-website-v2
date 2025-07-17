@@ -4,9 +4,10 @@
     "noEmit": true,
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["*"],
+      "packages/*": ["../../packages/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx","../../packages/**/*.ts"],
   "exclude": ["node_modules"]
 }

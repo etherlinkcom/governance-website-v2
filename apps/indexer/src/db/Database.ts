@@ -288,9 +288,10 @@ export class Database {
         scale,
         proposal_quorum,
         promotion_quorum,
-        promotion_supermajority
+        promotion_supermajority,
+        active
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          started_at_level = VALUES(started_at_level),
          period_length = VALUES(period_length),
@@ -300,6 +301,7 @@ export class Database {
          proposal_quorum = VALUES(proposal_quorum),
          promotion_quorum = VALUES(promotion_quorum),
          promotion_supermajority = VALUES(promotion_supermajority),
+         active = VALUES(active),
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
     );

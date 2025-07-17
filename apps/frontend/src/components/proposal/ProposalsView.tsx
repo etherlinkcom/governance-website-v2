@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { contractStore } from '@/stores/ContractStore';
+import { contractStore } from '@/stores/ContractStore2';
 import {ProposalsList} from '@/components/proposal/ProposalsList';
 import {UpvotersTable} from '@/components/proposal/UpvotersTable';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';

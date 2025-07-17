@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS contracts (
   proposal_quorum INT NOT NULL,
   promotion_quorum INT NOT NULL,
   promotion_supermajority INT NOT NULL,
+  active BOOLEAN NOT NULL DEFAULT FALSE,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP(),
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
 

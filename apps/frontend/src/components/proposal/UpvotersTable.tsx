@@ -1,10 +1,10 @@
 import { useTableSort } from '@/hooks/useTableSort';
-import { customSortComparator } from '@/utils/votingPowerUtils';
+import { customSortComparator } from '@/lib/votingPowerUtils';
 import { Table, TableHead, TableRow, TableCell, TableBody, Typography, useTheme } from '@mui/material';
 import {SortableTable} from '@/components/shared/SortableTable';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
-import { prettifyKey } from '@/utils/prettifyKey';
-import { contractStore } from '@/stores/ContractStore';
+import { prettifyKey } from '@/lib/prettifyKey';
+import { contractStore } from '@/stores/ContractStore2';
 import { observer } from 'mobx-react-lite';
 
 interface Upvoter {

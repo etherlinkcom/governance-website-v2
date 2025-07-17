@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { contractStore } from '@/stores/ContractStore';
+import { contractStore } from '@/stores/ContractStore2';
 import {CandidateInfo} from '@/components/promotion/CandidateInfo';
 import {VotingResults} from '@/components/promotion/VotingResults';
 import {VotersTable} from '@/components/promotion/VotersTable';

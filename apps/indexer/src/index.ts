@@ -6,4 +6,4 @@ import { logger } from "./utils/logger";
 
 const indexer = new GovernanceContractIndexer();
 indexer.initialize()
-indexer.indexContracts(all_contracts)
+// indexer.indexContracts(all_contracts)

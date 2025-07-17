@@ -1,7 +1,7 @@
 import { Box, Card, CardContent } from '@mui/material';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
 import {VoteResultCard} from '@/components/promotion/VoteResultCard';
-import { contractStore } from '@/stores/ContractStore';
+import { contractStore } from '@/stores/ContractStore2';
 import { observer } from 'mobx-react-lite';
 
 export const VotingResultsSkeleton = () => {

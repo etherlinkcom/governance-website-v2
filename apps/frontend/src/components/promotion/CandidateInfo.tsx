@@ -1,4 +1,4 @@
-import { contractStore } from '@/stores/ContractStore';
+import { contractStore } from '@/stores/ContractStore2';
 import { Box, Typography, useTheme } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';

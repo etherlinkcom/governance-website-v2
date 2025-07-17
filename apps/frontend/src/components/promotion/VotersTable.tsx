@@ -1,10 +1,10 @@
 import { Table, TableHead, TableRow, TableCell, TableBody, useTheme, Typography } from '@mui/material';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
-import { prettifyKey } from '@/utils/prettifyKey';
+import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
-import { contractStore } from '@/stores/ContractStore';
+import { contractStore } from '@/stores/ContractStore2';
 import { useTableSort } from '@/hooks/useTableSort';
-import { customSortComparator } from '@/utils/votingPowerUtils';
+import { customSortComparator } from '@/lib/votingPowerUtils';
 import {SortableTable} from '@/components/shared/SortableTable';
 
 

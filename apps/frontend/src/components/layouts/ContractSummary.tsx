@@ -1,11 +1,11 @@
 import { Box, Typography, Button, Stack, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { observer } from 'mobx-react-lite';
-import { contractStore } from '@/stores/ContractStore';
+import { contractStore2 } from '@/stores/ContractStore2';
 import { useTheme} from '@mui/material/styles';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
 import { useState, useEffect } from 'react';
-import { prettifyKey } from '@/utils/prettifyKey';
+import { prettifyKey } from '@/lib/prettifyKey';
 
 const ACCORDION_KEY = 'contract-accordion-expanded';
 
@@ -65,7 +65,7 @@ const ContractSummarySkeleton = () => {
 };
 
 export const ContractSummary = observer(() => {
-  const { contractData, contractInfo, isLoading } = contractStore;
+  const { contractData, contractInfo, isLoading } = contractStore2;
   const theme = useTheme();
   const [expanded, setExpanded] = useState(() => {
     if (typeof window !== 'undefined') {

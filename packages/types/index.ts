@@ -1,8 +1,6 @@
 export type NetworkType = 'mainnet' | 'testnet';
 export type GovernanceType = 'slow' | 'fast' | 'sequencer';
 export type VoteOption = 'yea' | 'nay' | 'pass';
-// storageHistory = https://api.tzkt.io/v1/contracts/KT1FPG4NApqTJjwvmhWvqA14m5PJxu9qgpBK/storage/history?limit=1000
-// operations = /v1/operations/transactions/{hash})
 
 export type ContractAndConfig = {
   contract_address: string;
@@ -19,7 +17,7 @@ export type ContractAndConfig = {
 }
 
 export type Period = {
-  id?: number; // self assigned in SQL
+  id?: number;
   contract_voting_index: number;
   contract_address: string;
   level_start: number;
@@ -27,60 +25,56 @@ export type Period = {
   date_start: Date;
   date_end: Date;
 
-  // Relations
-  proposal_hashes?: string[]; // Calculated
-  promotion_hash?: string; // Calculated
+  proposal_hashes?: string[];
+  promotion_hash?: string;
 };
 
 export type Proposal = {
-  id?: number; // self assigned in SQL
-  contract_period_index: number; // SH.value.period_index
+  id?: number;
+  contract_period_index: number;
   level: number;
   time: string;
-  proposal_hash: string; // SH.operation.param.value
+  proposal_hash: string;
   transaction_hash: string;
-  proposer: string; // operations.sender.address
-  alias?: string; // operations.sender.alias
+  proposer: string;
+  alias?: string;
   contract_address: string;
-  // Indexes: key, proposer, period_index, governance_type
+
 };
 
 export type Promotion = {
-  id?: number; // self assigned in SQL
-  proposal_hash: string; // Foreign key to Proposal
-  contract_period_index: number;   // Foreign key to Period
-  // transaction_hash: string; // SH.operation.hash
+  id?: number;
+  proposal_hash: string;
+  contract_period_index: number;
+
   contract_address: string;
   yea_voting_power: number;
   nay_voting_power: number;
   pass_voting_power: number;
   total_voting_power: number;
-  // Indexes: proposal_id, period_index, governance_type
 };
 
 export type Upvote = {
-  id?: number; // self assigned in SQL
+  id?: number;
   level: number;
-  time: string; // ISO date string
-  proposal_hash: string; // SH.operation.param.value
-  baker: string; // operations.sender.address
-  alias?: string; // operations.sender.alias
-  voting_power: number; // Calculated using Adrians function
-  transaction_hash: string; // SH.operation.hash
+  time: string;
+  proposal_hash: string;
+  baker: string;
+  alias?: string;
+  voting_power: number;
+  transaction_hash: string;
   contract_address: string;
-  // Indexes: proposal_id, baker
 };
 
 export type Vote = {
   id?: number;
-  proposal_hash: string; // SH.value.voting_context.period.promotion.winning_candidate
-  baker: string; // operations.sender.address
-  alias?: string; // operations.sender.alias
-  voting_power: number; // Calculated using Adrians function
-  vote: VoteOption; // SH.operation.parameter.value
+  proposal_hash: string;
+  baker: string;
+  alias?: string;
+  voting_power: number;
+  vote: VoteOption;
   time: string;
   level: number;
-  transaction_hash: string; // SH.operation.hash
+  transaction_hash: string;
   contract_address: string;
-  // Indexes: promotion_id, baker
 };

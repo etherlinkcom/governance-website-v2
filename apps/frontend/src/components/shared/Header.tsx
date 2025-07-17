@@ -39,14 +39,14 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
     event: React.MouseEvent<HTMLElement>,
     newNetwork: NetworkType
   ) => {
-    if (newNetwork !== null) contractStore.setNetwork(newNetwork);
+    // if (newNetwork !== null) contractStore.setNetwork(newNetwork);
   };
 
   const handleGovernanceChange = (
     newGovernance: GovernanceType
   ) => {
     if (newGovernance !== null) {
-      contractStore.setContract(newGovernance);
+      contractStore.setGovernance(newGovernance);
       router.push(`/governance/${newGovernance}`);
       handleMenuClose();
     }
@@ -92,9 +92,9 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
           </Link>
 
           <ToggleButtonGroup
-            value={contractStore.currentNetwork}
+            value="mainnet"
             exclusive
-            onChange={handleNetworkChange}
+            // onChange={handleNetworkChange}
             size="small"
             sx={{ display: { xs: 'none', md: 'flex' } }}
           >
@@ -112,16 +112,16 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
             <MenuIcon />
           </IconButton>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-            {Object.entries(NETWORKS).map(([key, value]) => (
+            {/* {Object.entries(NETWORKS).map(([key, value]) => ( */}
               <MenuItem
-                key={key}
-                onClick={() => contractStore.setNetwork(value)}
-                selected={contractStore.currentNetwork === value}
+                // key={key}
+                // onClick={() => contractStore.setNetwork(value)}
+                selected={true}
                 sx={{ textTransform: 'capitalize' }}
               >
-                {key}
+                "Mainnet"
               </MenuItem>
-            ))}
+            {/* ))} */}
             {Object.entries(GOVERNANCES).map(([key, value]) => (
               <MenuItem
                 key={key}

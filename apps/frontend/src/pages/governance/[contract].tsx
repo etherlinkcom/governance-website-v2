@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Box, Container} from '@mui/material';
+import { Box, Container, Typography, CircularProgress } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
-import {ContractSummary} from '@/components/layouts/ContractSummary';
-import {GovernanceDisplay} from '@/components/layouts/GovernanceDisplay';
+import { GovernanceType } from '@trilitech/types';
+import { ContractsList } from '@/components/contract/ContractsList';
 
 export default observer(() => {
   const router = useRouter();
@@ -12,10 +12,35 @@ export default observer(() => {
 
   useEffect(() => {
     if (contract && typeof contract === 'string') {
-      const governanceType = contract as 'slow' | 'fast' | 'sequencer';
-      contractStore.setContract(governanceType);
+      const governanceType = contract as GovernanceType;
+      contractStore.setGovernance(governanceType);
     }
   }, [contract]);
+
+  if (contractStore.loading) {
+    return (
+      <Container maxWidth="lg">
+        <Box display="flex" justifyContent="center" p={4}>
+          <CircularProgress />
+          <Typography sx={{ ml: 2 }}>
+            Loading {contractStore.currentGovernance} contracts...
+          </Typography>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (contractStore.error) {
+    return (
+      <Container maxWidth="lg">
+        <Box p={4}>
+          <Typography color="error">
+            Error: {contractStore.error}
+          </Typography>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg">
@@ -30,8 +55,11 @@ export default observer(() => {
           mx: "auto",
         }}
       >
-        <ContractSummary />
-        <GovernanceDisplay />
+        <Typography variant="h4" textTransform={'capitalize'}>
+          {contractStore.currentGovernance} Governance
+        </Typography>
+
+        <ContractsList />
       </Box>
     </Container>
   );
