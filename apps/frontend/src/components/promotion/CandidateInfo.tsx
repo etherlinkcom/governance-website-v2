@@ -1,4 +1,4 @@
-import { contractStore } from '@/stores/ContractStore2';
+import { contractStore2 } from '@/stores/ContractStore2';
 import { Box, Typography, useTheme } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
@@ -33,7 +33,7 @@ const CandidateInfoSkeleton = () => {
 };
 
 export const CandidateInfo = observer(() => {
-  const { promotion, isLoading } = contractStore;
+  const { promotion, isLoading } = contractStore2;
 
   if (isLoading) return <CandidateInfoSkeleton />;
 

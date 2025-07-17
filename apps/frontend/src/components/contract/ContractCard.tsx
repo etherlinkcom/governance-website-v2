@@ -2,10 +2,10 @@ import { Accordion, AccordionSummary, AccordionDetails, Box, Typography, Chip, I
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ContractAndConfig } from '@trilitech/types';
 import { Fragment, useEffect, useState } from 'react';
-import { ContractInfoModal } from './ContractInfoModal';
-import { InfoIcon } from '../shared/InfoIcon';
+import { ContractInfoModal } from '@/components/contract/ContractInfoModal';
+import { InfoIcon } from '@/components/shared/InfoIcon';
 import { contractStore } from '@/stores/ContractStore';
-import { PeriodCard } from '../period/PeriodCard';
+import { PeriodCard } from '@/components/period/PeriodCard';
 
 interface ContractCardProps {
   contract: ContractAndConfig;

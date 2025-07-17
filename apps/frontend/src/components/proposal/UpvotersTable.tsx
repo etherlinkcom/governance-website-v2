@@ -4,7 +4,7 @@ import { Table, TableHead, TableRow, TableCell, TableBody, Typography, useTheme 
 import {SortableTable} from '@/components/shared/SortableTable';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
 import { prettifyKey } from '@/lib/prettifyKey';
-import { contractStore } from '@/stores/ContractStore2';
+import { contractStore2 } from '@/stores/ContractStore2';
 import { observer } from 'mobx-react-lite';
 
 interface Upvoter {
@@ -53,7 +53,7 @@ const UpvotersTableSkeleton = () => {
 };
 
 export const UpvotersTable = observer(() => {
-  const {upvoters, isLoading} = contractStore;
+  const {upvoters, isLoading} = contractStore2;
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     upvoters,
     'baker',

@@ -20,7 +20,7 @@ const ContractsListSkeleton = () => (
 );
 
 export const ContractsList = observer(() => {
-  const { contracts, loading, totalContracts, currentGovernance } = contractStore;
+  const { contracts, loading, currentGovernance } = contractStore;
   const [expandedContract, setExpandedContract] = useState<string | null>(null);
 
   const handleAccordionChange = (contractAddress: string) => {

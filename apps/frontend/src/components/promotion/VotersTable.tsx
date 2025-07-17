@@ -2,7 +2,7 @@ import { Table, TableHead, TableRow, TableCell, TableBody, useTheme, Typography 
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
-import { contractStore } from '@/stores/ContractStore2';
+import { contractStore2 } from '@/stores/ContractStore2';
 import { useTableSort } from '@/hooks/useTableSort';
 import { customSortComparator } from '@/lib/votingPowerUtils';
 import {SortableTable} from '@/components/shared/SortableTable';
@@ -56,7 +56,7 @@ const VotersTableSkeleton = () => {
 
 export const VotersTable = observer(() => {
   const theme = useTheme();
-  const { promotion, isLoading } = contractStore;
+  const { promotion, isLoading } = contractStore2;
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     promotion?.voters || [],

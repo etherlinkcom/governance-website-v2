@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { contractStore } from '@/stores/ContractStore2';
+import { contractStore2 } from '@/stores/ContractStore2';
 import {ComponentLoading} from '@/components/shared/ComponentLoading';
 import { ProposalCard } from '@/components/proposal/ProposalCard';
 
@@ -19,7 +19,7 @@ const ProposalsListSkeleton = () => (
 );
 
 export const ProposalsList = observer(() => {
-  const { proposals, quorum, isLoading } = contractStore;
+  const { proposals, quorum, isLoading } = contractStore2;
 
   if (isLoading) return <ProposalsListSkeleton />;
 
