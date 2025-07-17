@@ -63,7 +63,7 @@ export const ContractCard = ({ contract, expanded, onChange }: ContractCardProps
             <IconButton
               size="small"
               onClick={handleInfoClick}
-              sx={{ ml: 1 }}
+              sx={{ ml: 1, color: 'primary.main' }}
             >
               <InfoIcon />
             </IconButton>

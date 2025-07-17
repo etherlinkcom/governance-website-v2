@@ -94,12 +94,25 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
           <ToggleButtonGroup
             value="mainnet"
             exclusive
-            // onChange={handleNetworkChange}
             size="small"
             sx={{ display: { xs: 'none', md: 'flex' } }}
           >
             {Object.entries(NETWORKS).map(([key, value]) => (
-              <ToggleButton key={key} value={value} sx={{ textTransform: 'capitalize' }}>
+              <ToggleButton
+                key={key}
+                value={value}
+                sx={{
+                  textTransform: 'capitalize',
+                  pointerEvents: 'none',
+                  cursor: 'default',
+                  '&:hover': {
+                    backgroundColor: 'action.selected'
+                  },
+                  '&:focus': {
+                    backgroundColor: 'action.selected'
+                  }
+                }}
+              >
                 {key}
               </ToggleButton>
             ))}
@@ -112,16 +125,7 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
             <MenuIcon />
           </IconButton>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-            {/* {Object.entries(NETWORKS).map(([key, value]) => ( */}
-              <MenuItem
-                // key={key}
-                // onClick={() => contractStore.setNetwork(value)}
-                selected={true}
-                sx={{ textTransform: 'capitalize' }}
-              >
-                "Mainnet"
-              </MenuItem>
-            {/* ))} */}
+
             {Object.entries(GOVERNANCES).map(([key, value]) => (
               <MenuItem
                 key={key}
