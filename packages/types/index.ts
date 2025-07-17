@@ -27,6 +27,8 @@ export type Period = {
 
   proposal_hashes?: string[];
   promotion_hash?: string;
+
+  period_class?: 'current' | 'future';
 };
 
 export type Proposal = {

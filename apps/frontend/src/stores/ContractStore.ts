@@ -8,6 +8,8 @@ class ContractStore {
   loadingByGovernance: Partial<Record<GovernanceType, boolean>> = {};
   loadingPeriodsByGovernance: Partial<Record<GovernanceType, Record<string, boolean>>> = {};
   error: string | null = null;
+  blockTimeMs: number = 6000;
+  futurePeriodsCount: number = 3;
 
   constructor() {
     makeAutoObservable(this);
@@ -54,6 +56,57 @@ class ContractStore {
     }
   }
 
+
+  private async generateCurrentAndFuturePeriods(contractAddress: string): Promise<Period[]> {
+  const contract = this.contracts.find(c => c.contract_address === contractAddress);
+  if (!contract || !contract.active) return [];
+
+  try {
+    const tzktResponse = await fetch('https://api.tzkt.io/v1/head');
+    const head = await tzktResponse.json();
+    const currentLevel = head.level;
+    const currentDate = new Date(head.timestamp);
+
+    const periodDurationBlocks = contract.period_length;
+    const startLevel = contract.started_at_level;
+
+    const blocksFromStart = currentLevel - startLevel;
+    const currentPeriodIndex = Math.max(1, Math.floor(blocksFromStart / periodDurationBlocks) + 1);
+
+    const periods: Period[] = [];
+
+    for (let i = 0; i <= this.futurePeriodsCount; i++) {
+      const periodIndex = currentPeriodIndex + i;
+      const periodLevelStart = startLevel + ((periodIndex - 1) * periodDurationBlocks);
+      const periodLevelEnd = periodLevelStart + periodDurationBlocks - 1;
+
+      const blocksFromCurrentToStart = periodLevelStart - currentLevel;
+      const blocksFromCurrentToEnd = periodLevelEnd - currentLevel;
+
+      const startDate = new Date(currentDate.getTime() + (blocksFromCurrentToStart * this.blockTimeMs));
+      const endDate = new Date(currentDate.getTime() + (blocksFromCurrentToEnd * this.blockTimeMs));
+
+      periods.push({
+        contract_voting_index: periodIndex,
+        contract_address: contractAddress,
+        level_start: periodLevelStart,
+        level_end: periodLevelEnd,
+        date_start: startDate,
+        date_end: endDate,
+        proposal_hashes: [],
+        promotion_hash: undefined,
+        period_class: i === 0 ? 'current' : 'future'
+      });
+    }
+
+    return periods;
+
+  } catch (error) {
+    console.error('Failed to generate periods:', error);
+    return [];
+  }
+}
+
   async getPeriods(contractAddress: string) {
     if (!this.currentGovernance) return;
 
@@ -78,8 +131,21 @@ class ContractStore {
       }
 
       const data = await response.json();
-      this.periodsByGovernance[this.currentGovernance]![contractAddress] = data.periods;
+      let allPeriods = data.periods;
 
+      // Add current and future periods for active contracts
+      const contract = this.contracts.find(c => c.contract_address === contractAddress);
+      if (contract?.active) {
+        const generatedPeriods = await this.generateCurrentAndFuturePeriods(contractAddress);
+
+        // Merge with existing periods, avoiding duplicates
+        const existingIndexes = new Set(allPeriods.map((p: Period) => p.contract_voting_index));
+        const newPeriods = generatedPeriods.filter(p => !existingIndexes.has(p.contract_voting_index));
+
+        allPeriods = [...allPeriods, ...newPeriods].sort((a, b) => b.contract_voting_index - a.contract_voting_index);
+      }
+
+      this.periodsByGovernance[this.currentGovernance]![contractAddress] = allPeriods;
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Unknown error loading periods';
       this.periodsByGovernance[this.currentGovernance]![contractAddress] = [];

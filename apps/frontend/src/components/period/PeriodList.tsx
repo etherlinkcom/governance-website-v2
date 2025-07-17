@@ -68,7 +68,7 @@ export const PeriodsList = observer(({ periods, isLoading }: PeriodsListProps) =
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Typography variant="subtitle2" sx={{ mb: 1 }}>
-        Periods with proposals / promotions ({periods.length})
+        Periods with proposals / promotions ({periods.filter(e => e.proposal_hashes && e.proposal_hashes.length + (e.promotion_hash ? 1 : 0)).length})
       </Typography>
 
       {periods.map((period, index) => {
