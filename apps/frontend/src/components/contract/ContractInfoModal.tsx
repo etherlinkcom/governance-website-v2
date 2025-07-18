@@ -47,17 +47,6 @@ export const ContractInfoModal = ({ open, onClose, contract }: ContractInfoModal
         onClose={onClose}
         maxWidth="sm"
         fullWidth
-        slotProps={{
-          paper: {
-            component: Paper,
-            sx: {
-              minWidth: { xs: 280, sm: 500 },
-              boxShadow: `0px 0px 3px 1px ${theme.palette.primary.main}`,
-              m: { xs: 1, sm: 3 },
-              width: { xs: '100%', sm: undefined },
-            },
-          },
-        }}
       >
         <DialogTitle>
           Contract Details
@@ -82,7 +71,7 @@ export const ContractInfoModal = ({ open, onClose, contract }: ContractInfoModal
                 size="small"
                 onClick={handleCopyAddress}
                 sx={{
-                  padding: 0.5,
+                  padding: 1,
                   '&:hover': {
                     backgroundColor: theme.palette.action.hover
                   }

@@ -114,21 +114,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
   // TODO components.ts
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: '95%',
-        maxWidth: '90vw',
-        height: '90vh',
-        bgcolor: 'background.paper',
-        borderRadius: 1,
-        boxShadow: 24,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}>
+      <Box className="modal-content">
         <Box sx={{
           p: 3,
           borderBottom: '1px solid',
@@ -210,21 +196,11 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
           <Tabs
             value={activeTab}
             onChange={handleTabChange}
-            sx={{
-              '& .MuiTabs-indicator': {
-                backgroundColor: 'primary.main',
-              },
-            }}
           >
             {tabConfig.map((tab, idx) => (
               <Tab
                 key={tab.label}
                 label={tab.label}
-                sx={{
-                  textTransform: 'none',
-                  fontSize: '1rem',
-                  fontWeight: activeTab === idx ? 600 : 400,
-                }}
               />
             ))}
           </Tabs>

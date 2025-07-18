@@ -46,7 +46,6 @@ export default observer(() => {
         <Typography variant="h4" textTransform={'capitalize'}>
           {contractStore.currentGovernance} Governance
         </Typography>
-
         <ContractsList />
       </Box>
     </Container>

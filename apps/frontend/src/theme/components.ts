@@ -2,6 +2,27 @@ import { Components, Theme, alpha } from '@mui/material/styles';
 import { typography } from './typography';
 
 export const components: Components<Theme> = {
+  MuiBox: {
+  styleOverrides: {
+    root: {
+      '&.flex-between': {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 2,
+      },
+      '&.flex-row': {
+        display: 'flex',
+        gap: 2,
+      },
+      '&.flex-col': {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+      },
+    },
+  },
+},
   MuiButton: {
     styleOverrides: {
       root: ({ theme }) => ({
@@ -104,20 +125,82 @@ export const components: Components<Theme> = {
       }),
     },
   },
+  MuiDialog: {
+  styleOverrides: {
+    paper: ({ theme }) => ({
+      backgroundColor: theme.palette.background.paper,
+      backdropFilter: 'blur(12px)',
+      boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
+      borderRadius: '25px',
+      border: 'none',
+      minWidth: { xs: 280, sm: 500 },
+      margin: { xs: 1, sm: 3 },
+    }),
+  },
+},
+MuiModal: {
+  styleOverrides: {
+    root: ({ theme }) => ({
+      '& .modal-content': {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '95%',
+        maxWidth: '90vw',
+        height: '90vh',
+        backgroundColor: theme.palette.background.paper,
+        borderRadius: theme.spacing(1),
+        boxShadow: 24,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      },
+    }),
+  },
+},
+MuiTabs: {
+  styleOverrides: {
+    root: {
+      '& .MuiTabs-indicator': {
+        backgroundColor: 'primary.main',
+      },
+    },
+  },
+},
+MuiTab: {
+  styleOverrides: {
+    root: {
+      textTransform: 'none',
+      fontSize: '1rem',
+      fontWeight: 400,
+      '&.Mui-selected': {
+        fontWeight: 600,
+      },
+    },
+  },
+},
+  MuiLink: {
+  styleOverrides: {
+    root: ({ theme }) => ({
+      '&.contract-link': {
+        textDecorationColor: theme.palette.primary.main,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        '&:hover': {
+          textDecorationColor: theme.palette.primary.light,
+        },
+      },
+    }),
+  },
+},
   MuiTypography: {
     styleOverrides: {
       root: ({ theme }) => ({
         fontFamily: typography.fontFamily,
         '&.MuiTypography-h1, &.MuiTypography-h2, &.MuiTypography-h3, &.MuiTypography-h4, &.MuiTypography-h5, &.MuiTypography-h6': {
           color: theme.palette.text.primary,
-        },
-        '&.MuiTypography-link': {
-          color: theme.palette.primary.main,
-          '&:hover': {
-            color: theme.palette.primary.dark,
-            textDecorationThickness: '2px',
-            cursor: 'pointer',
-          },
         },
         '&.MuiTypography-body1': {
           color: theme.palette.text.primary,

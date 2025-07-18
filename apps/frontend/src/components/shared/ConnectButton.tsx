@@ -74,17 +74,6 @@ export const ConnectButton = observer(() => {
         onClose={handleClose}
         maxWidth="xs"
         fullWidth
-        slotProps={{
-          paper: {
-            component: Paper,
-            sx: {
-                minWidth: { xs: 280, sm: 400 },
-                boxShadow: `0px 0px 3px 1px ${theme.palette.primary.main}`,
-                m: { xs: 1, sm: 3 },
-                width: { xs: '100%', sm: undefined },
-            },
-          },
-        }}
       >
         <DialogTitle>
           Wallet Info
