@@ -1,12 +1,9 @@
-import { Card, CardContent, Box, Typography } from '@mui/material';
+import { allLinkData } from '@/data/proposalLinks';
+import { formatDate } from '@/lib/formatDate';
+import { Card, CardContent, Box, Typography, Link } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-
-interface Proposal {
-  id: string;
-  title?: string;
-  author: string;
-  upvotes: string;
-}
+import { Proposal } from '@trilitech/types';
+import { HashDisplay } from '../shared/HashDisplay';
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -16,6 +13,7 @@ export const ProposalCard = ({ proposal}: ProposalCardProps) => {
   const theme = useTheme();
 
   return (
+    // TODO components.ts
     <Card
       sx={{
         backgroundColor: 'background.paper',
@@ -32,24 +30,44 @@ export const ProposalCard = ({ proposal}: ProposalCardProps) => {
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box sx={{ flex: 1 }}>
-            <Typography variant="body2" sx={{ mb: 1, display: 'block' }}>
-              {proposal.id}
-            </Typography>
+
+            <HashDisplay hash={proposal.proposal_hash} />
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              (by {proposal.author})
+              by{' '}
+              {proposal.transaction_hash ? (
+                <Link
+                  href={`https://tzkt.io/${proposal.transaction_hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    color: 'primary.main',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  {proposal.alias || proposal.proposer}
+                </Link>
+              ) : (
+                <span>{proposal.alias || proposal.proposer}</span>
+              )}
             </Typography>
-            {proposal.title && (
-              <Typography variant="body1">
-                {proposal.title}
+
+            {proposal.time && (
+              <Typography variant="subtitle2">
+                {formatDate(proposal.time)}
               </Typography>
             )}
           </Box>
+
           <Box sx={{ textAlign: 'right' }}>
             <Typography variant="subtitle2">
               Upvotes:
             </Typography>
             <Typography variant="body1" sx={{ display: 'block' }}>
-              {proposal.upvotes}
+              TODO
+              {/* {proposal.upvotes || 0} */}
             </Typography>
           </Box>
         </Box>

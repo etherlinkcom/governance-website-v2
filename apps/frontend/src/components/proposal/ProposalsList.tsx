@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { contractStore2 } from '@/stores/ContractStore2';
-import {ComponentLoading} from '@/components/shared/ComponentLoading';
+import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { ProposalCard } from '@/components/proposal/ProposalCard';
+import { usePeriodData } from '@/hooks/usePeriodData';
 
 const ProposalsListSkeleton = () => (
   <Box>
@@ -18,29 +18,62 @@ const ProposalsListSkeleton = () => (
   </Box>
 );
 
-export const ProposalsList = observer(() => {
-  const { proposals, quorum, isLoading } = contractStore2;
+interface ProposalsListProps {
+  contractVotingIndex?: number;
+  contractAddress?: string;
+}
+
+export const ProposalsList = observer(({ contractVotingIndex, contractAddress }: ProposalsListProps) => {
+  const { proposals, isLoading, error, hasValidParams } = usePeriodData(contractAddress, contractVotingIndex);
+
+  if (!hasValidParams) {
+    return (
+      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+        No proposals found
+      </Typography>
+    );
+  }
 
   if (isLoading) return <ProposalsListSkeleton />;
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="h6" sx={{ color: 'error.main', mb: 1 }}>
+          Error Loading Proposals
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" component="h2">
-          Proposals
-        </Typography>
-        <Typography variant="body1">
+        {/* TODO: Get quorum from somewhere - maybe from period info or separate call */}
+        {/* <Typography variant="body1">
           Quorum: {quorum}
-        </Typography>
+        </Typography> */}
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {proposals.map((proposal) => (
-          <ProposalCard
-            key={proposal.id}
-            proposal={proposal}
-          />
-        ))}
+        {proposals.length > 0 ? (
+          proposals.map((proposal) => (
+            <ProposalCard
+              key={proposal.id}
+              proposal={proposal}
+            />
+          ))
+        ) : (
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+            {contractVotingIndex
+              ? `No proposals found for period ${contractVotingIndex}`
+              : 'No proposals found'
+            }
+          </Typography>
+        )}
       </Box>
     </Box>
   );

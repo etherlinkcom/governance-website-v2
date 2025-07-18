@@ -1,6 +1,10 @@
 import { Card, CardContent, Box, Typography, Chip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Period } from '@trilitech/types';
+import { useState } from 'react';
+import { PeriodDetailsModal } from './PeriodDetailsModal';
+import { formatDate } from '@/lib/formatDate';
+import { HashDisplay } from '@/components/shared/HashDisplay';
 
 interface PeriodCardProps {
   period: Period;
@@ -8,18 +12,18 @@ interface PeriodCardProps {
 
 export const PeriodCard = ({ period }: PeriodCardProps) => {
   const theme = useTheme();
+  const [modalOpen, setModalOpen] = useState(false);
   const isCurrentPeriod = period.period_class === 'current';
   const isFuture = period.period_class === 'future';
 
-  const formatDate = (date: Date | string): string => {
-    if (typeof date === 'string') {
-      date = new Date(date);
-    }
-    return date.toLocaleDateString();
-  };
-
   const hasProposals = period.proposal_hashes && period.proposal_hashes.length > 0;
   const hasPromotion = period.promotion_hash;
+
+  const handleCardClick = () => {
+    if (hasProposals || hasPromotion) {
+      setModalOpen(true);
+    }
+  };
 
   if (isFuture) {
     return (
@@ -45,7 +49,9 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
   }
 
   return (
+    <>
     <Card
+      onClick={handleCardClick}
       sx={{
         ...(isCurrentPeriod && {
           border: '2px solid',
@@ -108,18 +114,7 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
                   Proposals:
                 </Typography>
                 {period.proposal_hashes?.map((hash, index) => (
-                  <Typography
-                    key={index}
-                    variant="body2"
-                    sx={{
-                      fontFamily: 'monospace',
-                      fontSize: '0.75rem',
-                      mb: 0.5,
-                      wordBreak: 'break-all'
-                    }}
-                  >
-                    {hash}
-                  </Typography>
+                  <HashDisplay key={index} hash={hash} />
                 ))}
               </Box>
             )}
@@ -129,21 +124,19 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Promotion:
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontFamily: 'monospace',
-                    fontSize: '0.75rem',
-                    wordBreak: 'break-all'
-                  }}
-                >
-                  {period.promotion_hash}
-                </Typography>
+                <HashDisplay hash={period.promotion_hash || ''} />
               </Box>
             )}
           </Box>
         </Box>
       </CardContent>
     </Card>
+
+      <PeriodDetailsModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        period={period}
+      />
+      </>
   );
 };

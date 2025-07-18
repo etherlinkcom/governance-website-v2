@@ -1,30 +1,30 @@
 import { Box, Typography } from '@mui/material';
-import { contractStore2 } from '@/stores/ContractStore2';
-import {CandidateInfo} from '@/components/promotion/CandidateInfo';
-import {VotingResults} from '@/components/promotion/VotingResults';
-import {VotersTable} from '@/components/promotion/VotersTable';
+import { CandidateInfo } from '@/components/promotion/CandidateInfo';
+import { VotingResults } from '@/components/promotion/VotingResults';
+import { VotersTable } from '@/components/promotion/VotersTable';
 
+interface PromotionViewProps {
+  contractVotingIndex?: number;
+  contractAddress?: string;
+  promotionHash?: string;
+}
 
-export const PromotionView = () => {
-  const { error } = contractStore2;
-
-  if (error) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="h6" sx={{ color: 'error.main' }}>
-          {error}
-        </Typography>
-      </Box>
-    );
-  }
-
+export const PromotionView = ({ contractVotingIndex, contractAddress, promotionHash }: PromotionViewProps) => {
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       {/* Candidate Section */}
       <Box>
-        <CandidateInfo/>
-        <VotingResults/>
+        <CandidateInfo
+          contractVotingIndex={contractVotingIndex}
+          contractAddress={contractAddress}
+          promotionHash={promotionHash}
+        />
+        <VotingResults
+          contractVotingIndex={contractVotingIndex}
+          contractAddress={contractAddress}
+          promotionHash={promotionHash}
+        />
       </Box>
 
       {/* Voters Section */}
@@ -32,7 +32,10 @@ export const PromotionView = () => {
         <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
           Voters
         </Typography>
-        <VotersTable />
+        <VotersTable
+          contractVotingIndex={contractVotingIndex}
+          contractAddress={contractAddress}
+        />
       </Box>
     </Box>
   );

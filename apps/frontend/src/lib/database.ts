@@ -1,5 +1,19 @@
 import mysql from 'mysql2/promise';
-import { GovernanceType, Period, ContractAndConfig } from '@trilitech/types';
+import { GovernanceType, Period, ContractAndConfig, Proposal, Upvote, Promotion, Vote } from '@trilitech/types';
+
+//TODO put somewhere
+export interface PeriodDetailsResponse {
+  proposals?: Proposal[];
+  upvotes?: Upvote[];
+  promotions?: Promotion[];
+  votes?: Vote[];
+  periodInfo: {
+    contractAddress: string;
+    contractVotingIndex: number;
+    hasProposals: boolean;
+    hasPromotions: boolean;
+  };
+}
 
 export class Database {
   private connection: mysql.Connection | null = null;
@@ -122,6 +136,84 @@ export class Database {
   console.log(`[Database] Returned ${periods.length} periods for contract ${contractAddress}`);
   return periods;
 }
+
+  async getPeriodDetails(contractAddress: string, contractVotingIndex: number): Promise<PeriodDetailsResponse> {
+    console.log(`[Database] Fetching period details for contract ${contractAddress}, period ${contractVotingIndex}`);
+
+    try {
+      // Fetch proposals for this period
+      const proposals = await this.query<Proposal>(
+        `SELECT * FROM proposals
+         WHERE contract_address = ? AND contract_period_index = ?
+         ORDER BY created_at DESC`,
+        [contractAddress, contractVotingIndex]
+      );
+
+      // Fetch upvotes for proposals in this period
+      // Since upvotes table doesn't have direct period reference, we need to join with proposals
+      const upvotes = await this.query<Upvote>(
+        `SELECT u.*
+         FROM upvotes u
+         JOIN proposals p ON u.proposal_hash = p.proposal_hash
+         WHERE p.contract_address = ? AND p.contract_period_index = ?
+         ORDER BY u.created_at DESC`,
+        [contractAddress, contractVotingIndex]
+      );
+
+      // Fetch promotions for this period
+      const promotions = await this.query<Promotion>(
+        `SELECT * FROM promotions
+         WHERE contract_address = ? AND contract_period_index = ?
+         ORDER BY created_at DESC`,
+        [contractAddress, contractVotingIndex]
+      );
+
+      // Fetch votes for promotions in this period
+      // Join votes with promotions to get votes for this specific period
+      const votes = await this.query<Vote>(
+        `SELECT v.*
+         FROM votes v
+         JOIN promotions pr ON v.proposal_hash = pr.proposal_hash
+         WHERE pr.contract_address = ? AND pr.contract_period_index = ?
+         ORDER BY v.created_at DESC`,
+        [contractAddress, contractVotingIndex]
+      );
+
+      const response: PeriodDetailsResponse = {
+        periodInfo: {
+          contractAddress,
+          contractVotingIndex,
+          hasProposals: proposals.length > 0,
+          hasPromotions: promotions.length > 0,
+        }
+      };
+
+      // Only include arrays that have data
+      if (proposals.length > 0) {
+        response.proposals = proposals;
+      }
+
+      if (upvotes.length > 0) {
+        response.upvotes = upvotes;
+      }
+
+      if (promotions.length > 0) {
+        response.promotions = promotions;
+      }
+
+      if (votes.length > 0) {
+        response.votes = votes;
+      }
+
+      console.log(`[Database] Period details - Proposals: ${proposals.length}, Upvotes: ${upvotes.length}, Promotions: ${promotions.length}, Votes: ${votes.length}`);
+
+      return response;
+
+    } catch (error) {
+      console.error(`[Database] Error fetching period details for ${contractAddress}, period ${contractVotingIndex}:`, error);
+      throw error;
+    }
+  }
 
   async close(): Promise<void> {
     if (this.connection) {

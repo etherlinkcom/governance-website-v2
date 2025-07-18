@@ -11,6 +11,14 @@ interface VoteResultCardProps {
 export const VoteResultCard = ({ type, percentage, count, label }: VoteResultCardProps) => {
   const theme = useTheme();
 
+
+  const formatCount = (num: number) => {
+    return new Intl.NumberFormat('en-US', {
+      notation: 'compact',
+      maximumFractionDigits: 1
+    }).format(num);
+  };
+
   const getThemeColors = () => {
     switch (type) {
       case 'yea':
@@ -74,7 +82,7 @@ export const VoteResultCard = ({ type, percentage, count, label }: VoteResultCar
             fontWeight: theme.typography.subtitle1.fontWeight
           }}
         >
-          {percentage}% ({count} {label})
+          {percentage}% ({formatCount(count)} {label})
         </Typography>
       </Box>
       <Typography

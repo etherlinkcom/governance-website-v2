@@ -1,10 +1,11 @@
-import { contractStore2 } from '@/stores/ContractStore2';
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Link, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import {ComponentLoading} from '@/components/shared/ComponentLoading';
+import { ComponentLoading } from '@/components/shared/ComponentLoading';
+import { allLinkData } from '@/data/proposalLinks';
+import { HashDisplay } from '../shared/HashDisplay';
+import { usePeriodData } from '@/hooks/usePeriodData';
 
 const CandidateInfoSkeleton = () => {
-  const theme = useTheme();
   return (
     <Box sx={{ mb: 2 }}>
       <Typography variant="subtitle2">
@@ -32,12 +33,16 @@ const CandidateInfoSkeleton = () => {
   );
 };
 
-export const CandidateInfo = observer(() => {
-  const { promotion, isLoading } = contractStore2;
+interface CandidateInfoProps {
+  contractAddress?: string;
+  contractVotingIndex?: number;
+  promotionHash?: string;
+}
 
-  if (isLoading) return <CandidateInfoSkeleton />;
-
-  if (!promotion) {
+export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, promotionHash }: CandidateInfoProps) => {
+  const { promotions, isLoading, error, hasValidParams } = usePeriodData(contractAddress, contractVotingIndex);
+  const promotion_hash = promotionHash || promotions?.[0]?.proposal_hash;
+  if (!promotion_hash) {
     return (
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2" color="text.secondary">
@@ -52,12 +57,7 @@ export const CandidateInfo = observer(() => {
       <Typography variant="subtitle2">
         Candidate:
       </Typography>
-      <Typography variant="body2" sx={{ mb: 1 }}>
-        {promotion.candidate}
-      </Typography>
-      <Typography variant="subtitle1">
-        {promotion.title}
-      </Typography>
+      <HashDisplay hash={promotion_hash} variant="inline" />
 
       {/* Stats */}
       <Box sx={{ display: 'flex', gap: 4, mt: 3 }}>
@@ -66,15 +66,15 @@ export const CandidateInfo = observer(() => {
             Quorum:
           </Typography>
           <Typography variant="body1">
-            {promotion.quorum}
+            {/* {promotion.quorum} */}
           </Typography>
         </Box>
         <Box>
           <Typography variant="subtitle2">
             Supermajority:
           </Typography>
-          <Typography variant="body1" >
-            {promotion.supermajority}
+          <Typography variant="body1">
+            {/* {promotion.supermajority} */}
           </Typography>
         </Box>
       </Box>
