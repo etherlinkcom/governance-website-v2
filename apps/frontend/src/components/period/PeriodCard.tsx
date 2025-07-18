@@ -27,7 +27,7 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
 
   if (isFuture) {
     return (
-      <Card variant="outlined" sx={{ py: 1, px: 2,  }}>
+      <Card variant="outlined" sx={{ py: 1, px: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2" color="text.secondary">
@@ -60,6 +60,7 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
           transform: 'scale(1.02)',
         }),
         transition: 'all 0.3s ease-in-out',
+        cursor: hasProposals || hasPromotion ? 'pointer' : 'default',
       }}
     >
       <CardContent sx={{ p: 3 }}>
