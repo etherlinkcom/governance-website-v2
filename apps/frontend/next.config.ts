@@ -25,9 +25,7 @@ const nextConfig: NextConfig = {
 
   transpilePackages: ['@trilitech/types'],
 
-  experimental: {
-    serverComponentsExternalPackages: ['mysql2'],
-  },
+  serverExternalPackages: ['mysql2']
 };
 
 export default nextConfig;

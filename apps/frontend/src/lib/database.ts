@@ -13,7 +13,7 @@ export class Database {
     port: parseInt(process.env.DB_PORT!),
     timezone: 'Z',
     dateStrings: false,
-    connectTimeout: 10000,
+    connectTimeout: 30000,
     keepAliveInitialDelay: 0,
     idleTimeout: 300000,
   };
