@@ -86,7 +86,7 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
               height={32}
               style={{ display: 'block' }}
             />
-            <Typography variant="h6" component="div">
+            <Typography variant="h6" sx={{ml: -1}}>
               Governance
             </Typography>
           </Link>

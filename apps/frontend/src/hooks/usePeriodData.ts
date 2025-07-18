@@ -1,5 +1,5 @@
 import { contractStore } from '@/stores/ContractStore';
-import { Upvote, Proposal, Vote, Promotion } from '@trilitech/types';
+import { Upvote, Proposal, Vote, Promotion, Period } from '@trilitech/types';
 
 interface PeriodData {
   proposals: Proposal[];
@@ -11,6 +11,8 @@ interface PeriodData {
   hasValidParams: boolean;
   proposalsPeriod: number;
   promotionsPeriod: number;
+  proposalsPeriodData: Period | null;
+  promotionsPeriodData: Period | null;
 }
 
 export const usePeriodData = (
@@ -31,7 +33,9 @@ export const usePeriodData = (
       error: null,
       hasValidParams: false,
       proposalsPeriod: 0,
-      promotionsPeriod: 0
+      promotionsPeriod: 0,
+      proposalsPeriodData: null,
+      promotionsPeriodData: null,
     };
   }
 
@@ -49,13 +53,18 @@ export const usePeriodData = (
     promotionsPeriod = contractVotingIndex;
   }
 
+  const allPeriods = contractStore.getPeriodsForContract(contractAddress);
+  const proposalsPeriodData = allPeriods.find(p => p.contract_voting_index === proposalsPeriod) || null;
+  const promotionsPeriodData = allPeriods.find(p => p.contract_voting_index === promotionsPeriod) || null;
+
   const proposals = contractStore.getProposalsForPeriod(contractAddress, proposalsPeriod);
   const promotions = contractStore.getPromotionsForPeriod(contractAddress, promotionsPeriod);
   const upvoters = contractStore.getUpvotesForPeriod(contractAddress, proposalsPeriod);
   const votes = contractStore.getVotesForPeriod(contractAddress, promotionsPeriod);
 
   const isLoading = contractStore.isPeriodDetailsLoading(contractAddress, proposalsPeriod) ||
-                   contractStore.isPeriodDetailsLoading(contractAddress, promotionsPeriod);
+                   contractStore.isPeriodDetailsLoading(contractAddress, promotionsPeriod) ||
+                   contractStore.isLoadingPeriods(contractAddress);
 
   const error = contractStore.getPeriodDetailsError(contractAddress, proposalsPeriod) ||
                contractStore.getPeriodDetailsError(contractAddress, promotionsPeriod);
@@ -69,6 +78,8 @@ export const usePeriodData = (
     error,
     hasValidParams,
     proposalsPeriod,
-    promotionsPeriod
+    promotionsPeriod,
+    proposalsPeriodData,
+    promotionsPeriodData,
   };
 };

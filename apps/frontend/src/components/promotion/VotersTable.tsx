@@ -1,12 +1,12 @@
-import { Table, TableHead, TableRow, TableCell, TableBody, useTheme, Typography, Link } from '@mui/material';
+import { Table, TableHead, TableRow, TableCell, TableBody, useTheme, Typography, Link, Box } from '@mui/material';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { usePeriodData } from '@/hooks/usePeriodData';
 import { useTableSort } from '@/hooks/useTableSort';
-import { customSortComparator } from '@/lib/votingPowerUtils';
 import { SortableTable } from '@/components/shared/SortableTable';
 import { Vote } from '@trilitech/types';
+import { customSortComparator, formatNumber } from '@/lib/votingCalculations';
 
 const voterKeys: (keyof Vote)[] = ['baker', 'voting_power', 'vote', 'time'];
 
@@ -14,18 +14,17 @@ const VotersTableSkeleton = () => {
   const theme = useTheme();
 
   return (
-    <div style={{
-      boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
+    <Box sx={{
+      width: '100%',
+      overflowX: 'auto',
       borderRadius: '25px',
-      overflow: 'hidden',
-      padding: '12px',
       background: theme.palette.background.paper,
     }}>
-      <Table>
+      <Table sx={{ minWidth: 600 }}>
         <TableHead>
           <TableRow>
             {voterKeys.map(key => (
-              <TableCell key={key}>
+              <TableCell key={key} sx={{ whiteSpace: 'nowrap' }}>
                 {prettifyKey(key)}
               </TableCell>
             ))}
@@ -35,7 +34,7 @@ const VotersTableSkeleton = () => {
           {[...Array(5)].map((_, rowIdx) => (
             <TableRow key={rowIdx}>
               {voterKeys.map((key, colIdx) => (
-                <TableCell key={colIdx}>
+                <TableCell key={colIdx} sx={{ whiteSpace: 'nowrap' }}>
                   <ComponentLoading width="80%" height={18} />
                 </TableCell>
               ))}
@@ -43,7 +42,7 @@ const VotersTableSkeleton = () => {
           ))}
         </TableBody>
       </Table>
-    </div>
+    </Box>
   );
 };
 
@@ -106,7 +105,7 @@ export const VotersTable = observer(({ contractVotingIndex, contractAddress }: V
           </Link>
         );
       case 'voting_power':
-        return row.voting_power?.toLocaleString();
+        return formatNumber(row.voting_power)
       case 'vote':
         return (
           <Typography
@@ -129,7 +128,6 @@ export const VotersTable = observer(({ contractVotingIndex, contractAddress }: V
     }
   };
 
-  // Show empty state if no data
   if (!Array.isArray(votes) || votes.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>

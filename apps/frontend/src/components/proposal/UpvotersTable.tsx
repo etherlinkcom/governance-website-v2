@@ -1,30 +1,29 @@
 import { useTableSort } from '@/hooks/useTableSort';
-import { customSortComparator } from '@/lib/votingPowerUtils';
-import { Table, TableHead, TableRow, TableCell, TableBody, Typography, useTheme, Link } from '@mui/material';
+import { Table, TableHead, TableRow, TableCell, TableBody, Typography, useTheme, Link, Box } from '@mui/material';
 import { SortableTable } from '@/components/shared/SortableTable';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { Upvote } from '@trilitech/types';
 import { usePeriodData } from '@/hooks/usePeriodData';
+import { customSortComparator, formatNumber } from '@/lib/votingCalculations';
 
 const upvoterKeys: (keyof Upvote)[] = ['baker', 'voting_power', 'proposal_hash', 'time'];
 
 const UpvotersTableSkeleton = () => {
   const theme = useTheme();
   return (
-    <div style={{
-      boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
+    <Box sx={{
+      width: '100%',
+      overflowX: 'auto',
       borderRadius: '25px',
-      overflow: 'hidden',
-      padding: '12px',
       background: theme.palette.background.paper,
     }}>
-      <Table>
+      <Table sx={{ minWidth: 600 }}>
         <TableHead>
           <TableRow>
             {upvoterKeys.map(key => (
-              <TableCell key={key}>
+              <TableCell key={key} sx={{ whiteSpace: 'nowrap' }}>
                 {prettifyKey(key)}
               </TableCell>
             ))}
@@ -34,7 +33,7 @@ const UpvotersTableSkeleton = () => {
           {[...Array(5)].map((_, rowIdx) => (
             <TableRow key={rowIdx}>
               {upvoterKeys.map((key, colIdx) => (
-                <TableCell key={colIdx}>
+                <TableCell key={colIdx} sx={{ whiteSpace: 'nowrap' }}>
                   <ComponentLoading width="80%" height={18} />
                 </TableCell>
               ))}
@@ -42,7 +41,7 @@ const UpvotersTableSkeleton = () => {
           ))}
         </TableBody>
       </Table>
-    </div>
+    </Box>
   );
 };
 
@@ -96,7 +95,7 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
           </Link>
         );
       case 'voting_power':
-        return row.voting_power?.toLocaleString();
+        return formatNumber(row.voting_power);
       case 'proposal_hash':
         return (
           <Typography

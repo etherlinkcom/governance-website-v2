@@ -1,4 +1,4 @@
-import { Accordion, AccordionSummary, AccordionDetails, Box, Typography, Chip, IconButton } from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Box, Typography, Chip, IconButton, Link } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ContractAndConfig } from '@trilitech/types';
 import { useEffect, useState } from 'react';
@@ -40,17 +40,17 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 2 }}>
             <Box sx={{ flex: 1 }}>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontFamily: 'monospace',
-                  fontWeight: 'medium',
-                  mb: 0.5
-                }}
+              <Link
+                variant="body2"
+                href={`https://tzkt.io/${contract.contract_address}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(event) => event.stopPropagation()}
               >
-                {contract.contract_address}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
+                Contract: {contract.contract_address}
+              </Link>
+
+              <Typography variant="body1" color="text.secondary" sx={{mt: 1}}>
                 Level: {contract.started_at_level.toLocaleString()}
               </Typography>
             </Box>

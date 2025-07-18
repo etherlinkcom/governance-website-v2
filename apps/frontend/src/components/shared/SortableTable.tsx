@@ -1,4 +1,4 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableSortLabel } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableSortLabel, Box } from '@mui/material';
 
 type Order = 'asc' | 'desc';
 
@@ -19,39 +19,56 @@ interface SortableTableProps<T> {
 
 export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort, renderCell }: SortableTableProps<T>) => {
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            {columns.map((column) => (
-              <TableCell key={column.id as string}>
-                {column.sortable ? (
-                  <TableSortLabel
-                    active={orderBy === column.id}
-                    direction={orderBy === column.id ? order : 'asc'}
-                    onClick={() => onRequestSort(column.id)}
-                  >
-                    {column.label}
-                  </TableSortLabel>
-                ) : (
-                  column.label
-                )}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.map((row, index) => (
-            <TableRow key={index}>
+    <Box sx={{
+      width: '100%',
+      overflowX: 'auto'
+    }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          minWidth: 600,
+          maxWidth: '100%'
+        }}
+      >
+        <Table sx={{ minWidth: 600 }}>
+          <TableHead>
+            <TableRow>
               {columns.map((column) => (
-                <TableCell key={column.id as string}>
-                  {renderCell(row, column)}
+                <TableCell
+                  key={column.id as string}
+                  sx={{ whiteSpace: 'nowrap' }}
+                >
+                  {column.sortable ? (
+                    <TableSortLabel
+                      active={orderBy === column.id}
+                      direction={orderBy === column.id ? order : 'asc'}
+                      onClick={() => onRequestSort(column.id)}
+                    >
+                      {column.label}
+                    </TableSortLabel>
+                  ) : (
+                    column.label
+                  )}
                 </TableCell>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {data.map((row, index) => (
+              <TableRow key={index}>
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.id as string}
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    {renderCell(row, column)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };

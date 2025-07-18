@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Tabs, Tab, Modal, Typography, IconButton } from '@mui/material';
+import { Box, Tabs, Tab, Modal, Typography, IconButton, Link } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
 import { ProposalsView } from '@/components/proposal/ProposalsView';
@@ -45,10 +45,11 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
   const {
     proposals,
     promotions,
-    isLoading,
     error,
     proposalsPeriod,
-    promotionsPeriod
+    promotionsPeriod,
+    proposalsPeriodData,
+    promotionsPeriodData
   } = usePeriodData(
     period.contract_address,
     period.contract_voting_index,
@@ -87,18 +88,6 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
     });
   }
 
-  if (isLoading && tabConfig.length === 0) {
-    tabConfig.push({
-      label: 'Loading...',
-      component: (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography>Loading period details...</Typography>
-        </Box>
-      ),
-      isPrimaryPeriod: true
-    });
-  }
-
   if (error && tabConfig.length === 0) {
     tabConfig.push({
       label: 'Error',
@@ -122,6 +111,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
     setActiveTab(newValue);
   };
 
+  // TODO components.ts
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={{
@@ -139,37 +129,79 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
         flexDirection: 'column',
         overflow: 'hidden'
       }}>
-        {/* Modal Header - Fixed */}
         <Box sx={{
           p: 3,
           borderBottom: '1px solid',
           borderColor: 'divider',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
           flexShrink: 0
         }}>
-          <Box>
-            <Typography variant="h5">
-              Period {period.contract_voting_index} Details
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              Contract: {period.contract_address}
-            </Typography>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 0.5 }}>
-              Dates: {formatDate(period.date_start)} - {formatDate(period.date_end)}
-            </Typography>
-
-            <Typography variant="caption" color="text.secondary">
-              Levels: {period.level_start.toLocaleString()} - {period.level_end.toLocaleString()}
-            </Typography>
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 2,
+            gap: 2,
+          }}>
+            <Link
+                variant="body2"
+                href={`https://tzkt.io/${period.contract_address}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Contract: {period.contract_address}
+              </Link>
+            <IconButton
+              onClick={onClose}
+              sx={{
+                flexShrink: 0,
+                minWidth: 48,
+                width: 48,
+                height: 48,
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
           </Box>
-          <IconButton onClick={onClose} sx={{ ml: 2 }}>
-            <CloseIcon />
-          </IconButton>
+
+          <Box sx={{ display: 'flex', gap: 4 }}>
+            {/* Proposals Period - Left */}
+            <Box sx={{ flex: 1, textAlign: 'left' }}>
+              {proposals.length > 0 && proposalsPeriodData && (
+                <>
+                  <Typography variant="h6" color="success.main">
+                    Proposals - Period {proposalsPeriod}
+                  </Typography>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
+                    Dates: {formatDate(proposalsPeriodData.date_start)} - {formatDate(proposalsPeriodData.date_end)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Levels: {proposalsPeriodData.level_start.toLocaleString()} - {proposalsPeriodData.level_end.toLocaleString()}
+                  </Typography>
+                </>
+               )}
+
+            </Box>
+
+            {/* Promotions Period - Right */}
+            <Box sx={{ flex: 1 }}>
+              {promotions.length > 0 && promotionsPeriodData && (
+                <>
+                  <Typography variant="h6" color="warning.main">
+                    Promotion - Period {promotionsPeriod}
+                  </Typography>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
+                    Dates: {formatDate(promotionsPeriodData.date_start)} - {formatDate(promotionsPeriodData.date_end)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Levels: {promotionsPeriodData.level_start.toLocaleString()} - {promotionsPeriodData.level_end.toLocaleString()}
+                  </Typography>
+                </>
+              )}
+            </Box>
+          </Box>
         </Box>
 
-        {/* Tabs - Fixed */}
+        {/* Tabs */}
         <Box sx={{
           borderBottom: 1,
           borderColor: 'divider',

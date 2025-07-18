@@ -1,3 +1,4 @@
+import { formatNumber } from '@/lib/votingCalculations';
 import { Box, Typography } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 
@@ -10,14 +11,6 @@ interface VoteResultCardProps {
 
 export const VoteResultCard = ({ type, percentage, count, label }: VoteResultCardProps) => {
   const theme = useTheme();
-
-
-  const formatCount = (num: number) => {
-    return new Intl.NumberFormat('en-US', {
-      notation: 'compact',
-      maximumFractionDigits: 1
-    }).format(num);
-  };
 
   const getThemeColors = () => {
     switch (type) {
@@ -82,7 +75,7 @@ export const VoteResultCard = ({ type, percentage, count, label }: VoteResultCar
             fontWeight: theme.typography.subtitle1.fontWeight
           }}
         >
-          {percentage}% ({formatCount(count)} {label})
+          {percentage}% ({formatNumber(count)} {label})
         </Typography>
       </Box>
       <Typography

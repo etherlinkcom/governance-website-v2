@@ -8,6 +8,7 @@ interface ProposalsViewProps {
   contractVotingIndex?: number;
   contractAddress?: string;
 }
+
 export const ProposalsView = observer(({ contractVotingIndex, contractAddress }: ProposalsViewProps) => {
 
   return (

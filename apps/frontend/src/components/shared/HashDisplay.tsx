@@ -4,10 +4,17 @@ import { allLinkData } from '@/data/proposalLinks';
 interface ProposalHashDisplayProps {
   hash: string;
   variant?: 'inline' | 'block';
+  enableEllipsis?: boolean;
 }
 
-export const HashDisplay = ({ hash, variant = 'block' }: ProposalHashDisplayProps) => {
+export const HashDisplay = ({ hash, variant = 'block', enableEllipsis = true }: ProposalHashDisplayProps) => {
   const linkData = allLinkData[hash];
+
+  const ellipsisStyles = enableEllipsis ? {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  } : {};
 
   if (linkData) {
     return (
@@ -19,12 +26,14 @@ export const HashDisplay = ({ hash, variant = 'block' }: ProposalHashDisplayProp
           color: 'primary.main',
           textDecoration: 'none',
           '&:hover': { textDecoration: 'underline' },
-          display: variant === 'block' ? 'block' : 'inline'
+          display: variant === 'block' ? 'block' : 'inline',
+          ...ellipsisStyles
         }}
       >
         <Typography
           variant="body2"
           component={variant === 'inline' ? 'span' : 'div'}
+          sx={ellipsisStyles}
         >
           {linkData.title}
         </Typography>
@@ -36,7 +45,7 @@ export const HashDisplay = ({ hash, variant = 'block' }: ProposalHashDisplayProp
     <Typography
       variant="body2"
       component={variant === 'inline' ? 'span' : 'div'}
-      sx={{wordBreak: 'break-all'}}
+      sx={ellipsisStyles}
     >
       {hash}
     </Typography>

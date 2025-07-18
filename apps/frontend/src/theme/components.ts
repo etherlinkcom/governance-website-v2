@@ -15,7 +15,6 @@ export const components: Components<Theme> = {
         borderRadius: '50px',
         padding: '12px 24px',
         transition: 'all 0.2s ease-in-out',
-        border: '2px solid',
         borderImageSource: `radial-gradient(50% 32.35% at 0% 50%, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0)} 100%)`,
         gap: theme.spacing(1),
         textAlign: 'center',
@@ -200,14 +199,30 @@ export const components: Components<Theme> = {
     },
   },
   MuiTableContainer: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
-        borderRadius: '25px',
-        overflow: 'hidden',
-      }),
-    },
+  styleOverrides: {
+    root: ({ theme }) => ({
+      borderRadius: '25px',
+      overflow: 'hidden',
+      overflowX: 'auto',
+      '&::-webkit-scrollbar': {
+        height: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+        borderRadius: '4px',
+        '&:hover': {
+          backgroundColor: alpha(theme.palette.primary.main, 0.1),
+        },
+      },
+      scrollbarWidth: 'thin',
+      scrollbarColor: `${alpha(theme.palette.primary.main, 0.1)} ${alpha(theme.palette.primary.main, 0.0)}`
+    }),
   },
+},
   MuiTable: {
     styleOverrides: {
       root: {
