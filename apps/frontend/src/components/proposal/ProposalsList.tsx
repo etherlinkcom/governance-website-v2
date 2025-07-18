@@ -52,10 +52,9 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        {/* TODO: Get quorum from somewhere - maybe from period info or separate call */}
-        {/* <Typography variant="body1">
-          Quorum: {quorum}
-        </Typography> */}
+        <Typography variant="body1">
+          Quorum: TODO
+        </Typography>
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

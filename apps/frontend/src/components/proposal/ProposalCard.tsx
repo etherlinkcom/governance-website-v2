@@ -23,7 +23,7 @@ export const ProposalCard = ({ proposal}: ProposalCardProps) => {
               by{' '}
               {proposal.transaction_hash ? (
                 <Link
-                  href={`https://tzkt.io/${proposal.transaction_hash}`}
+                  href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${proposal.transaction_hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{
@@ -54,7 +54,6 @@ export const ProposalCard = ({ proposal}: ProposalCardProps) => {
             </Typography>
             <Typography variant="body1" sx={{ display: 'block' }}>
               TODO
-              {/* {proposal.upvotes || 0} */}
             </Typography>
           </Box>
         </Box>

@@ -80,7 +80,7 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
       case 'baker':
         return (
           <Link
-            href={`https://tzkt.io/${row.baker}`}
+            href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${row.baker}`}
             target="_blank"
             rel="noopener noreferrer"
             sx={{
@@ -118,7 +118,6 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
     }
   };
 
-  // Show empty state if no data
   if (!hasValidParams) {
     return (
       <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>

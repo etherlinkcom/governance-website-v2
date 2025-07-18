@@ -88,9 +88,8 @@ export const VotersTable = observer(({ contractVotingIndex, contractAddress }: V
     switch (column.id) {
       case 'baker':
         return (
-          // TODO tzkt .env
           <Link
-            href={`https://tzkt.io/${row.baker}`}
+            href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${row.baker}`}
             target="_blank"
             rel="noopener noreferrer"
             sx={{

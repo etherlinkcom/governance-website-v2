@@ -111,7 +111,6 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
     setActiveTab(newValue);
   };
 
-  // TODO components.ts
   return (
     <Modal open={open} onClose={onClose}>
       <Box className="modal-content">
@@ -130,7 +129,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
           }}>
             <Link
                 variant="body2"
-                href={`https://tzkt.io/${period.contract_address}`}
+                href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${period.contract_address}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
