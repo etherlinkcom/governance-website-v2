@@ -1,5 +1,6 @@
-import { makeAutoObservable, flow, computed, runInAction } from 'mobx';
+import { makeAutoObservable, flow, computed } from 'mobx';
 import { GovernanceType, Period, ContractAndConfig, Vote, Promotion, Upvote, Proposal } from '@trilitech/types';
+import { PeriodDetailsResponse } from '@/types/api';
 
 class ContractStore {
   currentGovernance: GovernanceType | null = null;
@@ -302,7 +303,7 @@ class ContractStore {
       const response = yield fetch(`/api/contract/${contractAddress}/${periodIndex}/details`);
       if (!response.ok) throw new Error('Failed to fetch period details');
 
-      const data = yield response.json();
+      const data: PeriodDetailsResponse = yield response.json();
 
       this.periodDetails[contractAddress][periodIndex] = {
         ...data,

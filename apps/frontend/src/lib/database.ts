@@ -1,19 +1,6 @@
 import mysql from 'mysql2/promise';
 import { GovernanceType, Period, ContractAndConfig, Proposal, Upvote, Promotion, Vote } from '@trilitech/types';
-
-//TODO put somewhere
-export interface PeriodDetailsResponse {
-  proposals?: Proposal[];
-  upvotes?: Upvote[];
-  promotions?: Promotion[];
-  votes?: Vote[];
-  periodInfo: {
-    contractAddress: string;
-    contractVotingIndex: number;
-    hasProposals: boolean;
-    hasPromotions: boolean;
-  };
-}
+import { PeriodDetailsResponse } from '@/types/api';
 
 export class Database {
   private connection: mysql.Connection | null = null;
