@@ -2,27 +2,6 @@ import { Components, Theme, alpha } from '@mui/material/styles';
 import { typography } from './typography';
 
 export const components: Components<Theme> = {
-  MuiBox: {
-  styleOverrides: {
-    root: {
-      '&.flex-between': {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: 2,
-      },
-      '&.flex-row': {
-        display: 'flex',
-        gap: 2,
-      },
-      '&.flex-col': {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-      },
-    },
-  },
-},
   MuiButton: {
     styleOverrides: {
       root: ({ theme }) => ({
@@ -133,8 +112,12 @@ export const components: Components<Theme> = {
       boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
       borderRadius: '25px',
       border: 'none',
-      minWidth: { xs: 280, sm: 500 },
-      margin: { xs: 1, sm: 3 },
+      minWidth: '280px',
+      margin: '8px',
+      '@media (min-width: 600px)': {
+        minWidth: '500px',
+        margin: '24px',
+      },
     }),
   },
 },
