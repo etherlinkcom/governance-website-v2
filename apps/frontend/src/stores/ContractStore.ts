@@ -2,6 +2,7 @@ import { makeAutoObservable, flow, computed } from 'mobx';
 import { GovernanceType, Period, ContractAndConfig, Vote, Promotion, Upvote, Proposal } from '@trilitech/types';
 import { PeriodDetailsResponse } from '@/types/api';
 
+// TODO stop trying to reconnect to database after x fails
 class ContractStore {
   currentGovernance: GovernanceType | null = null;
   contractsByGovernance: Partial<Record<GovernanceType, ContractAndConfig[]>> = {};

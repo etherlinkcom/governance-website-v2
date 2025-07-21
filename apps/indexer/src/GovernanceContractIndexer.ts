@@ -84,9 +84,7 @@ export class GovernanceContractIndexer {
     public async getDelegateVotingPowerForAddress(address: string, level: number, global_voting_index: number): Promise<number> {
         logger.info(`[GovernanceContractIndexer] getDelegateVotingPowerForAddress(${address}, ${level}, ${global_voting_index})`);
         try {
-
             const cacheKey = `delegates_${address}_${global_voting_index}`;
-
             if (this.cache) {
                 const cached = this.cache.get(cacheKey);
                 if (cached) return cached;

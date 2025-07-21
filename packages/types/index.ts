@@ -41,7 +41,7 @@ export type Proposal = {
   proposer: string;
   alias?: string;
   contract_address: string;
-
+  //TODO upvotes
 };
 
 export type Promotion = {

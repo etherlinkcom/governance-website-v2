@@ -128,7 +128,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
             gap: 2,
           }}>
             <Link
-                variant="body2"
+                variant="contract-link"
                 href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${period.contract_address}`}
                 target="_blank"
                 rel="noopener noreferrer"

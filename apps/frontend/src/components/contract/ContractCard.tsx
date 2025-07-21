@@ -4,7 +4,7 @@ import { ContractAndConfig } from '@trilitech/types';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ContractInfoModal } from '@/components/contract/ContractInfoModal';
-import { InfoIcon } from '@/components/shared/InfoIcon';
+import { InfoIcon } from '@/components/shared/icons/InfoIcon';
 import { contractStore } from '@/stores/ContractStore';
 import { PeriodsList } from '@/components/period/PeriodList';
 

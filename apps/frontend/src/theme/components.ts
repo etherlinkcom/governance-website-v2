@@ -126,19 +126,22 @@ MuiModal: {
     root: ({ theme }) => ({
       '& .modal-content': {
         position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
+        inset: 0,
+        margin: 'auto',
         width: '95%',
-        maxWidth: '90vw',
-        height: '90vh',
+        width: '100vw',
+        height: '100dvh',
         backgroundColor: theme.palette.background.paper,
         borderRadius: theme.spacing(1),
         boxShadow: 24,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        [theme.breakpoints.up('sm')]: {
+          width: '90vw',
+          height: '90dvh',
       },
+    }
     }),
   },
 },
@@ -168,9 +171,11 @@ MuiTab: {
     root: ({ theme }) => ({
       '&.contract-link': {
         textDecorationColor: theme.palette.primary.main,
-        overflow: 'hidden',
+        overflow: 'hidden !important',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
+        maxWidth: '100%',
+        display: 'block',
         '&:hover': {
           textDecorationColor: theme.palette.primary.light,
         },
@@ -203,7 +208,7 @@ MuiTab: {
         backgroundColor: theme.palette.background.default,
         color: theme.palette.text.primary,
         fontFamily: typography.fontFamily,
-        minWidth: '415px'
+        minWidth: '375px'
       },
       '*::-webkit-scrollbar': {
         width: '8px',

@@ -13,6 +13,7 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout';
 import { getWalletStore } from '@/stores/WalletStore';
 import { CopyButton } from '@/components/shared/CopyButton';
+import { MetaMaskIcon } from '@/components/shared/icons/MetaMaskIcon';
 
 export const ConnectButton = observer(() => {
   const [open, setOpen] = useState(false);
@@ -45,9 +46,21 @@ export const ConnectButton = observer(() => {
 
   if (!walletStore.address) {
     return (
-      <Button variant="contained" onClick={handleConnect}>
-        Connect Wallet
+      <>
+      <Button variant="contained" onClick={handleConnect} >
+        <Box sx={{
+          color: theme.palette.primary.contrastText,
+          display: { xs: 'none', sm: 'inline-flex' }
+        }}>
+          Connect
+        </Box>
+        <Box sx={{
+          display: { xs: 'inline-flex', sm: 'none' }
+        }}>
+          <MetaMaskIcon />
+        </Box>
       </Button>
+      </>
     );
   }
 
