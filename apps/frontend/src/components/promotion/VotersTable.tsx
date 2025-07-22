@@ -80,7 +80,7 @@ export const VotersTable = observer(({ contractVotingIndex, contractAddress }: V
 
   const columns = voterKeys.map(key => ({
     id: key,
-    label: prettifyKey(key),
+    label: key === 'proposal_hash' ? 'Proposal' : prettifyKey(key),
     sortable: true
   }));
 

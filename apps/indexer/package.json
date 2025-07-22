@@ -9,7 +9,8 @@
   "main": "src/index.ts",
   "scripts": {
     "migrate": "ts-node src/migrate.ts",
-    "start": "ts-node src/index.ts"
+    "start:listener": "",
+    "start:indexer": "ts-node src/index.ts"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.0",

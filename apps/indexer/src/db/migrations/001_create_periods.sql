@@ -1,13 +1,15 @@
 CREATE TABLE IF NOT EXISTS periods (
   id INT AUTO_INCREMENT PRIMARY KEY,
   contract_voting_index INT NOT NULL,
-  contract_address VARCHAR(100) NOT NULL,
+  contract_address VARCHAR(36) NOT NULL,
   level_start BIGINT NOT NULL,
   level_end BIGINT NOT NULL,
   date_start DATETIME NOT NULL,
   date_end DATETIME NOT NULL,
   proposal_hashes JSON,
-  promotion_hash VARCHAR(100),
+  promotion_hash VARCHAR(255),
+  max_upvotes_voting_power BIGINT DEFAULT 0,
+
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP(),
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
 

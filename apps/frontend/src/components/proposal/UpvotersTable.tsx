@@ -7,6 +7,7 @@ import { observer } from 'mobx-react-lite';
 import { Upvote } from '@trilitech/types';
 import { usePeriodData } from '@/hooks/usePeriodData';
 import { customSortComparator, formatNumber } from '@/lib/votingCalculations';
+import { HashDisplay } from '../shared/HashDisplay';
 
 const upvoterKeys: (keyof Upvote)[] = ['baker', 'voting_power', 'proposal_hash', 'time'];
 
@@ -69,12 +70,14 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
     );
   }
 
+  // TODO can be moved to sortable table component
   const columns = upvoterKeys.map(key => ({
     id: key,
-    label: prettifyKey(key),
+    label: key === 'proposal_hash' ? 'Proposal' : prettifyKey(key),
     sortable: true
   }));
 
+  // TODO can be moved to sortable table component
   const renderCell = (row: Upvote, column: { id: keyof Upvote; label: string; sortable?: boolean }) => {
     switch (column.id) {
       case 'baker':
@@ -98,18 +101,7 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
         return formatNumber(row.voting_power);
       case 'proposal_hash':
         return (
-          <Typography
-            variant="body2"
-            sx={{
-              fontFamily: 'monospace',
-              fontSize: '0.75rem',
-              maxWidth: 150,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}
-          >
-            {row.proposal_hash}
-          </Typography>
+          <HashDisplay hash={row.proposal_hash} />
         );
       case 'time':
         return new Date(row.time).toLocaleString();

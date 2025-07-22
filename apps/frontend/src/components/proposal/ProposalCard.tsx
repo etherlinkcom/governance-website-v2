@@ -1,16 +1,14 @@
-import { allLinkData } from '@/data/proposalLinks';
 import { formatDate } from '@/lib/formatDate';
 import { Card, CardContent, Box, Typography, Link } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import { Proposal } from '@trilitech/types';
 import { HashDisplay } from '../shared/HashDisplay';
+import { formatNumber } from '@/lib/votingCalculations';
 
 interface ProposalCardProps {
   proposal: Proposal;
 }
 
 export const ProposalCard = ({ proposal}: ProposalCardProps) => {
-  const theme = useTheme();
 
   return (
     <Card>
@@ -53,7 +51,7 @@ export const ProposalCard = ({ proposal}: ProposalCardProps) => {
               Upvotes:
             </Typography>
             <Typography variant="body1" sx={{ display: 'block' }}>
-              TODO
+              {formatNumber(proposal.upvotes)}
             </Typography>
           </Box>
         </Box>

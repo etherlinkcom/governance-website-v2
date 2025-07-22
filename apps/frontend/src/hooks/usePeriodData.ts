@@ -1,5 +1,5 @@
 import { contractStore } from '@/stores/ContractStore';
-import { Upvote, Proposal, Vote, Promotion, Period } from '@trilitech/types';
+import { Upvote, Proposal, Vote, Promotion, Period, ContractAndConfig } from '@trilitech/types';
 
 interface PeriodData {
   proposals: Proposal[];
@@ -13,6 +13,7 @@ interface PeriodData {
   promotionsPeriod: number;
   proposalsPeriodData: Period | null;
   promotionsPeriodData: Period | null;
+  contractAndConfig: ContractAndConfig | undefined;
 }
 
 export const usePeriodData = (
@@ -36,6 +37,7 @@ export const usePeriodData = (
       promotionsPeriod: 0,
       proposalsPeriodData: null,
       promotionsPeriodData: null,
+      contractAndConfig: undefined
     };
   }
 
@@ -53,6 +55,9 @@ export const usePeriodData = (
     promotionsPeriod = contractVotingIndex;
   }
 
+  // TODO this is being called in many components
+  // What are the downsides to calling it so many times in one display on multiple components?
+  const contractAndConfig = contractStore.contracts.find(c => c.contract_address === contractAddress);
   const allPeriods = contractStore.getPeriodsForContract(contractAddress);
   const proposalsPeriodData = allPeriods.find(p => p.contract_voting_index === proposalsPeriod) || null;
   const promotionsPeriodData = allPeriods.find(p => p.contract_voting_index === promotionsPeriod) || null;
@@ -81,5 +86,6 @@ export const usePeriodData = (
     promotionsPeriod,
     proposalsPeriodData,
     promotionsPeriodData,
+    contractAndConfig
   };
 };

@@ -98,7 +98,8 @@ export class Database {
       date_start,
       date_end,
       proposal_hashes,
-      promotion_hash
+      promotion_hash,
+      max_upvotes_voting_power
     FROM periods
     WHERE contract_address = ?
       AND (
@@ -118,6 +119,7 @@ export class Database {
     date_end: row.date_end,
     proposal_hashes: row.proposal_hashes || [],
     promotion_hash: row.promotion_hash || undefined,
+    max_upvotes_voting_power: row.max_upvotes_voting_power
   }));
 
   console.log(`[Database] Returned ${periods.length} periods for contract ${contractAddress}`);

@@ -24,7 +24,7 @@ interface ProposalsListProps {
 }
 
 export const ProposalsList = observer(({ contractVotingIndex, contractAddress }: ProposalsListProps) => {
-  const { proposals, isLoading, error, hasValidParams } = usePeriodData(contractAddress, contractVotingIndex);
+  const { proposals, proposalsPeriodData, isLoading, error, hasValidParams, contractAndConfig } = usePeriodData(contractAddress, contractVotingIndex);
 
   if (!hasValidParams) {
     return (
@@ -53,7 +53,8 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="body1">
-          Quorum: TODO
+          Quorum: {proposalsPeriodData?.max_upvotes_voting_power} / {contractAndConfig?.proposal_quorum}%
+           TODO format
         </Typography>
       </Box>
 

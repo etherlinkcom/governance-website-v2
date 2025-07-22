@@ -3,11 +3,13 @@ CREATE TABLE IF NOT EXISTS proposals (
   contract_period_index INT NOT NULL,
   level BIGINT NOT NULL,
   time DATETIME NOT NULL,
-  proposal_hash VARCHAR(100) NOT NULL,
-  transaction_hash VARCHAR(100) NOT NULL,
-  contract_address VARCHAR(100) NOT NULL,
-  proposer VARCHAR(100) NOT NULL,
+  proposal_hash VARCHAR(255) NOT NULL,
+  transaction_hash VARCHAR(51) NOT NULL,
+  contract_address VARCHAR(36) NOT NULL,
+  proposer VARCHAR(36) NOT NULL,
   alias VARCHAR(255),
+  upvotes BIGINT DEFAULT 0,
+
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP(),
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
 

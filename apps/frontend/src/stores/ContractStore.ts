@@ -7,7 +7,9 @@ class ContractStore {
   currentGovernance: GovernanceType | null = null;
   contractsByGovernance: Partial<Record<GovernanceType, ContractAndConfig[]>> = {};
   periodsByGovernance: Partial<Record<GovernanceType, Record<string, Period[]>>> = {};
+  // TODO remove?
   loadingByGovernance: Partial<Record<GovernanceType, boolean>> = {};
+  // TODO remove?
   loadingPeriodsByGovernance: Partial<Record<GovernanceType, Record<string, boolean>>> = {};
   periodDetails: Record<string, Record<number, {
     proposals?: Proposal[];
@@ -20,6 +22,7 @@ class ContractStore {
   blockTimeMs: number = 6000;
   futurePeriodsCount: number = 3;
   periodDetailsLoading: Record<string, Record<number, boolean>> = {};
+  // TODO remove?
   periodDetailsErrors: Record<string, Record<number, string | null>> = {};
 
   constructor() {
@@ -112,7 +115,8 @@ class ContractStore {
           date_end: endDate,
           proposal_hashes: [],
           promotion_hash: undefined,
-          period_class: i === 0 ? 'current' : 'future'
+          period_class: i === 0 ? 'current' : 'future',
+          max_upvotes_voting_power: 0
         });
       }
 

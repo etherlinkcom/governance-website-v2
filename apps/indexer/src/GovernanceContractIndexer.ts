@@ -160,6 +160,7 @@ export class GovernanceContractIndexer {
                 level_end: level_end,
                 date_start: date_start,
                 date_end: date_end,
+                max_upvotes_voting_power: 0,
             };
             periods[period.contract_voting_index] = period;
         }
@@ -235,6 +236,14 @@ export class GovernanceContractIndexer {
         return winner_candidate;
     }
 
+    private normalizeProposalHash(value: any): string {
+        if (typeof value === 'string') return value;
+        if (value && typeof value === 'object' && value.pool_address && value.sequencer_pk) {
+            return JSON.stringify(value);
+        }
+        return String(value);
+    }
+
     private async createProposalsPromotionsVotesAndUpvotes(
         contract_and_config: ContractAndConfig,
         periods: PeriodIndexToPeriod,
@@ -242,46 +251,52 @@ export class GovernanceContractIndexer {
     ): Promise<{ promotions: Promotion[], proposals: Proposal[], upvotes: Upvote[], votes: Vote[] }> {
         logger.info(`[GovernanceContractIndexer] createProposalsPromotionsVotesAndUpvotes(${contract_and_config.contract_address}, ${periods}, ${data.length} entries)`);
         const promotions_hash_to_promotion: Record<string, Promotion> = {};
+        const proposals_hash_to_proposal: Record<string, Proposal> = {};
         const proposals: Proposal[] = [];
         const upvotes: Upvote[] = [];
         const votes: Vote[] = [];
         const current_level: number = await this.getCurrentLevel();
 
         for (let i = data.length - 1; i >= 0; i--) {
-            const entry = data[i];
+            const entry: TzktStorageHistory = data[i];
             if (entry.operation?.parameter?.entrypoint === 'new_proposal') {
                 const { sender, alias } = await this.getSenderFromHash(entry.operation.hash) || { sender: 'unknown', alias: undefined };
                 const period_index = Number(entry.value.voting_context.period_index);
-                const proposal_hash = entry.operation.parameter.value;
-                proposals.push({
-                    contract_period_index: period_index,
-                    level: entry.level,
-                    time: entry.timestamp,
-                    proposal_hash: entry.operation.parameter.value,
-                    transaction_hash: entry.operation.hash,
-                    contract_address: contract_and_config.contract_address,
-                    proposer: sender,
-                    alias: alias,
-                });
+                const proposal_hash = this.normalizeProposalHash(entry.operation.parameter.value);
+                console.log('proposal found: ', {proposal_hash})
 
                 periods[period_index].proposal_hashes = periods[period_index].proposal_hashes || [];
                 periods[period_index].proposal_hashes.push(proposal_hash);
+                periods[period_index].max_upvotes_voting_power = Number(entry.value.voting_context.period?.proposal?.max_upvotes_voting_power || 0);
 
                 const global_voting_index = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
                 const voting_power = await this.getVotingPowerForAddress(sender, global_voting_index);
                 const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
                 const total_voting_power = voting_power + delegate_voting_power;
 
+                proposals.push({
+                    contract_period_index: period_index,
+                    level: entry.level,
+                    time: entry.timestamp,
+                    proposal_hash: proposal_hash,
+                    transaction_hash: entry.operation.hash,
+                    contract_address: contract_and_config.contract_address,
+                    proposer: sender,
+                    alias: alias,
+                    upvotes: total_voting_power,
+                });
                 upvotes.push({
                     level: entry.level,
                     time: entry.timestamp,
                     transaction_hash: entry.operation.hash,
-                    proposal_hash: entry.operation.parameter.value,
+                    proposal_hash: proposal_hash,
                     baker: sender,
                     alias: alias,
                     voting_power: total_voting_power,
                     contract_address: contract_and_config.contract_address,
                 });
+
+                proposals_hash_to_proposal[proposal_hash] = proposals[proposals.length - 1];
 
                 const promotion_period_index = period_index + 1;
                 if (!periods[promotion_period_index] || periods[promotion_period_index]?.promotion_hash) continue;
@@ -313,16 +328,35 @@ export class GovernanceContractIndexer {
                 const voting_power = await this.getVotingPowerForAddress(sender, global_voting_index);
                 const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
                 const total_voting_power = voting_power + delegate_voting_power;
+
+                const proposal_hash = this.normalizeProposalHash(entry.operation.parameter.value);
                 upvotes.push({
                     level: entry.level,
                     time: entry.timestamp,
                     transaction_hash: entry.operation.hash,
-                    proposal_hash: entry.operation.parameter.value,
+                    proposal_hash: proposal_hash,
                     baker: sender,
                     alias: alias,
                     voting_power: total_voting_power,
                     contract_address: contract_and_config.contract_address,
                 });
+
+                const period_index = Number(entry.value.voting_context.period_index);
+                const current_max = Number(entry.value.voting_context.period?.proposal?.max_upvotes_voting_power || 0);
+                periods[period_index].max_upvotes_voting_power = Math.max(
+                    periods[period_index].max_upvotes_voting_power || 0,
+                    current_max
+                );
+
+                if (proposals_hash_to_proposal[proposal_hash]) {
+                    console.log('Adding to total voting power: ', total_voting_power)
+                    console.log('previous upvotes', proposals_hash_to_proposal[proposal_hash].upvotes);
+                    proposals_hash_to_proposal[proposal_hash].upvotes += total_voting_power;
+                    console.log('new upvotes', proposals_hash_to_proposal[proposal_hash].upvotes);
+                } else {
+                    console.log('No proposal found for upvote', {proposal_hash});
+                }
+
                 continue;
             }
             if (entry.operation?.parameter?.entrypoint === 'vote') {

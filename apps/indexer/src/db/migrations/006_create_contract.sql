@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS contracts (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  contract_address VARCHAR(100) NOT NULL UNIQUE,
+  contract_address VARCHAR(36) NOT NULL UNIQUE,
   governance_type ENUM('slow', 'fast', 'sequencer') NOT NULL,
   started_at_level INT NOT NULL,
   period_length INT NOT NULL,

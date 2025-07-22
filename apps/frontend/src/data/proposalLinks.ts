@@ -1,3 +1,5 @@
+import { SequencerKey } from "@/components/shared/HashDisplay";
+
 interface LinkData {
   [proposalHash: string]: {
     href: string;
