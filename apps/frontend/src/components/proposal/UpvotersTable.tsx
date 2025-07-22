@@ -6,8 +6,9 @@ import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { Upvote } from '@trilitech/types';
 import { usePeriodData } from '@/hooks/usePeriodData';
-import { customSortComparator, formatNumber } from '@/lib/votingCalculations';
+import { customSortComparator } from '@/lib/votingCalculations';
 import { HashDisplay } from '../shared/HashDisplay';
+import { formatNumber } from '@/lib/formatNumber';
 
 const upvoterKeys: (keyof Upvote)[] = ['baker', 'voting_power', 'proposal_hash', 'time'];
 

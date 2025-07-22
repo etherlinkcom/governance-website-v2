@@ -9,10 +9,17 @@ const toBigNumber = (value: BigNumber | bigint | number): BigNumber => {
 }
 
 export const getProposalQuorumPercent = (
-  upvotes: bigint,
-  totalVotingPower: bigint,
-): BigNumber => {
-  return toBigNumber(upvotes).div(toBigNumber(totalVotingPower)).multipliedBy(100)
+  upvotes?: bigint | number,
+  totalVotingPower?: bigint | number,
+): string => {
+  if (!upvotes || !totalVotingPower || totalVotingPower === 0) {
+    return BigNumber(0).toString();
+  }
+  return toBigNumber(upvotes)
+          .div(toBigNumber(totalVotingPower))
+          .multipliedBy(100)
+          .decimalPlaces(2)
+          .toString();
 };
 
 export const getPromotionQuorumPercent = (
@@ -80,11 +87,3 @@ export const customSortComparator = <T extends Record<string, any>>(
   if (bValue > aValue) return -1;
   return 0;
 };
-
-export const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US', {
-      notation: 'compact',
-      maximumFractionDigits: 1
-    }).format(num);
-  };
-

@@ -31,7 +31,7 @@ export type TzktStorageHistory= {
     hash: string;
     counter: number;
     parameter: {
-      entrypoint: string;
+      entrypoint: any;
       value: string;
     };
   };

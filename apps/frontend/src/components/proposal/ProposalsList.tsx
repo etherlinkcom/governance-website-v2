@@ -3,6 +3,8 @@ import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { ProposalCard } from '@/components/proposal/ProposalCard';
 import { usePeriodData } from '@/hooks/usePeriodData';
+import { getProposalQuorumPercent } from '@/lib/votingCalculations';
+import { Proposal } from '@trilitech/types';
 
 const ProposalsListSkeleton = () => (
   <Box>
@@ -26,6 +28,7 @@ interface ProposalsListProps {
 export const ProposalsList = observer(({ contractVotingIndex, contractAddress }: ProposalsListProps) => {
   const { proposals, proposalsPeriodData, isLoading, error, hasValidParams, contractAndConfig } = usePeriodData(contractAddress, contractVotingIndex);
 
+  const totalProposalUpvotes = proposals.map((e: Proposal) => e.upvotes).reduce((a: number, b: number) => a + b, 0);
   if (!hasValidParams) {
     return (
       <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
@@ -53,8 +56,8 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="body1">
-          Quorum: {proposalsPeriodData?.max_upvotes_voting_power} / {contractAndConfig?.proposal_quorum}%
-           TODO format
+          Quorum:{' '}
+          {getProposalQuorumPercent(totalProposalUpvotes, proposalsPeriodData?.total_voting_power)}% / {contractAndConfig?.proposal_quorum}%
         </Typography>
       </Box>
 

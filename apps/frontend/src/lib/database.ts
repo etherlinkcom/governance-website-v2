@@ -90,17 +90,7 @@ export class Database {
   console.log(`[Database] Fetching periods for contract ${contractAddress}`);
 
   const rows = await this.query<any>(
-    `SELECT
-      contract_voting_index,
-      contract_address,
-      level_start,
-      level_end,
-      date_start,
-      date_end,
-      proposal_hashes,
-      promotion_hash,
-      max_upvotes_voting_power
-    FROM periods
+    `SELECT * FROM periods
     WHERE contract_address = ?
       AND (
         JSON_LENGTH(proposal_hashes) > 0
@@ -119,7 +109,8 @@ export class Database {
     date_end: row.date_end,
     proposal_hashes: row.proposal_hashes || [],
     promotion_hash: row.promotion_hash || undefined,
-    max_upvotes_voting_power: row.max_upvotes_voting_power
+    max_upvotes_voting_power: row.max_upvotes_voting_power,
+    total_voting_power: row.total_voting_power
   }));
 
   console.log(`[Database] Returned ${periods.length} periods for contract ${contractAddress}`);

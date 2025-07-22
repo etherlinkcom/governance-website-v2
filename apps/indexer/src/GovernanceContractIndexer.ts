@@ -152,6 +152,7 @@ export class GovernanceContractIndexer {
             const date_start = await this.getDateFromLevel(i);
             const date_end = await this.getDateFromLevel(level_end);
             const contract_voting_index = Math.floor((i - started_at_level) / period_length);
+            const total_voting_power: number = await this.getTotalVotingPower(i);
 
             const period: Period = {
                 contract_voting_index: contract_voting_index,
@@ -161,6 +162,7 @@ export class GovernanceContractIndexer {
                 date_start: date_start,
                 date_end: date_end,
                 max_upvotes_voting_power: 0,
+                total_voting_power: total_voting_power,
             };
             periods[period.contract_voting_index] = period;
         }
@@ -236,12 +238,10 @@ export class GovernanceContractIndexer {
         return winner_candidate;
     }
 
-    private normalizeProposalHash(value: any): string {
-        if (typeof value === 'string') return value;
-        if (value && typeof value === 'object' && value.pool_address && value.sequencer_pk) {
-            return JSON.stringify(value);
-        }
-        return String(value);
+    public async getTotalVotingPower(level: number): Promise<number> {
+        logger.info(`[GovernanceContractIndexer] getTotalVotingPower(${level})`);
+        const url = `https://rpc.tzkt.io/mainnet/chains/main/blocks/${level}/votes/total_voting_power`;
+        return Number(await this.fetchJson<string>(url));
     }
 
     private async createProposalsPromotionsVotesAndUpvotes(
@@ -250,8 +250,8 @@ export class GovernanceContractIndexer {
         data: TzktStorageHistory[]
     ): Promise<{ promotions: Promotion[], proposals: Proposal[], upvotes: Upvote[], votes: Vote[] }> {
         logger.info(`[GovernanceContractIndexer] createProposalsPromotionsVotesAndUpvotes(${contract_and_config.contract_address}, ${periods}, ${data.length} entries)`);
-        const promotions_hash_to_promotion: Record<string, Promotion> = {};
-        const proposals_hash_to_proposal: Record<string, Proposal> = {};
+        const promotions_hash_to_promotion: Record<any, Promotion> = {};
+        const proposals_hash_to_proposal: Record<any, Proposal> = {};
         const proposals: Proposal[] = [];
         const upvotes: Upvote[] = [];
         const votes: Vote[] = [];
@@ -262,8 +262,7 @@ export class GovernanceContractIndexer {
             if (entry.operation?.parameter?.entrypoint === 'new_proposal') {
                 const { sender, alias } = await this.getSenderFromHash(entry.operation.hash) || { sender: 'unknown', alias: undefined };
                 const period_index = Number(entry.value.voting_context.period_index);
-                const proposal_hash = this.normalizeProposalHash(entry.operation.parameter.value);
-                console.log('proposal found: ', {proposal_hash})
+                const proposal_hash = entry.operation.parameter.value
 
                 periods[period_index].proposal_hashes = periods[period_index].proposal_hashes || [];
                 periods[period_index].proposal_hashes.push(proposal_hash);
@@ -329,7 +328,7 @@ export class GovernanceContractIndexer {
                 const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
                 const total_voting_power = voting_power + delegate_voting_power;
 
-                const proposal_hash = this.normalizeProposalHash(entry.operation.parameter.value);
+                const proposal_hash = entry.operation.parameter.value;
                 upvotes.push({
                     level: entry.level,
                     time: entry.timestamp,
@@ -349,12 +348,7 @@ export class GovernanceContractIndexer {
                 );
 
                 if (proposals_hash_to_proposal[proposal_hash]) {
-                    console.log('Adding to total voting power: ', total_voting_power)
-                    console.log('previous upvotes', proposals_hash_to_proposal[proposal_hash].upvotes);
                     proposals_hash_to_proposal[proposal_hash].upvotes += total_voting_power;
-                    console.log('new upvotes', proposals_hash_to_proposal[proposal_hash].upvotes);
-                } else {
-                    console.log('No proposal found for upvote', {proposal_hash});
                 }
 
                 continue;
@@ -444,7 +438,7 @@ export class GovernanceContractIndexer {
             } catch (error) {
             if (attempt === maxRetries) throw error;
 
-            const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+            const delay = Math.pow(2, attempt) * 1000;
             logger.warn(`[GovernanceContractIndexer] Request failed, retrying after ${delay}ms: ${error}`);
             await this.sleep(delay);
             }

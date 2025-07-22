@@ -28,6 +28,7 @@ export type Period = {
   proposal_hashes?: string[];
   promotion_hash?: string;
   max_upvotes_voting_power: number;
+  total_voting_power: number;
 
   period_class?: 'current' | 'future';
 };

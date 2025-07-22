@@ -1,4 +1,4 @@
-import { formatNumber } from '@/lib/votingCalculations';
+import { formatNumber } from '@/lib/formatNumber';
 import { Box, Typography } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 

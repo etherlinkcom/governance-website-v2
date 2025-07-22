@@ -2,7 +2,7 @@ import * as winston from "winston";
 import { format } from "logform";
 
 export const logger: winston.Logger = winston.createLogger({
-  level: "silent",
+  level: "info",
   format: format.combine(
     format.colorize(),
     format.timestamp(),

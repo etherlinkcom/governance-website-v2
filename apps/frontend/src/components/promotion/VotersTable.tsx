@@ -6,7 +6,8 @@ import { usePeriodData } from '@/hooks/usePeriodData';
 import { useTableSort } from '@/hooks/useTableSort';
 import { SortableTable } from '@/components/shared/SortableTable';
 import { Vote } from '@trilitech/types';
-import { customSortComparator, formatNumber } from '@/lib/votingCalculations';
+import { customSortComparator} from '@/lib/votingCalculations';
+import { formatNumber } from '@/lib/formatNumber';
 
 const voterKeys: (keyof Vote)[] = ['baker', 'voting_power', 'vote', 'time'];
 

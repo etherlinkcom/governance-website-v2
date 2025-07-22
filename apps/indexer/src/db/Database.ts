@@ -321,7 +321,8 @@ export class Database {
       period.date_end ? this.formatDateForMySQL(period.date_end.toString()) : null,
       JSON.stringify(this.sanitizeValues(period.proposal_hashes || [])),
       period.promotion_hash,
-      period.max_upvotes_voting_power
+      period.max_upvotes_voting_power,
+      period.total_voting_power
     ];
 
     await this.upsert(
@@ -334,9 +335,10 @@ export class Database {
         date_end,
         proposal_hashes,
         promotion_hash,
-        max_upvotes_voting_power
+        max_upvotes_voting_power,
+        total_voting_power
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          level_start = VALUES(level_start),
          level_end = VALUES(level_end),
@@ -345,6 +347,7 @@ export class Database {
          proposal_hashes = VALUES(proposal_hashes),
          promotion_hash = VALUES(promotion_hash),
          max_upvotes_voting_power = VALUES(max_upvotes_voting_power),
+         total_voting_power = VALUES(total_voting_power),
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
     );
