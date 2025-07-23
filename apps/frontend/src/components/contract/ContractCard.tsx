@@ -31,7 +31,7 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
     }
   }, [expanded, contract.contract_address]);
 
-  const periods = contractStore.getPeriodsForContract(contract.contract_address);
+  const periods = contractStore.periodsForContract(contract.contract_address);
   const isLoadingPeriods = contractStore.isLoadingPeriods(contract.contract_address);
 
   return (
@@ -58,6 +58,7 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {Boolean(contract.active) && (
                 <Chip
+                  variant='outlined'
                   label={'Active'}
                   size="small"
                   color={'success'}

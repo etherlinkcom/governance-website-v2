@@ -55,8 +55,8 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
       sx={{
         ...(isCurrentPeriod && {
           border: '2px solid',
-          borderColor: 'warning.main',
-          boxShadow: `0px 0px 15px 3px ${theme.palette.warning.main}30`,
+          borderColor: 'primary.main',
+          boxShadow: `0px 0px 15px 3px ${theme.palette.primary.main}30`,
           transform: 'scale(1.02)',
         }),
         transition: 'all 0.3s ease-in-out',
@@ -71,7 +71,7 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
             {isCurrentPeriod && (
                 <Chip
                   label="Current"
-                  color="warning"
+                  color="primary"
                   variant="filled"
                   size="small"
                   sx={{ mt: -0.5, ml: 1 }}

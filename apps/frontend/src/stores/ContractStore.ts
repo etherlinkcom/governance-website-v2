@@ -7,9 +7,7 @@ class ContractStore {
   currentGovernance: GovernanceType | null = null;
   contractsByGovernance: Partial<Record<GovernanceType, ContractAndConfig[]>> = {};
   periodsByGovernance: Partial<Record<GovernanceType, Record<string, Period[]>>> = {};
-  // TODO remove?
   loadingByGovernance: Partial<Record<GovernanceType, boolean>> = {};
-  // TODO remove?
   loadingPeriodsByGovernance: Partial<Record<GovernanceType, Record<string, boolean>>> = {};
   periodDetails: Record<string, Record<number, {
     proposals?: Proposal[];
@@ -22,8 +20,8 @@ class ContractStore {
   blockTimeMs: number = 6000;
   futurePeriodsCount: number = 3;
   periodDetailsLoading: Record<string, Record<number, boolean>> = {};
-  // TODO remove?
   periodDetailsErrors: Record<string, Record<number, string | null>> = {};
+  tzktApiUrl: string = 'https://api.tzkt.io';
 
   constructor() {
     makeAutoObservable(this, {
@@ -49,6 +47,51 @@ class ContractStore {
 
     if (!this.contractsByGovernance[governanceType]) {
       yield this.getContracts();
+    }
+  });
+
+  public getPeriods = flow(function* (this: ContractStore, contractAddress: string) {
+    if (!this.currentGovernance) return;
+
+    if (!this.periodsByGovernance[this.currentGovernance]) {
+      this.periodsByGovernance[this.currentGovernance] = {};
+    }
+    if (!this.loadingPeriodsByGovernance[this.currentGovernance]) {
+      this.loadingPeriodsByGovernance[this.currentGovernance] = {};
+    }
+
+    if (this.loadingPeriodsByGovernance[this.currentGovernance]![contractAddress]) return;
+
+    this.loadingPeriodsByGovernance[this.currentGovernance]![contractAddress] = true;
+    this.error = null;
+
+    try {
+      const response = yield fetch(`/api/contract/${contractAddress}/periods`);
+
+      if (!response.ok) {
+        const errorData = yield response.json();
+        throw new Error(errorData.error || 'Failed to fetch periods');
+      }
+
+      const data = yield response.json();
+      let allPeriods = data.periods;
+
+      const contract = this.contracts.find(c => c.contract_address === contractAddress);
+      if (contract?.active) {
+        const generatedPeriods = yield this.generateCurrentAndFuturePeriods(contractAddress);
+
+        const existingIndexes = new Set(allPeriods.map((p: Period) => p.contract_voting_index));
+        const newPeriods = generatedPeriods.filter((p: Period) => !existingIndexes.has(p.contract_voting_index));
+
+        allPeriods = [...allPeriods, ...newPeriods].sort((a, b) => b.contract_voting_index - a.contract_voting_index);
+      }
+
+      this.periodsByGovernance[this.currentGovernance]![contractAddress] = allPeriods;
+    } catch (error) {
+      this.error = error instanceof Error ? error.message : 'Unknown error loading periods';
+      this.periodsByGovernance[this.currentGovernance]![contractAddress] = [];
+    } finally {
+      this.loadingPeriodsByGovernance[this.currentGovernance]![contractAddress] = false;
     }
   });
 
@@ -82,7 +125,7 @@ class ContractStore {
     if (!contract || !contract.active) return [];
 
     try {
-      const tzktResponse = yield fetch('https://api.tzkt.io/v1/head');
+      const tzktResponse = yield fetch(`${this.tzktApiUrl}/v1/head`);
       const head = yield tzktResponse.json();
       const currentLevel = head.level;
       const currentDate = new Date(head.timestamp);
@@ -129,156 +172,6 @@ class ContractStore {
     }
   });
 
-  getPeriods = flow(function* (this: ContractStore, contractAddress: string) {
-    if (!this.currentGovernance) return;
-
-    if (!this.periodsByGovernance[this.currentGovernance]) {
-      this.periodsByGovernance[this.currentGovernance] = {};
-    }
-    if (!this.loadingPeriodsByGovernance[this.currentGovernance]) {
-      this.loadingPeriodsByGovernance[this.currentGovernance] = {};
-    }
-
-    if (this.loadingPeriodsByGovernance[this.currentGovernance]![contractAddress]) return;
-
-    this.loadingPeriodsByGovernance[this.currentGovernance]![contractAddress] = true;
-    this.error = null;
-
-    try {
-      const response = yield fetch(`/api/contract/${contractAddress}/periods`);
-
-      if (!response.ok) {
-        const errorData = yield response.json();
-        throw new Error(errorData.error || 'Failed to fetch periods');
-      }
-
-      const data = yield response.json();
-      let allPeriods = data.periods;
-
-      // Add current and future periods for active contracts
-      const contract = this.contracts.find(c => c.contract_address === contractAddress);
-      if (contract?.active) {
-        const generatedPeriods = yield this.generateCurrentAndFuturePeriods(contractAddress);
-
-        // Merge with existing periods, avoiding duplicates
-        const existingIndexes = new Set(allPeriods.map((p: Period) => p.contract_voting_index));
-        const newPeriods = generatedPeriods.filter((p: Period) => !existingIndexes.has(p.contract_voting_index));
-
-        allPeriods = [...allPeriods, ...newPeriods].sort((a, b) => b.contract_voting_index - a.contract_voting_index);
-      }
-
-      this.periodsByGovernance[this.currentGovernance]![contractAddress] = allPeriods;
-    } catch (error) {
-      this.error = error instanceof Error ? error.message : 'Unknown error loading periods';
-      this.periodsByGovernance[this.currentGovernance]![contractAddress] = [];
-    } finally {
-      this.loadingPeriodsByGovernance[this.currentGovernance]![contractAddress] = false;
-    }
-  });
-
-  get contracts(): ContractAndConfig[] {
-    return this.currentGovernance ? this.contractsByGovernance[this.currentGovernance] || [] : [];
-  }
-
-  get loading(): boolean {
-    return this.currentGovernance ? this.loadingByGovernance[this.currentGovernance] || false : false;
-  }
-
-  public getPeriodsForContract(contractAddress: string): Period[] {
-    return this.currentGovernance ? this.periodsByGovernance[this.currentGovernance]?.[contractAddress] || [] : [];
-  }
-
-  public isLoadingPeriods(contractAddress: string): boolean {
-    return this.currentGovernance ? this.loadingPeriodsByGovernance[this.currentGovernance]?.[contractAddress] || false : false;
-  }
-
-  public hasPeriodsLoaded(contractAddress: string): boolean {
-    if (!this.currentGovernance) return false;
-    return contractAddress in (this.periodsByGovernance[this.currentGovernance] || {});
-  }
-
-  get allPeriods(): Period[] {
-    if (!this.currentGovernance) return [];
-    return Object.values(this.periodsByGovernance[this.currentGovernance] || {}).flat();
-  }
-
-  get getUpvotesForPeriod() {
-    return (contractAddress: string, periodIndex: number): Upvote[] => {
-      const cached = this.periodDetails[contractAddress]?.[periodIndex];
-      if (cached?.upvotes) return cached.upvotes;
-
-      if (!this.isPeriodDetailsLoading(contractAddress, periodIndex)) {
-        this.getPeriodDetails(contractAddress, periodIndex);
-      }
-
-      return [];
-    };
-  }
-
-  get getProposalsForPeriod() {
-    return (contractAddress: string, periodIndex: number): Proposal[] => {
-      const cached = this.periodDetails[contractAddress]?.[periodIndex];
-      if (cached?.proposals) return cached.proposals;
-
-      if (!this.isPeriodDetailsLoading(contractAddress, periodIndex)) {
-        this.getPeriodDetails(contractAddress, periodIndex);
-      }
-
-      return [];
-    };
-  }
-
-  get getVotesForPeriod() {
-    return (contractAddress: string, periodIndex: number): Vote[] => {
-      const cached = this.periodDetails[contractAddress]?.[periodIndex];
-      if (cached?.votes) return cached.votes;
-
-      if (!this.isPeriodDetailsLoading(contractAddress, periodIndex)) {
-        this.getPeriodDetails(contractAddress, periodIndex);
-      }
-
-      return [];
-    };
-  }
-
-  get getPromotionsForPeriod() {
-    return (contractAddress: string, periodIndex: number): Promotion[] => {
-      const cached = this.periodDetails[contractAddress]?.[periodIndex];
-      if (cached?.promotions) return cached.promotions;
-
-      if (!this.isPeriodDetailsLoading(contractAddress, periodIndex)) {
-        this.getPeriodDetails(contractAddress, periodIndex);
-      }
-
-      return [];
-    };
-  }
-
-  private isValidCache(cached: any): boolean {
-    return cached && (Date.now() - cached.timestamp) < 5 * 60 * 1000; // 5 min
-  }
-
-  isPeriodDetailsLoading(contractAddress: string, periodIndex: number): boolean {
-    return this.periodDetailsLoading[contractAddress]?.[periodIndex] || false;
-  }
-
-  getPeriodDetailsError(contractAddress: string, periodIndex: number): string | null {
-    return this.periodDetailsErrors[contractAddress]?.[periodIndex] || null;
-  }
-
-  private setPeriodDetailsLoading(contractAddress: string, periodIndex: number, loading: boolean) {
-    if (!this.periodDetailsLoading[contractAddress]) {
-      this.periodDetailsLoading[contractAddress] = {};
-    }
-    this.periodDetailsLoading[contractAddress][periodIndex] = loading;
-  }
-
-  private setPeriodDetailsError(contractAddress: string, periodIndex: number, error: string | null) {
-    if (!this.periodDetailsErrors[contractAddress]) {
-      this.periodDetailsErrors[contractAddress] = {};
-    }
-    this.periodDetailsErrors[contractAddress][periodIndex] = error;
-  }
 
   private getPeriodDetails = flow(function* (this: ContractStore, contractAddress: string, periodIndex: number) {
     if (!this.periodDetails[contractAddress]) {
@@ -290,7 +183,6 @@ class ContractStore {
       return cached;
     }
 
-    // Prevent duplicate requests
     if (this.isPeriodDetailsLoading(contractAddress, periodIndex)) {
       while (this.isPeriodDetailsLoading(contractAddress, periodIndex)) {
         yield new Promise(resolve => setTimeout(resolve, 100));
@@ -325,6 +217,110 @@ class ContractStore {
       this.setPeriodDetailsLoading(contractAddress, periodIndex, false);
     }
   });
+
+  get contracts(): ContractAndConfig[] {
+    return this.currentGovernance ? this.contractsByGovernance[this.currentGovernance] || [] : [];
+  }
+
+  get loading(): boolean {
+    return this.currentGovernance ? this.loadingByGovernance[this.currentGovernance] || false : false;
+  }
+
+  get allPeriods(): Period[] {
+    if (!this.currentGovernance) return [];
+    return Object.values(this.periodsByGovernance[this.currentGovernance] || {}).flat();
+  }
+
+  get upvotesForPeriod() {
+    return (contractAddress: string, periodIndex: number): Upvote[] => {
+      const cached = this.periodDetails[contractAddress]?.[periodIndex];
+      if (cached?.upvotes) return cached.upvotes;
+
+      if (!this.isPeriodDetailsLoading(contractAddress, periodIndex)) {
+        this.getPeriodDetails(contractAddress, periodIndex);
+      }
+
+      return [];
+    };
+  }
+
+  get proposalsForPeriod() {
+    return (contractAddress: string, periodIndex: number): Proposal[] => {
+      const cached = this.periodDetails[contractAddress]?.[periodIndex];
+      if (cached?.proposals) return cached.proposals;
+
+      if (!this.isPeriodDetailsLoading(contractAddress, periodIndex)) {
+        this.getPeriodDetails(contractAddress, periodIndex);
+      }
+
+      return [];
+    };
+  }
+
+  get votesForPeriod() {
+    return (contractAddress: string, periodIndex: number): Vote[] => {
+      const cached = this.periodDetails[contractAddress]?.[periodIndex];
+      if (cached?.votes) return cached.votes;
+
+      if (!this.isPeriodDetailsLoading(contractAddress, periodIndex)) {
+        this.getPeriodDetails(contractAddress, periodIndex);
+      }
+
+      return [];
+    };
+  }
+
+  get promotionsForPeriod() {
+    return (contractAddress: string, periodIndex: number): Promotion[] => {
+      const cached = this.periodDetails[contractAddress]?.[periodIndex];
+      if (cached?.promotions) return cached.promotions;
+
+      if (!this.isPeriodDetailsLoading(contractAddress, periodIndex)) {
+        this.getPeriodDetails(contractAddress, periodIndex);
+      }
+
+      return [];
+    };
+  }
+
+  public periodsForContract(contractAddress: string): Period[] {
+    return this.currentGovernance ? this.periodsByGovernance[this.currentGovernance]?.[contractAddress] || [] : [];
+  }
+
+  public isLoadingPeriods(contractAddress: string): boolean {
+    return this.currentGovernance ? this.loadingPeriodsByGovernance[this.currentGovernance]?.[contractAddress] || false : false;
+  }
+
+  public hasPeriodsLoaded(contractAddress: string): boolean {
+    if (!this.currentGovernance) return false;
+    return contractAddress in (this.periodsByGovernance[this.currentGovernance] || {});
+  }
+
+  public isPeriodDetailsLoading(contractAddress: string, periodIndex: number): boolean {
+    return this.periodDetailsLoading[contractAddress]?.[periodIndex] || false;
+  }
+
+  public getPeriodDetailsError(contractAddress: string, periodIndex: number): string | null {
+    return this.periodDetailsErrors[contractAddress]?.[periodIndex] || null;
+  }
+
+  private setPeriodDetailsLoading(contractAddress: string, periodIndex: number, loading: boolean) {
+    if (!this.periodDetailsLoading[contractAddress]) {
+      this.periodDetailsLoading[contractAddress] = {};
+    }
+    this.periodDetailsLoading[contractAddress][periodIndex] = loading;
+  }
+
+  private setPeriodDetailsError(contractAddress: string, periodIndex: number, error: string | null) {
+    if (!this.periodDetailsErrors[contractAddress]) {
+      this.periodDetailsErrors[contractAddress] = {};
+    }
+    this.periodDetailsErrors[contractAddress][periodIndex] = error;
+  }
+
+  private isValidCache(cached: any): boolean {
+    return cached && (Date.now() - cached.timestamp) < 5 * 60 * 1000; // 5 min
+  }
 }
 
 export const contractStore = new ContractStore();

@@ -59,14 +59,14 @@ export const usePeriodData = (
   // TODO this is being called in many components
   // What are the downsides to calling it so many times in one display on multiple components?
   const contractAndConfig = contractStore.contracts.find(c => c.contract_address === contractAddress);
-  const allPeriods = contractStore.getPeriodsForContract(contractAddress);
+  const allPeriods = contractStore.periodsForContract(contractAddress);
   const proposalsPeriodData = allPeriods.find(p => p.contract_voting_index === proposalsPeriod) || null;
   const promotionsPeriodData = allPeriods.find(p => p.contract_voting_index === promotionsPeriod) || null;
 
-  const proposals = contractStore.getProposalsForPeriod(contractAddress, proposalsPeriod);
-  const promotions = contractStore.getPromotionsForPeriod(contractAddress, promotionsPeriod);
-  const upvoters = contractStore.getUpvotesForPeriod(contractAddress, proposalsPeriod);
-  const votes = contractStore.getVotesForPeriod(contractAddress, promotionsPeriod);
+  const proposals = contractStore.proposalsForPeriod(contractAddress, proposalsPeriod);
+  const promotions = contractStore.promotionsForPeriod(contractAddress, promotionsPeriod);
+  const upvoters = contractStore.upvotesForPeriod(contractAddress, proposalsPeriod);
+  const votes = contractStore.votesForPeriod(contractAddress, promotionsPeriod);
 
   const isLoading = contractStore.isPeriodDetailsLoading(contractAddress, proposalsPeriod) ||
                    contractStore.isPeriodDetailsLoading(contractAddress, promotionsPeriod) ||
