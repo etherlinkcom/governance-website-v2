@@ -55,6 +55,7 @@ export const usePeriodData = (
     promotionsPeriod = contractVotingIndex;
   }
 
+  // TODO move to contract store this doesn't need to be a hook
   // TODO this is being called in many components
   // What are the downsides to calling it so many times in one display on multiple components?
   const contractAndConfig = contractStore.contracts.find(c => c.contract_address === contractAddress);

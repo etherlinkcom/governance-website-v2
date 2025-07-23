@@ -128,7 +128,6 @@ MuiModal: {
         position: 'absolute',
         inset: 0,
         margin: 'auto',
-        width: '95%',
         width: '100vw',
         height: '100dvh',
         backgroundColor: theme.palette.background.paper,
