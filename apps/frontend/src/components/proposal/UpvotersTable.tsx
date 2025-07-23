@@ -4,10 +4,10 @@ import { SortableTable, SortableTableSkeleton } from '@/components/shared/Sortab
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { Upvote } from '@trilitech/types';
-import { usePeriodData } from '@/hooks/usePeriodData';
 import { customSortComparator } from '@/lib/votingCalculations';
 import { HashDisplay } from '../shared/HashDisplay';
 import { formatNumber } from '@/lib/formatNumber';
+import { contractStore } from '@/stores/ContractStore';
 
 const upvoterKeys: (keyof Upvote)[] = ['baker', 'voting_power', 'proposal_hash', 'time'];
 
@@ -17,7 +17,7 @@ interface UpvotersTableProps {
 }
 
 export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }: UpvotersTableProps) => {
-  const { upvoters, isLoading, error, hasValidParams } = usePeriodData(contractAddress, contractVotingIndex);
+  const { upvoters, isLoading, error, hasValidParams } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     upvoters,

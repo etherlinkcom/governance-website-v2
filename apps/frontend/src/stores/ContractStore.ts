@@ -1,6 +1,6 @@
 import { makeAutoObservable, flow, computed } from 'mobx';
 import { GovernanceType, Period, ContractAndConfig, Vote, Promotion, Upvote, Proposal } from '@trilitech/types';
-import { PeriodDetailsResponse } from '@/types/api';
+import { PeriodData, PeriodDetailsResponse } from '@/types/api';
 
 // TODO stop trying to reconnect to database after x fails
 class ContractStore {
@@ -303,6 +303,78 @@ class ContractStore {
   public getPeriodDetailsError(contractAddress: string, periodIndex: number): string | null {
     return this.periodDetailsErrors[contractAddress]?.[periodIndex] || null;
   }
+
+  public getPeriodData = (
+    contractAddress?: string,
+    contractVotingIndex?: number,
+    hasProposals?: boolean,
+    hasPromotions?: boolean
+  ): PeriodData => {
+    const hasValidParams = !!(contractAddress && contractVotingIndex);
+
+    if (!hasValidParams) {
+      return {
+        proposals: [],
+        promotions: [],
+        upvoters: [],
+        votes: [],
+        isLoading: false,
+        error: null,
+        hasValidParams: false,
+        proposalsPeriod: 0,
+        promotionsPeriod: 0,
+        proposalsPeriodData: null,
+        promotionsPeriodData: null,
+        contractAndConfig: undefined
+      };
+    }
+
+    let proposalsPeriod: number;
+    let promotionsPeriod: number;
+
+    if (hasProposals) {
+      proposalsPeriod = contractVotingIndex;
+      promotionsPeriod = contractVotingIndex + 1;
+    } else if (hasPromotions) {
+      proposalsPeriod = contractVotingIndex - 1;
+      promotionsPeriod = contractVotingIndex;
+    } else {
+      proposalsPeriod = contractVotingIndex;
+      promotionsPeriod = contractVotingIndex;
+    }
+
+    const contractAndConfig = this.contracts.find(c => c.contract_address === contractAddress);
+    const allPeriods = this.periodsForContract(contractAddress);
+    const proposalsPeriodData = allPeriods.find(p => p.contract_voting_index === proposalsPeriod) || null;
+    const promotionsPeriodData = allPeriods.find(p => p.contract_voting_index === promotionsPeriod) || null;
+
+    const proposals = this.proposalsForPeriod(contractAddress, proposalsPeriod);
+    const promotions = this.promotionsForPeriod(contractAddress, promotionsPeriod);
+    const upvoters = this.upvotesForPeriod(contractAddress, proposalsPeriod);
+    const votes = this.votesForPeriod(contractAddress, promotionsPeriod);
+
+    const isLoading = this.isPeriodDetailsLoading(contractAddress, proposalsPeriod) ||
+                    this.isPeriodDetailsLoading(contractAddress, promotionsPeriod) ||
+                    this.isLoadingPeriods(contractAddress);
+
+    const error = this.getPeriodDetailsError(contractAddress, proposalsPeriod) ||
+                this.getPeriodDetailsError(contractAddress, promotionsPeriod);
+
+    return {
+      proposals,
+      promotions,
+      upvoters,
+      votes,
+      isLoading,
+      error,
+      hasValidParams,
+      proposalsPeriod,
+      promotionsPeriod,
+      proposalsPeriodData,
+      promotionsPeriodData,
+      contractAndConfig
+    };
+  };
 
   private setPeriodDetailsLoading(contractAddress: string, periodIndex: number, loading: boolean) {
     if (!this.periodDetailsLoading[contractAddress]) {

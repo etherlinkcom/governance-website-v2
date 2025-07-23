@@ -2,9 +2,9 @@ import { Box, Typography, useTheme } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { HashDisplay } from '../shared/HashDisplay';
-import { usePeriodData } from '@/hooks/usePeriodData';
 import { getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
 import { VotingProgress } from '../shared/VotingProgress';
+import { contractStore } from '@/stores/ContractStore';
 
 const CandidateInfoSkeleton = () => {
   return (
@@ -44,7 +44,7 @@ interface CandidateInfoProps {
 }
 
 export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, promotionHash }: CandidateInfoProps) => {
-  const { promotions, isLoading, contractAndConfig } = usePeriodData(contractAddress, contractVotingIndex);
+  const { promotions, isLoading, contractAndConfig } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
   const theme = useTheme();
   const promotion_hash = promotionHash || promotions?.[0]?.proposal_hash;
 

@@ -4,9 +4,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
 import { ProposalsView } from '@/components/proposal/ProposalsView';
 import { PromotionView } from '@/components/promotion/PromotionView';
-import { usePeriodData } from '@/hooks/usePeriodData';
 import { Period } from '@trilitech/types';
 import { formatDate } from '@/lib/formatDate';
+import { contractStore } from '@/stores/ContractStore';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -50,7 +50,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
     promotionsPeriod,
     proposalsPeriodData,
     promotionsPeriodData
-  } = usePeriodData(
+  } = contractStore.getPeriodData(
     period.contract_address,
     period.contract_voting_index,
     hasProposals,

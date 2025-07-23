@@ -1,9 +1,9 @@
 import { Box, Card, CardContent } from '@mui/material';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { VoteResultCard } from '@/components/promotion/VoteResultCard';
-import { usePeriodData } from '@/hooks/usePeriodData';
 import { observer } from 'mobx-react-lite';
 import { Promotion } from '@trilitech/types';
+import { contractStore } from '@/stores/ContractStore';
 
 export const VotingResultsSkeleton = () => {
   return (
@@ -24,7 +24,7 @@ interface VotingResultsProps {
 }
 
 export const VotingResults = observer(({ contractVotingIndex, contractAddress, promotionHash }: VotingResultsProps) => {
-  const { votes, promotions, isLoading, error, hasValidParams } = usePeriodData(contractAddress, contractVotingIndex);
+  const { votes, promotions, isLoading, error, hasValidParams } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
 
   if (!hasValidParams) {
     return (

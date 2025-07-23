@@ -1,12 +1,12 @@
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
-import { usePeriodData } from '@/hooks/usePeriodData';
 import { useTableSort } from '@/hooks/useTableSort';
 import { SortableTable, SortableTableSkeleton } from '@/components/shared/SortableTable';
 import { Vote } from '@trilitech/types';
 import { customSortComparator} from '@/lib/votingCalculations';
 import { formatNumber } from '@/lib/formatNumber';
 import { Link, Typography } from '@mui/material';
+import { contractStore } from '@/stores/ContractStore';
 
 const voterKeys: (keyof Vote)[] = ['baker', 'voting_power', 'vote', 'time'];
 
@@ -16,7 +16,7 @@ interface VotersTableProps {
 }
 
 export const VotersTable = observer(({ contractVotingIndex, contractAddress }: VotersTableProps) => {
-  const { votes, isLoading, error, hasValidParams } = usePeriodData(contractAddress, contractVotingIndex);
+  const { votes, isLoading, error, hasValidParams } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     votes,

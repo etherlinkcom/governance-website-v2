@@ -2,10 +2,10 @@ import { Box, Typography, useTheme } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { ProposalCard } from '@/components/proposal/ProposalCard';
-import { usePeriodData } from '@/hooks/usePeriodData';
 import { getProposalQuorumPercent } from '@/lib/votingCalculations';
 import { Proposal } from '@trilitech/types';
 import { VotingProgress } from '../shared/VotingProgress';
+import { contractStore } from '@/stores/ContractStore';
 
 const ProposalsListSkeleton = () => (
   <Box>
@@ -27,7 +27,7 @@ interface ProposalsListProps {
 }
 
 export const ProposalsList = observer(({ contractVotingIndex, contractAddress }: ProposalsListProps) => {
-  const { proposals, proposalsPeriodData, isLoading, error, hasValidParams, contractAndConfig } = usePeriodData(contractAddress, contractVotingIndex);
+  const { proposals, proposalsPeriodData, isLoading, error, hasValidParams, contractAndConfig } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
 
   const theme = useTheme();
   const totalProposalUpvotes = proposals.map((e: Proposal) => e.upvotes).reduce((a: number, b: number) => a + b, 0);
