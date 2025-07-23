@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, LinearProgress, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { HashDisplay } from '../shared/HashDisplay';
@@ -43,7 +43,7 @@ interface CandidateInfoProps {
 }
 
 export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, promotionHash }: CandidateInfoProps) => {
-  const { promotions, isLoading, error, hasValidParams } = usePeriodData(contractAddress, contractVotingIndex);
+  const { promotions, isLoading, contractAndConfig } = usePeriodData(contractAddress, contractVotingIndex);
   const promotion_hash = promotionHash || promotions?.[0]?.proposal_hash;
 
   if (isLoading) return <CandidateInfoSkeleton />;
@@ -57,6 +57,32 @@ export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, p
       </Box>
     );
   }
+  if (!contractAndConfig) {
+    return (
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary">
+          No contract available
+        </Typography>
+      </Box>
+    );
+  }
+
+
+  const promotionQuorum = (getPromotionQuorumPercent(
+    promotions[0]?.yea_voting_power,
+    promotions[0]?.nay_voting_power,
+    promotions[0]?.pass_voting_power,
+    promotions[0]?.total_voting_power
+  )).toNumber();
+  const promotionSupermajority = (getPromotionSupermajorityPercent(
+    promotions[0]?.yea_voting_power,
+    promotions[0]?.nay_voting_power
+  )).toNumber();
+
+  const contractQuorum = contractAndConfig.promotion_quorum;
+  const contractSupermajority = contractAndConfig.promotion_supermajority;
+  const quorumProgess = Math.min((promotionQuorum / contractQuorum) * 100, 100);
+  const supermajorityProgress = Math.min((promotionSupermajority / contractSupermajority) * 100, 100);
 
   return (
     <Box sx={{ mb: 2 }}>
@@ -76,35 +102,36 @@ export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, p
           />
         </Box>
 
+// TODO tooltips for quorums
         {/* Right side - Stats */}
         <Box sx={{
           display: 'flex',
-          gap: 4,
-          flexShrink: 0
+          flexShrink: 0,
+          flexDirection: 'column',
         }}>
           <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="subtitle2">
-              Quorum:
-            </Typography>
             <Typography variant="body1">
-              {(getPromotionQuorumPercent(
-                promotions[0]?.yea_voting_power,
-                promotions[0]?.nay_voting_power,
-                promotions[0]?.pass_voting_power,
-                promotions[0]?.total_voting_power
-              )).toFixed(2)}%
-            </Typography>
+              Quorum: {promotionQuorum.toFixed(2)}% / {contractQuorum}%
+           </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={quorumProgess}
+            sx={{
+              width: 196,
+              mb: 1
+            }} />
           </Box>
           <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="subtitle2">
-              Supermajority:
-            </Typography>
             <Typography variant="body1">
-              {(getPromotionSupermajorityPercent(
-                promotions[0]?.yea_voting_power,
-                promotions[0]?.nay_voting_power
-              )).toFixed(2)}%
+              Supermajority: {promotionSupermajority}% / {contractSupermajority}%
             </Typography>
+            <LinearProgress
+              variant="determinate"
+              value={supermajorityProgress}
+              sx={{
+                width: 196,
+                mb: 1
+              }} />
           </Box>
         </Box>
       </Box>

@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, LinearProgress, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { ProposalCard } from '@/components/proposal/ProposalCard';
@@ -8,8 +8,8 @@ import { Proposal } from '@trilitech/types';
 
 const ProposalsListSkeleton = () => (
   <Box>
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-      <ComponentLoading width={120} height={32} />
+    <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', mb: 2 }}>
+      {/* <ComponentLoading width={120} height={32} /> */}
       <ComponentLoading width={80} height={24} />
     </Box>
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -52,13 +52,30 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
     );
   }
 
+  const quorumPercent = Number(getProposalQuorumPercent(totalProposalUpvotes, proposalsPeriodData?.total_voting_power));
+  const contractQuorum = contractAndConfig?.proposal_quorum || 1;
+
+  const progress = Math.min((quorumPercent / contractQuorum) * 100, 100);
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'end',
+        mb: 2,
+        flexDirection: 'column',
+        alignItems: 'flex-end'
+      }}>
         <Typography variant="body1">
-          Quorum:{' '}
-          {getProposalQuorumPercent(totalProposalUpvotes, proposalsPeriodData?.total_voting_power)}% / {contractAndConfig?.proposal_quorum}%
+          Quorum: {quorumPercent}% / {contractQuorum}%
         </Typography>
+        <LinearProgress
+          variant="determinate"
+          value={progress}
+          sx={{
+            width: 125,
+            mt: 1
+          }} />
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

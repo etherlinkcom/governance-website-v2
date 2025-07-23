@@ -116,7 +116,8 @@ class ContractStore {
           proposal_hashes: [],
           promotion_hash: undefined,
           period_class: i === 0 ? 'current' : 'future',
-          max_upvotes_voting_power: 0
+          max_upvotes_voting_power: 0,
+          total_voting_power: 0,
         });
       }
 

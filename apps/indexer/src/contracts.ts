@@ -28,10 +28,10 @@ export const past_contracts: Contract[] = [
 //     address: "KT1UvCsnXpLAssgeJmrbQ6qr3eFkYXxsTG9U",
 //   },
 //   // Level 8767489 4.0
-//   {
-//     type: "slow",
-//     address: "KT1XdSAYGXrUDE1U5GNqUKKscLWrMhzyjNeh",
-//   },
+  {
+    type: "slow",
+    address: "KT1XdSAYGXrUDE1U5GNqUKKscLWrMhzyjNeh",
+  },
 //   {
 //     type: "fast",
 //     address: "KT1D1fRgZVdjTj5sUZKcSTPPnuR7LRxVYnDL",
@@ -54,11 +54,11 @@ export const latest_contracts: Contract[] = [
 //     type: "fast",
 //     active: true
 //   },
-  {
-    address: "KT1WckZ2uiLfHCfQyNp1mtqeRcC1X6Jg2Qzf",
-    type: "sequencer",
-    active: true
-  },
+  // {
+  //   address: "KT1WckZ2uiLfHCfQyNp1mtqeRcC1X6Jg2Qzf",
+  //   type: "sequencer",
+  //   active: true
+  // },
 ];
 
 export const all_contracts: Contract[] = [
