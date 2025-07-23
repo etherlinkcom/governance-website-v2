@@ -1,9 +1,10 @@
-import { Box, LinearProgress, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { HashDisplay } from '../shared/HashDisplay';
 import { usePeriodData } from '@/hooks/usePeriodData';
 import { getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
+import { VotingProgress } from '../shared/VotingProgress';
 
 const CandidateInfoSkeleton = () => {
   return (
@@ -44,6 +45,7 @@ interface CandidateInfoProps {
 
 export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, promotionHash }: CandidateInfoProps) => {
   const { promotions, isLoading, contractAndConfig } = usePeriodData(contractAddress, contractVotingIndex);
+  const theme = useTheme();
   const promotion_hash = promotionHash || promotions?.[0]?.proposal_hash;
 
   if (isLoading) return <CandidateInfoSkeleton />;
@@ -102,37 +104,24 @@ export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, p
           />
         </Box>
 
-// TODO tooltips for quorums
         {/* Right side - Stats */}
         <Box sx={{
           display: 'flex',
           flexShrink: 0,
           flexDirection: 'column',
         }}>
-          <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="body1">
-              Quorum: {promotionQuorum.toFixed(2)}% / {contractQuorum}%
-           </Typography>
-          <LinearProgress
-            variant="determinate"
-            value={quorumProgess}
-            sx={{
-              width: 196,
-              mb: 1
-            }} />
-          </Box>
-          <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="body1">
-              Supermajority: {promotionSupermajority}% / {contractSupermajority}%
-            </Typography>
-            <LinearProgress
-              variant="determinate"
-              value={supermajorityProgress}
-              sx={{
-                width: 196,
-                mb: 1
-              }} />
-          </Box>
+          <VotingProgress
+            label="Quorum"
+            value={promotionQuorum.toFixed(2)}
+            required={contractQuorum}
+            progress={quorumProgess}
+          />
+          <VotingProgress
+            label="Supermajority"
+            value={promotionSupermajority.toString()}
+            required={contractSupermajority}
+            progress={supermajorityProgress}
+          />
         </Box>
       </Box>
     </Box>

@@ -1,10 +1,11 @@
-import { Box, LinearProgress, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { ProposalCard } from '@/components/proposal/ProposalCard';
 import { usePeriodData } from '@/hooks/usePeriodData';
 import { getProposalQuorumPercent } from '@/lib/votingCalculations';
 import { Proposal } from '@trilitech/types';
+import { VotingProgress } from '../shared/VotingProgress';
 
 const ProposalsListSkeleton = () => (
   <Box>
@@ -28,6 +29,7 @@ interface ProposalsListProps {
 export const ProposalsList = observer(({ contractVotingIndex, contractAddress }: ProposalsListProps) => {
   const { proposals, proposalsPeriodData, isLoading, error, hasValidParams, contractAndConfig } = usePeriodData(contractAddress, contractVotingIndex);
 
+  const theme = useTheme();
   const totalProposalUpvotes = proposals.map((e: Proposal) => e.upvotes).reduce((a: number, b: number) => a + b, 0);
   if (!hasValidParams) {
     return (
@@ -66,16 +68,13 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
         flexDirection: 'column',
         alignItems: 'flex-end'
       }}>
-        <Typography variant="body1">
-          Quorum: {quorumPercent}% / {contractQuorum}%
-        </Typography>
-        <LinearProgress
-          variant="determinate"
-          value={progress}
-          sx={{
-            width: 125,
-            mt: 1
-          }} />
+        <VotingProgress
+          label="Quorum"
+          value={quorumPercent.toFixed(2)}
+          required={contractQuorum}
+          progress={progress}
+          color={theme.palette.primary.main}
+        />
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
