@@ -1,7 +1,6 @@
 import { useTableSort } from '@/hooks/useTableSort';
-import { Table, TableHead, TableRow, TableCell, TableBody, Typography, useTheme, Link, Box } from '@mui/material';
-import { SortableTable } from '@/components/shared/SortableTable';
-import { ComponentLoading } from '@/components/shared/ComponentLoading';
+import { Typography, Link } from '@mui/material';
+import { SortableTable, SortableTableSkeleton } from '@/components/shared/SortableTable';
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { Upvote } from '@trilitech/types';
@@ -11,41 +10,6 @@ import { HashDisplay } from '../shared/HashDisplay';
 import { formatNumber } from '@/lib/formatNumber';
 
 const upvoterKeys: (keyof Upvote)[] = ['baker', 'voting_power', 'proposal_hash', 'time'];
-
-const UpvotersTableSkeleton = () => {
-  const theme = useTheme();
-  return (
-    <Box sx={{
-      width: '100%',
-      overflowX: 'auto',
-      borderRadius: '25px',
-      background: theme.palette.background.paper,
-    }}>
-      <Table sx={{ minWidth: 600 }}>
-        <TableHead>
-          <TableRow>
-            {upvoterKeys.map(key => (
-              <TableCell key={key} sx={{ whiteSpace: 'nowrap' }}>
-                {prettifyKey(key)}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {[...Array(5)].map((_, rowIdx) => (
-            <TableRow key={rowIdx}>
-              {upvoterKeys.map((key, colIdx) => (
-                <TableCell key={colIdx} sx={{ whiteSpace: 'nowrap' }}>
-                  <ComponentLoading width="80%" height={18} />
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Box>
-  );
-};
 
 interface UpvotersTableProps {
   contractVotingIndex?: number;
@@ -61,7 +25,13 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
     customSortComparator
   );
 
-  if (isLoading) return <UpvotersTableSkeleton />;
+  const columns = upvoterKeys.map(key => ({
+    id: key,
+    label: key === 'proposal_hash' ? 'Proposal' : prettifyKey(key),
+    sortable: true
+  }));
+
+  if (isLoading) return <SortableTableSkeleton columns={columns} />;
 
   if (error) {
     return (
@@ -71,11 +41,6 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
     );
   }
 
-  const columns = upvoterKeys.map(key => ({
-    id: key,
-    label: key === 'proposal_hash' ? 'Proposal' : prettifyKey(key),
-    sortable: true
-  }));
 
   const renderCell = (row: Upvote, column: { id: keyof Upvote; label: string; sortable?: boolean }) => {
     switch (column.id) {

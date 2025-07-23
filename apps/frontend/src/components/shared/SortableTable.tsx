@@ -1,12 +1,50 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableSortLabel, Box } from '@mui/material';
+import { theme } from '@/theme';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableSortLabel, Box} from '@mui/material';
+import { ComponentLoading } from './ComponentLoading';
+import { TableCards, TableCardsSkeleton } from './TableCards';
 
 type Order = 'asc' | 'desc';
 
-interface Column<T> {
+export interface Column<T> {
   id: keyof T;
   label: string;
   sortable?: boolean;
 }
+
+interface SortableTableSkeletonProps {
+  columns: Column<any>[];
+  rowCount?: number;
+}
+
+export const SortableTableSkeleton = ({ columns, rowCount = 5 }: SortableTableSkeletonProps) => {
+  return (
+    <Box sx={{ width: '100%', overflowX: 'auto', borderRadius: '25px', background: theme.palette.background.paper }}>
+      <Table sx={{ minWidth: 600, display: { xs: 'none', sm: 'table' } }}>
+        <TableHead>
+          <TableRow>
+            {columns.map(column => (
+              <TableCell key={column.id as string} sx={{ whiteSpace: 'nowrap' }}>
+                {column.label}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {[...Array(rowCount)].map((_, rowIdx) => (
+            <TableRow key={rowIdx}>
+              {columns.map((column, colIdx) => (
+                <TableCell key={colIdx} sx={{ whiteSpace: 'nowrap' }}>
+                  <ComponentLoading width="80%" height={18} />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <TableCardsSkeleton columns={columns} sx={{ display: { xs: 'block', sm: 'none' } }} />
+    </Box>
+  );
+};
 
 interface SortableTableProps<T> {
   columns: Column<T>[];
@@ -20,7 +58,7 @@ interface SortableTableProps<T> {
 export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort, renderCell }: SortableTableProps<T>) => {
   return (
     <Box sx={{ width: '100%' }}>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ display: { xs: 'none', sm: 'block' }, minWidth: 320 }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -72,6 +110,7 @@ export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort
           </TableBody>
         </Table>
       </TableContainer>
+      <TableCards<T> columns={columns} data={data} renderCell={renderCell} sx={{ display: { xs: 'block', sm: 'none' } }} />
     </Box>
   );
 };

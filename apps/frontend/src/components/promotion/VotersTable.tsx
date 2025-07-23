@@ -1,51 +1,14 @@
-import { Table, TableHead, TableRow, TableCell, TableBody, useTheme, Typography, Link, Box } from '@mui/material';
-import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { usePeriodData } from '@/hooks/usePeriodData';
 import { useTableSort } from '@/hooks/useTableSort';
-import { SortableTable } from '@/components/shared/SortableTable';
+import { SortableTable, SortableTableSkeleton } from '@/components/shared/SortableTable';
 import { Vote } from '@trilitech/types';
 import { customSortComparator} from '@/lib/votingCalculations';
 import { formatNumber } from '@/lib/formatNumber';
+import { Link, Typography } from '@mui/material';
 
 const voterKeys: (keyof Vote)[] = ['baker', 'voting_power', 'vote', 'time'];
-
-const VotersTableSkeleton = () => {
-  const theme = useTheme();
-
-  return (
-    <Box sx={{
-      width: '100%',
-      overflowX: 'auto',
-      borderRadius: '25px',
-      background: theme.palette.background.paper,
-    }}>
-      <Table sx={{ minWidth: 600 }}>
-        <TableHead>
-          <TableRow>
-            {voterKeys.map(key => (
-              <TableCell key={key} sx={{ whiteSpace: 'nowrap' }}>
-                {prettifyKey(key)}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {[...Array(5)].map((_, rowIdx) => (
-            <TableRow key={rowIdx}>
-              {voterKeys.map((key, colIdx) => (
-                <TableCell key={colIdx} sx={{ whiteSpace: 'nowrap' }}>
-                  <ComponentLoading width="80%" height={18} />
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Box>
-  );
-};
 
 interface VotersTableProps {
   contractVotingIndex?: number;
@@ -69,7 +32,13 @@ export const VotersTable = observer(({ contractVotingIndex, contractAddress }: V
     );
   }
 
-  if (isLoading) return <VotersTableSkeleton />;
+  const columns = voterKeys.map(key => ({
+    id: key,
+    label: key === 'proposal_hash' ? 'Proposal' : prettifyKey(key),
+    sortable: true
+  }));
+
+  if (isLoading) return <SortableTableSkeleton columns={columns} />;
 
   if (error) {
     return (
@@ -79,11 +48,6 @@ export const VotersTable = observer(({ contractVotingIndex, contractAddress }: V
     );
   }
 
-  const columns = voterKeys.map(key => ({
-    id: key,
-    label: key === 'proposal_hash' ? 'Proposal' : prettifyKey(key),
-    sortable: true
-  }));
 
   const renderCell = (row: Vote, column: { id: keyof Vote; label: string; sortable?: boolean }) => {
     switch (column.id) {
