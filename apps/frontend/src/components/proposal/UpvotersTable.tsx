@@ -71,14 +71,12 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
     );
   }
 
-  // TODO can be moved to sortable table component
   const columns = upvoterKeys.map(key => ({
     id: key,
     label: key === 'proposal_hash' ? 'Proposal' : prettifyKey(key),
     sortable: true
   }));
 
-  // TODO can be moved to sortable table component
   const renderCell = (row: Upvote, column: { id: keyof Upvote; label: string; sortable?: boolean }) => {
     switch (column.id) {
       case 'baker':

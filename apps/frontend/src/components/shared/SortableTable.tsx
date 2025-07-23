@@ -19,24 +19,21 @@ interface SortableTableProps<T> {
 
 export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort, renderCell }: SortableTableProps<T>) => {
   return (
-    <Box sx={{
-      width: '100%',
-      overflowX: 'auto'
-    }}>
-      <TableContainer
-        component={Paper}
-        sx={{
-          minWidth: 600,
-          maxWidth: '100%'
-        }}
-      >
-        <Table sx={{ minWidth: 600 }}>
+    <Box sx={{ width: '100%' }}>
+      <TableContainer component={Paper}>
+        <Table>
           <TableHead>
             <TableRow>
               {columns.map((column) => (
                 <TableCell
                   key={column.id as string}
-                  sx={{ whiteSpace: 'nowrap' }}
+                  sx={{
+                    minWidth: 0,
+                    maxWidth: 80,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    wordBreak: 'keep-all'
+                  }}
                 >
                   {column.sortable ? (
                     <TableSortLabel
@@ -59,7 +56,13 @@ export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort
                 {columns.map((column) => (
                   <TableCell
                     key={column.id as string}
-                    sx={{ whiteSpace: 'nowrap' }}
+                    sx={{
+                      minWidth: 0,
+                      maxWidth: 80,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
                   >
                     {renderCell(row, column)}
                   </TableCell>
