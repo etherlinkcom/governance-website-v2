@@ -1,8 +1,9 @@
 export const formatNumber = (num: number) => {
-    // TODO switch between mutez and tez
+    const displayInTez = process.env.DISPLAY_IN_TEZ === 'true';
+    const value = displayInTez ? num / 1_000_000 : num;
     return new Intl.NumberFormat('en-US', {
       notation: 'compact',
       maximumFractionDigits: 2
-    }).format(num);
+    }).format(value);
   };
 
