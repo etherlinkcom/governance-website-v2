@@ -1,8 +1,8 @@
 import { makeAutoObservable, flow, computed } from 'mobx';
 import { GovernanceType, Period, ContractAndConfig, Vote, Promotion, Upvote, Proposal } from '@trilitech/types';
 import { PeriodData, PeriodDetailsResponse } from '@/types/api';
+import { fetchJson } from '@/lib/fetchJson';
 
-// TODO stop trying to reconnect to database after x fails
 class ContractStore {
   currentGovernance: GovernanceType | null = null;
   contractsByGovernance: Partial<Record<GovernanceType, ContractAndConfig[]>> = {};
@@ -66,14 +66,7 @@ class ContractStore {
     this.error = null;
 
     try {
-      const response = yield fetch(`/api/contract/${contractAddress}/periods`);
-
-      if (!response.ok) {
-        const errorData = yield response.json();
-        throw new Error(errorData.error || 'Failed to fetch periods');
-      }
-
-      const data = yield response.json();
+      const data = yield fetchJson<{ periods: Period[] }>(`/api/contract/${contractAddress}/periods`);
       let allPeriods = data.periods;
 
       const contract = this.contracts.find(c => c.contract_address === contractAddress);
@@ -102,14 +95,7 @@ class ContractStore {
     this.error = null;
 
     try {
-      const response = yield fetch(`/api/governance/${this.currentGovernance}/contracts`);
-
-      if (!response.ok) {
-        const errorData = yield response.json();
-        throw new Error(errorData.error || 'Failed to fetch contracts');
-      }
-
-      const data = yield response.json();
+      const data = yield fetchJson<{ contracts: ContractAndConfig[] }>(`/api/governance/${this.currentGovernance}/contracts`);
       this.contractsByGovernance[this.currentGovernance] = data.contracts;
 
     } catch (error) {
@@ -125,8 +111,7 @@ class ContractStore {
     if (!contract || !contract.active) return [];
 
     try {
-      const tzktResponse = yield fetch(`${this.tzktApiUrl}/v1/head`);
-      const head = yield tzktResponse.json();
+      const head = yield fetchJson<{ level: number; timestamp: string }>(`${this.tzktApiUrl}/v1/head`);
       const currentLevel = head.level;
       const currentDate = new Date(head.timestamp);
 
@@ -198,11 +183,7 @@ class ContractStore {
     this.setPeriodDetailsError(contractAddress, periodIndex, null);
 
     try {
-      const response = yield fetch(`/api/contract/${contractAddress}/${periodIndex}/details`);
-      if (!response.ok) throw new Error('Failed to fetch period details');
-
-      const data: PeriodDetailsResponse = yield response.json();
-
+      const data = yield fetchJson<PeriodDetailsResponse>(`/api/contract/${contractAddress}/${periodIndex}/details`);
       this.periodDetails[contractAddress][periodIndex] = {
         ...data,
         timestamp: Date.now()
