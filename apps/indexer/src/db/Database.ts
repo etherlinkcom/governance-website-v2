@@ -252,12 +252,13 @@ export class Database {
       upvote.proposal_hash,
       upvote.baker,
       upvote.alias,
-      upvote.voting_power
+      upvote.voting_power,
+      upvote.contract_period_index
     ];
 
     await this.upsert(
-      `INSERT INTO upvotes (level, time, transaction_hash, proposal_hash, baker, alias, voting_power)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO upvotes (level, time, transaction_hash, proposal_hash, baker, alias, voting_power, contract_period_index)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          voting_power = VALUES(voting_power),
          alias = VALUES(alias),

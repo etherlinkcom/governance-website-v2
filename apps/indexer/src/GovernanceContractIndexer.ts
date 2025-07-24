@@ -204,6 +204,7 @@ export class GovernanceContractIndexer {
     }
 
     private async getWinningCandidateAtLevel(contract_address: string, level: number, period_index: number): Promise<string> {
+        // TODO only use promotion period and not proposal period to get candidates that definitely won
         logger.info(`[GovernanceContractIndexer] getWinningCandidateAtLevel(${contract_address}, ${level}, ${period_index})`);
         const url = `${this.tzkt_api_url}/contracts/${contract_address}/storage`;
         const data = await this.fetchJson<

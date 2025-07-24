@@ -129,12 +129,11 @@ export class Database {
       );
 
       // Fetch upvotes for proposals in this period
-      // Since upvotes table doesn't have direct period reference, we need to join with proposals
       const upvotes = await this.query<Upvote>(
         `SELECT u.*
          FROM upvotes u
          JOIN proposals p ON u.proposal_hash = p.proposal_hash
-         WHERE p.contract_address = ? AND p.contract_period_index = ?
+         WHERE p.contract_address = ? AND u.contract_period_index = ?
          ORDER BY u.created_at DESC`,
         [contractAddress, contractVotingIndex]
       );
