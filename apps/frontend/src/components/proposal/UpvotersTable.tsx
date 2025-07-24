@@ -47,7 +47,7 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
       case 'baker':
         return (
           <Link
-            href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${row.baker}`}
+            href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${row.transaction_hash}`}
             target="_blank"
             rel="noopener noreferrer"
             sx={{
