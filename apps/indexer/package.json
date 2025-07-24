@@ -13,8 +13,12 @@
   },
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.0",
+    "@microsoft/signalr": "^8.0.7",
+    "@taquito/taquito": "^22.0.0",
     "@trilitech/types": "*",
+    "dotenv": "^17.2.0",
     "logform": "^2.7.0",
+    "taquito": "^1.0.0",
     "winston": "^3.17.0"
   },
   "devDependencies": {
