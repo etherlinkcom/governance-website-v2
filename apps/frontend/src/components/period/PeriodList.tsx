@@ -65,6 +65,8 @@ export const PeriodsList = observer(({ periods, isLoading }: PeriodsListProps) =
     );
   }
 
+  const firstPeriodIndex = periods[0].contract_voting_index;
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Typography variant="subtitle2" sx={{ mb: 1 }}>
@@ -90,6 +92,15 @@ export const PeriodsList = observer(({ periods, isLoading }: PeriodsListProps) =
           </Fragment>
         );
       })}
+      {firstPeriodIndex > 1 && (
+        <Typography
+          variant="subtitle2"
+          color="text.secondary"
+          sx={{ textAlign: 'center', py: 1, fontStyle: 'italic' }}
+        >
+          No proposals or promotions for periods 1 - {firstPeriodIndex - 1}
+        </Typography>
+      )}
     </Box>
   );
 });

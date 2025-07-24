@@ -8,7 +8,6 @@ export class WalletStore {
   balance: number = 0;
   votingPower: number = 0;
 
-  // TODO env var
   private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
   private wallet: BeaconWallet;
   private delegatesViewContractAddress: string = process.env.NEXT_PUBLIC_VOTING_RIGHTS_DELEGATION_CONTRACT!;
