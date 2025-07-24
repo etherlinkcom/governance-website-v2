@@ -3,6 +3,7 @@ import { GovernanceContractIndexer } from './GovernanceContractIndexer';
 import { logger } from './utils/logger';
 import { Contract, TzktTransactionEvent, TzktStorageHistory} from './types';
 import { Period, Proposal, Upvote, Vote, Promotion } from 'packages/types';
+import { Database } from './db/Database';
 
 export class TzktListener {
   private contracts: Contract[];
@@ -11,6 +12,8 @@ export class TzktListener {
   private seenPeriods = new Set<string>();
   private governanceContractIndexer = new GovernanceContractIndexer();
   private readonly functions = ['new_proposal', 'upvote_proposal', 'vote'];
+  private database: Database = new Database();
+
 
   constructor(contracts: Contract[]) {
     this.contracts = contracts;
@@ -148,7 +151,7 @@ export class TzktListener {
       upvotes: 0,
     };
     logger.info(`[TzktListener] New proposal: ${JSON.stringify(p)}`);
-    // await this.database.upsertProposals([p]);
+    await this.database.upsertProposals([p]);
   }
 
   private async handleUpvoteProposal(
@@ -201,7 +204,7 @@ export class TzktListener {
     ` hash=${upvote.proposal_hash} voting_power=${upvote.voting_power}`
   );
   logger.info(`[TzktListener] Upvote: ${JSON.stringify(upvote)}`);
-  // await this.database.upsertUpvotes([upvote]);
+  await this.database.upsertUpvotes([upvote]);
 }
 
 
@@ -248,7 +251,7 @@ private async handleVote(
     ` promoPeriod=${promotionPeriodIndex}` +
     ` choice=${vote.vote} vp=${vote.voting_power}`
   );
-  // await this.database.upsertVotes([vote]);
+  await this.database.upsertVotes([vote]);
 
   // pull the live promotion context
   const url = `${this.governanceContractIndexer.tzkt_api_url}/contracts/${contract.address}/storage?level=${level}`;
@@ -283,7 +286,7 @@ private async handleVote(
     ` pass=${promotion.pass_voting_power}` +
     ` total=${promotion.total_voting_power}`
   );
-  // await this.database.upsertPromotions([promotion]);
+  await this.database.upsertPromotions([promotion]);
 }
 
   private async handleBlock(block: { level: number; timestamp: string }) {
@@ -323,6 +326,7 @@ private async handleVote(
                               : 'future',
       };
       logger.info(`[TzktListener] New period ${key}: ${JSON.stringify(period)}`);
+      await this.database.upsertPeriods([period]);
     }
   }
 
