@@ -378,6 +378,7 @@ export class GovernanceContractIndexer {
                     promotion.yea_voting_power = Number(new_promotion.yea_voting_power);
                     promotion.nay_voting_power = Number(new_promotion.nay_voting_power);
                     promotion.pass_voting_power = Number(new_promotion.pass_voting_power);
+                    // TODO this is not calculating properly
                     promotion.total_voting_power = Number(new_promotion.total_voting_power);
                 }
                 continue;

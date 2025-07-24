@@ -71,14 +71,14 @@ export const VotingResults = observer(({ contractVotingIndex, contractAddress, p
   }
 
   const promotion: Promotion = promotions[0];
-  const totalVotes = promotion.total_voting_power || 0;
   const yeaVotes = promotion.yea_voting_power || 0;
   const nayVotes = promotion.nay_voting_power || 0;
   const passVotes = promotion.pass_voting_power || 0;
+  const totalVotes = (yeaVotes + nayVotes + passVotes) || 0;
 
-  const yeaPercentage = totalVotes > 0 ? Math.round((yeaVotes / totalVotes) * 100) : 0;
-  const nayPercentage = totalVotes > 0 ? Math.round((nayVotes / totalVotes) * 100) : 0;
-  const passPercentage = totalVotes > 0 ? Math.round((passVotes / totalVotes) * 100) : 0;
+  const yeaPercentage = totalVotes > 0 ? ((yeaVotes / totalVotes) * 100).toFixed(2) : "0";
+  const nayPercentage = totalVotes > 0 ? ((nayVotes / totalVotes) * 100).toFixed(2) : "0";
+  const passPercentage = totalVotes > 0 ? ((passVotes / totalVotes) * 100).toFixed(2) : "0";
 
   return (
     <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>

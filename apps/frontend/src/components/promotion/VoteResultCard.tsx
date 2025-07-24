@@ -4,7 +4,7 @@ import { useTheme, alpha } from '@mui/material/styles';
 
 interface VoteResultCardProps {
   type: 'yea' | 'nay' | 'pass';
-  percentage: number;
+  percentage: string;
   count: number;
   label: string;
 }
