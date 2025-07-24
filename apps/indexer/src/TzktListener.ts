@@ -145,6 +145,7 @@ export class TzktListener {
       contract_address: contract.address,
       proposer: operation.sender.address,
       alias: operation.sender.alias,
+      upvotes: 0,
     };
     logger.info(`[TzktListener] New proposal: ${JSON.stringify(p)}`);
     // await this.database.upsertProposals([p]);
@@ -191,6 +192,7 @@ export class TzktListener {
     baker:           operation.sender.address,
     alias:           operation.sender.alias,
     transaction_hash: operation.hash,
+    contract_period_index: periodIndex,
   };
 
   logger.info(
@@ -303,6 +305,8 @@ private async handleVote(
       const date_start  = new Date(block.timestamp);
       const date_end    = await this.governanceContractIndexer.getDateFromLevel(level_end);
 
+      const now = lvl;
+
       const period: Period = {
         contract_voting_index: idx,
         contract_address:      c.address,
@@ -310,6 +314,13 @@ private async handleVote(
         level_end,
         date_start,
         date_end,
+        proposal_hashes:           [],              
+        promotion_hash:            undefined,       
+        max_upvotes_voting_power:  0,               
+        total_voting_power:        0,               
+        period_class:              now >= level_start && now <= level_end
+                              ? 'current'
+                              : 'future',
       };
       logger.info(`[TzktListener] New period ${key}: ${JSON.stringify(period)}`);
     }
