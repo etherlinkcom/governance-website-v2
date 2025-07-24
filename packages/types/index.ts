@@ -68,6 +68,7 @@ export type Upvote = {
   voting_power: number;
   transaction_hash: string;
   contract_address: string;
+  contract_period_index: number;
 };
 
 export type Vote = {

@@ -66,7 +66,6 @@ export default async function handler(
 
     console.log(`[API] Fetching details for contract ${contractAddress}, period ${contractVotingIndex}`);
 
-    // Get period details from database
     const periodDetails = await database.getPeriodDetails(contractAddress, contractVotingIndex);
 
     console.log(`[API] Found period details for contract ${contractAddress}, period ${contractVotingIndex}`);

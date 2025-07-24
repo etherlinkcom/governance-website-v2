@@ -293,6 +293,7 @@ export class GovernanceContractIndexer {
                     alias: alias,
                     voting_power: total_voting_power,
                     contract_address: contract_and_config.contract_address,
+                    contract_period_index: period_index,
                 });
 
                 proposals_hash_to_proposal[proposal_hash] = proposals[proposals.length - 1];
@@ -323,6 +324,7 @@ export class GovernanceContractIndexer {
             }
             if (entry.operation?.parameter?.entrypoint === 'upvote_proposal') {
                 const { sender, alias } = await this.getSenderFromHash(entry.operation.hash);
+                const period_index = Number(entry.value.voting_context.period_index);
                 const global_voting_index = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
                 const voting_power = await this.getVotingPowerForAddress(sender, global_voting_index);
                 const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
@@ -338,9 +340,9 @@ export class GovernanceContractIndexer {
                     alias: alias,
                     voting_power: total_voting_power,
                     contract_address: contract_and_config.contract_address,
+                    contract_period_index: period_index,
                 });
 
-                const period_index = Number(entry.value.voting_context.period_index);
                 const current_max = Number(entry.value.voting_context.period?.proposal?.max_upvotes_voting_power || 0);
                 periods[period_index].max_upvotes_voting_power = Math.max(
                     periods[period_index].max_upvotes_voting_power || 0,

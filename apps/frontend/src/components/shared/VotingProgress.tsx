@@ -35,12 +35,13 @@ export const VotingProgress = ({
       }}
     >
       <Tooltip title={`Current Voting Power: ${value}% / ${required}%`} placement="top" arrow={true}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-          <Typography variant="body1">
-            {label}: {value}% / {required}%
-          </Typography>
+       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+        <Typography variant="body1">{label}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body1">{value}% / {required}%</Typography>
           <InfoIcon className="info-icon" color={baseColor} />
         </Box>
+      </Box>
       </Tooltip>
       <LinearProgress
         variant="determinate"

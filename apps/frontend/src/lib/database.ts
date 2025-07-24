@@ -121,7 +121,6 @@ export class Database {
     console.log(`[Database] Fetching period details for contract ${contractAddress}, period ${contractVotingIndex}`);
 
     try {
-      // Fetch proposals for this period
       const proposals = await this.query<Proposal>(
         `SELECT * FROM proposals
          WHERE contract_address = ? AND contract_period_index = ?
