@@ -7,6 +7,7 @@ import { PromotionView } from '@/components/promotion/PromotionView';
 import { Period } from '@trilitech/types';
 import { formatDate } from '@/lib/formatDate';
 import { contractStore } from '@/stores/ContractStore';
+import { CopyButton } from '../shared/CopyButton';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -127,18 +128,26 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
             mb: 2,
             gap: 2,
           }}>
+            <Box sx={{display:'flex'}}>
             <Link
-                className="contract-link"
-                href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${period.contract_address}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Contract: {period.contract_address}
-              </Link>
-            <IconButton
-              onClick={onClose}
-              sx={{
-                flexShrink: 0,
+              className="contract-link"
+              href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${period.contract_address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Contract: {period.contract_address}
+            </Link>
+            <CopyButton
+              text={period.contract_address}
+              message="Contract address copied!"
+              size="small"
+              sx={{ ml: 0.5, mt: -0.25, color: 'primary.main' }}
+            />
+          </Box>
+          <IconButton
+            onClick={onClose}
+            sx={{
+              flexShrink: 0,
                 minWidth: 48,
                 width: 48,
                 height: 48,

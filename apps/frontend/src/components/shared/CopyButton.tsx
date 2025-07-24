@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { IconButton } from '@mui/material';
+import { IconButton, SxProps } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import toast from 'react-hot-toast';
@@ -8,17 +8,20 @@ interface CopyButtonProps {
   text: string;
   message?: string;
   size?: 'small' | 'medium' | 'large';
+  sx?: SxProps
 }
 
 export const CopyButton = ({
   text,
   message = 'Copied to clipboard!',
-  size = 'small'
+  size = 'small',
+  sx
 }: CopyButtonProps) => {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
+  const handleCopy = async (event: React.MouseEvent) => {
     try {
+      event?.stopPropagation();
       await navigator.clipboard.writeText(text);
       setCopied(true);
       toast.dismiss();
@@ -41,6 +44,7 @@ export const CopyButton = ({
             backgroundColor: 'transparent',
           },
         }),
+        ...sx,
       }}
     >
       {copied ? (

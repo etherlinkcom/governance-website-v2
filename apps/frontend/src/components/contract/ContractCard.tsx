@@ -7,6 +7,7 @@ import { ContractInfoModal } from '@/components/contract/ContractInfoModal';
 import { InfoIcon } from '@/components/shared/icons/InfoIcon';
 import { contractStore } from '@/stores/ContractStore';
 import { PeriodsList } from '@/components/period/PeriodList';
+import { CopyButton } from '../shared/CopyButton';
 
 interface ContractCardProps {
   contract: ContractAndConfig;
@@ -49,6 +50,12 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
               >
                 Contract: {contract.contract_address}
               </Link>
+              <CopyButton
+                text={contract.contract_address}
+                message="Contract address copied!"
+                size="small"
+                sx={{ ml: 0.5, mt: -0.5, color: 'primary.main' }}
+              />
 
               <Typography variant="body1" color="text.secondary" sx={{mt: 1}}>
                 Level: {contract.started_at_level.toLocaleString()}
