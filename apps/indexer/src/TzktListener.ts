@@ -11,9 +11,9 @@ export class TzktListener {
   private connection!: HubConnection;
   private seenPeriods = new Set<string>();
   private governanceContractIndexer = new GovernanceContractIndexer();
-  private readonly trackedFunctions = ['new_proposal', 'upvote_proposal', 'vote'];
-  private database = new Database();
-  private readonly eventsUrl = 'https://api.tzkt.io/v1/events';
+  private readonly trackedFunctions: string[] = ['new_proposal', 'upvote_proposal', 'vote'];
+  private database: Database = new Database();
+  private readonly eventsUrl: string = 'https://api.tzkt.io/v1/events';
 
   constructor(contracts: Contract[]) {
     this.contracts = contracts;
