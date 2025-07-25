@@ -1,7 +1,6 @@
 import { Typography } from '@mui/material';
 import { PayloadKey } from '@/data/proposalLinks';
-import { HashLink } from './HashLink';
-import { getLinkData, parseSequencerKey } from '@/lib/getLinkData';
+import { parseSequencerKey } from '@/lib/getLinkData';
 
 interface HashDisplayProps {
   hash: PayloadKey;
@@ -11,21 +10,15 @@ interface HashDisplayProps {
 export const HashDisplay = ({
   hash,
 }: HashDisplayProps) => {
-  const linkData = getLinkData(hash);
-
-  if (linkData) {
-    return <HashLink hash={hash} />;
-  }
-
   let displayValue: React.ReactNode;
   if (typeof hash === 'string') {
     const parsed = parseSequencerKey(hash);
     if (parsed) {
       displayValue = (
         <>
-          <span>{parsed.poolAddress}</span>
+          <span>Pool Address: {parsed.poolAddress}</span>
           <br />
-          <span>{parsed.sequencerPublicKey}</span>
+          <span>Sequencer Public Key: {parsed.sequencerPublicKey}</span>
         </>
       );
     } else {
@@ -34,9 +27,9 @@ export const HashDisplay = ({
   } else {
     displayValue = (
       <>
-        <span>{hash.poolAddress ?? ''}</span>
+        <span>Pool Address: {hash.poolAddress ?? ''}</span>
         <br />
-        <span>{hash.sequencerPublicKey ?? ''}</span>
+        <span>Sequencer Public Key: {hash.sequencerPublicKey ?? ''}</span>
       </>
     );
   }
