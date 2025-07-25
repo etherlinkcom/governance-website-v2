@@ -145,7 +145,7 @@ MuiModal: {
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        [theme.breakpoints.up('sm')]: {
+        [theme.breakpoints.up('md')]: {
           width: '90vw',
           height: '90dvh',
       },
@@ -188,9 +188,19 @@ MuiTab: {
           textDecorationColor: theme.palette.primary.light,
         },
       },
-    }),
-  },
+      '&.proposal-link': {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        maxWidth: '100%',
+        display: 'inline-block',
+        '&:hover': {
+          textDecorationColor: theme.palette.primary.light,
+        },
+    },
+  }),
 },
+  },
   MuiTypography: {
     styleOverrides: {
       root: ({ theme }) => ({

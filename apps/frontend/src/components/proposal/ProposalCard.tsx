@@ -3,6 +3,7 @@ import { Card, CardContent, Box, Typography, Link } from '@mui/material';
 import { Proposal } from '@trilitech/types';
 import { HashDisplay } from '../shared/HashDisplay';
 import { formatNumber } from '@/lib/formatNumber';
+import { HashLink } from '@/components/shared/HashLink';
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -38,6 +39,7 @@ export const ProposalCard = ({ proposal}: ProposalCardProps) => {
                 <span>{proposal.alias || proposal.proposer}</span>
               )}
             </Typography>
+            <HashLink hash={proposal.proposal_hash} />
 
             {proposal.time && (
               <Typography variant="subtitle2">

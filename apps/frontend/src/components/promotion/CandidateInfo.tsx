@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { HashDisplay } from '../shared/HashDisplay';
 import { getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
-import { VotingProgress } from '../shared/VotingProgress';
+import { VotingProgress } from '@/components/shared/VotingProgress';
 import { contractStore } from '@/stores/ContractStore';
 
 const CandidateInfoSkeleton = () => {
@@ -98,10 +98,7 @@ export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, p
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
             Candidate:
           </Typography>
-          <HashDisplay
-            hash={promotion_hash}
-            variant="inline"
-          />
+          <HashDisplay hash={promotion_hash}/>
         </Box>
 
         {/* Right side - Stats */}
