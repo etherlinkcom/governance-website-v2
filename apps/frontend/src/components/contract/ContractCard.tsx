@@ -73,6 +73,7 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
               )}
 
               <IconButton
+                component='span'
                 size="small"
                 onClick={handleInfoClick}
                 sx={{ ml: 1, color: 'primary.main' }}

@@ -36,6 +36,7 @@ export const CopyButton = ({
 
   return (
     <IconButton
+      component='span'
       size={size}
       onClick={handleCopy}
       sx={{

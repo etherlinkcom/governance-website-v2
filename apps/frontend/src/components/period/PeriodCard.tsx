@@ -79,6 +79,7 @@ function renderHash(hash: PayloadKey) {
               Period {period.contract_voting_index}{' '}
             {isCurrentPeriod && (
                 <Chip
+                  component='span'
                   label="Current"
                   color="primary"
                   variant="filled"
