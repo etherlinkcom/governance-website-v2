@@ -55,7 +55,6 @@ export class Database {
   private async runMigrations(): Promise<void> {
     logger.info('[Database] runMigrations()');
 
-    // Ensure migrations table exists
     await this.connection!.execute(`
       CREATE TABLE IF NOT EXISTS migrations (
         id INT NOT NULL PRIMARY KEY,
@@ -153,6 +152,12 @@ export class Database {
       proposal.upvotes
     ];
 
+    const upsertingValues = this.sanitizeValues(values);
+    upsertingValues.forEach(v => {
+      console.log(`Upserting value: ${v}`);
+      console.log(`Type: ${typeof v}`);
+    });
+
     await this.upsert(
       `INSERT INTO proposals (
         contract_period_index,
@@ -173,13 +178,12 @@ export class Database {
          alias = VALUES(alias),
          upvotes = VALUES(upvotes),
          updated_at = CURRENT_TIMESTAMP`,
-      this.sanitizeValues(values)
+      upsertingValues
     );
   }
 
   async upsertVote(vote: Vote): Promise<void> {
     const values = [
-      vote.id,
       vote.proposal_hash,
       vote.baker,
       vote.alias,
@@ -190,9 +194,15 @@ export class Database {
       this.formatDateForMySQL(vote.time)
     ];
 
+    const upsertingValues = this.sanitizeValues(values);
+    upsertingValues.forEach(v => {
+      console.log(`Upserting value: ${v}`);
+      console.log(`Type: ${typeof v}`);
+    });
+    console.log(JSON.stringify(vote, null, 2));
+
     await this.upsert(
       `INSERT INTO votes (
-        tzkt_id,
         proposal_hash,
         baker,
         alias,
@@ -202,13 +212,14 @@ export class Database {
         level,
         time
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          voting_power = VALUES(voting_power),
          vote = VALUES(vote),
          alias = VALUES(alias),
          updated_at = CURRENT_TIMESTAMP`,
-      this.sanitizeValues(values)
+      upsertingValues
+      // this.sanitizeValues(values)
     );
   }
 
@@ -322,7 +333,6 @@ export class Database {
       period.date_end ? this.formatDateForMySQL(period.date_end.toString()) : null,
       JSON.stringify(this.sanitizeValues(period.proposal_hashes || [])),
       period.promotion_hash,
-      period.max_upvotes_voting_power,
       period.total_voting_power
     ];
 
@@ -336,10 +346,9 @@ export class Database {
         date_end,
         proposal_hashes,
         promotion_hash,
-        max_upvotes_voting_power,
         total_voting_power
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          level_start = VALUES(level_start),
          level_end = VALUES(level_end),
@@ -347,7 +356,6 @@ export class Database {
          date_end = VALUES(date_end),
          proposal_hashes = VALUES(proposal_hashes),
          promotion_hash = VALUES(promotion_hash),
-         max_upvotes_voting_power = VALUES(max_upvotes_voting_power),
          total_voting_power = VALUES(total_voting_power),
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
@@ -355,36 +363,42 @@ export class Database {
   }
 
   async upsertContracts(contracts: (ContractAndConfig)[]): Promise<void> {
+    logger.info(`[Database] upsertContracts(${contracts.length} contracts)`);
     for (const contract of contracts) {
       await this.upsertContract(contract);
     }
   }
 
   async upsertPeriods(periods: Period[]): Promise<void> {
+    logger.info(`[Database] upsertPeriods(${periods.length} periods)`);
     for (const period of periods) {
       await this.upsertPeriod(period);
     }
   }
 
   async upsertProposals(proposals: Proposal[]): Promise<void> {
+    logger.info(`[Database] upsertProposals(${proposals.length} proposals)`);
     for (const proposal of proposals) {
       await this.upsertProposal(proposal);
     }
   }
 
   async upsertVotes(votes: Vote[]): Promise<void> {
+    logger.info(`[Database] upsertVotes(${votes.length} votes)`);
     for (const vote of votes) {
       await this.upsertVote(vote);
     }
   }
 
   async upsertPromotions(promotions: Promotion[]): Promise<void> {
+    logger.info(`[Database] upsertPromotions(${promotions.length} promotions)`);
     for (const promotion of promotions) {
       await this.upsertPromotion(promotion);
     }
   }
 
   async upsertUpvotes(upvotes: Upvote[]): Promise<void> {
+    logger.info(`[Database] upsertUpvotes(${upvotes.length} upvotes)`);
     for (const upvote of upvotes) {
       await this.upsertUpvote(upvote);
     }

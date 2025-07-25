@@ -79,9 +79,9 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {proposals.length > 0 ? (
-          proposals.map((proposal) => (
+          proposals.map((proposal, i) => (
             <ProposalCard
-              key={proposal.id}
+              key={i}
               proposal={proposal}
             />
           ))

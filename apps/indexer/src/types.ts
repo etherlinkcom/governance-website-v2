@@ -21,8 +21,37 @@ export type ContractConfig = {
     promotion_supermajority: string;
 };
 
+export type TzktContractStorage = {
+  config: ContractConfig;
+  metadata: number;
+  last_winner: null | {
+    payload: string;
+    trigger_history: number;
+  };
+  voting_context: {
+    period: {
+      proposal?: {
+        proposals: number;
+        winner_candidate: string | null;
+        total_voting_power: string;
+        upvoters_proposals: number;
+        upvoters_upvotes_count: number;
+        max_upvotes_voting_power: string | null;
+      };
+      promotion?: {
+        voters: number;
+        nay_voting_power: string;
+        winner_candidate: string;
+        yea_voting_power: string;
+        pass_voting_power: string;
+        total_voting_power: string;
+      };
+    };
+    period_index: string;
+  };
+};
 
-export type TzktStorageHistory= {
+export type TzktContractStorageHistory = {
   id: number;
   level: number;
   timestamp: string; // ISO date string

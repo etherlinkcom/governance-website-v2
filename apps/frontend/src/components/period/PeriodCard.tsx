@@ -5,8 +5,11 @@ import { useState } from 'react';
 import { PeriodDetailsModal } from './PeriodDetailsModal';
 import { formatDate } from '@/lib/formatDate';
 import { HashDisplay } from '@/components/shared/HashDisplay';
-import { getLinkData, HashLink } from '@/components/shared/HashLink';
+import { HashLink } from '@/components/shared/HashLink';
 import { PayloadKey } from '@/data/proposalLinks';
+import { getLinkData } from '@/lib/getLinkData';
+
+
 
 interface PeriodCardProps {
   period: Period;
@@ -26,6 +29,12 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
       setModalOpen(true);
     }
   };
+
+const renderHash = (hash: PayloadKey) => {
+  const linkData = getLinkData(hash);
+  if (linkData) return <HashLink hash={hash} />;
+  return <HashDisplay hash={hash} />;
+}
 
   if (isFuture) {
     return (
@@ -50,13 +59,6 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
     );
   }
 
-
-function renderHash(hash: PayloadKey) {
-  const linkData = getLinkData(hash);
-  if (linkData) return <HashLink hash={hash} />;
-  return <HashDisplay hash={hash} />;
-}
-
   return (
     <>
     <Card
@@ -66,7 +68,6 @@ function renderHash(hash: PayloadKey) {
           border: '2px solid',
           borderColor: 'primary.main',
           boxShadow: `0px 0px 15px 3px ${theme.palette.primary.main}30`,
-          transform: 'scale(1.02)',
         }),
         transition: 'all 0.3s ease-in-out',
         cursor: hasProposals || hasPromotion ? 'pointer' : 'default',
