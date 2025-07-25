@@ -109,7 +109,6 @@ export class Database {
     date_end: row.date_end,
     proposal_hashes: row.proposal_hashes || [],
     promotion_hash: row.promotion_hash || undefined,
-    max_upvotes_voting_power: row.max_upvotes_voting_power,
     total_voting_power: row.total_voting_power
   }));
 

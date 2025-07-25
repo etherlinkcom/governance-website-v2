@@ -110,6 +110,7 @@ class ContractStore {
     const contract = this.contracts.find(c => c.contract_address === contractAddress);
     if (!contract || !contract.active) return [];
 
+    // TODO future periods are not taking into account the
     try {
       const head = yield fetchJson<{ level: number; timestamp: string }>(`${this.tzktApiUrl}/v1/head`);
       const currentLevel = head.level;
@@ -144,7 +145,6 @@ class ContractStore {
           proposal_hashes: [],
           promotion_hash: undefined,
           period_class: i === 0 ? 'current' : 'future',
-          max_upvotes_voting_power: 0,
           total_voting_power: 0,
         });
       }

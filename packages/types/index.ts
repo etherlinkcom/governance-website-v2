@@ -27,14 +27,12 @@ export type Period = {
 
   proposal_hashes?: string[];
   promotion_hash?: string;
-  max_upvotes_voting_power: number;
   total_voting_power: number;
 
   period_class?: 'current' | 'future';
 };
 
 export type Proposal = {
-  id?: number;
   contract_period_index: number;
   level: number;
   time: string;
@@ -47,7 +45,6 @@ export type Proposal = {
 };
 
 export type Promotion = {
-  id?: number;
   proposal_hash: string;
   contract_period_index: number;
 
@@ -59,7 +56,6 @@ export type Promotion = {
 };
 
 export type Upvote = {
-  id?: number;
   level: number;
   time: string;
   proposal_hash: string;
@@ -72,7 +68,6 @@ export type Upvote = {
 };
 
 export type Vote = {
-  id?: number;
   proposal_hash: string;
   baker: string;
   alias?: string;
