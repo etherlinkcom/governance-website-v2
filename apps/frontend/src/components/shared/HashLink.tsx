@@ -1,23 +1,9 @@
 import { Link, Typography } from '@mui/material';
-import { allLinkData, PayloadKey } from '@/data/proposalLinks';
+import { PayloadKey } from '@/data/proposalLinks';
+import { getLinkData } from '@/lib/getLinkData';
 
 interface HashLinkProps {
   hash: PayloadKey;
-}
-
-export function getLinkData(hash: PayloadKey) {
-  return allLinkData.find(entry => {
-    if (typeof entry.payloadKey === 'string') {
-      return entry.payloadKey === hash;
-    }
-    if (typeof entry.payloadKey === 'object' && typeof hash === 'object') {
-      return (
-        entry.payloadKey.poolAddress === hash.poolAddress &&
-        entry.payloadKey.sequencerPublicKey === hash.sequencerPublicKey
-      );
-    }
-    return false;
-  });
 }
 
 export const HashLink = ({
@@ -34,10 +20,7 @@ export const HashLink = ({
       target="_blank"
       rel="noopener noreferrer"
     >
-      <Typography
-        variant="body2"
-        component='div'
-      >
+      <Typography variant="body2" component='div'>
         {linkData.title}
       </Typography>
     </Link>
