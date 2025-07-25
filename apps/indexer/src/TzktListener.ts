@@ -151,8 +151,28 @@ export class TzktListener {
       upvotes: 0
     };
 
+    // Upsert the proposal
     logger.info(`[TzktListener] New proposal: ${JSON.stringify(proposal)}`);
     await this.database.upsertProposals([proposal]);
+
+    // Automatically register an upvote by the proposer
+    logger.info(`[TzktListener] Registering automatic upvote for proposal ${proposalHash} by proposer ${proposal.proposer}`);
+    const globalVotingIndex = await this.governanceContractIndexer.getGlobalVotingPeriodIndex(level, level + 1);
+    const votingPower = await this.governanceContractIndexer.getVotingPowerForAddress(transactionEvent.sender.address, globalVotingIndex);
+    const delegateVotingPower = await this.governanceContractIndexer.getDelegateVotingPowerForAddress(transactionEvent.sender.address, level, globalVotingIndex);
+    const upvote: Upvote = {
+      level,
+      time: transactionEvent.timestamp,
+      proposal_hash: proposalHash,
+      voting_power: votingPower + delegateVotingPower,
+      contract_address: contract.address,
+      baker: transactionEvent.sender.address,
+      alias: transactionEvent.sender.alias,
+      transaction_hash: transactionEvent.hash,
+      contract_period_index: periodIndex
+    };
+    logger.info(`[TzktListener] Automatic upvote: ${JSON.stringify(upvote)}`);
+    await this.database.upsertUpvotes([upvote]);
   }
 
   private async handleUpvoteProposal(transactionEvent: TzktTransactionEvent, contract: Contract): Promise<void> {
@@ -265,10 +285,7 @@ export class TzktListener {
     logger.info(`[TzktListener] handleBlock(level=${headBlock.level})`);
 
     // Only process every 100th block to reduce unnecessary checks
-    if (headBlock.level % 100 !== 0) {
-      logger.info(`[TzktListener] Skipping handleBlock at level ${headBlock.level} (not a 100-block boundary)`);
-      return;
-    }
+    if (headBlock.level % 100 !== 0) return;
 
     for (const contract of this.contracts) {
       const contractConfig = this.contractConfigs[contract.address];
