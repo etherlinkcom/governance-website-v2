@@ -122,12 +122,18 @@ export class TzktListener {
   private async handleNewProposal(transactionEvent: TzktTransactionEvent, contract: Contract): Promise<void> {
     logger.info(`[TzktListener] handleNewProposal(contract=${contract.address}, id=${transactionEvent.id})`);
     const contractConfig = this.contractConfigs[contract.address];
-    if (!contractConfig) { logger.error(`[TzktListener] handleNewProposal—no config for ${contract.address}`); return; }
+    if (!contractConfig) {
+      logger.error(`[TzktListener] handleNewProposal—no config for ${contract.address}`);
+      return;
+    }
 
     const { startedAtLevel, periodLength } = contractConfig;
     const level = transactionEvent.level;
     const levelDifference = level - startedAtLevel;
-    if (levelDifference < 0) { logger.error(`[TzktListener] NewProposal at level ${level} is before startedAtLevel ${startedAtLevel}`); return; }
+    if (levelDifference < 0) {
+      logger.error(`[TzktListener] NewProposal at level ${level} is before startedAtLevel ${startedAtLevel}`);
+      return;
+    }
 
     const periodIndex = Math.floor(levelDifference / periodLength);
     const proposalHash = transactionEvent.parameter!.value;
@@ -152,12 +158,18 @@ export class TzktListener {
   private async handleUpvoteProposal(transactionEvent: TzktTransactionEvent, contract: Contract): Promise<void> {
     logger.info(`[TzktListener] handleUpvoteProposal(contract=${contract.address}, id=${transactionEvent.id})`);
     const contractConfig = this.contractConfigs[contract.address];
-    if (!contractConfig) { logger.error(`[TzktListener] handleUpvoteProposal—no config for ${contract.address}`); return; }
+    if (!contractConfig) {
+      logger.error(`[TzktListener] handleUpvoteProposal—no config for ${contract.address}`);
+      return;
+    }
 
     const { startedAtLevel, periodLength } = contractConfig;
     const level = transactionEvent.level;
     const levelDifference = level - startedAtLevel;
-    if (levelDifference < 0) { logger.error(`[TzktListener] Upvote at level ${level} is before startedAtLevel ${startedAtLevel}`); return; }
+    if (levelDifference < 0) {
+      logger.error(`[TzktListener] Upvote at level ${level} is before startedAtLevel ${startedAtLevel}`);
+      return;
+    }
 
     const periodIndex = Math.floor(levelDifference / periodLength);
     const globalVotingIndex = await this.governanceContractIndexer.getGlobalVotingPeriodIndex(level, level + 1);
@@ -184,12 +196,18 @@ export class TzktListener {
   private async handleVote(transactionEvent: TzktTransactionEvent, contract: Contract): Promise<void> {
     logger.info(`[TzktListener] handleVote(contract=${contract.address}, id=${transactionEvent.id})`);
     const contractConfig = this.contractConfigs[contract.address];
-    if (!contractConfig) { logger.error(`[TzktListener] handleVote—no config for ${contract.address}`); return; }
+    if (!contractConfig) {
+      logger.error(`[TzktListener] handleVote—no config for ${contract.address}`);
+      return;
+    }
 
     const { startedAtLevel, periodLength } = contractConfig;
     const level = transactionEvent.level;
     const levelDifference = level - startedAtLevel;
-    if (levelDifference < 0) { logger.error(`[TzktListener] Vote at level ${level} is before startedAtLevel ${startedAtLevel}`); return; }
+    if (levelDifference < 0) {
+      logger.error(`[TzktListener] Vote at level ${level} is before startedAtLevel ${startedAtLevel}`);
+      return;
+    }
 
     const proposalPeriodIndex = Math.floor(levelDifference / periodLength);
     const promotionPeriodIndex = proposalPeriodIndex + 1;
@@ -236,8 +254,9 @@ export class TzktListener {
     };
 
     logger.info(
-      `[TzktListener] promotion at ${contract.address} period=${promotionPeriodIndex} yea=${promotionRecord.yea_voting_power}` +
-      ` nay=${promotionRecord.nay_voting_power} pass=${promotionRecord.pass_voting_power} total=${promotionRecord.total_voting_power}`
+      `[TzktListener] promotion at ${contract.address} period=${promotionPeriodIndex} ` +
+      `yea=${promotionRecord.yea_voting_power} nay=${promotionRecord.nay_voting_power} ` +
+      `pass=${promotionRecord.pass_voting_power} total=${promotionRecord.total_voting_power}`
     );
     await this.database.upsertPromotions([promotionRecord]);
   }
@@ -245,9 +264,18 @@ export class TzktListener {
   private async handleBlock(headBlock: { level: number; timestamp: string }): Promise<void> {
     logger.info(`[TzktListener] handleBlock(level=${headBlock.level})`);
 
+    // Only process every 100th block to reduce unnecessary checks
+    if (headBlock.level % 100 !== 0) {
+      logger.info(`[TzktListener] Skipping handleBlock at level ${headBlock.level} (not a 100-block boundary)`);
+      return;
+    }
+
     for (const contract of this.contracts) {
       const contractConfig = this.contractConfigs[contract.address];
-      if (!contractConfig) continue;
+      if (!contractConfig) {
+        logger.error(`[TzktListener] handleBlock—no config for ${contract.address}`);
+        continue;
+      }
 
       const { startedAtLevel, periodLength } = contractConfig;
       const levelDifference = headBlock.level - startedAtLevel;
@@ -283,7 +311,7 @@ export class TzktListener {
 
   public async stop(): Promise<void> {
     logger.info('[TzktListener] stop()');
-    if (this.connection.state === HubConnectionState.Connected) await this.connection.stop();
+    if (this.connection.state === HubConnectionState.Connected) return await this.connection.stop();
     logger.info('[TzktListener] Listener stopped');
   }
 }
