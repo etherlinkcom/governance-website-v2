@@ -8,7 +8,6 @@ export class WalletStore {
   balance: number = 0;
   votingPower: number = 0;
 
-  // TODO env var
   private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
   private wallet: BeaconWallet;
   private delegatesViewContractAddress: string = process.env.NEXT_PUBLIC_VOTING_RIGHTS_DELEGATION_CONTRACT!;
@@ -79,9 +78,9 @@ export class WalletStore {
       // If no delegators returned, check delegate endpoint
       if (delegates.length === 0) {
         const url = this.tzktApiUrl + `/delegates/${address}`;
-        const res = await fetch(url);
-        const raw = await res.text();
-        if (res.ok && raw.trim() !== '') {
+        const response = await fetch(url);
+        const raw = await response.text();
+        if (response.ok && raw.trim() !== '') {
           const data = JSON.parse(raw);
           const staking = data.stakingBalance ?? 0;
           runInAction(() => {
@@ -89,7 +88,6 @@ export class WalletStore {
           });
           return;
         }
-        // nothing available
         runInAction(() => {
           this.votingPower = ownLiquid;
         });
@@ -101,10 +99,10 @@ export class WalletStore {
         delegates.map(async (delegateAddress) => {
           let staking = 0;
           try {
-            const r = await fetch(`${this.tzktApiUrl}/delegates/${delegateAddress}`);
-            if (r.ok) {
-              const d = await r.json();
-              staking = d.stakingBalance ?? 0;
+            const response = await fetch(`${this.tzktApiUrl}/delegates/${delegateAddress}`);
+            if (response.ok) {
+              const data = await response.json();
+              staking = data.stakingBalance ?? 0;
             }
           } catch {}
           let liquid = 0;
@@ -118,16 +116,16 @@ export class WalletStore {
       // fetch own staking balance
       let ownStaking = 0;
       try {
-        const res = await fetch(`${this.tzktApiUrl}/delegates/${address}`);
-        if (res.ok) {
-          const data = await res.json();
+        const response = await fetch(`${this.tzktApiUrl}/delegates/${address}`);
+        if (response.ok) {
+          const data = await response.json();
           ownStaking = data.stakingBalance ?? 0;
         }
       } catch {}
 
       // total voting power = own liquid + sum of delegators + own staking
       runInAction(() => {
-        this.votingPower = ownLiquid + delegateTotals.reduce((sum, v) => sum + v, 0) + ownStaking;
+        this.votingPower = ownLiquid + delegateTotals.reduce((sum, value) => sum + value, 0) + ownStaking;
       });
     } catch (err) {
       console.error('Error fetching voting power:', err);

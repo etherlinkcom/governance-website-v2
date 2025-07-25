@@ -9,13 +9,15 @@
   "main": "src/index.ts",
   "scripts": {
     "migrate": "ts-node src/migrate.ts",
-    "start": "ts-node src/index.ts"
+    "start:listener": "",
+    "start:indexer": "ts-node src/index.ts"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.0",
     "@trilitech/types": "*",
     "logform": "^2.7.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "mysql2": "^3.14.2"
   },
   "devDependencies": {
     "@types/node": "^20",

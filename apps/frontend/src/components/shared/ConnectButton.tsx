@@ -8,14 +8,12 @@ import {
   DialogActions,
   Typography,
   Box,
-  IconButton,
   useTheme,
-  Paper
 } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { getWalletStore } from '@/stores/WalletStore';
-
+import { CopyButton } from '@/components/shared/CopyButton';
+import { MetaMaskIcon } from '@/components/shared/icons/MetaMaskIcon';
 
 export const ConnectButton = observer(() => {
   const [open, setOpen] = useState(false);
@@ -46,17 +44,23 @@ export const ConnectButton = observer(() => {
     setOpen(false);
   };
 
-  const handleCopy = () => {
-    if (walletStore.address) {
-      navigator.clipboard.writeText(walletStore.address);
-    }
-  };
-
   if (!walletStore.address) {
     return (
-      <Button variant="contained" onClick={handleConnect}>
-        Connect Wallet
+      <>
+      <Button variant="contained" onClick={handleConnect} >
+        <Box sx={{
+          color: theme.palette.primary.contrastText,
+          display: { xs: 'none', sm: 'inline-flex' }
+        }}>
+          Connect
+        </Box>
+        <Box sx={{
+          display: { xs: 'inline-flex', sm: 'none' }
+        }}>
+          <MetaMaskIcon />
+        </Box>
       </Button>
+      </>
     );
   }
 
@@ -74,31 +78,24 @@ export const ConnectButton = observer(() => {
         onClose={handleClose}
         maxWidth="xs"
         fullWidth
-        slotProps={{
-          paper: {
-            component: Paper,
-            sx: {
-                minWidth: { xs: 280, sm: 400 },
-                boxShadow: `0px 0px 3px 1px ${theme.palette.primary.main}`,
-                m: { xs: 1, sm: 3 },
-                width: { xs: '100%', sm: undefined },
-            },
-          },
-        }}
       >
         <DialogTitle>
           Wallet Info
         </DialogTitle>
         <DialogContent>
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-              Address
-              <IconButton size="small" onClick={handleCopy} sx={{ ml: 1 }}>
-                <ContentCopyIcon fontSize="small" />
-              </IconButton>
-            </Typography>
-            <Typography variant="body2" sx={{ overflow:'hidden', mb: 2 }}>
-              {walletStore.address }
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Typography variant="subtitle2">
+                Address
+              </Typography>
+              <CopyButton
+                text={walletStore.address}
+                message="Wallet address copied!"
+                size="small"
+              />
+            </Box>
+            <Typography variant="body2" sx={{ overflow:'hidden', mb: 2, fontFamily: 'monospace' }}>
+              {walletStore.address}
             </Typography>
             <Typography variant="subtitle2">Balance</Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>

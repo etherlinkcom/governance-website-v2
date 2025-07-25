@@ -97,7 +97,7 @@ export default function Home() {
 
           <Button
             variant="outlined"
-            href="https://docs.etherlink.com/governance"
+            href="https://docs.etherlink.com/governance/how-is-etherlink-governed"
             target="_blank"
             rel="noopener noreferrer"
           >

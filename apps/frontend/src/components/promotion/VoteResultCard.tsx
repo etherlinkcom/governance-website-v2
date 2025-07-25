@@ -1,9 +1,10 @@
+import { formatNumber } from '@/lib/formatNumber';
 import { Box, Typography } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 
 interface VoteResultCardProps {
   type: 'yea' | 'nay' | 'pass';
-  percentage: number;
+  percentage: string;
   count: number;
   label: string;
 }
@@ -74,7 +75,7 @@ export const VoteResultCard = ({ type, percentage, count, label }: VoteResultCar
             fontWeight: theme.typography.subtitle1.fontWeight
           }}
         >
-          {percentage}% ({count} {label})
+          {percentage}% ({formatNumber(count)} {label})
         </Typography>
       </Box>
       <Typography

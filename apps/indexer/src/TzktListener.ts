@@ -133,6 +133,7 @@ export class TzktListener {
         contract_address: contract.address,
         proposer: operation.sender.address,
         alias: operation.sender.alias,
+        upvotes: 0
     }
     await this.database.upsertProposals([proposal]);
   }

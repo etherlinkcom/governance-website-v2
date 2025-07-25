@@ -9,7 +9,7 @@ dotenv.config();
 
 export class Database {
   private connection: mysql.Connection | null = null;
-  private migrationsDir: string = path.join(__dirname, './migrations');
+  private migrationsDir: string = path.join(process.cwd(), 'src/db/migrations');
   private connectionConfig: mysql.ConnectionOptions = {
       host: process.env.DB_HOST!,
       user: process.env.DB_USER!,
@@ -64,14 +64,14 @@ export class Database {
       );
     `);
 
-    // Get applied migrations
     const [rows] = await this.connection!.execute('SELECT name FROM migrations ORDER BY id') as any;
     const applied = new Set(rows.map((row: any) => row.name));
 
-    // Read and apply new migrations
     const files = fs.readdirSync(this.migrationsDir)
       .filter(f => f.endsWith('.sql'))
       .sort();
+
+    logger.info(`[Database] Found ${files.length} migration files`);
 
     for (const file of files) {
       if (applied.has(file)) {
@@ -84,7 +84,6 @@ export class Database {
 
       logger.info(`[Database] Applying migration ${file} (id: ${id})...`);
 
-      // Execute migration statements
       const statements = sql.split(';').filter(stmt => stmt.trim());
       for (const statement of statements) {
         if (statement.trim()) {
@@ -92,7 +91,6 @@ export class Database {
         }
       }
 
-      // Record migration as applied
       await this.connection!.execute(
         'INSERT INTO migrations (id, name, applied_at) VALUES (?, ?, NOW())',
         [id, file]
@@ -130,11 +128,13 @@ export class Database {
 
   private sanitizeValues(values: any[]): any[] {
     return values.map(value => {
-      // Convert undefined to null
       if (value === undefined) return null;
 
-      // Convert empty strings to null for optional fields (if desired)
       if (value === '') return null;
+
+      if (value && typeof value === 'object' && value.constructor === Object) {
+        return JSON.stringify(value);
+      }
 
       return value;
     });
@@ -149,7 +149,8 @@ export class Database {
       proposal.transaction_hash,
       proposal.contract_address,
       proposal.proposer,
-      proposal.alias
+      proposal.alias,
+      proposal.upvotes
     ];
 
     await this.upsert(
@@ -161,14 +162,16 @@ export class Database {
         transaction_hash,
         contract_address,
         proposer,
-        alias
+        alias,
+        upvotes
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          level = VALUES(level),
          time = VALUES(time),
          proposer = VALUES(proposer),
          alias = VALUES(alias),
+         upvotes = VALUES(upvotes),
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
     );
@@ -249,12 +252,13 @@ export class Database {
       upvote.proposal_hash,
       upvote.baker,
       upvote.alias,
-      upvote.voting_power
+      upvote.voting_power,
+      upvote.contract_period_index
     ];
 
     await this.upsert(
-      `INSERT INTO upvotes (level, time, transaction_hash, proposal_hash, baker, alias, voting_power)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO upvotes (level, time, transaction_hash, proposal_hash, baker, alias, voting_power, contract_period_index)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          voting_power = VALUES(voting_power),
          alias = VALUES(alias),
@@ -274,7 +278,8 @@ export class Database {
       contract.scale,
       contract.proposal_quorum,
       contract.promotion_quorum,
-      contract.promotion_supermajority
+      contract.promotion_supermajority,
+      contract.active ? 1 : 0
     ];
 
     await this.upsert(
@@ -288,9 +293,10 @@ export class Database {
         scale,
         proposal_quorum,
         promotion_quorum,
-        promotion_supermajority
+        promotion_supermajority,
+        active
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          started_at_level = VALUES(started_at_level),
          period_length = VALUES(period_length),
@@ -300,6 +306,7 @@ export class Database {
          proposal_quorum = VALUES(proposal_quorum),
          promotion_quorum = VALUES(promotion_quorum),
          promotion_supermajority = VALUES(promotion_supermajority),
+         active = VALUES(active),
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
     );
@@ -313,8 +320,10 @@ export class Database {
       period.level_end,
       period.date_start ? this.formatDateForMySQL(period.date_start.toString()) : null,
       period.date_end ? this.formatDateForMySQL(period.date_end.toString()) : null,
-      JSON.stringify(period.proposal_hashes || []),
-      period.promotion_hash
+      JSON.stringify(this.sanitizeValues(period.proposal_hashes || [])),
+      period.promotion_hash,
+      period.max_upvotes_voting_power,
+      period.total_voting_power
     ];
 
     await this.upsert(
@@ -326,9 +335,11 @@ export class Database {
         date_start,
         date_end,
         proposal_hashes,
-        promotion_hash
+        promotion_hash,
+        max_upvotes_voting_power,
+        total_voting_power
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          level_start = VALUES(level_start),
          level_end = VALUES(level_end),
@@ -336,6 +347,8 @@ export class Database {
          date_end = VALUES(date_end),
          proposal_hashes = VALUES(proposal_hashes),
          promotion_hash = VALUES(promotion_hash),
+         max_upvotes_voting_power = VALUES(max_upvotes_voting_power),
+         total_voting_power = VALUES(total_voting_power),
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
     );

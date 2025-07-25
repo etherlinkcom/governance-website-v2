@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS contracts (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  contract_address VARCHAR(100) NOT NULL UNIQUE,
+  contract_address VARCHAR(36) NOT NULL UNIQUE,
   governance_type ENUM('slow', 'fast', 'sequencer') NOT NULL,
   started_at_level INT NOT NULL,
   period_length INT NOT NULL,
@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS contracts (
   proposal_quorum INT NOT NULL,
   promotion_quorum INT NOT NULL,
   promotion_supermajority INT NOT NULL,
+  active BOOLEAN NOT NULL DEFAULT FALSE,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP(),
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
 
