@@ -17,7 +17,7 @@ export async function fetchJson<T>(
       return await response.json() as T;
     } catch (error) {
       attempt++;
-      if (attempt >= maxAttempts) throw new Error("Too many failures. Please try again later.");
+      if (attempt >= maxAttempts) throw new Error("Error fetching data. Please try again later.");
       await new Promise(resolve => setTimeout(resolve, delay));
       delay *= 2;
     }

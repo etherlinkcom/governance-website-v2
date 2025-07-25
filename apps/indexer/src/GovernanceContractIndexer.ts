@@ -203,9 +203,8 @@ export class GovernanceContractIndexer {
         return data.votingPower;
     }
 
-    private async getWinningCandidateAtLevel(contract_address: string, level: number, period_index: number): Promise<string> {
-        // TODO only use promotion period and not proposal period to get candidates that definitely won
-        logger.info(`[GovernanceContractIndexer] getWinningCandidateAtLevel(${contract_address}, ${level}, ${period_index})`);
+    private async getWinningCandidateAtLevel(contract_address: string, promotion_start_level: number, promotion_period_index: number): Promise<string | undefined> {
+        logger.info(`[GovernanceContractIndexer] getWinningCandidateAtLevel(${contract_address}, ${promotion_start_level}, ${promotion_period_index})`);
         const url = `${this.tzkt_api_url}/contracts/${contract_address}/storage`;
         const data = await this.fetchJson<
             {
@@ -217,22 +216,19 @@ export class GovernanceContractIndexer {
             }
             >(
                 url,
-                { level: String(level) }
+                { level: String(promotion_start_level) }
         );
         if (!data) throw new Error(`No data found for contract ${contract_address}`);
 
-        const is_proposal_period = data.voting_context?.period?.proposal !== undefined;
-        const winner_candidate = data.voting_context?.period?.proposal?.winner_candidate || data.voting_context?.period?.promotion?.winner_candidate;
-        if (!winner_candidate) throw new Error(`No winning candidate found for contract ${contract_address} at level ${level}`);
+        if (!data.voting_context?.period?.promotion) return undefined;
 
-        if (!data.voting_context?.period_index) throw new Error(`No period index found for contract ${contract_address} at level ${level}`);
+        const winner_candidate = data.voting_context?.period?.promotion?.winner_candidate;
 
-        // IF promotion period_index + 1 if proposal period_index
-        const compare_period_index = is_proposal_period ? period_index : period_index + 1;
-        if (compare_period_index !== parseInt(data.voting_context?.period_index)) {
+
+        if (promotion_period_index !== parseInt(data.voting_context?.period_index)) {
             throw new Error(`
-                Period index mismatch for contract ${contract_address} at level ${level}
-                expecting ${period_index}
+                Period index mismatch for contract ${contract_address} at level ${promotion_start_level}
+                expecting ${promotion_period_index}
                 got ${parseInt(data.voting_context?.period_index)}
             `);
         }
@@ -305,7 +301,11 @@ export class GovernanceContractIndexer {
                 const promotion_start_level = periods[period_index].level_end + 1;
                 if (current_level < promotion_start_level) continue;
 
-                const winning_candidate = await this.getWinningCandidateAtLevel(contract_and_config.contract_address, promotion_start_level, period_index);
+                const winning_candidate = await this.getWinningCandidateAtLevel(
+                    contract_and_config.contract_address,
+                    promotion_start_level,
+                    promotion_period_index
+                );
                 if (!winning_candidate) continue;
 
                 const promotion_start_time = await this.getDateFromLevel(promotion_start_level);

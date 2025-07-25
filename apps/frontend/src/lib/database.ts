@@ -128,17 +128,15 @@ export class Database {
         [contractAddress, contractVotingIndex]
       );
 
-      // Fetch upvotes for proposals in this period
       const upvotes = await this.query<Upvote>(
         `SELECT u.*
          FROM upvotes u
-         JOIN proposals p ON u.proposal_hash = p.proposal_hash
-         WHERE p.contract_address = ? AND u.contract_period_index = ?
+         JOIN proposals p ON u.proposal_hash = p.proposal_hash AND u.contract_period_index = p.contract_period_index
+         WHERE p.contract_address = ? AND p.contract_period_index = ?
          ORDER BY u.created_at DESC`,
         [contractAddress, contractVotingIndex]
       );
 
-      // Fetch promotions for this period
       const promotions = await this.query<Promotion>(
         `SELECT * FROM promotions
          WHERE contract_address = ? AND contract_period_index = ?
@@ -146,8 +144,6 @@ export class Database {
         [contractAddress, contractVotingIndex]
       );
 
-      // Fetch votes for promotions in this period
-      // Join votes with promotions to get votes for this specific period
       const votes = await this.query<Vote>(
         `SELECT v.*
          FROM votes v
