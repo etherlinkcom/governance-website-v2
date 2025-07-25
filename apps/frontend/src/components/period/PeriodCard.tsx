@@ -66,7 +66,6 @@ function renderHash(hash: PayloadKey) {
           border: '2px solid',
           borderColor: 'primary.main',
           boxShadow: `0px 0px 15px 3px ${theme.palette.primary.main}30`,
-          transform: 'scale(1.02)',
         }),
         transition: 'all 0.3s ease-in-out',
         cursor: hasProposals || hasPromotion ? 'pointer' : 'default',

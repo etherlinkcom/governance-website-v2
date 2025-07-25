@@ -46,7 +46,6 @@ export const components: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         backgroundColor: theme.palette.background.paper,
-        backdropFilter: 'blur(12px)',
         backgroundImage: 'none',
         border: '2px solid',
         borderImageSource: `radial-gradient(50% 32.35% at 0% 50%, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0)} 100%)`,
@@ -67,7 +66,6 @@ export const components: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         backgroundColor: theme.palette.background.paper,
-        backdropFilter: 'blur(12px)',
         boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
         border: 'none',
         borderImageSource: `radial-gradient(50% 32.35% at 0% 50%, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0)} 100%)`,

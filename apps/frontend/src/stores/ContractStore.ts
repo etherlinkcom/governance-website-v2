@@ -71,12 +71,12 @@ class ContractStore {
 
       const contract = this.contracts.find(c => c.contract_address === contractAddress);
       if (contract?.active) {
-        const generatedPeriods = yield this.generateCurrentAndFuturePeriods(contractAddress);
+        const latestPeriod = allPeriods.length ? allPeriods[0] : 0;
+        const generatedPeriods = yield this.generateCurrentAndFuturePeriods(contractAddress, latestPeriod);
 
-        const existingIndexes = new Set(allPeriods.map((p: Period) => p.contract_voting_index));
-        const newPeriods = generatedPeriods.filter((p: Period) => !existingIndexes.has(p.contract_voting_index));
-
-        allPeriods = [...allPeriods, ...newPeriods].sort((a, b) => b.contract_voting_index - a.contract_voting_index);
+        const generatedIndexes = new Set(generatedPeriods.map((p: Period) => p.contract_voting_index));
+        const filteredPeriods = allPeriods.filter((p: Period) => !generatedIndexes.has(p.contract_voting_index));
+        allPeriods = [...generatedPeriods, ...filteredPeriods];
       }
 
       this.periodsByGovernance[this.currentGovernance]![contractAddress] = allPeriods;
@@ -106,11 +106,14 @@ class ContractStore {
     }
   });
 
-  private generateCurrentAndFuturePeriods = flow(function* (this: ContractStore, contractAddress: string): Generator<any, Period[], any> {
+  private generateCurrentAndFuturePeriods = flow(function* (
+    this: ContractStore,
+    contractAddress: string,
+    latestPeriod?: Period
+  ): Generator<any, Period[], any> {
     const contract = this.contracts.find(c => c.contract_address === contractAddress);
     if (!contract || !contract.active) return [];
 
-    // TODO future periods are not taking into account the
     try {
       const head = yield fetchJson<{ level: number; timestamp: string }>(`${this.tzktApiUrl}/v1/head`);
       const currentLevel = head.level;
@@ -120,11 +123,20 @@ class ContractStore {
       const startLevel = contract.started_at_level;
 
       const blocksFromStart = currentLevel - startLevel;
-      const currentPeriodIndex = Math.max(1, Math.floor(blocksFromStart / periodDurationBlocks) + 1);
+      const currentPeriodIndex = Math.max(1, Math.floor(blocksFromStart / periodDurationBlocks));
 
-      const periods: Period[] = [];
+      let periods: Period[] = [];
 
-      for (let i = 0; i <= this.futurePeriodsCount; i++) {
+      if (
+        latestPeriod &&
+        currentLevel >= latestPeriod.level_start &&
+        currentLevel <= latestPeriod.level_end
+      ) {
+        periods.push({...latestPeriod, period_class: 'current'});
+      }
+
+      for (let i = periods.length; i <= this.futurePeriodsCount; i++) {
+
         const periodIndex = currentPeriodIndex + i;
         const periodLevelStart = startLevel + ((periodIndex - 1) * periodDurationBlocks);
         const periodLevelEnd = periodLevelStart + periodDurationBlocks - 1;
@@ -135,7 +147,7 @@ class ContractStore {
         const startDate = new Date(currentDate.getTime() + (blocksFromCurrentToStart * this.blockTimeMs));
         const endDate = new Date(currentDate.getTime() + (blocksFromCurrentToEnd * this.blockTimeMs));
 
-        periods.push({
+        periods.unshift({
           contract_voting_index: periodIndex,
           contract_address: contractAddress,
           level_start: periodLevelStart,
