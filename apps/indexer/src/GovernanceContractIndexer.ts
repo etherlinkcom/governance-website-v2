@@ -35,8 +35,8 @@ export class GovernanceContractIndexer {
     public async indexContract(contract: Contract): Promise<void> {
         logger.info(`[GovernanceContractIndexer] indexContract(${contract.address})`);
 
-        const lastIndexedLevel = await this.database.getLastIndexedLevel(contract.address);
-        logger.info(`[GovernanceContractIndexer] Last indexed level for contract ${contract.address}: ${lastIndexedLevel}`);
+        const last_processed_period: Period | null = await this.database.getLastProcessedPeriod(contract.address);
+        logger.info(`[GovernanceContractIndexer] Last processed period for contract ${contract.address}: ${last_processed_period?.contract_voting_index}`);
 
         const data: TzktContractStorageHistory[] = await this.fetchJson<TzktContractStorageHistory[]>(
             `${this.tzkt_api_url}/contracts/${contract.address}/storage/history`,
@@ -50,7 +50,7 @@ export class GovernanceContractIndexer {
         if (data.length >= 1000) throw new Error(`Storage history for contract ${contract.address} exceeds 1000 entries. Add pagination.`);
         if (!data[0].value.config) throw new Error(`No config found in storage history for contract ${contract.address}`);
 
-        const contract_config = data[0].value.config as ContractConfig;
+        const contract_config: ContractConfig = data[0].value.config as ContractConfig;
         const contract_and_config: ContractAndConfig = {
             contract_address: contract.address,
             governance_type: contract.type,
@@ -66,20 +66,20 @@ export class GovernanceContractIndexer {
         }
 
         const txParams: Record<string, string> = { 'limit': '10000', 'target': contract.address };
-        if (lastIndexedLevel !== null) {
-            txParams['level.ge'] = String(lastIndexedLevel);
+        if (last_processed_period !== null) {
+            txParams['level.ge'] = String(last_processed_period.level_start - 1);
         }
         const transactions: TzktTransactionEvent[] = await this.fetchJson<TzktTransactionEvent[]>(
             `${this.tzkt_api_url}/operations/transactions`,
             txParams
         );
 
-        const last_storage_level = data[0].level;
-        const last_level_activity = transactions.length ? transactions[transactions.length - 1].level : last_storage_level;
+        const last_storage_level: number = data[0].level;
+        const last_level_activity: number = transactions.length ? transactions[transactions.length - 1].level : last_storage_level;
         const periods: PeriodIndexToPeriod = await this.getContractPeriodsWithoutProposalsOrPromotions(
             contract_and_config,
             last_level_activity,
-            lastIndexedLevel
+            last_processed_period?.level_start
         );
 
         const { promotions, proposals, upvotes, votes } = await this.createProposalsPromotionsVotesAndUpvotes(
@@ -96,10 +96,6 @@ export class GovernanceContractIndexer {
             contracts: [contract_and_config],
             periods: Object.values(periods),
         })
-
-        const last_processed_level = await this.getCurrentLevel()
-        await this.database.setLastIndexedLevel(contract.address, last_processed_level);
-
     }
 
     public async getDelegateVotingPowerForAddress(address: string, level: number, global_voting_index: number): Promise<number> {
@@ -161,22 +157,15 @@ export class GovernanceContractIndexer {
     private async getContractPeriodsWithoutProposalsOrPromotions(
         contract_and_config: ContractAndConfig,
         last_level_activity: number,
-        last_processed_level: number | null
+        last_processed_level?: number
     ): Promise<PeriodIndexToPeriod> {
         logger.info(`[GovernanceContractIndexer] getContractPeriodsWithoutProposalsOrPromotions(${JSON.stringify(contract_and_config)})`);
         const periods: PeriodIndexToPeriod = {};
         const end_level: number = contract_and_config.active ? await this.getCurrentLevel() : last_level_activity;
         const period_length: number = contract_and_config.period_length;
-        const started_at_level: number = contract_and_config.started_at_level;
+        const started_at_level: number = last_processed_level ?? contract_and_config.started_at_level;
 
-        const first_unprocessed_level: number = last_processed_level !== null
-            ? last_processed_level + 1
-            : started_at_level;
-
-        const remainder: number = (first_unprocessed_level - started_at_level) % period_length;
-        const period_start: number = first_unprocessed_level - remainder;
-
-        for (let i = period_start; i <= end_level; i += period_length) {
+        for (let i = started_at_level; i <= end_level; i += period_length) {
             const level_end = i + period_length - 1;
             const date_start = await this.getDateFromLevel(i);
             const date_end = await this.getDateFromLevel(level_end);

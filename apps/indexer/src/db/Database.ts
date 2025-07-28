@@ -152,12 +152,6 @@ export class Database {
       proposal.upvotes
     ];
 
-    const upsertingValues = this.sanitizeValues(values);
-    upsertingValues.forEach(v => {
-      console.log(`Upserting value: ${v}`);
-      console.log(`Type: ${typeof v}`);
-    });
-
     await this.upsert(
       `INSERT INTO proposals (
         contract_period_index,
@@ -178,7 +172,7 @@ export class Database {
          alias = VALUES(alias),
          upvotes = VALUES(upvotes),
          updated_at = CURRENT_TIMESTAMP`,
-      upsertingValues
+         this.sanitizeValues(values)
     );
   }
 
@@ -193,14 +187,6 @@ export class Database {
       vote.level,
       this.formatDateForMySQL(vote.time)
     ];
-
-    const upsertingValues = this.sanitizeValues(values);
-    upsertingValues.forEach(v => {
-      console.log(`Upserting value: ${v}`);
-      console.log(`Type: ${typeof v}`);
-    });
-    console.log(JSON.stringify(vote, null, 2));
-
     await this.upsert(
       `INSERT INTO votes (
         proposal_hash,
@@ -218,8 +204,7 @@ export class Database {
          vote = VALUES(vote),
          alias = VALUES(alias),
          updated_at = CURRENT_TIMESTAMP`,
-      upsertingValues
-      // this.sanitizeValues(values)
+      this.sanitizeValues(values)
     );
   }
 
@@ -404,23 +389,12 @@ export class Database {
     }
   }
 
-  async getLastIndexedLevel(contract_address: string): Promise<number | null> {
-    logger.info(`[Database] getLastIndexedLevel(${contract_address})`);
-    const connection = await this.getConnection();
-    const [rows] = await connection.execute(
-        'SELECT last_level FROM last_indexed_block WHERE contract_address = ?',
-        [contract_address]
-    ) as [{last_level: number}[], FieldPacket[]];
-    return rows[0]?.last_level ?? null;
-  }
-
-async setLastIndexedLevel(contract_address: string, last_level: number): Promise<void> {
-    logger.info(`[Database] setLastIndexedLevel(${contract_address}, ${last_level})`);
-    await this.upsert(
-        `INSERT INTO last_indexed_block (contract_address, last_level)
-         VALUES (?, ?)
-         ON DUPLICATE KEY UPDATE last_level = VALUES(last_level), updated_at = CURRENT_TIMESTAMP`,
-        [contract_address, last_level]
-    );
+  async getLastProcessedPeriod(contract_address: string): Promise<Period | null> {
+      const connection = await this.getConnection();
+      const [rows] = await connection.execute(
+          `SELECT * FROM periods WHERE contract_address = ? ORDER BY contract_voting_index DESC LIMIT 1`,
+          [contract_address]
+      ) as [Period[], FieldPacket[]];
+      return rows.length > 0 ? rows[0] : null;
   }
 }

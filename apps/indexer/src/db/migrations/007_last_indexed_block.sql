@@ -1,5 +1,0 @@
-CREATE TABLE IF NOT EXISTS last_indexed_block (
-    contract_address VARCHAR(64) PRIMARY KEY,
-    last_level BIGINT NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);

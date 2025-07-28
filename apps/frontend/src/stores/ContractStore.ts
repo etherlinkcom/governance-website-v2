@@ -116,14 +116,14 @@ class ContractStore {
     try {
       const head = yield fetchJson<{ level: number; timestamp: string }>(`${this.tzktApiUrl}/head`);
       const currentLevel = head.level;
-      const currentDate = new Date(head.timestamp);
 
       const periodDurationBlocks = contract.period_length;
       const startLevel = contract.started_at_level;
 
-      const blocksFromStart = currentLevel - startLevel;
-      const currentPeriodIndex = Math.max(1, Math.floor(blocksFromStart / periodDurationBlocks));
-
+      const currentPeriodIndex = Math.max(
+        1,
+        Math.floor((currentLevel - startLevel) / periodDurationBlocks) + 1
+      );
       let periods: Period[] = [];
 
       if (
