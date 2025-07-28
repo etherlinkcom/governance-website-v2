@@ -20,7 +20,7 @@ export class Database {
       dateStrings: false,
       connectionLimit: 10,
       queueLimit: 0,
-      connectTimeout: 10000,
+      connectTimeout: 30000,
       keepAliveInitialDelay: 0,
       idleTimeout: 300000,
       maxIdle: 10,
