@@ -122,7 +122,7 @@ class ContractStore {
 
       const currentPeriodIndex = Math.max(
         1,
-        Math.floor((currentLevel - startLevel) / periodDurationBlocks) + 1
+        Math.floor((currentLevel - startLevel) / periodDurationBlocks)
       );
       let periods: Period[] = [];
 
@@ -134,11 +134,10 @@ class ContractStore {
         periods.push({...latestPeriod, period_class: 'current'});
       }
 
-
     const neededLevels: number[] = [];
-    for (let i = periods.length; i <= this.futurePeriodsCount; i++) {
+    for (let i = 0; i <= this.futurePeriodsCount; i++) {
       const periodIndex = currentPeriodIndex + i;
-      const periodLevelStart = startLevel + ((periodIndex - 1) * periodDurationBlocks);
+      const periodLevelStart = startLevel + ((periodIndex) * periodDurationBlocks);
       const periodLevelEnd = periodLevelStart + periodDurationBlocks - 1;
       neededLevels.push(periodLevelStart, periodLevelEnd);
     }
@@ -159,11 +158,9 @@ class ContractStore {
       }
     }
 
-    // TODO current periods showing late
-
     for (let i = periods.length; i <= this.futurePeriodsCount; i++) {
       const periodIndex: number = currentPeriodIndex + i;
-      const periodLevelStart: number = startLevel + ((periodIndex - 1) * periodDurationBlocks);
+      const periodLevelStart: number = startLevel + ((periodIndex) * periodDurationBlocks);
       const periodLevelEnd: number = periodLevelStart + periodDurationBlocks - 1;
 
       const startDateStr: string = levelToTimestamp.get(periodLevelStart) || '';
