@@ -17,11 +17,10 @@ class ContractStore {
     timestamp: number;
   }>> = {};
   error: string | null = null;
-  blockTimeMs: number = 6000;
   futurePeriodsCount: number = 3;
   periodDetailsLoading: Record<string, Record<number, boolean>> = {};
   periodDetailsErrors: Record<string, Record<number, string | null>> = {};
-  tzktApiUrl: string = 'https://api.tzkt.io';
+  readonly tzktApiUrl: string = 'https://api.tzkt.io/v1';
 
   constructor() {
     makeAutoObservable(this, {
@@ -71,12 +70,12 @@ class ContractStore {
 
       const contract = this.contracts.find(c => c.contract_address === contractAddress);
       if (contract?.active) {
-        const generatedPeriods = yield this.generateCurrentAndFuturePeriods(contractAddress);
+        const latestPeriod = allPeriods.length ? allPeriods[0] : 0;
+        const generatedPeriods = yield this.generateCurrentAndFuturePeriods(contractAddress, latestPeriod);
 
-        const existingIndexes = new Set(allPeriods.map((p: Period) => p.contract_voting_index));
-        const newPeriods = generatedPeriods.filter((p: Period) => !existingIndexes.has(p.contract_voting_index));
-
-        allPeriods = [...allPeriods, ...newPeriods].sort((a, b) => b.contract_voting_index - a.contract_voting_index);
+        const generatedIndexes = new Set(generatedPeriods.map((p: Period) => p.contract_voting_index));
+        const filteredPeriods = allPeriods.filter((p: Period) => !generatedIndexes.has(p.contract_voting_index));
+        allPeriods = [...generatedPeriods, ...filteredPeriods];
       }
 
       this.periodsByGovernance[this.currentGovernance]![contractAddress] = allPeriods;
@@ -106,12 +105,16 @@ class ContractStore {
     }
   });
 
-  private generateCurrentAndFuturePeriods = flow(function* (this: ContractStore, contractAddress: string): Generator<any, Period[], any> {
+  private generateCurrentAndFuturePeriods = flow(function* (
+    this: ContractStore,
+    contractAddress: string,
+    latestPeriod?: Period
+  ): Generator<any, Period[], any> {
     const contract = this.contracts.find(c => c.contract_address === contractAddress);
     if (!contract || !contract.active) return [];
 
     try {
-      const head = yield fetchJson<{ level: number; timestamp: string }>(`${this.tzktApiUrl}/v1/head`);
+      const head = yield fetchJson<{ level: number; timestamp: string }>(`${this.tzktApiUrl}/head`);
       const currentLevel = head.level;
       const currentDate = new Date(head.timestamp);
 
@@ -119,37 +122,68 @@ class ContractStore {
       const startLevel = contract.started_at_level;
 
       const blocksFromStart = currentLevel - startLevel;
-      const currentPeriodIndex = Math.max(1, Math.floor(blocksFromStart / periodDurationBlocks) + 1);
+      const currentPeriodIndex = Math.max(1, Math.floor(blocksFromStart / periodDurationBlocks));
 
-      const periods: Period[] = [];
+      let periods: Period[] = [];
 
-      for (let i = 0; i <= this.futurePeriodsCount; i++) {
-        const periodIndex = currentPeriodIndex + i;
-        const periodLevelStart = startLevel + ((periodIndex - 1) * periodDurationBlocks);
-        const periodLevelEnd = periodLevelStart + periodDurationBlocks - 1;
-
-        const blocksFromCurrentToStart = periodLevelStart - currentLevel;
-        const blocksFromCurrentToEnd = periodLevelEnd - currentLevel;
-
-        const startDate = new Date(currentDate.getTime() + (blocksFromCurrentToStart * this.blockTimeMs));
-        const endDate = new Date(currentDate.getTime() + (blocksFromCurrentToEnd * this.blockTimeMs));
-
-        periods.push({
-          contract_voting_index: periodIndex,
-          contract_address: contractAddress,
-          level_start: periodLevelStart,
-          level_end: periodLevelEnd,
-          date_start: startDate,
-          date_end: endDate,
-          proposal_hashes: [],
-          promotion_hash: undefined,
-          period_class: i === 0 ? 'current' : 'future',
-          max_upvotes_voting_power: 0,
-          total_voting_power: 0,
-        });
+      if (
+        latestPeriod &&
+        currentLevel >= latestPeriod.level_start &&
+        currentLevel <= latestPeriod.level_end
+      ) {
+        periods.push({...latestPeriod, period_class: 'current'});
       }
 
-      return periods;
+
+    const neededLevels: number[] = [];
+    for (let i = periods.length; i <= this.futurePeriodsCount; i++) {
+      const periodIndex = currentPeriodIndex + i;
+      const periodLevelStart = startLevel + ((periodIndex - 1) * periodDurationBlocks);
+      const periodLevelEnd = periodLevelStart + periodDurationBlocks - 1;
+      neededLevels.push(periodLevelStart, periodLevelEnd);
+    }
+
+    const uniqueLevels = Array.from(new Set(neededLevels))
+    const timestampResults = yield Promise.allSettled(
+      uniqueLevels.map(level =>
+        fetchJson<string>(`${this.tzktApiUrl}/blocks/${level}/timestamp`)
+          .then(timestamp => [level, timestamp] as [number, string])
+      )
+    );
+
+    const levelToTimestamp = new Map<number, string>();
+    for (const result of timestampResults) {
+      if (result.status === 'fulfilled') {
+        const [level, timestamp] = result.value;
+        levelToTimestamp.set(level, timestamp);
+      }
+    }
+
+    // TODO current periods showing late
+
+    for (let i = periods.length; i <= this.futurePeriodsCount; i++) {
+      const periodIndex: number = currentPeriodIndex + i;
+      const periodLevelStart: number = startLevel + ((periodIndex - 1) * periodDurationBlocks);
+      const periodLevelEnd: number = periodLevelStart + periodDurationBlocks - 1;
+
+      const startDateStr: string = levelToTimestamp.get(periodLevelStart) || '';
+      const endDateStr: string = levelToTimestamp.get(periodLevelEnd) || '';
+
+      periods.unshift({
+        contract_voting_index: periodIndex,
+        contract_address: contractAddress,
+        level_start: periodLevelStart,
+        level_end: periodLevelEnd,
+        date_start: new Date(startDateStr) || 'Error retrieving date',
+        date_end: new Date(endDateStr) || 'Error retrieving date',
+        proposal_hashes: [],
+        promotion_hash: undefined,
+        period_class: i === 0 ? 'current' : 'future',
+        total_voting_power: 0,
+      });
+    }
+
+    return periods;
 
     } catch (error) {
       console.error('Failed to generate periods:', error);

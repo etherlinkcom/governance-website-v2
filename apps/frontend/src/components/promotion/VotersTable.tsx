@@ -3,7 +3,6 @@ import { observer } from 'mobx-react-lite';
 import { useTableSort } from '@/hooks/useTableSort';
 import { SortableTable, SortableTableSkeleton } from '@/components/shared/SortableTable';
 import { Vote } from '@trilitech/types';
-import { customSortComparator} from '@/lib/votingCalculations';
 import { formatNumber } from '@/lib/formatNumber';
 import { Link, Typography } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
@@ -21,7 +20,6 @@ export const VotersTable = observer(({ contractVotingIndex, contractAddress }: V
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     votes,
     'baker',
-    customSortComparator
   );
 
   if (!hasValidParams) {
@@ -73,6 +71,7 @@ export const VotersTable = observer(({ contractVotingIndex, contractAddress }: V
       case 'vote':
         return (
           <Typography
+            component='span'
             sx={{
               textTransform: 'capitalize',
               fontWeight: 'bold',

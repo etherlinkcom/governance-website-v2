@@ -4,7 +4,6 @@ import { SortableTable, SortableTableSkeleton } from '@/components/shared/Sortab
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { Upvote } from '@trilitech/types';
-import { customSortComparator } from '@/lib/votingCalculations';
 import { HashDisplay } from '../shared/HashDisplay';
 import { formatNumber } from '@/lib/formatNumber';
 import { contractStore } from '@/stores/ContractStore';
@@ -22,7 +21,6 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     upvoters,
     'baker',
-    customSortComparator
   );
 
   const columns = upvoterKeys.map(key => ({

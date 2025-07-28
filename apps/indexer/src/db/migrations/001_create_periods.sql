@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS periods (
   date_end DATETIME NOT NULL,
   proposal_hashes JSON,
   promotion_hash VARCHAR(255),
-  max_upvotes_voting_power BIGINT NOT NULL,
   total_voting_power BIGINT NOT NULL,
 
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP(),

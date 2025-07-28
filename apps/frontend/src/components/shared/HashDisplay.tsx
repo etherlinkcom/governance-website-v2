@@ -1,5 +1,6 @@
 import { Typography } from '@mui/material';
 import { PayloadKey } from '@/data/proposalLinks';
+import { parseSequencerKey } from '@/lib/getLinkData';
 
 interface HashDisplayProps {
   hash: PayloadKey;
@@ -9,16 +10,32 @@ interface HashDisplayProps {
 export const HashDisplay = ({
   hash,
 }: HashDisplayProps) => {
-  let displayValue = typeof hash === 'string'
-    ? hash
-    : `${hash.poolAddress ?? ''}${hash.sequencerPublicKey ? `:${hash.sequencerPublicKey}` : ''}`;
+  let displayValue: React.ReactNode;
+  if (typeof hash === 'string') {
+    const parsed = parseSequencerKey(hash);
+    if (parsed) {
+      displayValue = (
+        <>
+          <span>Pool Address: {parsed.poolAddress}</span>
+          <br />
+          <span>Sequencer Public Key: {parsed.sequencerPublicKey}</span>
+        </>
+      );
+    } else {
+      displayValue = hash;
+    }
+  } else {
+    displayValue = (
+      <>
+        <span>Pool Address: {hash.poolAddress ?? ''}</span>
+        <br />
+        <span>Sequencer Public Key: {hash.sequencerPublicKey ?? ''}</span>
+      </>
+    );
+  }
 
   return (
-    <Typography
-      variant="body2"
-      component="div"
-      title={displayValue}
-    >
+    <Typography variant="body2" component="span" sx={{ wordBreak: 'break-all' }}>
       {displayValue}
     </Typography>
   );
