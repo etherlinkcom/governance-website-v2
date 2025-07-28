@@ -1,4 +1,4 @@
-import mysql from 'mysql2/promise';
+import mysql, { FieldPacket } from 'mysql2/promise';
 import fs from 'fs';
 import path from 'path';
 import { logger } from '../utils/logger';
@@ -402,5 +402,25 @@ export class Database {
     for (const upvote of upvotes) {
       await this.upsertUpvote(upvote);
     }
+  }
+
+  async getLastIndexedLevel(contract_address: string): Promise<number | null> {
+    logger.info(`[Database] getLastIndexedLevel(${contract_address})`);
+    const connection = await this.getConnection();
+    const [rows] = await connection.execute(
+        'SELECT last_level FROM last_indexed_block WHERE contract_address = ?',
+        [contract_address]
+    ) as [{last_level: number}[], FieldPacket[]];
+    return rows[0]?.last_level ?? null;
+  }
+
+async setLastIndexedLevel(contract_address: string, last_level: number): Promise<void> {
+    logger.info(`[Database] setLastIndexedLevel(${contract_address}, ${last_level})`);
+    await this.upsert(
+        `INSERT INTO last_indexed_block (contract_address, last_level)
+         VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE last_level = VALUES(last_level), updated_at = CURRENT_TIMESTAMP`,
+        [contract_address, last_level]
+    );
   }
 }

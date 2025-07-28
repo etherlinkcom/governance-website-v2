@@ -8,10 +8,10 @@
   "type": "commonjs",
   "main": "src/index.ts",
   "scripts": {
-    "migrate": "ts-node src/migrate.ts",
-    "start:listener": "ts-node src/index.ts",
-    "start:indexer": "ts-node src/index.ts",
-    "build": "tsup src/index.ts --out-dir dist --format cjs"
+    "build": "tsup src/index.ts --out-dir dist --format cjs",
+    "dev" : "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "prestart": "npm run build"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.0",
@@ -22,6 +22,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/node": "^20",
     "@types/ws": "^8.18.1",
     "ts-node": "^10",
