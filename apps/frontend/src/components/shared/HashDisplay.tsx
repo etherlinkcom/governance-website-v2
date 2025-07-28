@@ -35,7 +35,7 @@ export const HashDisplay = ({
   }
 
   return (
-    <Typography variant="body2" component="div" sx={{ wordBreak: 'break-all' }}>
+    <Typography variant="body2" component="span" sx={{ wordBreak: 'break-all' }}>
       {displayValue}
     </Typography>
   );

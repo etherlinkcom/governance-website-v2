@@ -17,11 +17,10 @@ class ContractStore {
     timestamp: number;
   }>> = {};
   error: string | null = null;
-  blockTimeMs: number = 6000;
   futurePeriodsCount: number = 3;
   periodDetailsLoading: Record<string, Record<number, boolean>> = {};
   periodDetailsErrors: Record<string, Record<number, string | null>> = {};
-  tzktApiUrl: string = 'https://api.tzkt.io';
+  readonly tzktApiUrl: string = 'https://api.tzkt.io/v1';
 
   constructor() {
     makeAutoObservable(this, {
@@ -115,7 +114,7 @@ class ContractStore {
     if (!contract || !contract.active) return [];
 
     try {
-      const head = yield fetchJson<{ level: number; timestamp: string }>(`${this.tzktApiUrl}/v1/head`);
+      const head = yield fetchJson<{ level: number; timestamp: string }>(`${this.tzktApiUrl}/head`);
       const currentLevel = head.level;
       const currentDate = new Date(head.timestamp);
 
@@ -135,33 +134,56 @@ class ContractStore {
         periods.push({...latestPeriod, period_class: 'current'});
       }
 
-      for (let i = periods.length; i <= this.futurePeriodsCount; i++) {
 
-        const periodIndex = currentPeriodIndex + i;
-        const periodLevelStart = startLevel + ((periodIndex - 1) * periodDurationBlocks);
-        const periodLevelEnd = periodLevelStart + periodDurationBlocks - 1;
+    const neededLevels: number[] = [];
+    for (let i = periods.length; i <= this.futurePeriodsCount; i++) {
+      const periodIndex = currentPeriodIndex + i;
+      const periodLevelStart = startLevel + ((periodIndex - 1) * periodDurationBlocks);
+      const periodLevelEnd = periodLevelStart + periodDurationBlocks - 1;
+      neededLevels.push(periodLevelStart, periodLevelEnd);
+    }
 
-        const blocksFromCurrentToStart = periodLevelStart - currentLevel;
-        const blocksFromCurrentToEnd = periodLevelEnd - currentLevel;
+    const uniqueLevels = Array.from(new Set(neededLevels))
+    const timestampResults = yield Promise.allSettled(
+      uniqueLevels.map(level =>
+        fetchJson<string>(`${this.tzktApiUrl}/blocks/${level}/timestamp`)
+          .then(timestamp => [level, timestamp] as [number, string])
+      )
+    );
 
-        const startDate = new Date(currentDate.getTime() + (blocksFromCurrentToStart * this.blockTimeMs));
-        const endDate = new Date(currentDate.getTime() + (blocksFromCurrentToEnd * this.blockTimeMs));
-
-        periods.unshift({
-          contract_voting_index: periodIndex,
-          contract_address: contractAddress,
-          level_start: periodLevelStart,
-          level_end: periodLevelEnd,
-          date_start: startDate,
-          date_end: endDate,
-          proposal_hashes: [],
-          promotion_hash: undefined,
-          period_class: i === 0 ? 'current' : 'future',
-          total_voting_power: 0,
-        });
+    const levelToTimestamp = new Map<number, string>();
+    for (const result of timestampResults) {
+      if (result.status === 'fulfilled') {
+        const [level, timestamp] = result.value;
+        levelToTimestamp.set(level, timestamp);
       }
+    }
 
-      return periods;
+    // TODO current periods showing late
+
+    for (let i = periods.length; i <= this.futurePeriodsCount; i++) {
+      const periodIndex: number = currentPeriodIndex + i;
+      const periodLevelStart: number = startLevel + ((periodIndex - 1) * periodDurationBlocks);
+      const periodLevelEnd: number = periodLevelStart + periodDurationBlocks - 1;
+
+      const startDateStr: string = levelToTimestamp.get(periodLevelStart) || '';
+      const endDateStr: string = levelToTimestamp.get(periodLevelEnd) || '';
+
+      periods.unshift({
+        contract_voting_index: periodIndex,
+        contract_address: contractAddress,
+        level_start: periodLevelStart,
+        level_end: periodLevelEnd,
+        date_start: new Date(startDateStr) || 'Error retrieving date',
+        date_end: new Date(endDateStr) || 'Error retrieving date',
+        proposal_hashes: [],
+        promotion_hash: undefined,
+        period_class: i === 0 ? 'current' : 'future',
+        total_voting_power: 0,
+      });
+    }
+
+    return periods;
 
     } catch (error) {
       console.error('Failed to generate periods:', error);

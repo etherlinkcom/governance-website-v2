@@ -341,6 +341,7 @@ export class GovernanceContractIndexer {
                     contract_period_index: period_index,
                 });
 
+                // TODO this can be a sum sql query to get the total voting power for the proposal instead of updating it here
                 if (proposals_hash_to_proposal[proposal_hash]) {
                     proposals_hash_to_proposal[proposal_hash].upvotes += total_voting_power;
                 }
