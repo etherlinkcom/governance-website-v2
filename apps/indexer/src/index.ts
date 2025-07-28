@@ -1,7 +1,5 @@
 import { all_contracts } from "./contracts";
 import { GovernanceContractIndexer } from "./GovernanceContractIndexer";
-import { Contract } from "./types";
-import { TzktListener } from "./TzktListener";
 import { logger } from "./utils/logger";
 
 async function main() {
