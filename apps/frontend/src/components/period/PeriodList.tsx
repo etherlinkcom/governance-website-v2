@@ -65,7 +65,7 @@ export const PeriodsList = observer(({ periods, isLoading }: PeriodsListProps) =
     );
   }
 
-  const firstPeriodIndex = periods[0].contract_voting_index;
+  const firstPeriodIndex = periods[periods.length - 1].contract_voting_index;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
