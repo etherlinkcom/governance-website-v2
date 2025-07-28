@@ -2,12 +2,13 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "module": "CommonJS",
-    "noEmit": true,
+    "outDir": "./dist",
+    "noEmit": false,
     "moduleResolution": "node",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  "include": [ "src"],
+  "exclude": ["node_modules", "dist"]
 }

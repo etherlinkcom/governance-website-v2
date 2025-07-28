@@ -1,4 +1,4 @@
-import mysql from 'mysql2/promise';
+import mysql, { FieldPacket } from 'mysql2/promise';
 import fs from 'fs';
 import path from 'path';
 import { logger } from '../utils/logger';
@@ -152,12 +152,6 @@ export class Database {
       proposal.upvotes
     ];
 
-    const upsertingValues = this.sanitizeValues(values);
-    upsertingValues.forEach(v => {
-      console.log(`Upserting value: ${v}`);
-      console.log(`Type: ${typeof v}`);
-    });
-
     await this.upsert(
       `INSERT INTO proposals (
         contract_period_index,
@@ -178,7 +172,7 @@ export class Database {
          alias = VALUES(alias),
          upvotes = VALUES(upvotes),
          updated_at = CURRENT_TIMESTAMP`,
-      upsertingValues
+         this.sanitizeValues(values)
     );
   }
 
@@ -193,14 +187,6 @@ export class Database {
       vote.level,
       this.formatDateForMySQL(vote.time)
     ];
-
-    const upsertingValues = this.sanitizeValues(values);
-    upsertingValues.forEach(v => {
-      console.log(`Upserting value: ${v}`);
-      console.log(`Type: ${typeof v}`);
-    });
-    console.log(JSON.stringify(vote, null, 2));
-
     await this.upsert(
       `INSERT INTO votes (
         proposal_hash,
@@ -218,8 +204,7 @@ export class Database {
          vote = VALUES(vote),
          alias = VALUES(alias),
          updated_at = CURRENT_TIMESTAMP`,
-      upsertingValues
-      // this.sanitizeValues(values)
+      this.sanitizeValues(values)
     );
   }
 
@@ -402,5 +387,14 @@ export class Database {
     for (const upvote of upvotes) {
       await this.upsertUpvote(upvote);
     }
+  }
+
+  async getLastProcessedPeriod(contract_address: string): Promise<Period | null> {
+      const connection = await this.getConnection();
+      const [rows] = await connection.execute(
+          `SELECT * FROM periods WHERE contract_address = ? ORDER BY contract_voting_index DESC LIMIT 1`,
+          [contract_address]
+      ) as [Period[], FieldPacket[]];
+      return rows.length > 0 ? rows[0] : null;
   }
 }

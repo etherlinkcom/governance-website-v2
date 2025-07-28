@@ -116,14 +116,14 @@ class ContractStore {
     try {
       const head = yield fetchJson<{ level: number; timestamp: string }>(`${this.tzktApiUrl}/head`);
       const currentLevel = head.level;
-      const currentDate = new Date(head.timestamp);
 
       const periodDurationBlocks = contract.period_length;
       const startLevel = contract.started_at_level;
 
-      const blocksFromStart = currentLevel - startLevel;
-      const currentPeriodIndex = Math.max(1, Math.floor(blocksFromStart / periodDurationBlocks));
-
+      const currentPeriodIndex = Math.max(
+        1,
+        Math.floor((currentLevel - startLevel) / periodDurationBlocks)
+      );
       let periods: Period[] = [];
 
       if (
@@ -134,11 +134,10 @@ class ContractStore {
         periods.push({...latestPeriod, period_class: 'current'});
       }
 
-
     const neededLevels: number[] = [];
-    for (let i = periods.length; i <= this.futurePeriodsCount; i++) {
+    for (let i = 0; i <= this.futurePeriodsCount; i++) {
       const periodIndex = currentPeriodIndex + i;
-      const periodLevelStart = startLevel + ((periodIndex - 1) * periodDurationBlocks);
+      const periodLevelStart = startLevel + ((periodIndex) * periodDurationBlocks);
       const periodLevelEnd = periodLevelStart + periodDurationBlocks - 1;
       neededLevels.push(periodLevelStart, periodLevelEnd);
     }
@@ -159,11 +158,9 @@ class ContractStore {
       }
     }
 
-    // TODO current periods showing late
-
     for (let i = periods.length; i <= this.futurePeriodsCount; i++) {
       const periodIndex: number = currentPeriodIndex + i;
-      const periodLevelStart: number = startLevel + ((periodIndex - 1) * periodDurationBlocks);
+      const periodLevelStart: number = startLevel + ((periodIndex) * periodDurationBlocks);
       const periodLevelEnd: number = periodLevelStart + periodDurationBlocks - 1;
 
       const startDateStr: string = levelToTimestamp.get(periodLevelStart) || '';

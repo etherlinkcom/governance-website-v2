@@ -152,6 +152,7 @@ export class TzktListener {
       baker: operation.sender.address,
       alias: operation.sender.alias,
       transaction_hash: operation.hash,
+      contract_period_index: 1 // TODO: Get the current period index from GovernanceContractIndexer or calculate it based on operation.level
     }
     await this.database.upsertUpvotes([upvote]);
   }
