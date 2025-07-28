@@ -11,6 +11,8 @@ out/
 # production
 build/
 **/build/
+dist/*
+**/dist/
 
 # testing
 coverage/
