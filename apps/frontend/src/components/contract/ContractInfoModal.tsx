@@ -1,4 +1,5 @@
 import {
+  Link,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -27,20 +28,21 @@ export const ContractInfoModal = ({ open, onClose, contract }: ContractInfoModal
             Contract Address
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <Typography
+            <Link
               variant="body2"
-              sx={{
-                fontFamily: 'monospace',
-                overflow: 'hidden',
-                flex: 1
-              }}
+              href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${contract.contract_address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(event) => event.stopPropagation()}
+              className="contract-link"
             >
               {contract.contract_address}
-            </Typography>
+            </Link>
             <CopyButton
               text={contract.contract_address}
               message="Contract address copied!"
               size="small"
+              sx={{color: 'primary.main', mt:0.5}}
             />
           </Box>
 

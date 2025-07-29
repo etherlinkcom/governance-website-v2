@@ -62,11 +62,7 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
                   text={contract.contract_address}
                   message="Contract address copied!"
                   size="small"
-                  sx={{
-                    ml: 0.5,
-                    mt: -0.5,
-                    color: 'primary.main',
-                  }}
+                  sx={{ mt: 0.5, color: 'primary.main'}}
                 />
               </Box>
 
