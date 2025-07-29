@@ -27,16 +27,19 @@ export class GovernanceContractIndexer {
     }
 
 
-    public async indexContracts(contracts: Contract[]): Promise<void[]> {
+    public async indexContracts(contracts: Contract[], indexFromStart: boolean = false): Promise<void[]> {
         logger.info(`[GovernanceContractIndexer] indexContracts(${contracts.length} contracts)`);
-        return Promise.all(contracts.map(contract => this.indexContract(contract)));
+        return Promise.all(contracts.map(contract => this.indexContract(contract, indexFromStart)));
     }
 
-    public async indexContract(contract: Contract): Promise<void> {
+    public async indexContract(contract: Contract, indexFromStart: boolean = false): Promise<void> {
         logger.info(`[GovernanceContractIndexer] indexContract(${contract.address})`);
 
-        const last_processed_period: Period | null = await this.database.getLastProcessedPeriod(contract.address);
-        logger.info(`[GovernanceContractIndexer] Last processed period for contract ${contract.address}: ${last_processed_period?.contract_voting_index}`);
+        let last_processed_period: Period | null = null;
+        if (!indexFromStart) {
+            last_processed_period = await this.database.getLastProcessedPeriod(contract.address);
+            logger.info(`[GovernanceContractIndexer] Last processed period for contract ${contract.address}: ${last_processed_period?.contract_voting_index}`);
+        }
 
         const data: TzktContractStorageHistory[] = await this.fetchJson<TzktContractStorageHistory[]>(
             `${this.tzkt_api_url}/contracts/${contract.address}/storage/history`,

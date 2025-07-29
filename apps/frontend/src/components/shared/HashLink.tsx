@@ -1,4 +1,4 @@
-import { Link, Typography } from '@mui/material';
+import { Link } from '@mui/material';
 import { PayloadKey } from '@/data/proposalLinks';
 import { getLinkData } from '@/lib/getLinkData';
 
@@ -20,9 +20,7 @@ export const HashLink = ({
       target="_blank"
       rel="noopener noreferrer"
     >
-      <Typography variant="body2" component='div'>
         {linkData.title}
-      </Typography>
     </Link>
   );
 };

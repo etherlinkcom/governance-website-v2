@@ -13,9 +13,13 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout';
 import { getWalletStore } from '@/stores/WalletStore';
 import { CopyButton } from '@/components/shared/CopyButton';
-import { MetaMaskIcon } from '@/components/shared/icons/MetaMaskIcon';
+import { EllipsisBox } from '@/components/shared/EllipsisBox';
 
-export const ConnectButton = observer(() => {
+interface ConnectButtonProps {
+  sx?: object;
+}
+
+export const ConnectButton = observer(({ sx }: ConnectButtonProps) => {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [walletStore, setWalletStore] = useState<ReturnType<typeof getWalletStore> | null>(null);
@@ -47,17 +51,9 @@ export const ConnectButton = observer(() => {
   if (!walletStore.address) {
     return (
       <>
-      <Button variant="contained" onClick={handleConnect} >
-        <Box sx={{
-          color: theme.palette.primary.contrastText,
-          display: { xs: 'none', sm: 'inline-flex' }
-        }}>
+      <Button variant="contained" onClick={handleConnect} sx={sx}>
+        <Box sx={{ color: theme.palette.primary.contrastText }}>
           Connect
-        </Box>
-        <Box sx={{
-          display: { xs: 'inline-flex', sm: 'none' }
-        }}>
-          <MetaMaskIcon />
         </Box>
       </Button>
       </>
@@ -68,16 +64,27 @@ export const ConnectButton = observer(() => {
     <>
       <Button
         variant="outlined"
-        sx={{ whiteSpace: 'nowrap'}}
+        sx={{
+          whiteSpace: 'nowrap',
+          px: { xs: 1, sm: 2 },
+          maxWidth: '100%',
+          overflow: 'hidden',
+          ...sx
+        }}
         onClick={handleOpen}
       >
-        {walletStore.balance.toFixed(2)} ꜩ
+        <EllipsisBox sx={{ maxWidth: '100%' }}>
+          {walletStore.address
+            ? `${walletStore.address.slice(0, 6)}...${walletStore.address.slice(-4)}`
+            : ''}
+        </EllipsisBox>
       </Button>
       <Dialog
         open={open}
         onClose={handleClose}
         maxWidth="xs"
         fullWidth
+        autoFocus
       >
         <DialogTitle>
           Wallet Info

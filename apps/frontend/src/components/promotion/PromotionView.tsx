@@ -12,7 +12,7 @@ interface PromotionViewProps {
 export const PromotionView = ({ contractVotingIndex, contractAddress, promotionHash }: PromotionViewProps) => {
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
       {/* Candidate Section */}
       <Box>
         <CandidateInfo
@@ -29,7 +29,7 @@ export const PromotionView = ({ contractVotingIndex, contractAddress, promotionH
 
       {/* Voters Section */}
       <Box>
-        <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
+        <Typography variant="h5" component="h2" sx={{ mb: 2, ml: 2 }}>
           Voters
         </Typography>
         <VotersTable

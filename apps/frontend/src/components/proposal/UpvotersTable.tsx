@@ -4,7 +4,7 @@ import { SortableTable, SortableTableSkeleton } from '@/components/shared/Sortab
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { Upvote } from '@trilitech/types';
-import { HashDisplay } from '../shared/HashDisplay';
+import { HashDisplay } from '@/components/shared/HashDisplay';
 import { formatNumber } from '@/lib/formatNumber';
 import { contractStore } from '@/stores/ContractStore';
 

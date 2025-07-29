@@ -4,10 +4,11 @@ import { ContractAndConfig } from '@trilitech/types';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ContractInfoModal } from '@/components/contract/ContractInfoModal';
-import { InfoIcon } from '@/components/shared/icons/InfoIcon';
+import { InfoIcon } from '@/components/shared/InfoIcon';
 import { contractStore } from '@/stores/ContractStore';
 import { PeriodsList } from '@/components/period/PeriodList';
-import { CopyButton } from '../shared/CopyButton';
+import { CopyButton } from '@/components/shared/CopyButton';
+import { EllipsisBox } from '@/components/shared/EllipsisBox';
 
 interface ContractCardProps {
   contract: ContractAndConfig;
@@ -40,27 +41,29 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
       <Accordion expanded={expanded} onChange={handleChange}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 2 }}>
-            <Box sx={{ flex: 1 }}>
-              <Link
-                variant="body2"
-                href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${contract.contract_address}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(event) => event.stopPropagation()}
-              >
-                Contract: {contract.contract_address}
-              </Link>
-              <CopyButton
-                text={contract.contract_address}
-                message="Contract address copied!"
-                size="small"
-                sx={{ ml: 0.5, mt: -0.5, color: 'primary.main' }}
-              />
-
-              <Typography variant="body1" color="text.secondary" sx={{mt: 1}}>
-                Level: {contract.started_at_level.toLocaleString()}
-              </Typography>
-            </Box>
+            <EllipsisBox sx={{maxWidth: {xs: '45vw', md: '100%'} }}>
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}>
+                <Link
+                  variant="body2"
+                  href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${contract.contract_address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(event) => event.stopPropagation()}
+                  className="contract-link"
+                >
+                  Contract: {contract.contract_address}
+                </Link>
+                <CopyButton
+                  text={contract.contract_address}
+                  message="Contract address copied!"
+                  size="small"
+                  sx={{ mt: 0.5, color: 'primary.main'}}
+                />
+              </Box>
+            </EllipsisBox>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {Boolean(contract.active) && (

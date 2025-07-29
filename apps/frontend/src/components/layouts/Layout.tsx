@@ -1,7 +1,7 @@
 import { Box, Container, Typography } from '@mui/material';
 import { ReactNode } from 'react';
 import { useRouter } from 'next/router';
-import {Header} from '@/components/shared/Header';
+import {Header} from '@/components/header/Header';
 
 interface LayoutProps {
   children: ReactNode;

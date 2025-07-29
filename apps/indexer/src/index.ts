@@ -28,9 +28,10 @@ app.get("/stop-listener", (_req: Request, res: Response) => {
 
 app.get("/index-active", async (req: Request, res: Response) => {
   try {
+    const indexFromStart = req.query.indexFromStart === "true";
     const indexer = new GovernanceContractIndexer();
     await indexer.initialize();
-    await indexer.indexContracts(all_contracts.filter(c => c.active));
+    await indexer.indexContracts(all_contracts.filter(c => c.active), indexFromStart);
     res.send("Indexer ran on active contracts");
   } catch (err) {
     logger.error("Failed to index active contracts", err);
@@ -40,9 +41,10 @@ app.get("/index-active", async (req: Request, res: Response) => {
 
 app.get("/index-all", async (req: Request, res: Response) => {
   try {
+    const indexFromStart = req.query.indexFromStart === "true";
     const indexer = new GovernanceContractIndexer();
     await indexer.initialize();
-    await indexer.indexContracts(all_contracts);
+    await indexer.indexContracts(all_contracts, indexFromStart);
     res.send("Indexer ran on all contracts");
   } catch (err) {
     logger.error("Failed to index all contracts", err);
