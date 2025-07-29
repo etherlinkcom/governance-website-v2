@@ -3,6 +3,7 @@ import { Column } from "./SortableTable";
 import { Theme } from "@emotion/react";
 import { Box } from "@mui/system";
 import { ComponentLoading } from "./ComponentLoading";
+import { EllipsisBox } from "./EllipsisBox";
 
 interface TableCardsSkeletonProps<T> {
   columns: Column<T>[];
@@ -53,7 +54,7 @@ export const TableCards = <T,>({ columns, data, renderCell, sx }: TableCardsProp
         {columns.map((column) => (
           <Box key={column.id as string} sx={{ mb: 1 }}>
             <Typography variant="subtitle2">{column.label}</Typography>
-            <Typography variant="body2">{renderCell(row, column)}</Typography>
+            <EllipsisBox >{renderCell(row, column)}</EllipsisBox>
           </Box>
         ))}
       </Paper>

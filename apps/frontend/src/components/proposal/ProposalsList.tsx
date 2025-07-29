@@ -63,19 +63,26 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
     <Box>
       <Box sx={{
         display: 'flex',
-        justifyContent: 'end',
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'center', sm: 'flex-start' },
+        justifyContent: { xs: 'center', sm: 'flex-end' },
         mb: 2,
-        flexDirection: 'column',
-        alignItems: 'flex-end'
+        mx: 0.5,
+        mr: { xs: 0, sm: 1 },
       }}>
+        <Box
+        sx={{
+          width: { xs: '95%', sm: 250 }
+        }}
+      >
         <VotingProgress
           label="Quorum"
           value={quorumPercent.toFixed(2)}
           required={contractQuorum}
           progress={progress}
-          color={theme.palette.primary.main}
         />
       </Box>
+    </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {proposals.length > 0 ? (
