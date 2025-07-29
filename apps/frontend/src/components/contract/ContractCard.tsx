@@ -40,26 +40,36 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
       <Accordion expanded={expanded} onChange={handleChange}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 2 }}>
-            <Box sx={{ flex: 1 }}>
-              <Link
-                variant="body2"
-                href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${contract.contract_address}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(event) => event.stopPropagation()}
-              >
-                Contract: {contract.contract_address}
-              </Link>
-              <CopyButton
-                text={contract.contract_address}
-                message="Contract address copied!"
-                size="small"
-                sx={{ ml: 0.5, mt: -0.5, color: 'primary.main' }}
-              />
+            <Box sx={{
+              flex: 1,
+              overflow: 'hidden',
+              maxWidth: {xs: '40vw', md: '100%'} }}>
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}>
+                <Link
+                  variant="body2"
+                  href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${contract.contract_address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(event) => event.stopPropagation()}
+                  className="contract-link"
+                >
+                  Contract: {contract.contract_address}
+                </Link>
+                <CopyButton
+                  text={contract.contract_address}
+                  message="Contract address copied!"
+                  size="small"
+                  sx={{
+                    ml: 0.5,
+                    mt: -0.5,
+                    color: 'primary.main',
+                  }}
+                />
+              </Box>
 
-              <Typography variant="body1" color="text.secondary" sx={{mt: 1}}>
-                Level: {contract.started_at_level.toLocaleString()}
-              </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
