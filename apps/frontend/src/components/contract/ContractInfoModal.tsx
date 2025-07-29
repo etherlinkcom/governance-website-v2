@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { ContractAndConfig } from '@trilitech/types';
 import { CopyButton } from '@/components/shared/CopyButton';
+import { EllipsisBox } from '../shared/EllipsisBox';
 
 interface ContractInfoModalProps {
   open: boolean;
@@ -27,7 +28,7 @@ export const ContractInfoModal = ({ open, onClose, contract }: ContractInfoModal
           <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
             Contract Address
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <EllipsisBox sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             <Link
               variant="body2"
               href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${contract.contract_address}`}
@@ -44,7 +45,7 @@ export const ContractInfoModal = ({ open, onClose, contract }: ContractInfoModal
               size="small"
               sx={{color: 'primary.main', mt:0.5}}
             />
-          </Box>
+          </EllipsisBox>
 
           <Box sx={{ display: 'flex', gap: 1, mb: 2, textTransform: 'capitalize' }}>
             <Chip

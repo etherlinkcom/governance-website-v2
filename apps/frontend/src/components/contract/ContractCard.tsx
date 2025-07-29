@@ -7,7 +7,8 @@ import { ContractInfoModal } from '@/components/contract/ContractInfoModal';
 import { InfoIcon } from '@/components/shared/icons/InfoIcon';
 import { contractStore } from '@/stores/ContractStore';
 import { PeriodsList } from '@/components/period/PeriodList';
-import { CopyButton } from '../shared/CopyButton';
+import { CopyButton } from '@/components/shared/CopyButton';
+import { EllipsisBox } from '../shared/EllipsisBox';
 
 interface ContractCardProps {
   contract: ContractAndConfig;
@@ -40,10 +41,7 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
       <Accordion expanded={expanded} onChange={handleChange}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 2 }}>
-            <Box sx={{
-              flex: 1,
-              overflow: 'hidden',
-              maxWidth: {xs: '40vw', md: '100%'} }}>
+            <EllipsisBox sx={{maxWidth: {xs: '45vw', md: '100%'} }}>
               <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -65,8 +63,7 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
                   sx={{ mt: 0.5, color: 'primary.main'}}
                 />
               </Box>
-
-            </Box>
+            </EllipsisBox>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {Boolean(contract.active) && (

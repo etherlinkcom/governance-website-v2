@@ -8,6 +8,7 @@ import { HashDisplay } from '@/components/shared/HashDisplay';
 import { HashLink } from '@/components/shared/HashLink';
 import { PayloadKey } from '@/data/proposalLinks';
 import { getLinkData } from '@/lib/getLinkData';
+import { EllipsisBox } from '@/components/shared/EllipsisBox';
 
 interface PeriodCardProps {
   period: Period;
@@ -93,8 +94,11 @@ const renderHash = (hash: PayloadKey) => {
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Levels: {period.level_start.toLocaleString()} - {period.level_end.toLocaleString()}
             </Typography>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-              Start: {formatDate(period.date_start)} - End: {formatDate(period.date_end)}
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', sm: 'none' }, mb:2 }}>
+              {formatDate(period.date_start, false)} - {formatDate(period.date_end, false)}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' }, mb:2 }}>
+              Start {formatDate(period.date_start)} - End {formatDate(period.date_end)}
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
@@ -127,9 +131,9 @@ const renderHash = (hash: PayloadKey) => {
                   Proposals:
                 </Typography>
                 {period.proposal_hashes?.map((hash, index) => (
-                  <Box key={index}>
+                  <EllipsisBox key={index}>
                     {renderHash(hash)}
-                  </Box>
+                  </EllipsisBox>
                 ))}
               </Box>
             )}
@@ -139,7 +143,9 @@ const renderHash = (hash: PayloadKey) => {
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Promotion:
                 </Typography>
+                <EllipsisBox>
                 {renderHash(period.promotion_hash || '')}
+                </EllipsisBox>
               </Box>
             )}
           </Box>
