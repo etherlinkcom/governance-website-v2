@@ -113,6 +113,11 @@ export const components: Components<Theme> = {
   },
   MuiDialog: {
   styleOverrides: {
+    root: ({ theme }) => ({
+      '& .MuiBackdrop-root': {
+        backgroundColor: alpha(theme.palette.background.paper, 0.8),
+      },
+    }),
     paper: ({ theme }) => ({
       backgroundColor: theme.palette.background.paper,
       backdropFilter: 'blur(12px)',
@@ -224,7 +229,9 @@ MuiTab: {
         backgroundColor: theme.palette.background.default,
         color: theme.palette.text.primary,
         fontFamily: typography.fontFamily,
-        minWidth: '375px'
+        minWidth: '375px',
+        paddingRight: '0px !important',
+        overflowY: 'auto !important',
       },
       '*::-webkit-scrollbar': {
         width: '8px',

@@ -68,10 +68,36 @@ export const ConnectButton = observer(() => {
     <>
       <Button
         variant="outlined"
-        sx={{ whiteSpace: 'nowrap'}}
+        sx={{
+          whiteSpace: 'nowrap',
+          px: { xs: 1, sm: 2},
+          maxWidth: '100%',
+          overflow: 'hidden'
+        }}
         onClick={handleOpen}
       >
-        {walletStore.balance.toFixed(2)} ꜩ
+        <Box sx={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: 'flex',
+          alignItems: 'center',
+          maxWidth: '100%'
+        }}>
+          {walletStore.address.slice(0, 6)}
+          <Typography
+            component="span"
+            sx={{
+              display: 'inline',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              flexShrink: 1,
+              minWidth: 0
+            }}
+          >
+            ...
+          </Typography>
+          {walletStore.address.slice(-4)}
+        </Box>
       </Button>
       <Dialog
         open={open}

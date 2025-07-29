@@ -35,12 +35,12 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
 
   const handleMenuClose = () => setAnchorEl(null);
 
-  const handleNetworkChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newNetwork: NetworkType
-  ) => {
-    // if (newNetwork !== null) contractStore.setNetwork(newNetwork);
-  };
+  // const handleNetworkChange = (
+  //   event: React.MouseEvent<HTMLElement>,
+  //   newNetwork: NetworkType
+  // ) => {
+  //   // if (newNetwork !== null) contractStore.setNetwork(newNetwork);
+  // };
 
   const handleGovernanceChange = (
     newGovernance: GovernanceType
@@ -86,7 +86,7 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
               height={32}
               style={{ display: 'block' }}
             />
-            <Typography variant="h6" sx={{ml: -1}}>
+            <Typography variant="h6" sx={{ml: -1, display: { xs: 'none', sm: 'inline-flex' }}}>
               Governance
             </Typography>
           </Link>
