@@ -81,7 +81,13 @@ export const VotingResults = observer(({ contractVotingIndex, contractAddress, p
   const passPercentage = totalVotes > 0 ? ((passVotes / totalVotes) * 100).toFixed(2) : "0";
 
   return (
-    <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
+    <Box sx={{
+        display: 'flex',
+        gap: 2,
+        my: 4,
+        flexDirection: { xs: 'column', sm: 'row' },
+        justifyContent: 'space-between'
+        }}>
       <VoteResultCard
         type="yea"
         percentage={yeaPercentage}
