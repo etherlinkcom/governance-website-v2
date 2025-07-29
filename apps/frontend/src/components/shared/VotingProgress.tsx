@@ -1,5 +1,5 @@
 import { Box, darken, LinearProgress, Tooltip, Typography, useTheme } from '@mui/material';
-import { InfoIcon } from './icons/InfoIcon';
+import { InfoIcon } from './InfoIcon';
 
 interface VotingProgressProps {
   label: string;
