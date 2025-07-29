@@ -201,14 +201,19 @@ export class GovernanceContractIndexer {
 
     public async getVotingPowerForAddress(address: string, global_voting_index: number): Promise<number> {
         logger.info(`[GovernanceContractIndexer] getVotingPowerForAddress(${address}, ${global_voting_index})`);
-        let voting_power = 0;
-        const data = await this.fetchJson<{ delegate: { address: string }; votingPower: number }>(
-            `${this.tzkt_api_url}/voting/periods/${global_voting_index}/voters/${address}`
-        );
-        if (!data) return voting_power;
-        if (!data) throw new Error(`No voter found for address ${address} at global_voting_index ${global_voting_index}`);
-        if (!data.votingPower) throw new Error(`No voting power found for address ${address} at global_voting_index ${global_voting_index}`);
-        return data.votingPower;
+        try {
+            let voting_power = 0;
+            const data = await this.fetchJson<{ delegate: { address: string }; votingPower: number }>(
+                `${this.tzkt_api_url}/voting/periods/${global_voting_index}/voters/${address}`
+            );
+            if (!data) return voting_power;
+            if (!data.votingPower) throw new Error(`No voting power found for address ${address} at global_voting_index ${global_voting_index}`);
+            return data.votingPower;
+        } catch (error) {
+            logger.warn(`Error fetching voting power for address ${address} at global_voting_index ${global_voting_index}: ${error}`);
+            logger.warn(`User may be a delegate and not a baker`)
+            return 0;
+        }
     }
 
     private async getPromotionHashAtPromotionLevel(contract_address: string, promotion_end_level: number, promotion_period_index: number): Promise<string | undefined> {
