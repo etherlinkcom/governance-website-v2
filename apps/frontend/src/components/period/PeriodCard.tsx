@@ -9,8 +9,6 @@ import { HashLink } from '@/components/shared/HashLink';
 import { PayloadKey } from '@/data/proposalLinks';
 import { getLinkData } from '@/lib/getLinkData';
 
-
-
 interface PeriodCardProps {
   period: Period;
 }
@@ -44,14 +42,17 @@ const renderHash = (hash: PayloadKey) => {
             <Typography variant="body2" color="text.secondary">
               Period {period.contract_voting_index}
             </Typography>
-            <Chip label="Future" size="small" variant="outlined" color="info" />
+            <Chip label="Future" size="small" variant="outlined" color="info" sx={{display: {xs: 'none', sm: 'block'}}} />
           </Box>
           <Box sx={{ textAlign: 'right', mb: 1 }}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
               Levels: {period.level_start.toLocaleString()} - {period.level_end.toLocaleString()}
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-              {formatDate(period.date_start)} - {formatDate(period.date_end)}
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', sm: 'none' }, mb:-1 }}>
+              {formatDate(period.date_start, false)} - {formatDate(period.date_end, false)}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+              Start {formatDate(period.date_start)} - End {formatDate(period.date_end)}
             </Typography>
           </Box>
         </Box>
