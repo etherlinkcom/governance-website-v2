@@ -8,7 +8,7 @@ import { InfoIcon } from '@/components/shared/icons/InfoIcon';
 import { contractStore } from '@/stores/ContractStore';
 import { PeriodsList } from '@/components/period/PeriodList';
 import { CopyButton } from '@/components/shared/CopyButton';
-import { EllipsisBox } from '../shared/EllipsisBox';
+import { EllipsisBox } from '@/components/shared/EllipsisBox';
 
 interface ContractCardProps {
   contract: ContractAndConfig;

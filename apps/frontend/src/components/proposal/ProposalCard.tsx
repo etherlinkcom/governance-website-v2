@@ -1,7 +1,7 @@
 import { formatDate } from '@/lib/formatDate';
 import { Card, CardContent, Box, Typography, Link } from '@mui/material';
 import { Proposal } from '@trilitech/types';
-import { HashDisplay } from '../shared/HashDisplay';
+import { HashDisplay } from '@/components/shared/HashDisplay';
 import { formatNumber } from '@/lib/formatNumber';
 import { HashLink } from '@/components/shared/HashLink';
 

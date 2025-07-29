@@ -1,7 +1,7 @@
 import { Box, Typography, useTheme } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
-import { HashDisplay } from '../shared/HashDisplay';
+import { HashDisplay } from '@/components/shared/HashDisplay';
 import { getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
 import { VotingProgress } from '@/components/shared/VotingProgress';
 import { contractStore } from '@/stores/ContractStore';

@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { ContractAndConfig } from '@trilitech/types';
 import { CopyButton } from '@/components/shared/CopyButton';
-import { EllipsisBox } from '../shared/EllipsisBox';
+import { EllipsisBox } from '@/components/shared/EllipsisBox';
 
 interface ContractInfoModalProps {
   open: boolean;

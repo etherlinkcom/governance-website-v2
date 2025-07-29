@@ -7,7 +7,7 @@ import { PromotionView } from '@/components/promotion/PromotionView';
 import { Period } from '@trilitech/types';
 import { formatDate } from '@/lib/formatDate';
 import { contractStore } from '@/stores/ContractStore';
-import { CopyButton } from '../shared/CopyButton';
+import { CopyButton } from '@/components/shared/CopyButton';
 
 interface TabPanelProps {
   children?: React.ReactNode;

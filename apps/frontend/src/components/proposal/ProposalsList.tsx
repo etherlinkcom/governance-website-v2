@@ -4,7 +4,7 @@ import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { ProposalCard } from '@/components/proposal/ProposalCard';
 import { getProposalQuorumPercent } from '@/lib/votingCalculations';
 import { Proposal } from '@trilitech/types';
-import { VotingProgress } from '../shared/VotingProgress';
+import { VotingProgress } from '@/components/shared/VotingProgress';
 import { contractStore } from '@/stores/ContractStore';
 
 const ProposalsListSkeleton = () => (
