@@ -153,7 +153,7 @@ export const components: Components<Theme> = {
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          [theme.breakpoints.up("md")]: {
+          [theme.breakpoints.up("lg")]: {
             width: "90vw",
             height: "90dvh",
           },

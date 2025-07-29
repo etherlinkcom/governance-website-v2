@@ -8,6 +8,7 @@ import { Period } from '@trilitech/types';
 import { formatDate } from '@/lib/formatDate';
 import { contractStore } from '@/stores/ContractStore';
 import { CopyButton } from '@/components/shared/CopyButton';
+import { EllipsisBox } from '../shared/EllipsisBox';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -128,7 +129,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
             mb: 2,
             gap: 2,
           }}>
-            <Box sx={{display:'flex'}}>
+            <EllipsisBox sx={{display:'flex'}}>
             <Link
               className="contract-link"
               href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${period.contract_address}`}
@@ -143,7 +144,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
               size="small"
               sx={{ ml: 0.5, mt: -0.25, color: 'primary.main' }}
             />
-          </Box>
+          </EllipsisBox>
           <IconButton
             onClick={onClose}
             sx={{
@@ -159,7 +160,11 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
 
           <Box sx={{ display: 'flex', gap: 4 }}>
             {/* Proposals Period - Left */}
-            <Box sx={{ flex: 1, textAlign: 'left' }}>
+            <Box sx={{
+              flex: 1,
+              textAlign: 'left',
+              display: { xs: activeTab === 0 ? 'block' : 'none', sm: 'block' }
+            }}>
               {proposals.length > 0 && proposalsPeriodData && (
                 <>
                   <Typography variant="h6" color="success.main">
@@ -173,11 +178,13 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
                   </Typography>
                 </>
                )}
-
             </Box>
 
             {/* Promotions Period - Right */}
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{
+              flex: 1,
+              display: { xs: activeTab === 1 ? 'block' : 'none', sm: 'block' }
+            }}>
               {promotions.length > 0 && promotionsPeriodData && (
                 <>
                   <Typography variant="h6" color="warning.main">
