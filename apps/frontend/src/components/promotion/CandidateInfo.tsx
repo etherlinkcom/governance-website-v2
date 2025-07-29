@@ -1,10 +1,11 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { HashDisplay } from '@/components/shared/HashDisplay';
 import { getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
 import { VotingProgress } from '@/components/shared/VotingProgress';
 import { contractStore } from '@/stores/ContractStore';
+import { EllipsisBox } from '../shared/EllipsisBox';
 
 const CandidateInfoSkeleton = () => {
   return (
@@ -45,7 +46,6 @@ interface CandidateInfoProps {
 
 export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, promotionHash }: CandidateInfoProps) => {
   const { promotions, isLoading, contractAndConfig } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
-  const theme = useTheme();
   const promotion_hash = promotionHash || promotions?.[0]?.proposal_hash;
 
   if (isLoading) return <CandidateInfoSkeleton />;
@@ -88,24 +88,34 @@ export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, p
 
   return (
     <Box sx={{ mb: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column-reverse', sm: 'row' },
+          alignItems: 'flex-start',
+          gap: 2,
+          justifyContent: { xs: 'flex-end', sm: 'space-between' },
+        }}
+      >
         {/* Left side - Candidate info */}
-        <Box sx={{
+        <EllipsisBox sx={{
           flex: 1,
           minWidth: 0,
-          overflow: 'hidden'
+          overflow: 'hidden',
+          maxWidth: '100%',
         }}>
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
             Candidate:
           </Typography>
           <HashDisplay hash={promotion_hash}/>
-        </Box>
+        </EllipsisBox>
 
         {/* Right side - Stats */}
         <Box sx={{
           display: 'flex',
           flexShrink: 0,
           flexDirection: 'column',
+          width: { xs: '100%', sm: 'auto' },
         }}>
           <VotingProgress
             label="Quorum"

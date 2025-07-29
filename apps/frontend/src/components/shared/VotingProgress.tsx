@@ -47,7 +47,7 @@ export const VotingProgress = ({
         variant="determinate"
         value={progress}
         sx={{
-          width,
+          width: '100%',
           mb: 1
         }}
       />
