@@ -112,7 +112,12 @@ export const VotingResults = observer(({ contractVotingIndex, contractAddress, p
       >
         Vote
       </Button>
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        autoFocus
+        aria-hidden='false'
+      >
         <DialogTitle>Cast Your Vote</DialogTitle>
         <DialogContent>
           <RadioGroup

@@ -1,26 +1,25 @@
 import { formatDate } from "@/lib/formatDate";
-import { Card, CardContent, Box, Typography, Link, Button } from "@mui/material";
+import { Card, CardContent, Box, Typography, Link, Button, CircularProgress } from "@mui/material";
 import { Proposal } from "@trilitech/types";
 import { HashDisplay } from "@/components/shared/HashDisplay";
 import { formatNumber } from "@/lib/formatNumber";
 import { HashLink } from "@/components/shared/HashLink";
 import { EllipsisBox } from "../shared/EllipsisBox";
 import { getWalletStore } from "@/stores/WalletStore";
+import { observer } from "mobx-react-lite";
 
 interface ProposalCardProps {
   proposal: Proposal;
-  isCurrent?: boolean;
+  isCurrentPeriod?: boolean;
 }
 
-export const ProposalCard = ({ proposal, isCurrent }: ProposalCardProps) => {
+export const ProposalCard = observer(({ proposal, isCurrentPeriod }: ProposalCardProps) => {
 
   const walletStore = getWalletStore()
 
   return (
     <>
-    <Card
-      sx={(theme) => ({mx: 1})}
-    >
+    <Card sx={(theme) => ({mx: 1})}>
       <CardContent sx={{ p: 3 }}>
         <Box
           sx={{
@@ -72,16 +71,16 @@ export const ProposalCard = ({ proposal, isCurrent }: ProposalCardProps) => {
       </CardContent>
     </Card>
     {
-      isCurrent &&
+      isCurrentPeriod &&
       <Button
         variant="contained"
         color="primary"
         sx={{ mx: 2, mb: 2, justifySelf: "flex-end", width: { xs: 'auto', sm: '100px' } }}
         onClick={() => walletStore?.upvoteProposal(proposal.contract_address, proposal.proposal_hash)}
       >
-        Upvote
+        {walletStore?.voting ? <CircularProgress size={24} color="inherit" /> : "Upvote"}
       </Button>
     }
       </>
   );
-};
+});

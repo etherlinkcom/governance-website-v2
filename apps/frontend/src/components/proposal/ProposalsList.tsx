@@ -34,7 +34,7 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
     hasValidParams,
     contractAndConfig
   } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
-  const isCurrent = contractVotingIndex === contractStore.currentPeriodIndex;
+  const isCurrentPeriod = contractVotingIndex === contractStore.currentPeriodIndex;
 
   const totalProposalUpvotes = proposals.map((e: Proposal) => e.upvotes).reduce((a: number, b: number) => a + b, 0);
   if (!hasValidParams) {
@@ -96,7 +96,7 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
             <ProposalCard
               key={i}
               proposal={proposal}
-              isCurrent={isCurrent}
+              isCurrentPeriod={isCurrentPeriod}
             />
           ))
         ) : (
