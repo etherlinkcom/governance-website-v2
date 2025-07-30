@@ -7,17 +7,27 @@ export class WalletStore {
   address: string | null = null;
   balance: number = 0;
   votingPower: number = 0;
+  loading: Record<string, boolean> = {};
+  error: Record<string, string | null> = {};
+  lastUpdated: Record<string, number> = {};
 
-  private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
+  private Tezos = new TezosToolkit('https://ghostnet.tezos.ecadinfra.com');
   private wallet: BeaconWallet;
   private delegatesViewContractAddress: string = process.env.NEXT_PUBLIC_VOTING_RIGHTS_DELEGATION_CONTRACT!;
   private readonly tzktApiUrl: string = 'https://api.tzkt.io/v1';
+
+  private readonly contractAddresses = {
+    slow: 'KT1HRPRfyzceEJmkHgiWx7DbhcUeMC43WioZ',
+    fast: 'KT1HRPRfyzceEJmkHgiWx7DbhcUeMC43WioZ',
+    sequencer: 'KT1HRPRfyzceEJmkHgiWx7DbhcUeMC43WioZ'
+  };
 
   constructor() {
     this.wallet = new BeaconWallet({
         name: 'Etherlink Governance App',
         colorMode: ColorMode.DARK,
         iconUrl: '/favicon.ico',
+        preferredNetwork: 'ghostnet'
     });
     this.Tezos.setWalletProvider(this.wallet);
     makeAutoObservable(this);
@@ -148,6 +158,103 @@ export class WalletStore {
         this.refreshVotingPower(),
       ]);
     }
+  }
+
+  async vote(label: 'slow' | 'sequencer' | 'fast', voteType: 'yea' | 'nay' | 'pass') {
+    this.setLoading(`vote_${label}`, true);
+    this.clearError(`vote_${label}`);
+    
+    try {
+      const contractAddress = this.contractAddresses[label];
+      if (!contractAddress) {
+        throw new Error(`Contract address for ${label} is not set`);
+      }
+
+      console.log(`Voting ${voteType} for ${label}`);
+
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      const op = await contract.methodsObject.vote(voteType).send();
+      
+      console.log(`Vote transaction sent: ${op.opHash}`);
+      
+      await op.confirmation();
+      
+      console.log(`Vote confirmed for ${label}`);
+      
+      runInAction(() => {
+        this.setLastUpdated(`vote_${label}`);
+      });
+      
+      return op.opHash;
+    } catch (error) {
+      const errorMessage = `Error voting ${voteType} for ${label}: ${error}`;
+      console.error(errorMessage);
+      runInAction(() => {
+        this.setError(`vote_${label}`, errorMessage);
+      });
+      throw error;
+    } finally {
+      runInAction(() => {
+        this.setLoading(`vote_${label}`, false);
+      });
+    }
+  }
+
+  async upvoteProposal(label: 'slow' | 'sequencer' | 'fast', proposalHash: string) {
+    this.setLoading(`upvote_${label}`, true);
+    this.clearError(`upvote_${label}`);
+    
+    try {
+      const contractAddress = this.contractAddresses[label];
+      if (!contractAddress) {
+        throw new Error(`Contract address for ${label} is not set`);
+      }
+
+      console.log(`Upvoting proposal ${proposalHash} for ${label}`);
+
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      const op = await contract.methodsObject.upvote_proposal(proposalHash).send();
+      
+      console.log(`Upvote transaction sent: ${op.opHash}`);
+      
+      await op.confirmation();
+      
+      console.log(`Upvote confirmed for ${label}`);
+      
+      runInAction(() => {
+        this.setLastUpdated(`upvote_${label}`);
+      });
+      
+      return op.opHash;
+    } catch (error) {
+      const errorMessage = `Error upvoting proposal for ${label}: ${error}`;
+      console.error(errorMessage);
+      runInAction(() => {
+        this.setError(`upvote_${label}`, errorMessage);
+      });
+      throw error;
+    } finally {
+      runInAction(() => {
+        this.setLoading(`upvote_${label}`, false);
+      });
+    }
+  }
+
+  // Helper methods for loading states
+  setLoading(key: string, value: boolean) {
+    this.loading[key] = value;
+  }
+
+  setError(key: string, error: string) {
+    this.error[key] = error;
+  }
+
+  clearError(key: string) {
+    this.error[key] = null;
+  }
+
+  setLastUpdated(key: string) {
+    this.lastUpdated[key] = Date.now();
   }
 }
 
