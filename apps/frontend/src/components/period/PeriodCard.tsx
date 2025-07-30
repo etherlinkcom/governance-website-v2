@@ -46,10 +46,10 @@ const renderHash = (hash: PayloadKey) => {
             <Chip label="Future" size="small" variant="outlined" color="info" sx={{display: {xs: 'none', sm: 'block'}}} />
           </Box>
           <Box sx={{ textAlign: 'right', mb: 1 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: { xs: 'none', sm: 'block' } }}>
               Levels: {period.level_start.toLocaleString()} - {period.level_end.toLocaleString()}
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', sm: 'none' }, mb:-1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: -1, display: { xs: 'block', sm: 'none' } }}>
               {formatDate(period.date_start, false)} - {formatDate(period.date_end, false)}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
