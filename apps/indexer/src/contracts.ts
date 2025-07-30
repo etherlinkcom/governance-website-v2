@@ -47,7 +47,7 @@ export const latest_contracts: Contract[] = [
   {
     address: "KT1VZVNCNnhUp7s15d9RsdycP7C1iwYhAQ8r",
     type: "slow",
-    active: true,
+    active: true
   },
   {
     address: "KT1DxndcFitAbxLdJCN3C1pPivqbC3RJxD1R",
