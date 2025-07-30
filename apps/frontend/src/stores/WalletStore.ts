@@ -2,6 +2,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { TezosToolkit } from '@taquito/taquito';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { ColorMode } from '@airgap/beacon-types';
+import { VoteOption } from '@trilitech/types';
 
 export class WalletStore {
   address: string | null = null;
@@ -147,6 +148,28 @@ export class WalletStore {
         this.refreshBalance(),
         this.refreshVotingPower(),
       ]);
+    }
+  }
+
+  async vote(contractAddress: string, voteType: VoteOption) {
+    try {
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      const operation = await contract.methodsObject.vote(voteType).send();
+      await operation.confirmation();
+      return operation.opHash;
+    } catch (error) {
+      console.error(`Error voting ${voteType} for ${contractAddress}: ${error}`);
+    }
+  }
+
+  async upvoteProposal(contractAddress: string, proposalHash: string) {
+    try {
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      const operation = await contract.methodsObject.upvote_proposal(proposalHash).send();
+      await operation.confirmation();
+      return operation.opHash;
+    } catch (error) {
+      console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
     }
   }
 }
