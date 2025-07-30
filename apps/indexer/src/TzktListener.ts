@@ -13,7 +13,7 @@ export class TzktListener {
   private governanceContractIndexer = new GovernanceContractIndexer();
   private readonly trackedFunctions: string[] = ['new_proposal', 'upvote_proposal', 'vote'];
   private database: Database = new Database();
-  private readonly eventsUrl: string = 'https://api.tzkt.io/v1/events';
+  private readonly eventsUrl: string = 'https://api.mainnet.tzkt.io/v1/events';
 
   constructor(contracts: Contract[]) {
     logger.info(`[TzktListener] constructor(contracts=${contracts.map(c => c.address).join(',')})`);
@@ -334,7 +334,8 @@ export class TzktListener {
         date_end: dateEnd,
         proposal_hashes: [],
         promotion_hash: undefined,
-        total_voting_power: 0
+        total_voting_power: 0,
+        max_upvotes_voting_power: 0
       };
 
       logger.info(`[TzktListener] New period ${periodKey}: ${JSON.stringify(periodRecord)}`);

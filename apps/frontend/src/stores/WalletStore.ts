@@ -11,7 +11,7 @@ export class WalletStore {
   private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
   private wallet: BeaconWallet;
   private delegatesViewContractAddress: string = process.env.NEXT_PUBLIC_VOTING_RIGHTS_DELEGATION_CONTRACT!;
-  private readonly tzktApiUrl: string = 'https://api.tzkt.io/v1';
+  private readonly tzktApiUrl: string = 'https://api.mainnet.tzkt.io/v1';
 
   constructor() {
     this.wallet = new BeaconWallet({

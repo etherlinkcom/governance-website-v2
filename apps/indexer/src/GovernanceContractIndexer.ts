@@ -191,6 +191,7 @@ export class GovernanceContractIndexer {
                 date_start: date_start,
                 date_end: date_end,
                 total_voting_power: total_voting_power,
+                max_upvotes_voting_power: 0
             };
             periods[period.contract_voting_index] = period;
         }
