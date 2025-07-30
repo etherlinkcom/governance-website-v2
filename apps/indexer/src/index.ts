@@ -29,12 +29,13 @@ app.get("/stop-listener", (_req: Request, res: Response) => {
 app.get("/index-active", async (req: Request, res: Response) => {
   try {
     const indexFromStart = req.query.indexFromStart === "true";
+    logger.info(`[Indexer] Indexing all contracts. Indexing from start: ${indexFromStart}`);
     const indexer = new GovernanceContractIndexer();
     await indexer.initialize();
     await indexer.indexContracts(all_contracts.filter(c => c.active), indexFromStart);
     res.send("Indexer ran on active contracts");
   } catch (err) {
-    logger.error("Failed to index active contracts", err);
+    logger.error("[Indexer] Failed to index active contracts", err);
     res.status(500).send("Failed to index active contracts");
   }
 });
@@ -42,16 +43,17 @@ app.get("/index-active", async (req: Request, res: Response) => {
 app.get("/index-all", async (req: Request, res: Response) => {
   try {
     const indexFromStart = req.query.indexFromStart === "true";
+    logger.info(`[Indexer] Indexing all contracts. Indexing from start: ${indexFromStart}`);
     const indexer = new GovernanceContractIndexer();
     await indexer.initialize();
     await indexer.indexContracts(all_contracts, indexFromStart);
     res.send("Indexer ran on all contracts");
   } catch (err) {
-    logger.error("Failed to index all contracts", err);
+    logger.error("[Indexer] Failed to index all contracts", err);
     res.status(500).send("Failed to index all contracts");
   }
 });
 
 app.listen(port, () => {
-  logger.info(`Indexer API listening on port ${port}`);
+  logger.info(`[Indexer] Indexer API listening on port ${port}`);
 });

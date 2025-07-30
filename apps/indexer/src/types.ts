@@ -162,3 +162,9 @@ export interface TzktTransactionEvent {
     gbp: number;
   };
 }
+
+export interface Voter {
+  address: string;
+  alias?: string;
+  votingPower: number;
+}

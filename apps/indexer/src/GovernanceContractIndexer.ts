@@ -1,5 +1,5 @@
 import { ContractAndConfig, Period, Promotion, Proposal, Upvote, Vote, VoteOption } from "packages/types";
-import { Contract, ContractConfig, TzktContractStorage, TzktContractStorageHistory, TzktTransactionEvent } from "./types";
+import { Contract, ContractConfig, Voter, TzktContractStorage, TzktContractStorageHistory, TzktTransactionEvent } from "./types";
 import {logger} from './utils/logger'
 import { LRUCache } from "./utils/LRUCache";
 
@@ -101,14 +101,9 @@ export class GovernanceContractIndexer {
         })
     }
 
-    public async getDelegateVotingPowerForAddress(address: string, level: number, global_voting_index: number): Promise<number> {
-        logger.info(`[GovernanceContractIndexer] getDelegateVotingPowerForAddress(${address}, ${level}, ${global_voting_index})`);
+    public async getDelegatesForAddress(address: string, level: number): Promise<string[]> {
+        logger.info(`[GovernanceContractIndexer] getDelegatesForAddress(${address}, ${level})`);
         try {
-            const cacheKey = `delegates_${address}_${global_voting_index}`;
-            if (this.cache) {
-                const cached = this.cache.get(cacheKey);
-                if (cached) return cached;
-            }
             const rpc_client = new HistoricalRpcClient(this.tzkt_rpc_url, level);
             const tezos_toolkit = new TezosToolkit(rpc_client);
             const contract = await tezos_toolkit.contract.at(this.delegate_view_contract);
@@ -116,33 +111,46 @@ export class GovernanceContractIndexer {
                 0: address,
                 1: null
             });
-            const delegates: string[] = await view.executeView({ viewCaller: address });
 
-            if (delegates.length === 0) {
-                logger.info(`[GovernanceContractIndexer] No delegates found for address ${address}`);
-                return 0;
+            return await view.executeView({ viewCaller: address });
+        } catch (error) {
+            logger.warn(`[GovernanceContractIndexer] Error fetching delegates for address ${address} at level ${level}: ${error}`);
+            return [];
+        }
+    }
+
+    public async getVotersForAddress(address: string, level: number, global_voting_index: number): Promise<Voter[]> {
+        logger.info(`[GovernanceContractIndexer] getVotersForAddress(${address}, ${level}, ${global_voting_index})`);
+        try {
+            const cacheKey = `delegates_${address}_${global_voting_index}`;
+            if (this.cache) {
+                const cached = this.cache.get(cacheKey);
+                if (cached) return cached;
             }
 
-            const delegate_totals = await Promise.allSettled(
-                delegates.map(async (addr) => {
-                    return this.getVotingPowerForAddress(addr, global_voting_index)
-                })
-            );
+            const voters: string[] = [address];
+            const all_votes: Voter[] = [];
+            const delegates: string[] = await this.getDelegatesForAddress(address, level);
+            logger.info(`[GovernanceContractIndexer] Delegates for address ${address} at level ${level}: ${delegates.length} found`);
 
-            const delegate_sum: number =  delegate_totals.reduce((total, result) => {
-                if (result.status === 'fulfilled') {
-                    return total + result.value;
-                } else {
-                    logger.error(`Error fetching voting power for delegate: ${result.reason}`);
-                    throw new Error(`Error fetching voting power for delegate: ${result.reason}`);
-                }
-            }, 0);
-            if (this.cache) this.cache.set(cacheKey, delegate_sum);
-            return delegate_sum;
+            voters.push(...delegates)
+
+            for (let i = 0; i < voters.length; i++) {
+                const voter = await this.getVotingPowerForAddress(voters[i], global_voting_index);
+                if (!voter) continue;
+                all_votes.push({
+                    address: voter.address,
+                    votingPower: voter.votingPower,
+                    alias: voter.alias
+                });
+            }
+
+            if (this.cache) this.cache.set(cacheKey, all_votes);
+            return all_votes;
         } catch (error) {
-            logger.error(`Error getting delegate voting power for address ${address} at level ${level}: ${error}`);
+            logger.error(`[GovernanceContractIndexer] Error getting delegate voting power for address ${address} at level ${level}: ${error}`);
+            throw error;
         }
-        return 0;
     }
 
     private async getDateFromLevel(level: number): Promise<Date> {
@@ -202,20 +210,21 @@ export class GovernanceContractIndexer {
         return data[0].index;
     }
 
-    public async getVotingPowerForAddress(address: string, global_voting_index: number): Promise<number> {
+    public async getVotingPowerForAddress(address: string, global_voting_index: number): Promise<Voter | undefined> {
         logger.info(`[GovernanceContractIndexer] getVotingPowerForAddress(${address}, ${global_voting_index})`);
         try {
-            let voting_power = 0;
-            const data = await this.fetchJson<{ delegate: { address: string }; votingPower: number }>(
+            const data = await this.fetchJson<{ delegate: { address: string, alias: string | undefined }; votingPower: number }>(
                 `${this.tzkt_api_url}/voting/periods/${global_voting_index}/voters/${address}`
             );
-            if (!data) return voting_power;
-            if (!data.votingPower) throw new Error(`No voting power found for address ${address} at global_voting_index ${global_voting_index}`);
-            return data.votingPower;
+            if (!data) return undefined;
+
+            return {
+                address: data.delegate.address,
+                alias: data.delegate.alias,
+                votingPower: data.votingPower
+            };
         } catch (error) {
             logger.warn(`Error fetching voting power for address ${address} at global_voting_index ${global_voting_index}: ${error}`);
-            logger.warn(`User may be a delegate and not a baker`)
-            return 0;
         }
     }
 
@@ -267,146 +276,168 @@ export class GovernanceContractIndexer {
         const upvotes: Upvote[] = [];
         const votes: Vote[] = [];
 
-        for (let i = 0; i < transactions.length; i++) {
-            const entry: TzktTransactionEvent = transactions[i];
+        for (const entry of transactions) {
             if (entry.parameter?.entrypoint === 'new_proposal') {
-                const sender = entry.sender.address;
-                const alias = entry.sender.alias;
-
-                const period_index: number = Number((await this.getContractStorageAtLevel(contract_and_config.contract_address, entry.level)).voting_context.period_index);
-                const proposal_hash = entry.parameter.value
-
-                periods[period_index].proposal_hashes = periods[period_index].proposal_hashes || [];
-                periods[period_index].proposal_hashes.push(proposal_hash);
-
-                const global_voting_index = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
-                const voting_power = await this.getVotingPowerForAddress(sender, global_voting_index);
-                const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
-                const total_voting_power = voting_power + delegate_voting_power;
-
-                proposals.push({
-                    contract_period_index: period_index,
-                    level: entry.level,
-                    time: entry.timestamp,
-                    proposal_hash: proposal_hash,
-                    transaction_hash: entry.hash,
-                    contract_address: contract_and_config.contract_address,
-                    proposer: sender,
-                    alias: alias,
-                    upvotes: total_voting_power,
-                });
-                upvotes.push({
-                    level: entry.level,
-                    time: entry.timestamp,
-                    transaction_hash: entry.hash,
-                    proposal_hash: proposal_hash,
-                    baker: sender,
-                    alias: alias,
-                    voting_power: total_voting_power,
-                    contract_address: contract_and_config.contract_address,
-                    contract_period_index: period_index,
-                });
-
-                proposals_hash_to_proposal[proposal_hash] = proposals[proposals.length - 1];
-
-                const promotion_period_index = period_index + 1;
-                if (!periods[promotion_period_index] || periods[promotion_period_index]?.promotion_hash) continue;
-
-                const promotion_end_level = periods[period_index + 1].level_end;
-
-                const winning_candidate = await this.getPromotionHashAtPromotionLevel(
-                    contract_and_config.contract_address,
-                    promotion_end_level,
-                    promotion_period_index
-                );
-                if (!winning_candidate) continue;
-
-                const promotion_start_time = await this.getDateFromLevel(promotion_end_level);
-
-                if (!promotion_start_time) continue;
-
-                periods[promotion_period_index].promotion_hash = winning_candidate;
-                promotions_hash_to_promotion[winning_candidate] = {
-                    proposal_hash: winning_candidate,
-                    contract_period_index: promotion_period_index,
-                    contract_address: contract_and_config.contract_address,
-                    yea_voting_power: 0,
-                    nay_voting_power: 0,
-                    pass_voting_power: 0,
-                    total_voting_power: 0,
-                };
-                continue;
+                await this.handleNewProposal(entry, contract_and_config, periods, proposals, upvotes, proposals_hash_to_proposal, promotions_hash_to_promotion);
             }
             if (entry.parameter?.entrypoint === 'upvote_proposal') {
-
-                const sender = entry.sender.address;
-                const alias = entry.sender.alias;
-                const period_index = Number((await this.getContractStorageAtLevel(contract_and_config.contract_address, entry.level)).voting_context.period_index)
-
-                const global_voting_index = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
-                const voting_power = await this.getVotingPowerForAddress(sender, global_voting_index);
-                const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
-                const total_voting_power = voting_power + delegate_voting_power;
-                const proposal_hash = entry.parameter.value;
-
-                upvotes.push({
-                    level: entry.level,
-                    time: entry.timestamp,
-                    transaction_hash: entry.hash,
-                    proposal_hash: proposal_hash,
-                    baker: sender,
-                    alias: alias,
-                    voting_power: total_voting_power,
-                    contract_address: contract_and_config.contract_address,
-                    contract_period_index: period_index,
-                });
-
-                // TODO this can be a sum sql query to get the total voting power for the proposal instead of updating it here
-                if (proposals_hash_to_proposal[proposal_hash]) {
-                    proposals_hash_to_proposal[proposal_hash].upvotes += total_voting_power;
-                }
-                continue;
+                await this.handleUpvoteProposal(entry, contract_and_config, upvotes, proposals_hash_to_proposal);
             }
             if (entry.parameter?.entrypoint === 'vote') {
-                const sender = entry.sender.address;
-                const alias = entry.sender.alias;
-                const global_voting_index = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
-                const voting_power = await this.getVotingPowerForAddress(sender, global_voting_index);
-                const delegate_voting_power = await this.getDelegateVotingPowerForAddress(sender, entry.level, global_voting_index);
-                const contract_storage_at_level: TzktContractStorage = await this.getContractStorageAtLevel(contract_and_config.contract_address, entry.level);
-                const period_index: number = Number(contract_storage_at_level.voting_context.period_index);
-                const promotion_hash = await this.getPromotionHashAtPromotionLevel(
-                    contract_and_config.contract_address,
-                    entry.level,
-                    period_index
-                );
-                votes.push({
-                    level: entry.level,
-                    time: entry.timestamp,
-                    proposal_hash: promotion_hash || '',
-                    baker: sender,
-                    alias: alias,
-                    voting_power: voting_power + delegate_voting_power,
-                    vote: entry.parameter.value as VoteOption,
-                    transaction_hash: entry.hash,
-                    contract_address: contract_and_config.contract_address,
-                });
-
-                const new_promotion = contract_storage_at_level.voting_context.period.promotion;
-                if (!new_promotion) continue;
-                const promotion = promotions_hash_to_promotion[new_promotion?.winner_candidate];
-                if (promotion) {
-                    promotion.yea_voting_power = Number(new_promotion.yea_voting_power);
-                    promotion.nay_voting_power = Number(new_promotion.nay_voting_power);
-                    promotion.pass_voting_power = Number(new_promotion.pass_voting_power);
-                    promotion.total_voting_power = Number(new_promotion.total_voting_power);
-                }
-                continue;
+                await this.handleVote(entry, contract_and_config, votes, promotions_hash_to_promotion);
             }
         }
 
         const promotions: Promotion[] = Object.values(promotions_hash_to_promotion);
         return { promotions, proposals, upvotes, votes };
+    }
+
+    private async handleNewProposal(
+        entry: TzktTransactionEvent,
+        contract_and_config: ContractAndConfig,
+        periods: PeriodIndexToPeriod,
+        proposals: Proposal[],
+        upvotes: Upvote[],
+        proposals_hash_to_proposal: Record<any, Proposal>,
+        promotions_hash_to_promotion: Record<any, Promotion>
+    ) {
+        const period_index: number = Number((await this.getContractStorageAtLevel(contract_and_config.contract_address, entry.level)).voting_context.period_index);
+        const proposal_hash = entry.parameter!.value;
+
+        periods[period_index].proposal_hashes = periods[period_index].proposal_hashes || [];
+        periods[period_index].proposal_hashes.push(proposal_hash);
+
+        const global_voting_index: number = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
+        const delegates: Voter[] = await this.getVotersForAddress(entry.sender.address, entry.level, global_voting_index);
+
+        let voting_power: number = 0;
+        for (let i = 0; i < delegates.length; i++) {
+            voting_power += delegates[i].votingPower;
+            upvotes.push({
+                level: entry.level,
+                time: entry.timestamp,
+                transaction_hash: entry.hash,
+                proposal_hash: proposal_hash,
+                baker: delegates[i].address,
+                alias: delegates[i].alias,
+                voting_power: delegates[i].votingPower,
+                contract_address: contract_and_config.contract_address,
+                contract_period_index: period_index,
+            });
+        }
+
+        proposals.push({
+            contract_period_index: period_index,
+            level: entry.level,
+            time: entry.timestamp,
+            proposal_hash: proposal_hash,
+            transaction_hash: entry.hash,
+            contract_address: contract_and_config.contract_address,
+            proposer: delegates[0].address,
+            alias: delegates[0]?.alias || '',
+            upvotes: voting_power,
+        });
+
+        proposals_hash_to_proposal[proposal_hash] = proposals[proposals.length - 1];
+
+        const promotion_period_index = period_index + 1;
+        if (!periods[promotion_period_index] || periods[promotion_period_index]?.promotion_hash) return;
+
+        const promotion_end_level = periods[period_index + 1].level_end;
+        const winning_candidate = await this.getPromotionHashAtPromotionLevel(
+            contract_and_config.contract_address,
+            promotion_end_level,
+            promotion_period_index
+        );
+        if (!winning_candidate) return;
+
+        const promotion_start_time = await this.getDateFromLevel(promotion_end_level);
+        if (!promotion_start_time) return;
+
+        periods[promotion_period_index].promotion_hash = winning_candidate;
+        promotions_hash_to_promotion[winning_candidate] = {
+            proposal_hash: winning_candidate,
+            contract_period_index: promotion_period_index,
+            contract_address: contract_and_config.contract_address,
+            yea_voting_power: 0,
+            nay_voting_power: 0,
+            pass_voting_power: 0,
+            total_voting_power: 0,
+        };
+    }
+
+    private async handleUpvoteProposal(
+        entry: TzktTransactionEvent,
+        contract_and_config: ContractAndConfig,
+        upvotes: Upvote[],
+        proposals_hash_to_proposal: Record<any, Proposal>
+    ) {
+        const period_index: number = Number((await this.getContractStorageAtLevel(contract_and_config.contract_address, entry.level)).voting_context.period_index);
+        const global_voting_index: number = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
+        const delegates: Voter[] = await this.getVotersForAddress(entry.sender.address, entry.level, global_voting_index);
+        const proposal_hash = entry.parameter!.value;
+
+        let voting_power: number = 0;
+        for (let i = 0; i < delegates.length; i++) {
+            voting_power += delegates[i].votingPower;
+            upvotes.push({
+                level: entry.level,
+                time: entry.timestamp,
+                transaction_hash: entry.hash,
+                proposal_hash: proposal_hash,
+                baker: delegates[i].address,
+                alias: delegates[i].alias,
+                voting_power: delegates[i].votingPower,
+                contract_address: contract_and_config.contract_address,
+                contract_period_index: period_index,
+            });
+        }
+
+        if (proposals_hash_to_proposal[proposal_hash]) {
+            proposals_hash_to_proposal[proposal_hash].upvotes += voting_power;
+        }
+    }
+
+    private async handleVote(
+        entry: TzktTransactionEvent,
+        contract_and_config: ContractAndConfig,
+        votes: Vote[],
+        promotions_hash_to_promotion: Record<any, Promotion>
+    ) {
+        const global_voting_index: number = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
+        const delegates: Voter[] = await this.getVotersForAddress(entry.sender.address, entry.level, global_voting_index);
+        const contract_storage_at_level: TzktContractStorage = await this.getContractStorageAtLevel(contract_and_config.contract_address, entry.level);
+        const period_index: number = Number(contract_storage_at_level.voting_context.period_index);
+        const promotion_hash = await this.getPromotionHashAtPromotionLevel(
+            contract_and_config.contract_address,
+            entry.level,
+            period_index
+        );
+
+        for (let i = 0; i < delegates.length; i++) {
+            votes.push({
+                level: entry.level,
+                time: entry.timestamp,
+                proposal_hash: promotion_hash || '',
+                baker: delegates[i].address,
+                alias: delegates[i].alias,
+                voting_power: delegates[i].votingPower,
+                vote: entry.parameter!.value as VoteOption,
+                transaction_hash: entry.hash,
+                contract_address: contract_and_config.contract_address,
+            });
+        }
+
+        const new_promotion = contract_storage_at_level.voting_context.period.promotion;
+        if (!new_promotion) return;
+        const promotion = promotions_hash_to_promotion[new_promotion?.winner_candidate];
+
+        if (promotion) {
+            promotion.yea_voting_power = Number(new_promotion.yea_voting_power);
+            promotion.nay_voting_power = Number(new_promotion.nay_voting_power);
+            promotion.pass_voting_power = Number(new_promotion.pass_voting_power);
+            promotion.total_voting_power = Number(new_promotion.total_voting_power);
+        }
     }
 
     protected async fetchJson<T>(
@@ -429,42 +460,42 @@ export class GovernanceContractIndexer {
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-            logger.info(`[GovernanceContractIndexer] Fetching URL (attempt ${attempt}): ${url}`);
+                logger.info(`[GovernanceContractIndexer] Fetching URL (attempt ${attempt}): ${url}`);
 
-            const res = await fetch(url, fetchParams);
+                const res = await fetch(url, fetchParams);
+                if (res.status === 204) return undefined as unknown as T;
+                if (res.status === 404) return undefined as unknown as T;
 
-            if (res.status === 429) {
-                const retryAfter = res.headers.get('Retry-After');
-                const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, attempt) * 1000;
+                if (res.status === 429) {
+                    const retryAfter = res.headers.get('Retry-After');
+                    const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, attempt) * 1000;
 
-                logger.warn(`[GovernanceContractIndexer] Rate limited. Retrying after ${delay}ms (attempt ${attempt}/${maxRetries})`);
+                    logger.warn(`[GovernanceContractIndexer] Rate limited. Retrying after ${delay}ms (attempt ${attempt}/${maxRetries})`);
 
-                if (attempt === maxRetries) {
-                throw new Error(`Rate limited after ${maxRetries} attempts for ${url}`);
+                    if (attempt === maxRetries) {
+                    throw new Error(`Rate limited after ${maxRetries} attempts for ${url}`);
+                    }
+
+                    await this.sleep(delay);
+                    continue;
                 }
 
-                await this.sleep(delay);
-                continue;
-            }
+                if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText} for ${url}`);
 
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText} for ${url}`);
-            }
-
-            const data = await res.json() as T;
-            if (this.cache) this.cache.set(url, data);
-            return data;
+                const data = await res.json() as T;
+                if (this.cache) this.cache.set(url, data);
+                return data;
 
             } catch (error) {
-            if (attempt === maxRetries) throw error;
+                if (attempt === maxRetries) throw error;
 
-            const delay = Math.pow(2, attempt) * 1000;
-            logger.warn(`[GovernanceContractIndexer] Request failed, retrying after ${delay}ms: ${error}`);
-            await this.sleep(delay);
+                const delay = Math.pow(2, attempt) * 1000;
+                logger.warn(`[GovernanceContractIndexer] Request failed, retrying after ${delay}ms: ${error}`);
+                await this.sleep(delay);
             }
         }
             throw new Error(`Failed to fetch after ${maxRetries} attempts: ${url}`);
-        }
+    }
 
     private async sleep(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -482,17 +513,17 @@ export class GovernanceContractIndexer {
         logger.info(`[GovernanceContractIndexer] Saving to database: ${data.proposals.length} proposals, ${data.votes.length} votes, ${data.upvotes.length} upvotes, ${data.promotions.length} promotions`);
 
         try {
-        await this.database.upsertProposals(data.proposals);
-        await this.database.upsertVotes(data.votes);
-        await this.database.upsertUpvotes(data.upvotes);
-        await this.database.upsertPromotions(data.promotions);
-        await this.database.upsertContracts(data.contracts);
-        await this.database.upsertPeriods(data.periods);
+            await this.database.upsertProposals(data.proposals);
+            await this.database.upsertVotes(data.votes);
+            await this.database.upsertUpvotes(data.upvotes);
+            await this.database.upsertPromotions(data.promotions);
+            await this.database.upsertContracts(data.contracts);
+            await this.database.upsertPeriods(data.periods);
 
-        logger.info('[GovernanceContractIndexer] Successfully saved all data to database');
+            logger.info('[GovernanceContractIndexer] Successfully saved all data to database');
         } catch (error) {
-        logger.error(`[GovernanceContractIndexer] Error saving to database: ${error}`);
-        throw error;
+            logger.error(`[GovernanceContractIndexer] Error saving to database: ${error}`);
+            throw error;
         }
     }
 }

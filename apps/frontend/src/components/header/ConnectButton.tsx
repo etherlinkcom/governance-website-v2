@@ -85,6 +85,7 @@ export const ConnectButton = observer(({ sx }: ConnectButtonProps) => {
         maxWidth="xs"
         fullWidth
         autoFocus
+        aria-hidden='false'
       >
         <DialogTitle>
           Wallet Info
