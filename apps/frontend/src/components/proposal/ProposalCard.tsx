@@ -19,16 +19,7 @@ export const ProposalCard = ({ proposal, isCurrent }: ProposalCardProps) => {
   return (
     <>
     <Card
-      sx={(theme) => ({
-        mx: 1,
-        position: "relative",
-        transition: "background 0.2s",
-        cursor: "pointer",
-        "&:hover .upvote-overlay": {
-          opacity: 0.9,
-          transform: "translateX(0)"
-        },
-      })}
+      sx={(theme) => ({mx: 1})}
     >
       <CardContent sx={{ p: 3 }}>
         <Box

@@ -8,6 +8,7 @@ export class WalletStore {
   address: string | null = null;
   balance: number = 0;
   votingPower: number = 0;
+  voting: boolean = false;
 
   private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
   private wallet: BeaconWallet;
@@ -152,6 +153,8 @@ export class WalletStore {
   }
 
   async vote(contractAddress: string, voteType: VoteOption) {
+    if (this.voting) return;
+    this.voting = true;
     try {
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.vote(voteType).send();
@@ -159,17 +162,35 @@ export class WalletStore {
       return operation.opHash;
     } catch (error) {
       console.error(`Error voting ${voteType} for ${contractAddress}: ${error}`);
+    } finally {
+      this.voting = false;
     }
   }
 
-  async upvoteProposal(contractAddress: string, proposalHash: string) {
+  async upvoteProposal(contractAddress: string, proposal: string) {
+    if (this.voting) return;
+    this.voting = true;
     try {
       const contract = await this.Tezos.wallet.at(contractAddress);
-      const operation = await contract.methodsObject.upvote_proposal(proposalHash).send();
+      let sequencerProposal;
+
+      try {
+        const parsed = JSON.parse(proposal);
+        if (parsed && parsed.sequencer_pk && parsed.pool_address) {
+          sequencerProposal = {
+            sequencer_pk: parsed.sequencer_pk,
+            pool_address: '0x' + parsed.pool_address,
+          };
+        }
+      } catch {}
+
+      const operation = await contract.methodsObject.upvote_proposal(sequencerProposal ?? proposal).send();
       await operation.confirmation();
       return operation.opHash;
     } catch (error) {
       console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
+    } finally {
+      this.voting = false;
     }
   }
 }

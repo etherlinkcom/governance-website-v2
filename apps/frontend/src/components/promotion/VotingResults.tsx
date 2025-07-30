@@ -1,9 +1,11 @@
-import { Box, Card, CardContent } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, RadioGroup, FormControlLabel, Radio, Card, CardContent } from '@mui/material';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { VoteResultCard } from '@/components/promotion/VoteResultCard';
 import { observer } from 'mobx-react-lite';
 import { Promotion } from '@trilitech/types';
 import { contractStore } from '@/stores/ContractStore';
+import { getWalletStore } from '@/stores/WalletStore';
 
 export const VotingResultsSkeleton = () => {
   return (
@@ -25,6 +27,10 @@ interface VotingResultsProps {
 
 export const VotingResults = observer(({ contractVotingIndex, contractAddress, promotionHash }: VotingResultsProps) => {
   const { votes, promotions, isLoading, error, hasValidParams } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
+  const walletStore = getWalletStore();
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedVote, setSelectedVote] = useState<'yea' | 'nay' | 'pass'>('yea');
 
   if (!hasValidParams) {
     return (
@@ -80,32 +86,49 @@ export const VotingResults = observer(({ contractVotingIndex, contractAddress, p
   const nayPercentage = totalVotes > 0 ? ((nayVotes / totalVotes) * 100).toFixed(2) : "0";
   const passPercentage = totalVotes > 0 ? ((passVotes / totalVotes) * 100).toFixed(2) : "0";
 
+  const handleVoteSubmit = () => {
+    walletStore?.vote(contractAddress!, selectedVote);
+    setDialogOpen(false);
+  };
+
   return (
-    <Box sx={{
+    <>
+      <Box sx={{
         display: 'flex',
         gap: 2,
         my: 4,
         flexDirection: { xs: 'column', sm: 'row' },
         justifyContent: 'space-between'
-        }}>
-      <VoteResultCard
-        type="yea"
-        percentage={yeaPercentage}
-        count={yeaVotes}
-        label="Yea"
-      />
-      <VoteResultCard
-        type="nay"
-        percentage={nayPercentage}
-        count={nayVotes}
-        label="Nay"
-      />
-      <VoteResultCard
-        type="pass"
-        percentage={passPercentage}
-        count={passVotes}
-        label="Pass"
-      />
-    </Box>
+      }}>
+        <VoteResultCard type="yea" percentage={yeaPercentage} count={yeaVotes} label="Yea" />
+        <VoteResultCard type="nay" percentage={nayPercentage} count={nayVotes} label="Nay" />
+        <VoteResultCard type="pass" percentage={passPercentage} count={passVotes} label="Pass" />
+      </Box>
+      <Button
+        variant="contained"
+        color="primary"
+        sx={{ mt: 2, width: {xs: '100%', sm: '100px'} }}
+        onClick={() => setDialogOpen(true)}
+      >
+        Vote
+      </Button>
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <DialogTitle>Cast Your Vote</DialogTitle>
+        <DialogContent>
+          <RadioGroup
+            value={selectedVote}
+            onChange={e => setSelectedVote(e.target.value as 'yea' | 'nay' | 'pass')}
+          >
+            <FormControlLabel value="yea" control={<Radio />} label="Yea" />
+            <FormControlLabel value="nay" control={<Radio />} label="Nay" />
+            <FormControlLabel value="pass" control={<Radio />} label="Pass" />
+          </RadioGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="primary" onClick={handleVoteSubmit}>Submit Vote</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 });
