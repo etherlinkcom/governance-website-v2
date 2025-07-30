@@ -5,12 +5,17 @@ import { HashDisplay } from "@/components/shared/HashDisplay";
 import { formatNumber } from "@/lib/formatNumber";
 import { HashLink } from "@/components/shared/HashLink";
 import { EllipsisBox } from "../shared/EllipsisBox";
+import { getWalletStore } from "@/stores/WalletStore";
 
 interface ProposalCardProps {
   proposal: Proposal;
+  isCurrent?: boolean;
 }
 
-export const ProposalCard = ({ proposal }: ProposalCardProps) => {
+export const ProposalCard = ({ proposal, isCurrent }: ProposalCardProps) => {
+
+  const walletStore = getWalletStore()
+
   return (
     <>
     <Card
@@ -73,52 +78,19 @@ export const ProposalCard = ({ proposal }: ProposalCardProps) => {
             </Typography>
           </Box>
         </Box>
-        <Box
-          className="upvote-overlay"
-          sx={(theme) => ({
-        width: "50%",
-        height: "100%",
-        position: "absolute",
-        top: 0,
-        right: 0,
-        zIndex: 2,
-        background: theme.palette.background.paper,
-        color: theme.palette.primary.main,
-        borderRadius: '25px',
-        boxShadow: 2,
-        fontWeight: 600,
-        opacity: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        transition: "opacity 0.2s, transform 0.3s cubic-bezier(.4,0,.2,1)",
-        transform: "translateX(100%)",
-        pointerEvents: "none",
-          })}
-        >
-          Upvote
-        </Box>
-        <Typography
-          variant="caption"
-          sx={{
-            display: { xs: "block", sm: "none" },
-            textAlign: "center",
-            color: "primary.main",
-            mt: 1,
-          }}
-        >
-          Tap to upvote
-        </Typography>
       </CardContent>
     </Card>
+    {
+      isCurrent &&
       <Button
         variant="contained"
         color="primary"
         sx={{ mx: 2, mb: 2, justifySelf: "flex-end", width: { xs: 'auto', sm: '100px' } }}
-        onClick={() => console.log("Upvote clicked")}
+        onClick={() => walletStore?.upvoteProposal(proposal.contract_address, proposal.proposal_hash)}
       >
         Upvote
       </Button>
+    }
       </>
   );
 };

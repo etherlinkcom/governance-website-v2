@@ -53,9 +53,7 @@ interface PeriodsListProps {
 }
 
 export const PeriodsList = observer(({ periods, isLoading }: PeriodsListProps) => {
-  if (isLoading) {
-    return <PeriodsListSkeleton />;
-  }
+  if (isLoading) return <PeriodsListSkeleton />;
 
   if (periods.length === 0) {
     return (

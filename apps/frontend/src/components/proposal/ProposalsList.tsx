@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { ProposalCard } from '@/components/proposal/ProposalCard';
@@ -10,7 +10,6 @@ import { contractStore } from '@/stores/ContractStore';
 const ProposalsListSkeleton = () => (
   <Box>
     <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', mb: 2 }}>
-      {/* <ComponentLoading width={120} height={32} /> */}
       <ComponentLoading width={80} height={24} />
     </Box>
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -27,9 +26,16 @@ interface ProposalsListProps {
 }
 
 export const ProposalsList = observer(({ contractVotingIndex, contractAddress }: ProposalsListProps) => {
-  const { proposals, proposalsPeriodData, isLoading, error, hasValidParams, contractAndConfig } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
+  const {
+    proposals,
+    proposalsPeriodData,
+    isLoading,
+    error,
+    hasValidParams,
+    contractAndConfig
+  } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
+  const isCurrent = contractVotingIndex === contractStore.currentPeriodIndex;
 
-  const theme = useTheme();
   const totalProposalUpvotes = proposals.map((e: Proposal) => e.upvotes).reduce((a: number, b: number) => a + b, 0);
   if (!hasValidParams) {
     return (
@@ -90,6 +96,7 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
             <ProposalCard
               key={i}
               proposal={proposal}
+              isCurrent={isCurrent}
             />
           ))
         ) : (

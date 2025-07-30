@@ -316,6 +316,10 @@ class ContractStore {
     return this.periodDetailsErrors[contractAddress]?.[periodIndex] || null;
   }
 
+  get currentPeriodIndex(): number | undefined {
+    return this.allPeriods.find((period: Period) => period.period_class === 'current')?.contract_voting_index;
+  }
+
   public getPeriodData = (
     contractAddress?: string,
     contractVotingIndex?: number,

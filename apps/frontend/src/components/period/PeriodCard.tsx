@@ -144,7 +144,7 @@ const renderHash = (hash: PayloadKey) => {
                   Promotion:
                 </Typography>
                 <EllipsisBox>
-                {renderHash(period.promotion_hash || '')}
+                  {renderHash(period.promotion_hash || '')}
                 </EllipsisBox>
               </Box>
             )}
