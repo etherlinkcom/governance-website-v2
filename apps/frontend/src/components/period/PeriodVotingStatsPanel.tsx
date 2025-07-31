@@ -68,22 +68,16 @@ export const PeriodVotingStatsPanel = ({
                 contractAndConfig?.promotion_supermajority || 0
               }
             />
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Box>
+            <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between" }}>
                 <Typography sx={{ color: `${theme.palette.success.main} !important` }}>
-                  Yea: {((promotions[0].yea_voting_power / totalVotingPower) * 100).toFixed(1)}%
+                  Yea: {((promotions[0].yea_voting_power / totalVotingPower) * 100).toFixed(0)}%
                 </Typography>
-              </Box>
-              <Box>
                 <Typography sx={{ color: `${theme.palette.error.main} !important` }}>
-                  Nay: {((promotions[0].nay_voting_power / promotions[0].total_voting_power) * 100).toFixed(1)}%
+                  Nay: {((promotions[0].nay_voting_power / promotions[0].total_voting_power) * 100).toFixed(0)}%
                 </Typography>
-              </Box>
-              <Box>
                 <Typography sx={{ color: `${theme.palette.warning.main} !important` }}>
-                  Pass: {((promotions[0].pass_voting_power / totalVotingPower) * 100).toFixed(1)}%
+                  Pass: {((promotions[0].pass_voting_power / totalVotingPower) * 100).toFixed(0)}%
                 </Typography>
-              </Box>
             </Box>
           </>
         ) : null}
