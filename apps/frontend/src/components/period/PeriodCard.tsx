@@ -8,10 +8,10 @@ import { HashDisplay } from '@/components/shared/HashDisplay';
 import { HashLink } from '@/components/shared/HashLink';
 import { PayloadKey } from '@/data/proposalLinks';
 import { getLinkData } from '@/lib/getLinkData';
-import { EllipsisBox } from '@/components/shared/EllipsisBox';
 import { contractStore } from '@/stores/ContractStore';
 import { observer } from 'mobx-react-lite';
-import { PeriodVotingStatsPanel } from './PeriodVotingStatsPanel';
+import { PeriodVotingStatsPanel } from '@/components/period/PeriodVotingStatsPanel';
+import { PeriodMetadata } from '@/components/period/PeriodMetadata';
 
 interface PeriodCardProps {
   period: Period;
@@ -98,78 +98,12 @@ const renderHash = (hash: PayloadKey) => {
           />
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="body2" sx={{ mb: 1, display: 'block' }}>
-                Period {period.contract_voting_index}{' '}
-                {isCurrentPeriod && (
-                    <Chip
-                      component='span'
-                      label="Current"
-                      color="primary"
-                      variant="filled"
-                      size="small"
-                      sx={{ mt: -0.5, ml: 1 }}
-                    />
-                  )}
-              </Typography>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Levels: {period.level_start.toLocaleString()} - {period.level_end.toLocaleString()}
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', sm: 'none' }, mb:2 }}>
-                {formatDate(period.date_start, false)} - {formatDate(period.date_end, false)}
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' }, mb:2 }}>
-                Start {formatDate(period.date_start)} - End {formatDate(period.date_end)}
-              </Typography>
-
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-                {hasProposals && (
-                  <Chip
-                    label={`${period.proposal_hashes?.length} Proposal`}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                  />
-                )}
-                {hasPromotion && (
-                  <Chip
-                    label="Promotion"
-                    size="small"
-                    color="secondary"
-                    variant="outlined"
-                  />
-                )}
-                {!hasProposals && !hasPromotion && (
-                  <Typography variant="body1" color="text.secondary">
-                    No Proposals or Promotions for current period
-                  </Typography>
-                )}
-              </Box>
-
-              {hasProposals && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    Proposals:
-                  </Typography>
-                  {period.proposal_hashes?.map((hash, index) => (
-                    <EllipsisBox key={index}>
-                      {renderHash(hash)}
-                    </EllipsisBox>
-                  ))}
-                </Box>
-              )}
-
-              {hasPromotion && (
-                <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  Promotion:
-                </Typography>
-                <EllipsisBox>
-                {renderHash(period.promotion_hash || '')}
-                </EllipsisBox>
-              </Box>
-              )}
-            </Box>
+            <PeriodMetadata
+              period={period}
+              hasProposals={hasProposals}
+              hasPromotion={hasPromotion}
+              renderHash={renderHash}
+            />
           </Box>
         </CardContent>
       </Card>
