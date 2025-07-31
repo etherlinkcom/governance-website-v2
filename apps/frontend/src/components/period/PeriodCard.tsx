@@ -12,6 +12,7 @@ import { EllipsisBox } from '@/components/shared/EllipsisBox';
 import { contractStore } from '@/stores/ContractStore';
 import { observer } from 'mobx-react-lite';
 import { PromotionVotingStats, ProposalVotingStats } from '../shared/VotingStats';
+import { ComponentLoading } from '@/components/shared/ComponentLoading';
 
 interface PeriodCardProps {
   period: Period;
@@ -26,8 +27,7 @@ export const PeriodCard = observer(({ period }: PeriodCardProps) => {
   const hasProposals = period.proposal_hashes && period.proposal_hashes.length > 0;
   const hasPromotion = period.promotion_hash;
 
-  // TODO only one promotion per period
-  const { proposals, promotions, contractAndConfig } = contractStore.getPeriodData(
+  const { proposals, promotions, contractAndConfig, isLoading } = contractStore.getPeriodData(
     period.contract_address,
     period.contract_voting_index,
     hasProposals,
@@ -88,42 +88,53 @@ const renderHash = (hash: PayloadKey) => {
         }}
       >
         <CardContent sx={{ p: 3, position: 'relative' }}>
-          {hasPromotion && promotions[0] && (
-            <Box
-              sx={{
-                position: 'absolute',
-                right: 24,
-                display: { xs: 'none', md: 'block' },
-              }}
-            >
-              <PromotionVotingStats
-                yeaVotingPower={promotions[0].yea_voting_power || 0}
-                nayVotingPower={promotions[0].nay_voting_power || 0}
-                passVotingPower={promotions[0].pass_voting_power || 0}
-                totalVotingPower={promotions[0].total_voting_power || 0}
-                contractQuorum={contractAndConfig?.promotion_quorum || 0}
-                contractSupermajority={contractAndConfig?.promotion_supermajority || 0}
-              />
-            </Box>
-          )}
+          {hasPromotion && (
+    <Box
+      sx={{
+        position: 'absolute',
+        right: 24,
+        display: { xs: 'none', md: 'block' },
+      }}
+    >
+      {isLoading ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <ComponentLoading width='240px' borderRadius={2} sx={{mt:1}} />
+          <ComponentLoading width='240px' borderRadius={2} />
+        </Box>
+      ) : promotions[0] ? (
+        <PromotionVotingStats
+          yeaVotingPower={promotions[0].yea_voting_power || 0}
+          nayVotingPower={promotions[0].nay_voting_power || 0}
+          passVotingPower={promotions[0].pass_voting_power || 0}
+          totalVotingPower={promotions[0].total_voting_power || 0}
+          contractQuorum={contractAndConfig?.promotion_quorum || 0}
+          contractSupermajority={contractAndConfig?.promotion_supermajority || 0}
+        />
+      ) : null}
+    </Box>
+  )}
 
 
-          {(hasProposals && proposals[0]) && (
-            <Box
-              sx={{
-                position: 'absolute',
-                right: 24,
-                display: { xs: 'none', md: 'block' },
-                width: '240px'
-              }}
-            >
-              <ProposalVotingStats
-                proposals={proposals}
-                totalVotingPower={period.total_voting_power}
-                contractQuorum={contractAndConfig?.proposal_quorum || 0}
-              />
-            </Box>
-          )}
+          {hasProposals && (
+    <Box
+      sx={{
+        position: 'absolute',
+        right: 24,
+        display: { xs: 'none', md: 'block' },
+        width: '240px'
+      }}
+    >
+      {isLoading ? (
+        <ComponentLoading width='240px' sx={{mt:2}}/>
+      ) : proposals[0] ? (
+        <ProposalVotingStats
+          proposals={proposals}
+          totalVotingPower={period.total_voting_power}
+          contractQuorum={contractAndConfig?.proposal_quorum || 0}
+        />
+      ) : null}
+    </Box>
+  )}
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
             <Box sx={{ flex: 1 }}>

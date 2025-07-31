@@ -1,15 +1,17 @@
-import { Box, useTheme, alpha } from '@mui/material';
+import { Box, useTheme, alpha, SxProps } from '@mui/material';
 
 interface ComponentLoadingProps {
   width?: string | number;
   height?: number;
   borderRadius?: number;
+  sx?: SxProps;
 }
 
 export const ComponentLoading = ({
   width = '100%',
   height = 20,
-  borderRadius = 1
+  borderRadius = 1,
+  sx
 }: ComponentLoadingProps) => {
   const theme = useTheme();
 
@@ -29,6 +31,7 @@ export const ComponentLoading = ({
             opacity: 0.5,
           },
         },
+        ...sx
       }}
     />
   );
