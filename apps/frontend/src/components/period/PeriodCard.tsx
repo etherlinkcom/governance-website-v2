@@ -11,8 +11,7 @@ import { getLinkData } from '@/lib/getLinkData';
 import { EllipsisBox } from '@/components/shared/EllipsisBox';
 import { contractStore } from '@/stores/ContractStore';
 import { observer } from 'mobx-react-lite';
-import { PromotionVotingStats, ProposalVotingStats } from '../shared/VotingStats';
-import { ComponentLoading } from '@/components/shared/ComponentLoading';
+import { PeriodVotingStatsPanel } from './PeriodVotingStatsPanel';
 
 interface PeriodCardProps {
   period: Period;
@@ -88,53 +87,15 @@ const renderHash = (hash: PayloadKey) => {
         }}
       >
         <CardContent sx={{ p: 3, position: 'relative' }}>
-          {hasPromotion && (
-    <Box
-      sx={{
-        position: 'absolute',
-        right: 24,
-        display: { xs: 'none', md: 'block' },
-      }}
-    >
-      {isLoading ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <ComponentLoading width='240px' borderRadius={2} sx={{mt:1}} />
-          <ComponentLoading width='240px' borderRadius={2} />
-        </Box>
-      ) : promotions[0] ? (
-        <PromotionVotingStats
-          yeaVotingPower={promotions[0].yea_voting_power || 0}
-          nayVotingPower={promotions[0].nay_voting_power || 0}
-          passVotingPower={promotions[0].pass_voting_power || 0}
-          totalVotingPower={promotions[0].total_voting_power || 0}
-          contractQuorum={contractAndConfig?.promotion_quorum || 0}
-          contractSupermajority={contractAndConfig?.promotion_supermajority || 0}
-        />
-      ) : null}
-    </Box>
-  )}
-
-
-          {hasProposals && (
-    <Box
-      sx={{
-        position: 'absolute',
-        right: 24,
-        display: { xs: 'none', md: 'block' },
-        width: '240px'
-      }}
-    >
-      {isLoading ? (
-        <ComponentLoading width='240px' sx={{mt:2}}/>
-      ) : proposals[0] ? (
-        <ProposalVotingStats
-          proposals={proposals}
-          totalVotingPower={period.total_voting_power}
-          contractQuorum={contractAndConfig?.proposal_quorum || 0}
-        />
-      ) : null}
-    </Box>
-  )}
+          <PeriodVotingStatsPanel
+            hasPromotion={hasPromotion}
+            hasProposals={hasProposals}
+            promotions={promotions}
+            proposals={proposals}
+            contractAndConfig={contractAndConfig}
+            isLoading={isLoading}
+            period={period}
+          />
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
             <Box sx={{ flex: 1 }}>
