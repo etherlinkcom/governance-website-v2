@@ -98,12 +98,7 @@ export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, p
         }}
       >
         {/* Left side - Candidate info */}
-        <EllipsisBox sx={{
-          flex: 1,
-          minWidth: 0,
-          overflow: 'hidden',
-          maxWidth: '100%',
-        }}>
+        <EllipsisBox sx={{ maxWidth: '100%' }}>
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
             Candidate:
           </Typography>
@@ -122,12 +117,14 @@ export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, p
             value={promotionQuorum.toFixed(2)}
             required={contractQuorum}
             progress={quorumProgess}
+            variant='body1'
           />
           <VotingProgress
             label="Supermajority"
             value={promotionSupermajority.toString()}
             required={contractSupermajority}
             progress={supermajorityProgress}
+            variant="body1"
           />
         </Box>
       </Box>

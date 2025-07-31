@@ -6,6 +6,7 @@ interface VotingProgressProps {
   value: string;
   required: number;
   progress: number;
+  variant?: 'subtitle1' | 'body1';
 }
 
 export const VotingProgress = ({
@@ -13,6 +14,7 @@ export const VotingProgress = ({
   value,
   required,
   progress,
+  variant = 'subtitle1'
 }: VotingProgressProps) => {
     const theme = useTheme();
   const baseColor = theme.palette.primary.main;
@@ -32,9 +34,9 @@ export const VotingProgress = ({
     >
       <Tooltip title={`Current Voting Power: ${value}% / ${required}%`} placement="top" arrow={true}>
        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-        <Typography variant="body1">{label}</Typography>
+        <Typography variant={variant}>{label}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body1">{value}% / {required}%</Typography>
+          <Typography variant={variant}>{value}% / {required}%</Typography>
           <InfoIcon className="info-icon" color={baseColor} />
         </Box>
       </Box>

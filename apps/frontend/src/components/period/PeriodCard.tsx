@@ -9,12 +9,15 @@ import { HashLink } from '@/components/shared/HashLink';
 import { PayloadKey } from '@/data/proposalLinks';
 import { getLinkData } from '@/lib/getLinkData';
 import { EllipsisBox } from '@/components/shared/EllipsisBox';
+import { contractStore } from '@/stores/ContractStore';
+import { observer } from 'mobx-react-lite';
+import { PromotionVotingStats, ProposalVotingStats } from '../shared/VotingStats';
 
 interface PeriodCardProps {
   period: Period;
 }
 
-export const PeriodCard = ({ period }: PeriodCardProps) => {
+export const PeriodCard = observer(({ period }: PeriodCardProps) => {
   const theme = useTheme();
   const [modalOpen, setModalOpen] = useState(false);
   const isCurrentPeriod = period.period_class === 'current';
@@ -22,6 +25,14 @@ export const PeriodCard = ({ period }: PeriodCardProps) => {
 
   const hasProposals = period.proposal_hashes && period.proposal_hashes.length > 0;
   const hasPromotion = period.promotion_hash;
+
+  // TODO only one promotion per period
+  const { proposals, promotions, contractAndConfig } = contractStore.getPeriodData(
+    period.contract_address,
+    period.contract_voting_index,
+    hasProposals,
+    hasPromotion ? true : false
+  );
 
   const handleCardClick = () => {
     if (hasProposals || hasPromotion) {
@@ -63,83 +74,121 @@ const renderHash = (hash: PayloadKey) => {
 
   return (
     <>
-    <Card
-      onClick={handleCardClick}
-      sx={{
-        ...(isCurrentPeriod && {
-          border: '2px solid',
-          borderColor: 'primary.main',
-          boxShadow: `0px 0px 15px 3px ${theme.palette.primary.main}30`,
-        }),
-        transition: 'all 0.3s ease-in-out',
-        cursor: hasProposals || hasPromotion ? 'pointer' : 'default',
-      }}
-    >
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="body2" sx={{ mb: 1, display: 'block' }}>
-              Period {period.contract_voting_index}{' '}
-            {isCurrentPeriod && (
-                <Chip
-                  component='span'
-                  label="Current"
-                  color="primary"
-                  variant="filled"
-                  size="small"
-                  sx={{ mt: -0.5, ml: 1 }}
-                />
-              )}
-            </Typography>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Levels: {period.level_start.toLocaleString()} - {period.level_end.toLocaleString()}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', sm: 'none' }, mb:2 }}>
-              {formatDate(period.date_start, false)} - {formatDate(period.date_end, false)}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' }, mb:2 }}>
-              Start {formatDate(period.date_start)} - End {formatDate(period.date_end)}
-            </Typography>
-
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-              {hasProposals && (
-                <Chip
-                  label={`${period.proposal_hashes?.length} Proposal`}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-              {hasPromotion && (
-                <Chip
-                  label="Promotion"
-                  size="small"
-                  color="secondary"
-                  variant="outlined"
-                />
-              )}
-              {!hasProposals && !hasPromotion && (
-                <Typography variant="body1" color="text.secondary">
-                  No Proposals or Promotions for current period
-                </Typography>
-              )}
+      <Card
+        onClick={handleCardClick}
+        sx={{
+          ...(isCurrentPeriod && {
+            border: '2px solid',
+            borderColor: 'primary.main',
+            boxShadow: `0px 0px 15px 3px ${theme.palette.primary.main}30`,
+          }),
+          transition: 'all 0.3s ease-in-out',
+          cursor: hasProposals || hasPromotion ? 'pointer' : 'default',
+          position: 'relative',
+        }}
+      >
+        <CardContent sx={{ p: 3, position: 'relative' }}>
+          {hasPromotion && promotions[0] && (
+            <Box
+              sx={{
+                position: 'absolute',
+                right: 24,
+                display: { xs: 'none', md: 'block' },
+              }}
+            >
+              <PromotionVotingStats
+                yeaVotingPower={promotions[0].yea_voting_power || 0}
+                nayVotingPower={promotions[0].nay_voting_power || 0}
+                passVotingPower={promotions[0].pass_voting_power || 0}
+                totalVotingPower={promotions[0].total_voting_power || 0}
+                contractQuorum={contractAndConfig?.promotion_quorum || 0}
+                contractSupermajority={contractAndConfig?.promotion_supermajority || 0}
+              />
             </Box>
+          )}
 
-            {hasProposals && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  Proposals:
-                </Typography>
-                {period.proposal_hashes?.map((hash, index) => (
-                  <EllipsisBox key={index}>
-                    {renderHash(hash)}
-                  </EllipsisBox>
-                ))}
+
+          {(hasProposals && proposals[0]) && (
+            <Box
+              sx={{
+                position: 'absolute',
+                right: 24,
+                display: { xs: 'none', md: 'block' },
+                width: '240px'
+              }}
+            >
+              <ProposalVotingStats
+                proposals={proposals}
+                totalVotingPower={period.total_voting_power}
+                contractQuorum={contractAndConfig?.proposal_quorum || 0}
+              />
+            </Box>
+          )}
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="body2" sx={{ mb: 1, display: 'block' }}>
+                Period {period.contract_voting_index}{' '}
+                {isCurrentPeriod && (
+                    <Chip
+                      component='span'
+                      label="Current"
+                      color="primary"
+                      variant="filled"
+                      size="small"
+                      sx={{ mt: -0.5, ml: 1 }}
+                    />
+                  )}
+              </Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                Levels: {period.level_start.toLocaleString()} - {period.level_end.toLocaleString()}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', sm: 'none' }, mb:2 }}>
+                {formatDate(period.date_start, false)} - {formatDate(period.date_end, false)}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' }, mb:2 }}>
+                Start {formatDate(period.date_start)} - End {formatDate(period.date_end)}
+              </Typography>
+
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                {hasProposals && (
+                  <Chip
+                    label={`${period.proposal_hashes?.length} Proposal`}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
+                {hasPromotion && (
+                  <Chip
+                    label="Promotion"
+                    size="small"
+                    color="secondary"
+                    variant="outlined"
+                  />
+                )}
+                {!hasProposals && !hasPromotion && (
+                  <Typography variant="body1" color="text.secondary">
+                    No Proposals or Promotions for current period
+                  </Typography>
+                )}
               </Box>
-            )}
 
-            {hasPromotion && (
-              <Box>
+              {hasProposals && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    Proposals:
+                  </Typography>
+                  {period.proposal_hashes?.map((hash, index) => (
+                    <EllipsisBox key={index}>
+                      {renderHash(hash)}
+                    </EllipsisBox>
+                  ))}
+                </Box>
+              )}
+
+              {hasPromotion && (
+                <Box>
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Promotion:
                 </Typography>
@@ -147,17 +196,16 @@ const renderHash = (hash: PayloadKey) => {
                 {renderHash(period.promotion_hash || '')}
                 </EllipsisBox>
               </Box>
-            )}
+              )}
+            </Box>
           </Box>
-        </Box>
-      </CardContent>
-    </Card>
-
+        </CardContent>
+      </Card>
       <PeriodDetailsModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         period={period}
       />
-      </>
+    </>
   );
-};
+});
