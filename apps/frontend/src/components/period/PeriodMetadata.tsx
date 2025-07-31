@@ -1,19 +1,27 @@
-import { Box, Typography, Chip } from "@mui/material";
+import { Box, Typography, Chip, SxProps } from "@mui/material";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
-import { Period } from "@trilitech/types";
+import { Period, Proposal } from "@trilitech/types";
 import { JSX } from "react";
 import { formatDate } from "@/lib/formatDate";
+import { formatNumber } from "@/lib/formatNumber";
+import { ComponentLoading } from "../shared/ComponentLoading";
 
 interface PeriodMetadataProps {
   period: Period;
+  proposals?: Proposal[];
   hasProposals?: boolean;
   hasPromotion?: string;
+  isLoading?: boolean;
+  nextPeriodsPromotionHash?: string;
   renderHash: (hash: string) => JSX.Element;
 }
 export const PeriodMetadata = ({
   period,
+  proposals,
   hasProposals,
   hasPromotion,
+  isLoading,
+  nextPeriodsPromotionHash,
   renderHash,
 }: PeriodMetadataProps) => (
   <Box sx={{ flex: 1 }}>
@@ -79,8 +87,31 @@ export const PeriodMetadata = ({
         <Typography variant="subtitle2" sx={{ mb: 1 }}>
           Proposals:
         </Typography>
-        {period.proposal_hashes?.map((hash, index) => (
-          <EllipsisBox key={index}>{renderHash(hash)}</EllipsisBox>
+        {period.proposal_hashes?.map((hash: string, index) => (
+          <Box
+            key={index}
+            sx={{
+              justifyContent: "space-between",
+              display: "flex",
+              width: '100%' ,
+              alignItems: "center",
+              }}>
+            <EllipsisBox
+              sx={{maxWidth: '65vw'}}>
+                {renderHash(hash)}
+              </EllipsisBox>
+            <Box sx={{display: {xs: 'none', md: 'block', wordBreak: 'nobreak'}}}>
+              {isLoading ? (
+                <ComponentLoading width="115px"/>
+              ) : (
+                proposals && proposals[index] && (
+                  <Typography variant="body2" sx={{ wordWrap: 'normal', whiteSpace: 'nowrap', ml: 2}}>
+                  {formatNumber(proposals[index].upvotes)} Upvotes
+                </Typography>
+              )
+            )}
+          </Box>
+          </Box>
         ))}
       </Box>
     )}

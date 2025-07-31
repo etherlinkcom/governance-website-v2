@@ -1,5 +1,5 @@
 import { Card, CardContent, Box, Typography, Chip } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { SxProps, useTheme } from '@mui/material/styles';
 import { Period } from '@trilitech/types';
 import { useState } from 'react';
 import { PeriodDetailsModal } from './PeriodDetailsModal';
@@ -33,17 +33,25 @@ export const PeriodCard = observer(({ period }: PeriodCardProps) => {
     hasPromotion ? true : false
   );
 
+  let nextPeriodsPromotionHash = '';
+  if (hasProposals) {
+    nextPeriodsPromotionHash = contractStore.promotionsForPeriod(
+      period.contract_address,
+      period.contract_voting_index + 1
+    )?.[0]?.proposal_hash;
+  }
+
   const handleCardClick = () => {
     if (hasProposals || hasPromotion) {
       setModalOpen(true);
     }
   };
 
-const renderHash = (hash: PayloadKey) => {
-  const linkData = getLinkData(hash);
-  if (linkData) return <HashLink hash={hash} />;
-  return <HashDisplay hash={hash} />;
-}
+  const renderHash = (hash: PayloadKey) => {
+    const linkData = getLinkData(hash);
+    if (linkData) return <HashLink hash={hash} />;
+    return <HashDisplay hash={hash} />;
+  }
 
   if (isFuture) {
     return (
@@ -100,8 +108,11 @@ const renderHash = (hash: PayloadKey) => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
             <PeriodMetadata
               period={period}
+              proposals={proposals}
               hasProposals={hasProposals}
               hasPromotion={hasPromotion}
+              isLoading={isLoading}
+              nextPeriodsPromotionHash={nextPeriodsPromotionHash}
               renderHash={renderHash}
             />
           </Box>
