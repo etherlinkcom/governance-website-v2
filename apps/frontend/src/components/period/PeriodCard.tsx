@@ -2,7 +2,7 @@ import { Card, CardContent, Box, Typography, Chip } from '@mui/material';
 import { SxProps, useTheme } from '@mui/material/styles';
 import { Period } from '@trilitech/types';
 import { useState } from 'react';
-import { PeriodDetailsModal } from './PeriodDetailsModal';
+import { PeriodDetailsModal } from '@/components/period/PeriodDetailsModal';
 import { formatDate } from '@/lib/formatDate';
 import { HashDisplay } from '@/components/shared/HashDisplay';
 import { HashLink } from '@/components/shared/HashLink';
@@ -32,14 +32,6 @@ export const PeriodCard = observer(({ period }: PeriodCardProps) => {
     hasProposals,
     hasPromotion ? true : false
   );
-
-  let nextPeriodsPromotionHash = '';
-  if (hasProposals) {
-    nextPeriodsPromotionHash = contractStore.promotionsForPeriod(
-      period.contract_address,
-      period.contract_voting_index + 1
-    )?.[0]?.proposal_hash;
-  }
 
   const handleCardClick = () => {
     if (hasProposals || hasPromotion) {
@@ -112,7 +104,6 @@ export const PeriodCard = observer(({ period }: PeriodCardProps) => {
               hasProposals={hasProposals}
               hasPromotion={hasPromotion}
               isLoading={isLoading}
-              nextPeriodsPromotionHash={nextPeriodsPromotionHash}
               renderHash={renderHash}
             />
           </Box>

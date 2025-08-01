@@ -12,7 +12,6 @@ interface PeriodMetadataProps {
   hasProposals?: boolean;
   hasPromotion?: string;
   isLoading?: boolean;
-  nextPeriodsPromotionHash?: string;
   renderHash: (hash: string) => JSX.Element;
 }
 export const PeriodMetadata = ({
@@ -21,7 +20,6 @@ export const PeriodMetadata = ({
   hasProposals,
   hasPromotion,
   isLoading,
-  nextPeriodsPromotionHash,
   renderHash,
 }: PeriodMetadataProps) => (
   <Box sx={{ flex: 1 }}>
@@ -61,7 +59,7 @@ export const PeriodMetadata = ({
     <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
       {hasProposals && (
         <Chip
-          label={`${period.proposal_hashes?.length} Proposal`}
+          label={`${period.proposal_hashes?.length} Proposal${period.proposal_hashes?.length === 1 ? '' : 's'}`}
           size="small"
           color="primary"
           variant="outlined"
