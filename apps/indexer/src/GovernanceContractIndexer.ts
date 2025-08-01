@@ -153,7 +153,7 @@ export class GovernanceContractIndexer {
         }
     }
 
-    private async getDateFromLevel(level: number): Promise<Date> {
+    public async getDateFromLevel(level: number): Promise<Date> {
         logger.info(`[GovernanceContractIndexer] getDateFromLevel(${level})`);
             const utc = await this.fetchJson<string>(`${this.tzkt_api_url}/blocks/${level}/timestamp`);
             return new Date(utc);
@@ -191,6 +191,7 @@ export class GovernanceContractIndexer {
                 date_start: date_start,
                 date_end: date_end,
                 total_voting_power: total_voting_power,
+                max_upvotes_voting_power: 0
             };
             periods[period.contract_voting_index] = period;
         }
