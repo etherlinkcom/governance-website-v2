@@ -355,15 +355,15 @@ class ContractStore {
       promotionsPeriod = contractVotingIndex;
     }
 
-    const contractAndConfig = this.contracts.find(c => c.contract_address === contractAddress);
-    const allPeriods = this.periodsForContract(contractAddress);
-    const proposalsPeriodData = allPeriods.find(p => p.contract_voting_index === proposalsPeriod) || null;
-    const promotionsPeriodData = allPeriods.find(p => p.contract_voting_index === promotionsPeriod) || null;
-
     const proposals = this.proposalsForPeriod(contractAddress, proposalsPeriod);
     const promotions = this.promotionsForPeriod(contractAddress, promotionsPeriod);
     const upvoters = this.upvotesForPeriod(contractAddress, proposalsPeriod);
     const votes = this.votesForPeriod(contractAddress, promotionsPeriod);
+
+    const contractAndConfig = this.contracts.find(c => c.contract_address === contractAddress);
+    const allPeriods = this.periodsForContract(contractAddress);
+    const proposalsPeriodData = allPeriods.find(p => p.contract_voting_index === proposalsPeriod) || null;
+    const promotionsPeriodData = allPeriods.find(p => p.contract_voting_index === promotionsPeriod) || null;
 
     const isLoading = this.isPeriodDetailsLoading(contractAddress, proposalsPeriod) ||
                     this.isPeriodDetailsLoading(contractAddress, promotionsPeriod) ||

@@ -1,41 +1,45 @@
-import { Typography } from '@mui/material';
+import { Box, SxProps, Typography } from '@mui/material';
 import { PayloadKey } from '@/data/proposalLinks';
 import { parseSequencerKey } from '@/lib/getLinkData';
 
 interface HashDisplayProps {
   hash: PayloadKey;
-  enableEllipsis?: boolean;
+  sx?: SxProps
 }
 
 export const HashDisplay = ({
   hash,
+  sx
 }: HashDisplayProps) => {
+
   let displayValue: React.ReactNode;
+
   if (typeof hash === 'string') {
     const parsed = parseSequencerKey(hash);
     if (parsed) {
       displayValue = (
-        <>
-          <span>Pool Address: {parsed.poolAddress}</span>
+        <Box sx={{...sx}}>
+          <Box component="span">Pool Address: {parsed.poolAddress}</Box>
           <br />
-          <span>Sequencer Public Key: {parsed.sequencerPublicKey}</span>
-        </>
+          <Box component="span">Sequencer Public Key: {parsed.sequencerPublicKey}</Box>
+        </Box>
       );
     } else {
       displayValue = hash;
     }
+
   } else {
     displayValue = (
-      <>
-        <span>Pool Address: {hash.poolAddress ?? ''}</span>
+      <Box sx={{...sx}}>
+        <Box component="span">Pool Address: {hash.poolAddress ?? ''}</Box>
         <br />
-        <span>Sequencer Public Key: {hash.sequencerPublicKey ?? ''}</span>
-      </>
+        <Box component="span">Sequencer Public Key: {hash.sequencerPublicKey ?? ''}</Box>
+      </Box>
     );
   }
 
   return (
-    <Typography variant="body2" component="span" sx={{ wordBreak: 'break-all' }}>
+    <Typography variant="body2" component="span" sx={{ wordBreak: 'break-all', ...sx }}>
       {displayValue}
     </Typography>
   );

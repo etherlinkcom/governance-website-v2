@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { ProposalCard } from '@/components/proposal/ProposalCard';
@@ -29,8 +29,6 @@ interface ProposalsListProps {
 export const ProposalsList = observer(({ contractVotingIndex, contractAddress }: ProposalsListProps) => {
   const { proposals, proposalsPeriodData, isLoading, error, hasValidParams, contractAndConfig } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
 
-  const theme = useTheme();
-  const totalProposalUpvotes = proposals.map((e: Proposal) => e.upvotes).reduce((a: number, b: number) => a + b, 0);
   if (!hasValidParams) {
     return (
       <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
@@ -54,9 +52,9 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
     );
   }
 
+  const totalProposalUpvotes = proposals.map((e: Proposal) => e.upvotes).reduce((a: number, b: number) => a + b, 0);
   const quorumPercent = Number(getProposalQuorumPercent(totalProposalUpvotes, proposalsPeriodData?.total_voting_power));
   const contractQuorum = contractAndConfig?.proposal_quorum || 1;
-
   const progress = Math.min((quorumPercent / contractQuorum) * 100, 100);
 
   return (
@@ -80,6 +78,7 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
           value={quorumPercent.toFixed(2)}
           required={contractQuorum}
           progress={progress}
+          variant='body1'
         />
       </Box>
     </Box>
