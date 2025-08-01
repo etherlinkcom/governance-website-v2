@@ -1,5 +1,5 @@
 import { Card, CardContent, Box, Typography, Chip } from '@mui/material';
-import { SxProps, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import { Period } from '@trilitech/types';
 import { useState } from 'react';
 import { PeriodDetailsModal } from '@/components/period/PeriodDetailsModal';
