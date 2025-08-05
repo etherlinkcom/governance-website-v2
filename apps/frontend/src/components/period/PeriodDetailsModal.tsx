@@ -148,7 +148,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
           <IconButton
             onClick={onClose}
             sx={{
-              flexShrink: 0,
+                flexShrink: 0,
                 minWidth: 48,
                 width: 48,
                 height: 48,
@@ -212,7 +212,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
             value={activeTab}
             onChange={handleTabChange}
           >
-            {tabConfig.map((tab, idx) => (
+            {tabConfig.map((tab) => (
               <Tab
                 key={tab.label}
                 label={tab.label}

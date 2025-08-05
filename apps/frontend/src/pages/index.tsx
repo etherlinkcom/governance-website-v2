@@ -23,20 +23,6 @@ export default function Home() {
           offering high speed, scalability, ultra-low fees, and built-in MEV protection.
         </Typography>
 
-        <Box component="ul" sx={{ listStyleType: "disc", pl: 2 }}>
-          <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-            <strong>Decentralized:</strong> The decentralized sequencer reduces
-            the risk of centralized control and manipulation.
-          </Typography>
-          <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-            <strong>Secure:</strong> Built-in MEV protection protects users against
-            exploitation.
-          </Typography>
-          <Typography component="li" variant="body1" sx={{ mb: -1 }}>
-            <strong>Low fees:</strong> Think $0.01 per transaction, not $20.
-          </Typography>
-        </Box>
-
         <Typography variant="h2" component="h2">
           Etherlink governance
         </Typography>

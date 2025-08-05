@@ -9,9 +9,8 @@ import {
 } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { CopyButton } from "@/components/shared/CopyButton";
-import { formatNumber } from "@/lib/formatNumber";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
-import { getWalletStore, VotingPower } from "@/stores/WalletStore";
+import { getWalletStore } from "@/stores/WalletStore";
 import { observer } from "mobx-react-lite";
 
 interface WalletDialogProps {
