@@ -19,9 +19,8 @@ export default function Home() {
         </Typography>
 
         <Typography variant="body1">
-          Etherlink is an EVM-compatible layer-2 blockchain with a decentralized
-          sequencer, offering very low fees and MEV protection, powered by Tezos
-          Smart Rollup technology.
+          Etherlink is an EVM-compatible layer-2 built directly into the Tezos blockchain,
+          offering high speed, scalability, ultra-low fees, and built-in MEV protection.
         </Typography>
 
         <Box component="ul" sx={{ listStyleType: "disc", pl: 2 }}>
@@ -33,16 +32,10 @@ export default function Home() {
             <strong>Secure:</strong> Built-in MEV protection protects users against
             exploitation.
           </Typography>
-          <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+          <Typography component="li" variant="body1" sx={{ mb: -1 }}>
             <strong>Low fees:</strong> Think $0.01 per transaction, not $20.
           </Typography>
         </Box>
-
-        <Typography variant="body1">
-          Etherlink uses Smart Rollups on the decentralized Tezos protocol for
-          data availability and will expand to use the Tezos Data Availability
-          Layer.
-        </Typography>
 
         <Typography variant="h2" component="h2">
           Etherlink governance

@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Container, Link, Typography } from '@mui/material';
 import { ReactNode } from 'react';
 import { useRouter } from 'next/router';
 import {Header} from '@/components/header/Header';
@@ -45,7 +45,40 @@ export const Layout = ({ children }: LayoutProps) => {
             }}
           >
             <Typography variant="body1" sx={{ textAlign: "center" }}>
-              © 2025 Etherlink - Powered by Tezos Smart Rollup technology
+              2025 |{' '}
+              <Link
+                href="https://etherlink.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                color="inherit"
+                sx={{
+                  textDecoration: "none",
+                  transition: "color 0.2s",
+                  "&:hover": {
+                    color: "primary.main",
+                    textDecoration: "none",
+                  },
+                }}
+              >
+                Etherlink
+              </Link>
+              {' | '}
+              <Link
+                href="https://docs.etherlink.com/governance/how-is-etherlink-governed"
+                target="_blank"
+                rel="noopener noreferrer"
+                color="inherit"
+                sx={{
+                  textDecoration: "none",
+                  transition: "color 0.2s",
+                  "&:hover": {
+                    color: "primary.main",
+                    textDecoration: "none",
+                  },
+                }}
+              >
+                Governance
+              </Link>
             </Typography>
           </Box>
         </Container>
