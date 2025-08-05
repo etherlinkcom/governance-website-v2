@@ -5,7 +5,7 @@ import { HashDisplay } from '@/components/shared/HashDisplay';
 import { getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
 import { VotingProgress } from '@/components/shared/VotingProgress';
 import { contractStore } from '@/stores/ContractStore';
-import { EllipsisBox } from '../shared/EllipsisBox';
+import { EllipsisBox } from '@/components/shared/EllipsisBox';
 
 const CandidateInfoSkeleton = () => {
   return (

@@ -8,10 +8,10 @@ import { Period } from '@trilitech/types';
 import { formatDate } from '@/lib/formatDate';
 import { contractStore } from '@/stores/ContractStore';
 import { CopyButton } from '@/components/shared/CopyButton';
-import { EllipsisBox } from '../shared/EllipsisBox';
-import { ComponentLoading } from '../shared/ComponentLoading';
-import { SortableTableSkeleton } from '../shared/SortableTable';
-import { VotingResultsSkeleton } from '../promotion/VotingResults';
+import { EllipsisBox } from '@/components/shared/EllipsisBox';
+import { ComponentLoading } from '@/components/shared/ComponentLoading';
+import { SortableTableSkeleton } from '@/components/shared/SortableTable';
+import { VotingResultsSkeleton } from '@/components/promotion/VotingResults';
 
 interface TabPanelProps {
   children?: React.ReactNode;

@@ -4,7 +4,7 @@ import { Proposal } from "@trilitech/types";
 import { HashDisplay } from "@/components/shared/HashDisplay";
 import { formatNumber } from "@/lib/formatNumber";
 import { HashLink } from "@/components/shared/HashLink";
-import { EllipsisBox } from "../shared/EllipsisBox";
+import { EllipsisBox } from "@/components/shared/EllipsisBox";
 
 interface ProposalCardProps {
   proposal: Proposal;
