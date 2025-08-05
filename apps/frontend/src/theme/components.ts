@@ -129,9 +129,9 @@ export const components: Components<Theme> = {
         boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
         borderRadius: "25px",
         border: "none",
-        minWidth: "280px",
+        minWidth: "95vw",
         margin: "8px",
-        "@media (min-width: 600px)": {
+        [theme.breakpoints.up("sm")]: {
           minWidth: "500px",
           margin: "24px",
         },
@@ -213,6 +213,9 @@ export const components: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         fontFamily: typography.fontFamily,
+        overflow: 'inherit',
+        textOverflow: 'inherit',
+        whiteSpace: 'inherit',
         "&.MuiTypography-h1, &.MuiTypography-h2, &.MuiTypography-h3, &.MuiTypography-h4, &.MuiTypography-h5, &.MuiTypography-h6":
           {
             color: theme.palette.text.primary,
