@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button, Box, useTheme } from '@mui/material';
 import { getWalletStore } from '@/stores/WalletStore';
 import { EllipsisBox } from '@/components/shared/EllipsisBox';
-import WalletDialog from './WalletDialog';
+import {WalletDialog} from '@/components/header/WalletDialog';
 
 interface ConnectButtonProps {
   sx?: object;

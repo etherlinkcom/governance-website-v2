@@ -12,6 +12,7 @@ import { CopyButton } from "@/components/shared/CopyButton";
 import { formatNumber } from "@/lib/formatNumber";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { getWalletStore, VotingPower } from "@/stores/WalletStore";
+import { observer } from "mobx-react-lite";
 
 interface WalletDialogProps {
   open: boolean;
@@ -19,7 +20,7 @@ interface WalletDialogProps {
   onDisconnect: () => void;
 }
 
-export const WalletDialog = ({
+export const WalletDialog = observer(({
   open,
   onClose,
   onDisconnect,
@@ -99,6 +100,4 @@ export const WalletDialog = ({
       </DialogActions>
     </Dialog>
   );
-};
-
-export default WalletDialog;
+});
