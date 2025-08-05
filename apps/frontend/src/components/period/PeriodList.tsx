@@ -86,7 +86,13 @@ export const PeriodsList = observer(({ periods, isLoading }: PeriodsListProps) =
                 color="text.secondary"
                 sx={{ textAlign: 'center', py: 1, fontStyle: 'italic' }}
               >
-                No proposals or promotions for periods {nextPeriod.contract_voting_index + 1} - {period.contract_voting_index - 1}
+                {
+                  nextPeriod.contract_voting_index + 1 === period.contract_voting_index - 1 ? (
+                    <>No proposals or promotions for period {nextPeriod.contract_voting_index + 1}</>
+                  ) : (
+                    <>No proposals or promotions for periods {nextPeriod.contract_voting_index + 1} - {period.contract_voting_index - 1}</>
+                  )
+                }
               </Typography>
             )}
           </Fragment>
