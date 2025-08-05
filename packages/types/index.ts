@@ -24,7 +24,6 @@ export type Period = {
   level_end: number;
   date_start: Date;
   date_end: Date;
-  max_upvotes_voting_power: number;
 
   proposal_hashes?: string[];
   promotion_hash?: string;
