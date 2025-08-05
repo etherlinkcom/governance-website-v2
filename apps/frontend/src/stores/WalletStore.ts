@@ -1,12 +1,21 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { TezosToolkit } from '@taquito/taquito';
+import { Contract, TezosToolkit } from '@taquito/taquito';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { ColorMode } from '@airgap/beacon-types';
+import BigNumber from 'bignumber.js';
+import { formatNumber } from '@/lib/formatNumber';
+
+
+export type VotingPower = {
+  votingAmount: BigNumber | null;
+  votingPercent?: BigNumber | null;
+}
 
 export class WalletStore {
-  address: string | null = null;
-  balance: number = 0;
-  votingPower: number = 0;
+  private _address: string | null = null;
+  private balance: number = 0;
+  private votingPower: VotingPower | null = null;
+  private delegates = new Map<string, VotingPower | null>();
 
   private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
   private wallet: BeaconWallet;
@@ -15,7 +24,7 @@ export class WalletStore {
 
   constructor() {
     this.wallet = new BeaconWallet({
-        name: 'Etherlink Governance App',
+      name: 'Etherlink Governance',
         colorMode: ColorMode.DARK,
         iconUrl: '/favicon.ico',
     });
@@ -25,11 +34,39 @@ export class WalletStore {
     this.restoreConnection();
   }
 
+  get address(): string | null{
+    return this._address;
+  }
+
+  get formattedBalance(): string {
+    return formatNumber(this.balance);
+  }
+
+  get formattedVotingAmount(): string {
+    return this.votingPower?.votingAmount ? formatNumber(this.votingPower.votingAmount) : '0';
+  }
+
+  get formattedVotingPercent(): string {
+    return this.votingPower?.votingPercent ? this.votingPower.votingPercent.toPrecision(2) : '0';
+  }
+
+  get formattedDelegates(): [string, { votingAmount: string, votingPercent: string }][] {
+    return Array.from(this.delegates.entries()).map(([key, value]) => {
+      return [key, value ? {
+        votingAmount: formatNumber(value.votingAmount || 0),
+        votingPercent: value.votingPercent ? value.votingPercent.toPrecision(2) : '0',
+      }: {
+        votingAmount: '--',
+        votingPercent: '--',
+      }];
+    })
+  }
+
   async connect(): Promise<void> {
     await this.wallet.requestPermissions({});
     const address = await this.wallet.getPKH();
     runInAction(() => {
-      this.address = address;
+      this._address = address;
     });
     await Promise.all([
       this.refreshBalance(),
@@ -40,99 +77,90 @@ export class WalletStore {
   async disconnect(): Promise<void> {
     await this.wallet.clearActiveAccount();
     runInAction(() => {
-      this.address = null;
+      this._address = null;
       this.balance = 0;
-      this.votingPower = 0;
+      this.votingPower = null;
     });
   }
 
   async refreshBalance(): Promise<void> {
-    if (!this.address) return;
-    const mutez = await this.Tezos.tz.getBalance(this.address);
+    if (!this._address) return;
+    const mutez = await this.Tezos.tz.getBalance(this._address);
     runInAction(() => {
       this.balance = mutez.toNumber() / 1_000_000;
     });
   }
 
   async refreshVotingPower(): Promise<void> {
-    if (!this.address) return;
+    if (!this._address) return;
 
-    const address = this.address!;
-    let ownLiquid = 0;
     try {
-      // fetch own liquid balance first (delegators endpoint does not return own liquid balance)
-      try {
-        ownLiquid = (await this.Tezos.tz.getBalance(address)).toNumber();
-      } catch (e) {
-        console.warn('Failed to fetch own liquid balance:', e);
-      }
 
-      // calling onchain view to get delegators
-      const contract = await this.Tezos.contract.at(this.delegatesViewContractAddress);
+      const contract: Contract = await this.Tezos.contract.at(this.delegatesViewContractAddress);
       const view = contract.contractViews.list_voters({
-        0: address,
+        0: this._address,
         1: null
       });
-      const delegates: string[] = await view.executeView({ viewCaller: address });
+      const delegates: string[] = await view.executeView({ viewCaller: this._address });
+      delegates.unshift(this._address);
+      delegates.push('tz1U638Z3xWRiXDDKx2S125MCCaAeGDdA896')
 
-      // If no delegators returned, check delegate endpoint
-      if (delegates.length === 0) {
-        const url = this.tzktApiUrl + `/delegates/${address}`;
-        const response = await fetch(url);
-        const raw = await response.text();
-        if (response.ok && raw.trim() !== '') {
-          const data = JSON.parse(raw);
-          const staking = data.stakingBalance ?? 0;
-          runInAction(() => {
-            this.votingPower = ownLiquid + staking;
-          });
-          return;
+      let totalVotingPower: BigNumber = new BigNumber(0);
+      try {
+        const response: Response = await fetch(`${this.tzktApiUrl}/voting/periods/current`);
+        if (response.ok) {
+          const data: {totalVotingPower?: number} = await response.json();
+          totalVotingPower = new BigNumber(data.totalVotingPower ?? 0);
         }
-        runInAction(() => {
-          this.votingPower = ownLiquid;
-        });
-        return;
+      } catch (error) {
+        totalVotingPower = new BigNumber(0);
       }
 
-      // sum each delegators staking balance + liquid balance
-      const delegateTotals = await Promise.all(
-        delegates.map(async (delegateAddress) => {
-          let staking = 0;
+
+      let ownVotingPower: BigNumber = new BigNumber(0);
+      runInAction(() => this.delegates.clear());
+
+      await Promise.allSettled(
+        delegates.map(async (delegateAddress, index) => {
           try {
-            const response = await fetch(`${this.tzktApiUrl}/delegates/${delegateAddress}`);
-            if (response.ok) {
-              const data = await response.json();
-              staking = data.stakingBalance ?? 0;
+
+            const response: Response = await fetch(`${this.tzktApiUrl}/voting/periods/current/voters/${delegateAddress}`);
+            if (!response.ok || response.status === 204) {
+              runInAction(() => this.delegates.delete(delegateAddress));
+              return;
             }
-          } catch {}
-          let liquid = 0;
-          try {
-            liquid = (await this.Tezos.tz.getBalance(delegateAddress)).toNumber();
-          } catch {}
-          return staking + liquid;
+
+            const data: { votingPower?: number, delegate: { alias?: string} } = await response.json();
+            ownVotingPower = ownVotingPower.plus(data.votingPower ?? 0);
+
+            if (delegateAddress === this._address && delegates.length > 1) return;
+
+            const votingPercent: BigNumber = new BigNumber(data.votingPower ?? 0).div(totalVotingPower).times(100);
+            const delegateVotingPower: VotingPower = {
+              votingAmount: new BigNumber(data.votingPower ?? 0),
+              votingPercent: votingPercent.isNaN() ? null : votingPercent,
+            }
+
+            runInAction(() => {
+              this.delegates.set(data.delegate.alias ?? delegateAddress, delegateVotingPower)
+            });
+
+          } catch (error) {
+            if (delegateAddress === this._address) return;
+            runInAction(() => this.delegates.set(delegateAddress, null));
+          }
         })
       );
 
-      // fetch own staking balance
-      let ownStaking = 0;
-      try {
-        const response = await fetch(`${this.tzktApiUrl}/delegates/${address}`);
-        if (response.ok) {
-          const data = await response.json();
-          ownStaking = data.stakingBalance ?? 0;
-        }
-      } catch {}
+      runInAction(() => {
+        this.votingPower = {
+          votingAmount: new BigNumber(ownVotingPower),
+          votingPercent: totalVotingPower.isZero() ? null : ownVotingPower.div(totalVotingPower).times(100),
+        };
+      });
 
-      // total voting power = own liquid + sum of delegators + own staking
-      runInAction(() => {
-        this.votingPower = ownLiquid + delegateTotals.reduce((sum, value) => sum + value, 0) + ownStaking;
-      });
-    } catch (err) {
-      console.error('Error fetching voting power:', err);
-      // fallback in error case: own liquid only
-      runInAction(() => {
-        this.votingPower = ownLiquid;
-      });
+    } catch (error) {
+      runInAction(() => this.votingPower = null);
     }
   }
 
@@ -141,7 +169,7 @@ export class WalletStore {
     if (activeAccount) {
       const address = await this.wallet.getPKH();
       runInAction(() => {
-        this.address = address;
+        this._address = address;
       });
       await Promise.all([
         this.refreshBalance(),
