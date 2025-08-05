@@ -103,7 +103,6 @@ export class WalletStore {
       });
       const delegates: string[] = await view.executeView({ viewCaller: this._address });
       delegates.unshift(this._address);
-      delegates.push('tz1U638Z3xWRiXDDKx2S125MCCaAeGDdA896')
 
       let totalVotingPower: BigNumber = new BigNumber(0);
       try {
