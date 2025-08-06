@@ -9,7 +9,6 @@ export class TzktListener {
   private contracts: Contract[];
   private contractConfigs: Record<string, { startedAtLevel: number; periodLength: number }> = {};
   private connection!: HubConnection;
-  private seenPeriods = new Set<string>();
   private governanceContractIndexer = new GovernanceContractIndexer();
   private readonly trackedFunctions: string[] = ['new_proposal', 'upvote_proposal', 'vote'];
   private database: Database = new Database();
@@ -240,6 +239,10 @@ export class TzktListener {
     const { startedAtLevel, periodLength } = contractConfig;
     const level = transactionEvent.level;
     const levelDifference = level - startedAtLevel;
+    if (levelDifference < 0) {
+      logger.error(`[TzktListener] Vote at level ${level} is before startedAtLevel ${startedAtLevel}`);
+      return;
+    }
 
     const proposalPeriodIndex = Math.floor(levelDifference / periodLength);
     const promotionPeriodIndex = proposalPeriodIndex + 1;
@@ -317,9 +320,6 @@ export class TzktListener {
       if (levelDifference < 0 || levelDifference % periodLength !== 0) continue;
 
       const periodIndex = levelDifference / periodLength;
-      const periodKey = `${contract.address}-${periodIndex}`;
-      if (this.seenPeriods.has(periodKey)) continue;
-      this.seenPeriods.add(periodKey);
 
       const levelStart = startedAtLevel + periodIndex * periodLength;
       const levelEnd = levelStart + periodLength - 1;
@@ -338,7 +338,7 @@ export class TzktListener {
         total_voting_power: 0
       };
 
-      logger.info(`[TzktListener] New period ${periodKey}: ${JSON.stringify(periodRecord)}`);
+      logger.info(`[TzktListener] New period ${contract.address}-${periodIndex}: ${JSON.stringify(periodRecord)}`);
       await this.database.upsertPeriods([periodRecord]);
     }
   }
