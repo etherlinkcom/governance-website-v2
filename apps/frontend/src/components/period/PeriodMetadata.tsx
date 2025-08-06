@@ -4,7 +4,7 @@ import { Period, Proposal } from "@trilitech/types";
 import { JSX } from "react";
 import { formatDate } from "@/lib/formatDate";
 import { formatNumber } from "@/lib/formatNumber";
-import { ComponentLoading } from "../shared/ComponentLoading";
+import { ComponentLoading } from "@/components/shared/ComponentLoading";
 
 interface PeriodMetadataProps {
   period: Period;

@@ -115,12 +115,11 @@ export class WalletStore {
         totalVotingPower = new BigNumber(0);
       }
 
-
       let ownVotingPower: BigNumber = new BigNumber(0);
       runInAction(() => this.delegates.clear());
 
       await Promise.allSettled(
-        delegates.map(async (delegateAddress, index) => {
+        delegates.map(async (delegateAddress) => {
           try {
 
             const response: Response = await fetch(`${this.tzktApiUrl}/voting/periods/current/voters/${delegateAddress}`);

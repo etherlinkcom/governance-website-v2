@@ -10,7 +10,6 @@ import { contractStore } from '@/stores/ContractStore';
 const ProposalsListSkeleton = () => (
   <Box>
     <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', mb: 2 }}>
-      {/* <ComponentLoading width={120} height={32} /> */}
       <ComponentLoading width={80} height={24} />
     </Box>
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

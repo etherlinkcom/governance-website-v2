@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Container, Stack } from "@mui/material";
+import { Box, Typography, Button, Container, Stack, Link } from "@mui/material";
 
 export default function Home() {
   return (
@@ -19,26 +19,22 @@ export default function Home() {
         </Typography>
 
         <Typography variant="body1">
-          Etherlink is an EVM-compatible layer-2 built directly into the Tezos blockchain,
-          offering high speed, scalability, ultra-low fees, and built-in MEV protection.
+          Etherlink is an EVM-compatible, non-custodial Layer 2 blockchain
+          powered by <Link href="https://tezos.com/developers/smart-rollups/">Tezos Smart Rollup technology.</Link>{' '}
+          It enables seamless integration with existing Ethereum tools,
+          including wallets and indexers, and facilitates asset transfers
+          to and from other EVM-compatible chains.
+          </Typography>
+
+          <Typography variant="body1">
+          Built upon the secure foundation of Tezos layer 1, Etherlink delivers a
+          fast, fair, and (nearly) free experience. This permissionless and
+          censorship-resistant environment empowers developers to actively
+          create and participate in the next generation of decentralized applications.
         </Typography>
 
-        <Box component="ul" sx={{ listStyleType: "disc", pl: 2 }}>
-          <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-            <strong>Decentralized:</strong> The decentralized sequencer reduces
-            the risk of centralized control and manipulation.
-          </Typography>
-          <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-            <strong>Secure:</strong> Built-in MEV protection protects users against
-            exploitation.
-          </Typography>
-          <Typography component="li" variant="body1" sx={{ mb: -1 }}>
-            <strong>Low fees:</strong> Think $0.01 per transaction, not $20.
-          </Typography>
-        </Box>
-
         <Typography variant="h2" component="h2">
-          Etherlink governance
+          Etherlink Governance
         </Typography>
 
         <Typography variant="body1">

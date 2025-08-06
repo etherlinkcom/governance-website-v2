@@ -8,7 +8,10 @@ import { Period } from '@trilitech/types';
 import { formatDate } from '@/lib/formatDate';
 import { contractStore } from '@/stores/ContractStore';
 import { CopyButton } from '@/components/shared/CopyButton';
-import { EllipsisBox } from '../shared/EllipsisBox';
+import { EllipsisBox } from '@/components/shared/EllipsisBox';
+import { ComponentLoading } from '@/components/shared/ComponentLoading';
+import { SortableTableSkeleton } from '@/components/shared/SortableTable';
+import { VotingResultsSkeleton } from '@/components/promotion/VotingResults';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -38,6 +41,69 @@ interface PeriodDetailsModalProps {
   period: Period;
 }
 
+
+const PeriodDetailsSkeleton = ({ tabValue, onClose }: { tabValue: number; onClose: () => void }) => {
+  const blankColumns = Array.from({ length: 4 }, (_, i) => ({ id: `${i}`, label: '' }));
+  return (
+    <Box className="modal-content">
+      <Box sx={{
+        p: 3,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        flexShrink: 0
+      }}>
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 2,
+          gap: 2,
+        }}>
+          <ComponentLoading width={220} height={24} borderRadius={2} />
+          <IconButton
+            onClick={onClose}
+            sx={{
+              flexShrink: 0,
+              minWidth: 48,
+              width: 48,
+              height: 48,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 4 }}>
+          <Box sx={{ flex: 1 }}>
+            <ComponentLoading width={180} height={28} borderRadius={2} />
+            <ComponentLoading width={120} height={20} borderRadius={2} sx={{ mt: 1 }} />
+            <ComponentLoading width={100} height={16} borderRadius={2} sx={{ mt: 1 }} />
+          </Box>
+          <Box sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }}>
+            <ComponentLoading width={180} height={28} borderRadius={2} />
+            <ComponentLoading width={120} height={20} borderRadius={2} sx={{ mt: 1 }} />
+            <ComponentLoading width={100} height={16} borderRadius={2} sx={{ mt: 1 }} />
+          </Box>
+        </Box>
+      </Box>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
+        <Tabs value={tabValue} >
+          <Tab label={<ComponentLoading width={120} height={24} borderRadius={2} />} />
+          <Tab label={<ComponentLoading width={120} height={24} borderRadius={2} />} />
+        </Tabs>
+      </Box>
+      <Box sx={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+        <TabPanel value={0} index={0}>
+          <Box sx={{ py: 3 }}>
+            <ComponentLoading width="100%" height={80} borderRadius={2} sx={{ mb: 2 }} />
+            {tabValue === 1 && <VotingResultsSkeleton />}
+            <SortableTableSkeleton columns={blankColumns} />
+          </Box>
+        </TabPanel>
+      </Box>
+    </Box>
+  );
+}
+
 export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDetailsModalProps) => {
   const [activeTab, setActiveTab] = useState(0);
 
@@ -48,6 +114,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
     proposals,
     promotions,
     error,
+    isLoading,
     proposalsPeriod,
     promotionsPeriod,
     proposalsPeriodData,
@@ -115,6 +182,9 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
 
   return (
     <Modal open={open} onClose={onClose}>
+      {isLoading ? (
+        <PeriodDetailsSkeleton tabValue={activeTab} onClose={onClose} />
+      ) : (
       <Box className="modal-content">
         <Box sx={{
           p: 3,
@@ -148,7 +218,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
           <IconButton
             onClick={onClose}
             sx={{
-              flexShrink: 0,
+                flexShrink: 0,
                 minWidth: 48,
                 width: 48,
                 height: 48,
@@ -212,7 +282,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
             value={activeTab}
             onChange={handleTabChange}
           >
-            {tabConfig.map((tab, idx) => (
+            {tabConfig.map((tab) => (
               <Tab
                 key={tab.label}
                 label={tab.label}
@@ -234,6 +304,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
           ))}
         </Box>
       </Box>
+      )}
     </Modal>
   );
 });
