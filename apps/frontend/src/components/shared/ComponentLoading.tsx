@@ -17,6 +17,7 @@ export const ComponentLoading = ({
 
   return (
     <Box
+      component="span"
       sx={{
         width,
         height,

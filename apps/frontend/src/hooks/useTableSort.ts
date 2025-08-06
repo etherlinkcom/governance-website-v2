@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 type Order = 'asc' | 'desc';
 
@@ -22,30 +22,32 @@ export function useTableSort<T>(
     return num * multiplier;
   };
 
-  const sortedData = data.slice().sort((a, b) => {
-    let aValue: any = a[orderBy];
-    let bValue: any = b[orderBy];
+  const sortedData = useMemo(() => {
+    return data.slice().sort((a, b) => {
+      let aValue: any = a[orderBy];
+      let bValue: any = b[orderBy];
 
-    if (orderBy === 'voting_power' && typeof aValue === 'string' && typeof bValue === 'string') {
-      aValue = parseVotingPower(aValue);
-      bValue = parseVotingPower(bValue);
-    }
+      if (orderBy === 'voting_power' && typeof aValue === 'string' && typeof bValue === 'string') {
+        aValue = parseVotingPower(aValue);
+        bValue = parseVotingPower(bValue);
+      }
 
-    if (orderBy === 'time' && typeof aValue === 'string' && typeof bValue === 'string') {
-      aValue = new Date(aValue).getTime();
-      bValue = new Date(bValue).getTime();
-    }
+      if (orderBy === 'time' && typeof aValue === 'string' && typeof bValue === 'string') {
+        aValue = new Date(aValue).getTime();
+        bValue = new Date(bValue).getTime();
+      }
 
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return order === 'asc'
-        ? aValue.localeCompare(bValue, undefined, { sensitivity: 'base', numeric: true })
-        : bValue.localeCompare(aValue, undefined, { sensitivity: 'base', numeric: true });
-    }
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return order === 'asc'
+          ? aValue.localeCompare(bValue, undefined, { sensitivity: 'base', numeric: true })
+          : bValue.localeCompare(aValue, undefined, { sensitivity: 'base', numeric: true });
+      }
 
-    if (aValue < bValue) return order === 'asc' ? -1 : 1;
-    if (aValue > bValue) return order === 'asc' ? 1 : -1;
-    return 0;
-  });
+      if (aValue < bValue) return order === 'asc' ? -1 : 1;
+      if (aValue > bValue) return order === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [data, order, orderBy]);
 
   return { sortedData, order, orderBy, handleRequestSort };
 }
