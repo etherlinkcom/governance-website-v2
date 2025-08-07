@@ -96,7 +96,7 @@ export const PeriodVotingStatsPanel = ({
         }}
       >
         {isLoading ? (
-          <ComponentLoading width="255px" sx={{ mt: 2 }} />
+          <ComponentLoading width={255} sx={{ mt: 2, display: 'flex' }} />
         ) : proposals && period && proposals[0] ? (
           <ProposalVotingStats
             proposals={proposals}
