@@ -18,8 +18,8 @@ const ContractCardSkeleton = () => (
         <ComponentLoading width={20} height={30} borderRadius={1} />
     </Box>
       <Box sx={{display: 'flex', gap: 1, alignItems: 'center'}}>
-        <ComponentLoading width={32} height={32} borderRadius={50} />
-        <ComponentLoading width={20} height={15} borderRadius={1} />
+        <ComponentLoading width={18} height={18} borderRadius={50} />
+        <ComponentLoading width={15} height={10} borderRadius={1} />
       </Box>
   </Card>
 );
@@ -27,8 +27,8 @@ const ContractCardSkeleton = () => (
 const ContractsListSkeleton = () => (
   <Box sx={{ width: '100%' }}>
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {[...Array(4)].map((_, idx) => (
-        <ContractCardSkeleton key={idx} />
+      {[...Array(4)].map((_, index) => (
+        <ContractCardSkeleton key={index} />
       ))}
     </Box>
   </Box>
@@ -58,7 +58,6 @@ export const ContractsList = observer(() => {
     setUserExpandedContract(null);
   }, [currentGovernance]);
 
-  // const loading = true;
   if (loading) return <ContractsListSkeleton />;
 
   return (
