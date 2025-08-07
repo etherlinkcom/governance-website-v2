@@ -1,36 +1,41 @@
-# Etherlink Governance Backend
+# Etherlink Governance Indexer
 
-This package contains:
+## Overview
+A Node.js backend service that indexes Tezos governance data into MySQL. Provides Express API endpoints for database operations, real-time blockchain monitoring, and governance data synchronization.
 
-- **Database migrations** for BigQuery (in `/migrations`)
+## Core Features
+- **Database Management**: MySQL migrations for governance data schema
+- **Real-time Indexing**: WebSocket listener for live blockchain events via TzKT API
+- **Express API**: RESTful endpoints for triggering indexing operations
+- **Historical Data**: Full governance history indexing with incremental updates
 
-## Setup
+## Technical Stack
+- **Backend**: Node.js with TypeScript and Express
+- **Database**: MySQL with automated migrations
+- **Blockchain API**: TzKT integration for Tezos data
+- **Architecture**: Monorepo with shared types, migration system
 
-1. **Install dependencies (from the repo root):**
-   ```sh
-   npm install
-   ```
+## Key Components
+- **Migrations**: SQL schema management in `/src/db/migrations/`
+- **API Routes**: Express endpoints for manual indexing operations
+- **WebSocket Listener**: Real-time governance event processing
+- **Contract Indexer**: Historical and incremental data synchronization
 
-## Migrations
+## API Endpoints
+```sh
+GET /start-listener      # Start real-time blockchain listener
+GET /stop-listener       # Stop the listener
+GET /index-active        # Index active governance contracts
+GET /index-all          # Index all contracts (active + historical)
+```
 
-- Migration SQL files are in `/migrations`.
-- To run all pending migrations:
-  ```sh
-  npm run migrate
-  ```
-
-## Cronjobs
-
-- Cronjob scripts are in `/src/cron`.
-- To run the governance periods sync job:
-  ```sh
-  npm run cron:getGovernancePeriods
-  ```
-- Schedule these scripts using GCP Cloud Scheduler, cron, or similar.
-
-## Adding a New Migration
-
-1. Add a new `.sql` file in `/migrations` with the next sequential number (e.g., `006_add_new_table.sql`).
-2. Run `npm run migrate` to apply it.
+## Setup & Usage
+```sh
+npm install              # Install dependencies
+npm run dev             # Start development server
+npm run build           # Build for production
+npm run start           # Run production server
+```
 
 
+The indexer ensures governance data is consistently available and up-to-date for the frontend application through both real-time monitoring and on
