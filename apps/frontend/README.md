@@ -1,142 +1,20 @@
-# Governance Website v2 - Styling Guide
-
-A Next.js governance application with Material-UI theming system and TypeScript.
-
-# Themes
-<details>
-<summary>Theme Details</summary>
+# Etherlink Governance Website
 
 ## Overview
-<details>
-<summary>Directory Structure</summary>
+A Next.js application providing a user-friendly interface for exploring Tezos governance contracts, proposals, and voting periods. Built with TypeScript and Material-UI for responsive, real-time governance participation.
 
-```bash
-src/theme/
-├── index.ts          # Main theme configuration
-├── palette.ts        # Color definitions
-├── typography.ts     # Typography variants
-├── components.ts     # Component style overrides
-└── breakpoints.ts    # Responsive breakpoints
-```
+## Core Features
+- **Contract Explorer**: Browse different governance contracts (Lambda DAO, Sequencer) with real-time blockchain data
+- **Proposal Tracking**: View governance proposals with voting statistics and historical data
+- **Period Management**: Track governance periods with proposal counts and voting power metrics
+- **Smart Sorting**: Performance-optimized table operations with cached parsing
 
-**Key Features:**
-- Centralized styling in theme files
-- Custom color palette extensions
-- Component-level style overrides
-- Responsive design tokens
+## Technical Stack
+- **Frontend**: Next.js 14, TypeScript, Material-UI, MobX state management
+- **Performance**: Bundle splitting, lazy loading, skeleton components to prevent layout shifts
+- **Architecture**: Monorepo with shared types, responsive design, RESTful API integration
 
-</details>
-
-## 🎯 Quick Reference
-
-<details>
-<summary><strong>Colors</strong></summary>
-
-```typescript
-primary: '#38FF9C'        // Green - main actions
-secondary: '#FF6B6B'      // Red - secondary actions
-success: '#38FF9C'        // Green - "yea" votes
-error: '#FF6B6B'          // Red - "nay" votes
-warning: '#FFA726'        // Orange - "pass" votes
-background.default: '#0A0A0A'  // Pure black
-background.paper: '#151515'    // Card backgrounds
-```
-
-</details>
-
-<details>
-<summary><strong>Typography</strong></summary>
-
-```tsx
-// Use semantic variants - avoid inline styles
-<Typography variant="h1">Main Title</Typography>
-<Typography variant="body1">Content</Typography>
-<Typography variant="caption">Labels</Typography>
-```
-
-</details>
-
-<details>
-<summary><strong>Components</strong></summary>
-
-**Auto-styled via theme:**
-- **Buttons**: 50px border-radius, glowing effects
-- **Tables**: Headers 700 weight/16px, Body 400 weight/12px
-- **Cards**: 25px border-radius, primary shadows
-- **Forms**: Outlined style, primary focus states
-
-</details>
-
-## 📁 Component Organization
-
-```bash
-src/components/
-├── layouts/        # ContractSummary, GovernanceDisplay, Layout
-├── proposal/       # Proposal related components
-├── promotion/      # Promotion related components
-└── shared/         # Loading, Headers, Sortable table
-```
-
-## ✅ Best Practices
-
-<details>
-<summary><strong>Do's and Dont's</strong></summary>
-
-**✅ Good:**
-```tsx
-// Use theme values
-<Box sx={{ p: theme.spacing(2), borderRadius: theme.shape.borderRadius }}>
-<Typography variant="subtitle1">Styled Text</Typography>
-<Button sx={{ color: theme.palette.primary.main }}>
-```
-
-**❌ Avoid:**
-```tsx
-// Don't hardcode values
-<Box sx={{ padding: '16px', borderRadius: '8px' }}>
-<Typography sx={{ fontSize: '14px', fontWeight: 'bold' }}>
-<Button sx={{ backgroundColor: '#3B82F6' }}>
-```
-
-</details>
-
-## 🚀 Development
-
-<details>
-<summary><strong>Getting Started</strong></summary>
-
-```bash
-npm install
-npm run dev
-```
-
-**Adding New Components:**
-1. Create in appropriate domain folder
-2. Use TypeScript interfaces
-3. Apply theme-based styling
-4. Add to barrel exports
-5. Test responsively
-
-**Modifying Theme:**
-- Colors: Edit `src/theme/palette.ts`
-- Typography: Edit `src/theme/typography.ts`
-- Component styles: Edit `src/theme/components.ts`
-
-</details>
-
-<details>
-<summary><strong>Troubleshooting</strong></summary>
-
-**Common Issues:**
-- **Typography not applying**: Check theme variants vs component overrides
-- **Colors wrong**: Verify palette values and semantic usage
-- **Responsive issues**: Use theme breakpoints consistently
-- **Style conflicts**: Check component overrides specificity
-
-</details>
-
----
-
-**📚 Resources:** [Material-UI Docs](https://mui.com) | **🎯 Focus:** Use theme system, avoid hardcoded styles, organize by domain
-
-</details>
+## Key Pages
+- **Home**: Overview of available governance contracts
+- **Contract View**: Detailed contract information with periods and proposals
+- **Proposal Details**: Individual proposal voting data and statistics
