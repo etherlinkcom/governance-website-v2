@@ -40,7 +40,7 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
     <>
       <Accordion expanded={expanded} onChange={handleChange}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
             <EllipsisBox sx={{maxWidth: {xs: '45vw', md: '100%'} }}>
               <Box sx={{
                 display: 'flex',
@@ -79,7 +79,7 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
                 component='span'
                 size="small"
                 onClick={handleInfoClick}
-                sx={{ ml: 1, color: 'primary.main' }}
+                sx={{ color: 'primary.main' }}
               >
                 <InfoIcon />
               </IconButton>
