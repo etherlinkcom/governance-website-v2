@@ -88,7 +88,6 @@ export const WalletDialog = observer(({
       </DialogContent>
       <DialogActions>
         <Button
-          color="error"
           variant="outlined"
           startIcon={<LogoutIcon />}
           onClick={onDisconnect}

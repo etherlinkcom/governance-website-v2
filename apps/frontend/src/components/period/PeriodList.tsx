@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Card, Typography, useTheme } from '@mui/material';
 import { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Period } from '@trilitech/types';
@@ -6,44 +6,21 @@ import { PeriodCard } from '@/components/period/PeriodCard';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 
 const PeriodCardSkeleton = () => {
-  const theme = useTheme();
   return (
-    <Box
-      sx={{
-        borderRadius: '25px',
-        p: 3,
-        boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
-    }}
-  >
-    <Box sx={{ mb: 2 }}>
-      <ComponentLoading width="25%" height={20} borderRadius={1} />
-    </Box>
-
-    <Box sx={{ mb: 1 }}>
-      <ComponentLoading width="40%" height={20} borderRadius={1} />
-    </Box>
-
-    <Box sx={{ mb: 2 }}>
-      <ComponentLoading width="60%" height={16} borderRadius={1} />
-    </Box>
-
-    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-      <ComponentLoading width={80} height={24} borderRadius={3} />
-      <ComponentLoading width={70} height={24} borderRadius={3} />
-    </Box>
-
-    <Box sx={{ mb: 1 }}>
-      <ComponentLoading width="20%" height={18} borderRadius={1} />
-    </Box>
-
-    <ComponentLoading width="100%" height={16} borderRadius={1} />
-  </Box>
+    <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <ComponentLoading width={80} height={20} borderRadius={1} sx={{mb: 1, mt: 1}} />
+      <ComponentLoading width={200} height={16} borderRadius={1} />
+      <ComponentLoading width={300} height={14} borderRadius={1} sx={{mb: 1}} />
+      <ComponentLoading width={80} height={24} borderRadius={3} sx={{mb: 1}} />
+      <ComponentLoading width={70} height={18} borderRadius={3} />
+      <ComponentLoading width={450} height={18} borderRadius={1} sx={{ mb:2 }} />
+  </Card>
 );
 }
 
 const PeriodsListSkeleton = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <PeriodCardSkeleton key={1} />
+      <PeriodCardSkeleton />
   </Box>
 );
 
@@ -53,9 +30,8 @@ interface PeriodsListProps {
 }
 
 export const PeriodsList = observer(({ periods, isLoading }: PeriodsListProps) => {
-  if (isLoading) {
-    return <PeriodsListSkeleton />;
-  }
+
+  if (isLoading) return <PeriodsListSkeleton />;
 
   if (periods.length === 0) {
     return (

@@ -15,9 +15,6 @@ export const components: Components<Theme> = {
         borderRadius: "50px",
         padding: "12px 24px",
         transition: "all 0.2s ease-in-out",
-        borderImageSource: `radial-gradient(50% 32.35% at 0% 50%, ${
-          theme.palette.primary.main
-        } 0%, ${alpha(theme.palette.primary.main, 0)} 100%)`,
         gap: theme.spacing(1),
         textAlign: "center",
         whiteSpace: "normal",
@@ -49,10 +46,7 @@ export const components: Components<Theme> = {
       root: ({ theme }) => ({
         backgroundColor: theme.palette.background.paper,
         backgroundImage: "none",
-        border: "2px solid",
-        borderImageSource: `radial-gradient(50% 32.35% at 0% 50%, ${
-          theme.palette.primary.main
-        } 0%, ${alpha(theme.palette.primary.main, 0)} 100%)`,
+        border: "2px solid transparent",
         borderRadius: 12,
         "&.table-card": {
           padding: theme.spacing(2),
@@ -72,9 +66,6 @@ export const components: Components<Theme> = {
         backgroundColor: theme.palette.background.paper,
         boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
         border: "none",
-        borderImageSource: `radial-gradient(50% 32.35% at 0% 50%, ${
-          theme.palette.primary.main
-        } 0%, ${alpha(theme.palette.primary.main, 0)} 100%)`,
         borderRadius: "25px",
         "&:hover": {
           boxShadow: `0px 0px 10px 2px ${theme.palette.custom.shadow.secondary}`,
