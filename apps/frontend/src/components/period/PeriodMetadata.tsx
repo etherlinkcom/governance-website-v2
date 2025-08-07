@@ -100,7 +100,7 @@ export const PeriodMetadata = ({
               </EllipsisBox>
             <Box sx={{display: {xs: 'none', md: 'block', wordBreak: 'nobreak'}}}>
               {isLoading ? (
-                <ComponentLoading width="115px"/>
+                <ComponentLoading width={115} sx={{ display: 'flex' }} />
               ) : (
                 proposals && proposals[index] && (
                   <Typography variant="body2" sx={{ wordWrap: 'normal', whiteSpace: 'nowrap', ml: 2}}>
