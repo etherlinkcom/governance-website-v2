@@ -25,7 +25,6 @@
     "mysql2": "^3.14.2",
     "tsup": "^8.5.0",
     "winston": "^3.17.0",
-    "ws": "^7.5.10",
     "taquito": "^1.0.0"
   },
   "devDependencies": {
