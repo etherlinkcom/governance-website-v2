@@ -27,3 +27,18 @@ export interface PeriodData {
   promotionsPeriodData: Period | null;
   contractAndConfig: ContractAndConfig | undefined;
 }
+
+export interface PeriodFrontend {
+    startDateTime: Date;
+    endDateTime: Date;
+    contract: string;
+    governance: string;
+    proposals?: Proposal[];
+    promotion?: Promotion;
+}
+
+// TODO calculated in contractstore
+export interface FuturePeriod {
+    startDateTime: Date;
+    endDateTime: Date;
+}
