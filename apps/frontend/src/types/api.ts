@@ -29,14 +29,17 @@ export interface PeriodData {
   contractAndConfig: ContractAndConfig | undefined;
 }
 
-export interface FrontendProposal extends Proposal {
-  upvotes: string;
+export interface PeriodFrontend {
+    startDateTime: Date;
+    endDateTime: Date;
+    contract: string;
+    governance: string;
+    proposals?: Proposal[];
+    promotion?: Promotion;
 }
 
-export interface TransactionOperationConfirmation {
-    block: BlockResponse;
-    expectedConfirmation: number;
-    currentConfirmation: number;
-    completed: boolean;
-    isInCurrentBranch: () => Promise<boolean>;
+// TODO calculated in contractstore
+export interface FuturePeriod {
+    startDateTime: Date;
+    endDateTime: Date;
 }
