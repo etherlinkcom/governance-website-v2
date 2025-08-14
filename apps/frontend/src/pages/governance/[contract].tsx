@@ -1,10 +1,9 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Button, Container, Typography } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
 import { GovernanceType } from '@trilitech/types';
-import { ContractsList } from '@/components/contract/ContractsList';
 
 export default observer(() => {
   const router = useRouter();
@@ -18,12 +17,12 @@ export default observer(() => {
   }, [contract]);
 
 
-  if (contractStore.error) {
+  if (contractStore.currentError) {
     return (
       <Container maxWidth="lg">
         <Box p={4}>
           <Typography color="error">
-            Error: {contractStore.error}
+            Error: {contractStore.currentError}
           </Typography>
         </Box>
       </Container>
@@ -44,9 +43,34 @@ export default observer(() => {
         }}
       >
         <Typography variant="h4" textTransform={'capitalize'}>
-          {contractStore.currentGovernance} Governance
+          {contractStore.selectedGovernance} Governance
         </Typography>
-        <ContractsList />
+        <Box>
+          <Button
+            variant="contained"
+            onClick={() => {
+              // Handle button click
+            }}
+          >
+            Current
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              // Handle button click
+            }}
+          >
+            Past
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              // Handle button click
+            }}
+          >
+            Future
+          </Button>
+        </Box>
       </Box>
     </Container>
   );
