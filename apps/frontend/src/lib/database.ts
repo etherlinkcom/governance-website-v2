@@ -101,6 +101,9 @@ export class Database {
       periods.date_start,
       periods.date_end,
       periods.contract_address,
+      periods.level_start,
+      periods.level_end,
+
       contracts.governance_type,
       periods.contract_voting_index,
       periods.promotion_hash,
@@ -131,22 +134,20 @@ export class Database {
       AND periods.contract_voting_index = proposals.contract_period_index
     WHERE contracts.governance_type = ?
       AND contracts.active = 1
-      AND periods.level_end = (
-        SELECT MAX(p2.level_end)
-        FROM periods p2
-        JOIN contracts c2 ON p2.contract_address = c2.contract_address
-        WHERE c2.governance_type = ? AND c2.active = 1
-      )
-    ORDER BY proposals.level DESC, proposals.created_at DESC`,
-    [governanceType, governanceType]
+    ORDER BY periods.level_end DESC, periods.contract_voting_index DESC
+    LIMIT 1`,
+    [governanceType]
   );
+    console.log(`[Database] Raw query result:`, JSON.stringify(rows, null, 2));
 
   if (rows.length === 0) {
     console.log(`[Database] No current period found for ${governanceType} governance`);
     return null;
   }
 
-  return this.buildPeriodFromRows(rows)[0];
+  const result = this.buildPeriodFromRows(rows)[0];
+  console.log(`[Database] Found current period with level_end: ${result.endLevel}`);
+  return result;
 }
 
 async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> {
