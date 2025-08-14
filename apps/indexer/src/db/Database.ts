@@ -389,9 +389,6 @@ export class Database {
       )
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
-         level_start = VALUES(level_start),
-         level_end = VALUES(level_end),
-         date_start = VALUES(date_start),
          date_end = VALUES(date_end),
          proposal_hashes = VALUES(proposal_hashes),
           promotion_hash = CASE
