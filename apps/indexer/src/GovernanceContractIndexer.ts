@@ -177,10 +177,10 @@ export class GovernanceContractIndexer {
         const started_at_level: number = last_processed_level ?? contract_and_config.started_at_level;
 
         for (let i = started_at_level; i <= end_level; i += period_length) {
-            const level_end = i + period_length - 1;
-            const date_start = await this.getDateFromLevel(i);
-            const date_end = await this.getDateFromLevel(level_end);
-            const contract_voting_index = Math.floor((i - started_at_level) / period_length);
+            const level_end: number = i + period_length - 1;
+            const date_start: Date = await this.getDateFromLevel(i);
+            const date_end: Date = await this.getDateFromLevel(level_end);
+            const contract_voting_index: number = Math.floor((i - contract_and_config.started_at_level) / period_length);
             const total_voting_power: number = await this.getTotalVotingPower(i);
 
             const period: Period = {

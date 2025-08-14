@@ -7,24 +7,24 @@ import { logger } from "./utils/logger";
 const app = express();
 const port = process.env.PORT || 8080;
 
-let listener: TzktListener | null = null;
+// let listener: TzktListener | null = null;
 
-app.get("/start-listener", (_req: Request, res: Response) => {
-  if (listener) {
-    return res.status(400).send("Listener already running");
-  }
-  listener = new TzktListener(all_contracts.filter(c => c.active));
-  res.send("TzKT Listener started");
-});
+// app.get("/start-listener", (_req: Request, res: Response) => {
+//   if (listener) {
+//     return res.status(400).send("Listener already running");
+//   }
+//   listener = new TzktListener(all_contracts.filter(c => c.active));
+//   res.send("TzKT Listener started");
+// });
 
-app.get("/stop-listener", (_req: Request, res: Response) => {
-  if (listener) {
-    listener.stop();
-    listener = null;
-    return res.send("Listener stopped");
-  }
-  res.status(400).send("No listener running");
-});
+// app.get("/stop-listener", (_req: Request, res: Response) => {
+//   if (listener) {
+//     listener.stop();
+//     listener = null;
+//     return res.send("Listener stopped");
+//   }
+//   res.status(400).send("No listener running");
+// });
 
 app.get("/index-active", async (req: Request, res: Response) => {
   try {
