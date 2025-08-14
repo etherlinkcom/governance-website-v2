@@ -36,7 +36,6 @@ export type TzktContractStorage = {
         total_voting_power: string;
         upvoters_proposals: number;
         upvoters_upvotes_count: number;
-        max_upvotes_voting_power: string | null;
       };
       promotion?: {
         voters: number;
@@ -80,7 +79,6 @@ export type TzktContractStorageHistory = {
           total_voting_power: string;
           upvoters_proposals: number;
           upvoters_upvotes_count: number;
-          max_upvotes_voting_power: string | null;
         };
         promotion?: {
           voters: number;
@@ -167,4 +165,12 @@ export interface Voter {
   address: string;
   alias?: string;
   votingPower: number;
+}
+
+// SignalR event types
+export interface TzktHeadEvent {
+  data: {
+    level: number;
+    timestamp: string;
+  };
 }
