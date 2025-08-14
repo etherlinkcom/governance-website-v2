@@ -8,7 +8,7 @@ import {
   Promotion,
   Vote,
 } from "@trilitech/types";
-import { PeriodDetailsResponse, PeriodFrontend } from "@/types/api";
+import { PeriodDetailsResponse, FrontendPeriod } from "@/types/api";
 
 export class Database {
   private connection: mysql.Connection | null = null;
@@ -93,7 +93,7 @@ export class Database {
     return contracts;
   }
 
-  async getCurrentPeriod(governanceType: GovernanceType): Promise<PeriodFrontend | null> {
+  async getCurrentPeriod(governanceType: GovernanceType): Promise<FrontendPeriod | null> {
     console.log(`[Database] Fetching current period for ${governanceType} governance`);
 
     const rows = await this.query<any>(
@@ -149,7 +149,7 @@ export class Database {
   return this.buildPeriodFromRows(rows)[0];
 }
 
-async getPastPeriods(governanceType: GovernanceType): Promise<PeriodFrontend[]> {
+async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> {
   console.log(`[Database] Fetching past periods with activity for ${governanceType} governance`);
 
   const rows = await this.query<any>(
@@ -207,18 +207,20 @@ async getPastPeriods(governanceType: GovernanceType): Promise<PeriodFrontend[]> 
   return this.buildPeriodFromRows(rows);
 }
 
-  private buildPeriodFromRows(rows: any[]): PeriodFrontend[] {
+  private buildPeriodFromRows(rows: any[]): FrontendPeriod[] {
     if (rows.length === 0) return [];
 
-    const periodsMap = new Map<string, PeriodFrontend>();
+    const periodsMap = new Map<string, FrontendPeriod>();
 
     for (const row of rows) {
       const periodKey = `${row.contract_address}-${row.contract_voting_index}`;
 
       if (!periodsMap.has(periodKey)) {
-        const period: PeriodFrontend = {
+        const period: FrontendPeriod = {
           startDateTime: new Date(row.date_start),
           endDateTime: new Date(row.date_end),
+          startLevel: row.level_start,
+          endLevel: row.level_end,
           contract: row.contract_address,
           governance: row.governance_type,
         };
