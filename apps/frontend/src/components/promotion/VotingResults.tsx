@@ -22,12 +22,13 @@ export const VotingResultsSkeleton = () => {
 interface VotingResultsProps {
   contractVotingIndex?: number;
   contractAddress?: string;
-  promotionHash?: string;
 }
 
-export const VotingResults = observer(({ contractVotingIndex, contractAddress, promotionHash }: VotingResultsProps) => {
+export const VotingResults = observer(({ contractVotingIndex, contractAddress }: VotingResultsProps) => {
   const { votes, promotions, isLoading, error, hasValidParams } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
   const walletStore = getWalletStore();
+
+  const isCurrentPeriod = contractVotingIndex === contractStore.currentPeriodIndex;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedVote, setSelectedVote] = useState<'yea' | 'nay' | 'pass'>('yea');
@@ -104,14 +105,18 @@ export const VotingResults = observer(({ contractVotingIndex, contractAddress, p
         <VoteResultCard type="nay" percentage={nayPercentage} count={nayVotes} label="Nay" />
         <VoteResultCard type="pass" percentage={passPercentage} count={passVotes} label="Pass" />
       </Box>
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{ mt: 2, width: {xs: '100%', sm: '100px'} }}
-        onClick={() => setDialogOpen(true)}
-      >
-        Vote
-      </Button>
+
+      { walletStore?.address && isCurrentPeriod && (
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ mb: 2, width: {xs: '100%', sm: '100px'} }}
+          onClick={() => setDialogOpen(true)}
+        >
+          Vote
+        </Button>
+      )}
+
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}

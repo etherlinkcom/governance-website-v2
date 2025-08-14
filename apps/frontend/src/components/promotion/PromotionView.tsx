@@ -23,7 +23,6 @@ export const PromotionView = ({ contractVotingIndex, contractAddress, promotionH
         <VotingResults
           contractVotingIndex={contractVotingIndex}
           contractAddress={contractAddress}
-          promotionHash={promotionHash}
         />
       </Box>
 

@@ -61,11 +61,28 @@ export const ProposalCard = observer(({ proposal, isCurrentPeriod }: ProposalCar
             )}
           </EllipsisBox>
 
-          <Box sx={{ textAlign: "right" }}>
-            <Typography variant="subtitle2">Upvotes:</Typography>
-            <Typography variant="body1" sx={{ display: "block" }}>
-              {formatNumber(proposal.upvotes)}
-            </Typography>
+          <Box sx={{ textAlign: "right"}}>
+            <Box>
+              <Typography variant="subtitle2">Upvotes:</Typography>
+              <Typography variant="body1" sx={{ display: "block" }}>
+                {formatNumber(proposal.upvotes)}
+              </Typography>
+            </Box>
+
+            <Box>
+              {isCurrentPeriod && walletStore?.address &&
+                (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 2, alignSelf: "flex-end" }}
+                    onClick={() => walletStore?.upvoteProposal(proposal.contract_address, proposal.proposal_hash)}
+                  >
+                    Upvote
+                  </Button>
+                )
+              }
+            </Box>
           </Box>
         </Box>
       </CardContent>
