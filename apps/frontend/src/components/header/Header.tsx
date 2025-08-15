@@ -51,7 +51,7 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
           </Link>
 
         </Box>
-        <Menu currentPage={currentPage} />
+          <Menu currentPage={currentPage} />
         </Box>
       </AppBar>
   );
