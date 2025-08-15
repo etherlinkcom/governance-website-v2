@@ -6,10 +6,9 @@ import {
 import { ComponentLoading } from "@/components/shared/ComponentLoading";
 import {
   ContractAndConfig,
-  Period,
   Promotion,
 } from "@trilitech/types";
-import { FrontendProposal } from "@/types/api";
+import { FrontendPeriod } from "@/types/api";
 
 interface PeriodVotingStatsPanelProps {
   hasPromotion?: string;
@@ -18,7 +17,7 @@ interface PeriodVotingStatsPanelProps {
   proposals?: FrontendProposal[];
   contractAndConfig?: ContractAndConfig;
   isLoading: boolean;
-  period?: Period;
+  period?: FrontendPeriod;
 }
 
 export const PeriodVotingStatsPanel = ({
