@@ -36,7 +36,7 @@ export interface FrontendPeriod {
     contract: string;
     governance: string;
     contract_voting_index: number;
-    total_voting_power: number;
+    totalVotingPower: number;
     proposals?: Proposal[];
     promotion?: Promotion;
 }
