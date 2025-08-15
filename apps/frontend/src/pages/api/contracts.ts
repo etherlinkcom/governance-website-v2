@@ -17,7 +17,7 @@ export default async function handler(
 
   try {
     console.log(`[API] Fetching contracts for governance`);
-    const contracts: ContractAndConfig[] = await database.getActiveContracts();
+    const contracts: ContractAndConfig[] = await database.getContracts();
     console.log(`[API] Found ${contracts.length} contracts for governance`);
     res.status(200).json({contracts});
   } catch (error) {
