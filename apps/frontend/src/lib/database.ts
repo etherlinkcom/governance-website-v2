@@ -103,6 +103,7 @@ export class Database {
       periods.contract_address,
       periods.level_start,
       periods.level_end,
+      periods.total_voting_power,
 
       contracts.governance_type,
       periods.contract_voting_index,
@@ -112,7 +113,6 @@ export class Database {
       promotions.yea_voting_power,
       promotions.nay_voting_power,
       promotions.pass_voting_power,
-      promotions.total_voting_power,
       promotions.created_at as promotion_created_at,
 
       -- Proposal data
@@ -163,12 +163,12 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
       contracts.governance_type,
       periods.contract_voting_index,
       periods.promotion_hash,
+      periods.total_voting_power,
 
       -- Promotion data
       promotions.yea_voting_power,
       promotions.nay_voting_power,
       promotions.pass_voting_power,
-      promotions.total_voting_power,
       promotions.created_at as promotion_created_at,
 
       -- Proposal data
@@ -219,6 +219,7 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
       const periodKey = `${row.contract_address}-${row.contract_voting_index}`;
 
       if (!periodsMap.has(periodKey)) {
+        console.log({row})
         const period: FrontendPeriod = {
           startDateTime: new Date(row.date_start),
           endDateTime: new Date(row.date_end),
@@ -227,7 +228,7 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
           contract: row.contract_address,
           governance: row.governance_type,
           contract_voting_index: row.contract_voting_index,
-          total_voting_power: row.total_voting_power,
+          totalVotingPower: row.total_voting_power,
         };
 
         if (row.promotion_hash) {
