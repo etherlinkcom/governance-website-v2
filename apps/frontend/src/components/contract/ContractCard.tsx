@@ -6,7 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { ContractInfoModal } from '@/components/contract/ContractInfoModal';
 import { InfoIcon } from '@/components/shared/InfoIcon';
 import { contractStore } from '@/stores/ContractStore';
-import { PeriodsList } from '@/components/period/PeriodList';
+import { PeriodsList } from '@/components/past/PastPeriodList';
 import { CopyButton } from '@/components/shared/CopyButton';
 import { EllipsisBox } from '@/components/shared/EllipsisBox';
 

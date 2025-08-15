@@ -35,6 +35,8 @@ export interface FrontendPeriod {
     endLevel: number;
     contract: string;
     governance: string;
+    contract_voting_index: number;
+    total_voting_power: number;
     proposals?: Proposal[];
     promotion?: Promotion;
 }

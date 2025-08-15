@@ -145,7 +145,7 @@ export class Database {
     return null;
   }
 
-  const result = this.buildPeriodFromRows(rows)[0];
+  const result: FrontendPeriod = this.buildPeriodFromRows(rows)[0];
   console.log(`[Database] Found current period with level_end: ${result.endLevel}`);
   return result;
 }
@@ -157,6 +157,8 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
     `SELECT
       periods.date_start,
       periods.date_end,
+      periods.level_start,
+      periods.level_end,
       periods.contract_address,
       contracts.governance_type,
       periods.contract_voting_index,
@@ -224,6 +226,8 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
           endLevel: row.level_end,
           contract: row.contract_address,
           governance: row.governance_type,
+          contract_voting_index: row.contract_voting_index,
+          total_voting_power: row.total_voting_power,
         };
 
         if (row.promotion_hash) {
