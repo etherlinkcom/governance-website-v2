@@ -4,21 +4,70 @@ import {
   ProposalVotingStats,
 } from "@/components/shared/VotingStats";
 import { ComponentLoading } from "@/components/shared/ComponentLoading";
-import {
-  ContractAndConfig,
-  Promotion,
-} from "@trilitech/types";
+import { ContractAndConfig, Promotion, Proposal } from "@trilitech/types";
 import { FrontendPeriod } from "@/types/api";
 
 interface PeriodVotingStatsPanelProps {
   hasPromotion?: string;
   hasProposals?: boolean;
   promotions?: Promotion[];
-  proposals?: FrontendProposal[];
-  contractAndConfig?: ContractAndConfig;
+  proposals?: Proposal[];
+  contractAndConfig: ContractAndConfig;
   isLoading: boolean;
-  period?: FrontendPeriod;
+  period: FrontendPeriod;
 }
+
+interface PromotionVotingStatsPanelProps {
+  promotion: Promotion;
+  period: FrontendPeriod;
+  contractAndConfig: ContractAndConfig;
+}
+
+export const PromotionVotingStatsPanel = ({
+  promotion,
+  period,
+  contractAndConfig,
+}: PromotionVotingStatsPanelProps) => {
+  const theme = useTheme();
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      <PromotionVotingStats
+        yeaVotingPower={promotion.yea_voting_power || 0}
+        nayVotingPower={promotion.nay_voting_power || 0}
+        passVotingPower={promotion.pass_voting_power || 0}
+        totalVotingPower={period.totalVotingPower || 0}
+        contractQuorum={contractAndConfig?.promotion_quorum || 0}
+        contractSupermajority={contractAndConfig?.promotion_supermajority || 0}
+      />
+      <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between" }}>
+        <Typography sx={{ color: `${theme.palette.success.main} !important` }}>
+          Yea:{" "}
+          {(
+            (promotion.yea_voting_power / period.totalVotingPower) *
+            100
+          ).toFixed(0)}
+          %
+        </Typography>
+        <Typography sx={{ color: `${theme.palette.error.main} !important` }}>
+          Nay:{" "}
+          {(
+            (promotion.nay_voting_power / period.totalVotingPower) *
+            100
+          ).toFixed(0)}
+          %
+        </Typography>
+        <Typography sx={{ color: `${theme.palette.warning.main} !important` }}>
+          Pass:{" "}
+          {(
+            (promotion.pass_voting_power / period.totalVotingPower) *
+            100
+          ).toFixed(0)}
+          %
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
 
 export const PeriodVotingStatsPanel = ({
   hasPromotion,
@@ -34,10 +83,10 @@ export const PeriodVotingStatsPanel = ({
   if (hasPromotion) {
     let totalVotingPower = 0;
     if (promotions && promotions[0]) {
-      totalVotingPower = promotions[0].yea_voting_power +
-        promotions[0].nay_voting_power +
-        promotions[0].pass_voting_power ||
-        0;
+      totalVotingPower =
+        promotions[0].yea_voting_power +
+          promotions[0].nay_voting_power +
+          promotions[0].pass_voting_power || 0;
     }
 
     return (
@@ -56,36 +105,17 @@ export const PeriodVotingStatsPanel = ({
             <ComponentLoading width="255px" borderRadius={2} />
           </Box>
         ) : promotions && promotions[0] ? (
-          <>
-            <PromotionVotingStats
-              yeaVotingPower={promotions[0].yea_voting_power || 0}
-              nayVotingPower={promotions[0].nay_voting_power || 0}
-              passVotingPower={promotions[0].pass_voting_power || 0}
-              totalVotingPower={period?.totalVotingPower || 0}
-              contractQuorum={contractAndConfig?.promotion_quorum || 0}
-              contractSupermajority={
-                contractAndConfig?.promotion_supermajority || 0
-              }
-            />
-            <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between" }}>
-                <Typography sx={{ color: `${theme.palette.success.main} !important` }}>
-                  Yea: {(((promotions[0].yea_voting_power / totalVotingPower) || 0) * 100).toFixed(0)}%
-                </Typography>
-                <Typography sx={{ color: `${theme.palette.error.main} !important` }}>
-                  Nay: {(((promotions[0].nay_voting_power / totalVotingPower) || 0) * 100).toFixed(0)}%
-                </Typography>
-                <Typography sx={{ color: `${theme.palette.warning.main} !important` }}>
-                  Pass: {(((promotions[0].pass_voting_power / totalVotingPower) || 0) * 100).toFixed(0)}%
-                </Typography>
-            </Box>
-          </>
+          <PromotionVotingStatsPanel
+            promotion={promotions[0]}
+            period={period}
+            contractAndConfig={contractAndConfig}
+          />
         ) : null}
       </Box>
     );
   }
 
   if (hasProposals) {
-    console.log(period)
     return (
       <Box
         sx={{
@@ -96,7 +126,7 @@ export const PeriodVotingStatsPanel = ({
         }}
       >
         {isLoading ? (
-          <ComponentLoading width={255} sx={{ mt: 2, display: 'flex' }} />
+          <ComponentLoading width={255} sx={{ mt: 2, display: "flex" }} />
         ) : proposals && period && proposals[0] ? (
           <ProposalVotingStats
             proposals={proposals}

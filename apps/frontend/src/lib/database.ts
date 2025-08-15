@@ -54,8 +54,7 @@ export class Database {
     }
   }
 
-  async getActiveContracts(
-  ): Promise<ContractAndConfig[]> {
+  async getContracts(): Promise<ContractAndConfig[]> {
     console.log(`[Database] Fetching contracts for governance`);
 
     const rows = await this.query<any>(
@@ -71,8 +70,7 @@ export class Database {
         proposal_quorum,
         promotion_quorum,
         promotion_supermajority
-      FROM contracts
-      WHERE active = 1`,
+      FROM contracts`,
     );
 
     const contracts: ContractAndConfig[] = rows.map((row: any) => ({
@@ -138,7 +136,6 @@ export class Database {
     LIMIT 1`,
     [governanceType]
   );
-    console.log(`[Database] Raw query result:`, JSON.stringify(rows, null, 2));
 
   if (rows.length === 0) {
     console.log(`[Database] No current period found for ${governanceType} governance`);
@@ -219,7 +216,6 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
       const periodKey = `${row.contract_address}-${row.contract_voting_index}`;
 
       if (!periodsMap.has(periodKey)) {
-        console.log({row})
         const period: FrontendPeriod = {
           startDateTime: new Date(row.date_start),
           endDateTime: new Date(row.date_end),
@@ -273,6 +269,18 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
 
     // Return as array - already sorted by SQL!
     return Array.from(periodsMap.values());
+  }
+
+  async getVotes(proposalHash: string): Promise<Vote[]> {
+    console.log(`[Database] Fetching votes for promotion: ${proposalHash}`);
+
+    const rows = await this.query<Vote>(`
+      SELECT *
+      FROM votes
+      WHERE proposal_hash = ?
+    `, [proposalHash]);
+
+    return rows;
   }
 
   async close(): Promise<void> {

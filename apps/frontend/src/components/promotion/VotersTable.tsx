@@ -10,42 +10,23 @@ import { contractStore } from '@/stores/ContractStore';
 const voterKeys: (keyof Vote)[] = ['baker', 'voting_power', 'vote', 'time'];
 
 interface VotersTableProps {
-  contractVotingIndex?: number;
-  contractAddress?: string;
+  proposalHash: string;
 }
 
-export const VotersTable = observer(({ contractVotingIndex, contractAddress }: VotersTableProps) => {
-  const { votes, isLoading, error, hasValidParams } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
+// TODO pass contractAddress + contractVotingIndex to fetch votes for specific period
+export const VotersTable = observer(({ proposalHash }: VotersTableProps) => {
+  const { votes, isLoading } = contractStore.getVotesForPeriod(proposalHash);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     votes,
     'baker',
   );
 
-  if (!hasValidParams) {
-    return (
-      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-        No voters found
-      </Typography>
-    );
-  }
-
   const columns = voterKeys.map(key => ({
     id: key,
     label: key === 'proposal_hash' ? 'Proposal' : prettifyKey(key),
     sortable: true
   }));
-
-  if (isLoading) return <SortableTableSkeleton columns={columns} />;
-
-  if (error) {
-    return (
-      <Typography variant="body2" color="error" sx={{ textAlign: 'center', py: 3 }}>
-        Error loading voters: {error}
-      </Typography>
-    );
-  }
-
 
   const renderCell = (row: Vote, column: { id: keyof Vote; label: string; sortable?: boolean }) => {
     switch (column.id) {
@@ -91,15 +72,8 @@ export const VotersTable = observer(({ contractVotingIndex, contractAddress }: V
     }
   };
 
-  if (!Array.isArray(votes) || votes.length === 0) {
-    return (
-      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-        {contractVotingIndex
-          ? `No voters found for period ${contractVotingIndex}`
-          : 'No voters found'
-        }
-      </Typography>
-    );
+  if (!Array.isArray(votes) || votes.length === 0 || isLoading) {
+    return <SortableTableSkeleton columns={columns} rowCount={5} />;
   }
 
   return (
