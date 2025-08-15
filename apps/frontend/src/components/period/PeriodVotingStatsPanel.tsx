@@ -61,7 +61,7 @@ export const PeriodVotingStatsPanel = ({
               yeaVotingPower={promotions[0].yea_voting_power || 0}
               nayVotingPower={promotions[0].nay_voting_power || 0}
               passVotingPower={promotions[0].pass_voting_power || 0}
-              totalVotingPower={promotions[0].total_voting_power || 0}
+              totalVotingPower={period?.totalVotingPower || 0}
               contractQuorum={contractAndConfig?.promotion_quorum || 0}
               contractSupermajority={
                 contractAndConfig?.promotion_supermajority || 0
@@ -85,6 +85,7 @@ export const PeriodVotingStatsPanel = ({
   }
 
   if (hasProposals) {
+    console.log(period)
     return (
       <Box
         sx={{
@@ -99,7 +100,7 @@ export const PeriodVotingStatsPanel = ({
         ) : proposals && period && proposals[0] ? (
           <ProposalVotingStats
             proposals={proposals}
-            totalVotingPower={period.total_voting_power}
+            totalVotingPower={period.totalVotingPower}
             contractQuorum={contractAndConfig?.proposal_quorum || 0}
           />
         ) : null}

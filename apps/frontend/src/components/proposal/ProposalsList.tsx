@@ -63,11 +63,46 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
 
     if (isLoading) return <ProposalsListSkeleton />;
 
-    if (error) {
-      return (
-        <Box sx={{ p: 3, textAlign: "center" }}>
-          <Typography variant="h6" sx={{ color: "error.main", mb: 1 }}>
-            Error Loading Proposals
+  return (
+    <Box>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'center', sm: 'flex-start' },
+        justifyContent: { xs: 'center', sm: 'flex-end' },
+        mb: 2,
+        mx: 0.5,
+        mr: { xs: 0, sm: 1 },
+      }}>
+        <Box
+        sx={{
+          width: { xs: '95%', sm: 250 }
+        }}
+      >
+        <VotingProgress
+          label="Quorum"
+          value={quorumPercent.toFixed(2)}
+          required={contractQuorum}
+          progress={progress}
+          variant='body1'
+        />
+      </Box>
+    </Box>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {proposals.length > 0 ? (
+          proposals.map((proposal: Proposal, i: number) => (
+            <ProposalCard
+              key={i}
+              proposal={proposal}
+            />
+          ))
+        ) : (
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+            {contractVotingIndex
+              ? `No proposals found for period ${contractVotingIndex}`
+              : 'No proposals found'
+            }
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {error}
