@@ -1,11 +1,12 @@
 import { Box, Card, Typography, useTheme } from '@mui/material';
 import { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Period } from '@trilitech/types';
-import { PeriodCard } from '@/components/period/PeriodCard';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
+import { FrontendPeriod } from '@/types/api';
+import { formatDate } from '@/lib/formatDate';
+import { PastPeriodCard } from '@/components/past/PastPeriodCard';
 
-const PeriodCardSkeleton = () => {
+const PastPeriodCardSkeleton = () => {
   return (
     <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
       <ComponentLoading width={80} height={20} borderRadius={1} sx={{mb: 1, mt: 1}} />
@@ -20,16 +21,16 @@ const PeriodCardSkeleton = () => {
 
 const PeriodsListSkeleton = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <PeriodCardSkeleton />
+      <PastPeriodCardSkeleton />
   </Box>
 );
 
 interface PeriodsListProps {
-  periods: Period[];
+  periods: FrontendPeriod[];
   isLoading: boolean;
 }
 
-export const PeriodsList = observer(({ periods, isLoading }: PeriodsListProps) => {
+export const PastPeriodsList = observer(({ periods, isLoading }: PeriodsListProps) => {
 
   if (isLoading) return <PeriodsListSkeleton />;
 
@@ -41,12 +42,11 @@ export const PeriodsList = observer(({ periods, isLoading }: PeriodsListProps) =
     );
   }
 
-  const firstPeriodIndex = periods[periods.length - 1].contract_voting_index;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Typography variant="subtitle2" sx={{ mb: 1 }}>
-        Periods with proposals / promotions ({periods.filter(e => e.proposal_hashes && e.proposal_hashes.length + (e.promotion_hash ? 1 : 0)).length})
+        Periods with proposals / promotions ({periods.length})
       </Typography>
 
       {periods.map((period, index) => {
@@ -55,34 +55,19 @@ export const PeriodsList = observer(({ periods, isLoading }: PeriodsListProps) =
 
         return (
           <Fragment key={period.contract_voting_index}>
-            <PeriodCard period={period} />
+            <PastPeriodCard period={period} />
             {hasGap && (
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
                 sx={{ textAlign: 'center', py: 1, fontStyle: 'italic' }}
               >
-                {
-                  nextPeriod.contract_voting_index + 1 === period.contract_voting_index - 1 ? (
-                    <>No proposals or promotions for period {nextPeriod.contract_voting_index + 1}</>
-                  ) : (
-                    <>No proposals or promotions for periods {nextPeriod.contract_voting_index + 1} - {period.contract_voting_index - 1}</>
-                  )
-                }
+                No proposals or promotions for periods between {formatDate(nextPeriod.startDateTime, false)} - {formatDate(period.endDateTime, false)}
               </Typography>
             )}
           </Fragment>
         );
       })}
-      {firstPeriodIndex > 1 && (
-        <Typography
-          variant="subtitle2"
-          color="text.secondary"
-          sx={{ textAlign: 'center', py: 1, fontStyle: 'italic' }}
-        >
-          No proposals or promotions for periods 1 - {firstPeriodIndex - 1}
-        </Typography>
-      )}
     </Box>
   );
 });

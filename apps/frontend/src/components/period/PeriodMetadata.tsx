@@ -5,12 +5,11 @@ import { JSX } from "react";
 import { formatDate } from "@/lib/formatDate";
 import { formatNumber } from "@/lib/formatNumber";
 import { ComponentLoading } from "@/components/shared/ComponentLoading";
-import { FrontendProposal } from "@/types/api";
-import { observer } from "mobx-react-lite";
+import { FrontendPeriod } from "@/types/api";
 
 interface PeriodMetadataProps {
-  period: Period;
-  proposals?: FrontendProposal[];
+  period: FrontendPeriod;
+  proposals?: Proposal[];
   hasProposals?: boolean;
   hasPromotion?: string;
   isLoading?: boolean;
@@ -25,69 +24,31 @@ export const PeriodMetadata = observer(({
   renderHash,
 }: PeriodMetadataProps) => (
   <Box sx={{ flex: 1 }}>
-    <Typography variant="body2" sx={{ mb: 1, display: "block" }}>
-      Period {period.contract_voting_index}{" "}
-      {period.period_class === "current" && (
-        <Chip
-          component="span"
-          label="Current"
-          color="primary"
-          variant="filled"
-          size="small"
-          sx={{ mt: -0.5, ml: 1 }}
-        />
-      )}
-    </Typography>
-    <Typography variant="subtitle2" sx={{ mb: 1 }}>
-      Levels: {period.level_start.toLocaleString()} -{" "}
-      {period.level_end.toLocaleString()}
-    </Typography>
-    <Typography
-      variant="caption"
-      color="text.secondary"
-      sx={{ display: { xs: "block", sm: "none" }, mb: 2 }}
-    >
-      {formatDate(period.date_start, false)} -{" "}
-      {formatDate(period.date_end, false)}
-    </Typography>
-    <Typography
-      variant="caption"
-      color="text.secondary"
-      sx={{ display: { xs: "none", sm: "block" }, mb: 2 }}
-    >
-      Start {formatDate(period.date_start)} - End {formatDate(period.date_end)}
-    </Typography>
 
-    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
-      {hasProposals && (
-        <Chip
-          label={`${period.proposal_hashes?.length} Proposal${period.proposal_hashes?.length === 1 ? '' : 's'}`}
-          size="small"
-          color="primary"
-          variant="outlined"
-        />
-      )}
-      {hasPromotion && (
-        <Chip
-          label="Promotion"
-          size="small"
-          color="secondary"
-          variant="outlined"
-        />
-      )}
-      {!hasProposals && !hasPromotion && (
-        <Typography variant="body1" color="text.secondary">
-          No Proposals or Promotions for current period
-        </Typography>
-      )}
-    </Box>
+    <Typography
+      variant="subtitle2"
+      sx={{ display: { xs: "block", sm: "none" }, mb: 0 }}
+    >
+      {formatDate(period.startDateTime, false)} -{" "}
+      {formatDate(period.endDateTime, false)}
+    </Typography>
+    <Typography
+      variant="subtitle2"
+      sx={{ display: { xs: "none", sm: "block" }, mb: 0 }}
+    >
+      Start {formatDate(period.startDateTime)} - End {formatDate(period.endDateTime)}
+    </Typography>
+    <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
+      Levels: {period.startLevel.toLocaleString()} -{" "}
+      {period.endLevel.toLocaleString()}
+    </Typography>
 
     {hasProposals && (
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+      <Box sx={{ mt: 2}}>
+        <Typography variant="subtitle2">
           Proposals:
         </Typography>
-        {period.proposal_hashes?.map((hash: string, index) => (
+        {period.proposals?.map((proposal: Proposal, index) => (
           <Box
             key={index}
             sx={{
@@ -98,7 +59,7 @@ export const PeriodMetadata = observer(({
               }}>
             <EllipsisBox
               sx={{maxWidth: '65vw'}}>
-                {renderHash(hash)}
+                {renderHash(proposal.proposal_hash)}
               </EllipsisBox>
             <Box sx={{display: {xs: 'none', md: 'block', wordBreak: 'nobreak'}}}>
               {isLoading ? (
@@ -118,10 +79,10 @@ export const PeriodMetadata = observer(({
 
     {hasPromotion && (
       <Box>
-        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ mt: 2 }}>
           Promotion:
         </Typography>
-        <EllipsisBox>{renderHash(period.promotion_hash || "")}</EllipsisBox>
+        <EllipsisBox>{renderHash(period.promotion?.proposal_hash || "")}</EllipsisBox>
       </Box>
     )}
   </Box>

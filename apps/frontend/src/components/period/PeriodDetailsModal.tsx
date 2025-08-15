@@ -12,6 +12,7 @@ import { EllipsisBox } from '@/components/shared/EllipsisBox';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { SortableTableSkeleton } from '@/components/shared/SortableTable';
 import { VotingResultsSkeleton } from '@/components/promotion/VotingResults';
+import { FrontendPeriod } from '@/types/api';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -38,7 +39,7 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 interface PeriodDetailsModalProps {
   open: boolean;
   onClose: () => void;
-  period: Period;
+  period: FrontendPeriod;
 }
 
 
@@ -107,31 +108,32 @@ const PeriodDetailsSkeleton = ({ tabValue, onClose }: { tabValue: number; onClos
 export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDetailsModalProps) => {
   const [activeTab, setActiveTab] = useState(0);
 
-  const hasProposals = period.proposal_hashes && period.proposal_hashes.length > 0;
-  const hasPromotions = !!period.promotion_hash;
+  const hasProposals = period.proposals && period.proposals.length > 0;
+  const hasPromotions = !!period.promotion;
+  const isLoading = contractStore.isLoadingPastPeriods;
 
-  const {
-    proposals,
-    promotions,
-    error,
-    isLoading,
-    proposalsPeriod,
-    promotionsPeriod,
-    proposalsPeriodData,
-    promotionsPeriodData
-  } = contractStore.getPeriodData(
-    period.contract_address,
-    period.contract_voting_index,
-    hasProposals,
-    hasPromotions
-  );
+  // const {
+  //   proposals,
+  //   promotions,
+  //   error,
+  //   isLoading,
+  //   proposalsPeriod,
+  //   promotionsPeriod,
+  //   proposalsPeriodData,
+  //   promotionsPeriodData
+  // } = contractStore.getPeriodData(
+  //   period.contract,
+  //   period.contract_voting_index,
+  //   hasProposals,
+  //   hasPromotions
+  // );
 
   const tabConfig: { label: string; component: React.ReactNode; isPrimaryPeriod: boolean }[] = [];
 
-  if (proposals.length > 0) {
-    const isPrimaryPeriod = proposalsPeriod === period.contract_voting_index;
+  if (period.proposals && period.proposals.length > 0) {
+    const isPrimaryPeriod = !!period.proposals;
     tabConfig.push({
-      label: `Proposals - Period ${proposalsPeriod}`,
+      label: `Proposals - Period ${period.contract_voting_index}`,
       component: (
         <ProposalsView
           contractVotingIndex={proposalsPeriod}
@@ -143,10 +145,10 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
     });
   }
 
-  if (promotions.length > 0) {
-    const isPrimaryPeriod = promotionsPeriod === period.contract_voting_index;
+  if (period.promotion) {
+    const isPrimaryPeriod = !!period.promotion;
     tabConfig.push({
-      label: `Promotion - Period ${promotionsPeriod}`,
+      label: `Promotion - Period ${period.contract_voting_index}`,
       component: (
         <PromotionView
           contractVotingIndex={promotionsPeriod}
@@ -156,18 +158,6 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
         />
       ),
       isPrimaryPeriod
-    });
-  }
-
-  if (error && tabConfig.length === 0) {
-    tabConfig.push({
-      label: 'Error',
-      component: (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography color="error">Error: {error}</Typography>
-        </Box>
-      ),
-      isPrimaryPeriod: true
     });
   }
 
@@ -208,10 +198,10 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
               target="_blank"
               rel="noopener noreferrer"
             >
-              Contract: {period.contract_address}
+              Contract: {period.contract}
             </Link>
             <CopyButton
-              text={period.contract_address}
+              text={period.contract}
               message="Contract address copied!"
               size="small"
               sx={{ ml: 0.5, mt: -0.25, color: 'primary.main' }}
@@ -237,16 +227,16 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
               textAlign: 'left',
               display: { xs: activeTab === 0 ? 'block' : 'none', sm: 'block' }
             }}>
-              {proposals.length > 0 && proposalsPeriodData && (
+              {period.proposals &&(
                 <>
                   <Typography variant="h6" color="success.main">
-                    Proposals - Period {proposalsPeriod}
+                    Proposals - Period {period.contract_voting_index}
                   </Typography>
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
-                    Dates: {formatDate(proposalsPeriodData.date_start)} - {formatDate(proposalsPeriodData.date_end)}
+                    Dates: {formatDate(period.startDateTime)} - {formatDate(period.endDateTime)}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Levels: {proposalsPeriodData.level_start.toLocaleString()} - {proposalsPeriodData.level_end.toLocaleString()}
+                    Levels: {period.startLevel.toLocaleString()} - {period.endLevel.toLocaleString()}
                   </Typography>
                 </>
                )}
@@ -257,16 +247,16 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
               flex: 1,
               display: { xs: activeTab === 1 ? 'block' : 'none', sm: 'block' }
             }}>
-              {promotions.length > 0 && promotionsPeriodData && (
+              {period.promotion && (
                 <>
                   <Typography variant="h6" color="warning.main">
-                    Promotion - Period {promotionsPeriod}
+                    Promotion - Period {period.contract_voting_index}
                   </Typography>
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
-                    Dates: {formatDate(promotionsPeriodData.date_start)} - {formatDate(promotionsPeriodData.date_end)}
+                    Dates: {formatDate(period.startDateTime)} - {formatDate(period.endDateTime)}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Levels: {promotionsPeriodData.level_start.toLocaleString()} - {promotionsPeriodData.level_end.toLocaleString()}
+                    Levels: {period.startLevel.toLocaleString()} - {period.endLevel.toLocaleString()}
                   </Typography>
                 </>
               )}

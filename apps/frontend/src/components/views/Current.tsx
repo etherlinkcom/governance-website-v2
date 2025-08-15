@@ -7,19 +7,19 @@ import {
   CardContent,
 } from "@mui/material";
 import { contractStore } from "@/stores/ContractStore";
-import { getWalletStore } from "@/stores/WalletStore";
 import { CurrentCardHeader } from "@/components/current/CurrentCardHeader";
 import { EmptyPeriod } from "../current/EmptyPeriod";
 
 export const Current = observer(() => {
   const currentPeriod = contractStore.currentPeriodData;
   const isLoading = contractStore.isLoadingCurrentPeriod;
-  const walletStore = getWalletStore();
 
   if (isLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-        <Typography>Loading current period...</Typography>
+      <Box sx={{ width: "100%", mx: "auto"}}>
+        <Card sx={{ p: 1, height: "600px", borderRadius: "16px" }}>
+          <Typography>Loading current period...</Typography>
+        </Card>
       </Box>
     );
   }
@@ -43,6 +43,12 @@ export const Current = observer(() => {
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ mb: 2 }}>
                 Current Proposals
+              </Typography>
+            </Box>
+          ) : currentPeriod.promotion ? (
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Promotion Period
               </Typography>
             </Box>
           ) : (

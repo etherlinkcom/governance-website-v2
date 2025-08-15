@@ -6,6 +6,8 @@ import { fetchJson } from '@/lib/fetchJson';
 class ContractStore {
   private currentGovernance: GovernanceType | null = null;
 
+  // TODO get all contracts by contractaddress as well and look up periods that way
+  // We could also join periods on contract quorum
   private contracts: Partial<Record<string, ContractAndConfig>> = {};
 
   // Caches
@@ -23,7 +25,7 @@ class ContractStore {
 
   private error: string | null = null;
 
-  private readonly futurePeriodsCount: number = 3;
+  private readonly futurePeriodsCount: number = 10;
   private readonly tzktApiUrl: string = 'https://api.tzkt.io/v1';
 
   constructor() {
@@ -141,17 +143,17 @@ class ContractStore {
     this.loadingFuturePeriods[this.currentGovernance] = true;
 
     const tezosBlockTimeInMs: number = 8000;
-    const startLevel: number = contract.started_at_level;
+    const contractStartLevel: number = contract.started_at_level;
     const periodLength: number = contract.period_length;
 
-    // TODO make this in constructor?
-    const currentLevel: {level: number} = yield fetchJson<{ level: number }>(
+    // TODO make this in constructor as we dont need it every time
+    const currentLevel: [{level: number}] = yield fetchJson<[{ level: number }]>(
       `${this.tzktApiUrl}/blocks?limit=1&sort.desc=level`
     );
     const currentTime: number = (new Date()).getTime();
 
-    const remainder: number = (currentLevel.level - startLevel) % periodLength
-    const nextPeriodStart: number = currentLevel.level - remainder + periodLength;
+    const remainder: number = (currentLevel[0].level - contractStartLevel) % periodLength
+    const nextPeriodStart: number = currentLevel[0].level - remainder + periodLength;
 
     const futurePeriods: FuturePeriod[] = [];
     for (let i = 0; i < this.futurePeriodsCount; i++) {

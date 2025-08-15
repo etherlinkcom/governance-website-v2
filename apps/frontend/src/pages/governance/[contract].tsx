@@ -5,6 +5,8 @@ import { Box, Button, Container, Typography } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
 import { GovernanceType } from '@trilitech/types';
 import { Current } from '@/components/views/Current';
+import { Past } from '@/components/views/Past';
+import { Future } from '@/components/views/Future';
 
 type ViewType = 'Current' | 'Past' | 'Future';
 
@@ -66,35 +68,15 @@ export default observer(() => {
         {/* Conditional content based on selected view */}
         <Box sx={{ width: '100%'}}>
           {selectedView === 'Current' && (
-            <Box>
-              {contractStore.currentPeriodData ? (
-                <Current  />
-              ) : (
-                <Typography>No current period data</Typography>
-              )}
-            </Box>
+            <Current  />
           )}
 
           {selectedView === 'Past' && (
-            <Box>
-              <Typography variant="h5" gutterBottom>Past Periods</Typography>
-              {contractStore.pastPeriodsData && contractStore.pastPeriodsData.length > 0 ? (
-                <pre>{JSON.stringify(contractStore.pastPeriodsData, null, 2)}</pre>
-              ) : (
-                <Typography>No past periods data</Typography>
-              )}
-            </Box>
+            <Past />
           )}
 
           {selectedView === 'Future' && (
-            <Box>
-              <Typography variant="h5" gutterBottom>Future Periods</Typography>
-              {contractStore.futurePeriodsData && contractStore.futurePeriodsData.length > 0 ? (
-                <pre>{JSON.stringify(contractStore.futurePeriodsData, null, 2)}</pre>
-              ) : (
-                <Typography>No future periods data</Typography>
-              )}
-            </Box>
+            <Future />
           )}
         </Box>
       </Box>
