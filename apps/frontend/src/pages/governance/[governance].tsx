@@ -12,17 +12,32 @@ type ViewType = 'Current' | 'Past' | 'Future';
 
 export default observer(() => {
   const router = useRouter();
-  const { contract } = router.query;
-  const [selectedView, setSelectedView] = useState<ViewType>('Current');
+  const { governance } = router.query;
+  const [selectedView, setSelectedView] = useState<ViewType | null>(null);
 
   const views: ViewType[] = ['Current', 'Past', 'Future'];
 
   useEffect(() => {
-    if (contract && typeof contract === 'string') {
-      const governanceType = contract as GovernanceType;
-      contractStore.setGovernance(governanceType);
+    if (governance && typeof governance === 'string') {
+      contractStore.setGovernance(governance as GovernanceType);
     }
-  }, [contract]);
+  }, [governance]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const storedView = localStorage.getItem('governance-selected-view') as ViewType;
+    if (storedView && views.includes(storedView)) {
+      setSelectedView(storedView);
+    } else {
+      setSelectedView('Current');
+    }
+  }, []);
+
+  const handleViewChange = (view: ViewType) => {
+    setSelectedView(view);
+    localStorage.setItem('governance-selected-view', view);
+  };
 
   if (contractStore.currentError) {
     return (
@@ -58,14 +73,13 @@ export default observer(() => {
               sx={{borderRadius: '12px'}}
               key={view}
               variant={selectedView === view ? 'contained' : 'outlined'}
-              onClick={() => setSelectedView(view)}
+              onClick={() => handleViewChange(view)}
             >
               {view}
             </Button>
           ))}
         </Box>
 
-        {/* Conditional content based on selected view */}
         <Box sx={{ width: '100%'}}>
           {selectedView === 'Current' && (
             <Current  />
