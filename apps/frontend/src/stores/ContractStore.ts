@@ -77,6 +77,7 @@ class ContractStore {
   }
 
   get futurePeriodsData(): FuturePeriod[] | undefined {
+    console.log(this.currentGovernance, this.futurePeriods)
     return this.currentGovernance ? this.futurePeriods[this.currentGovernance] : undefined;
   }
 
@@ -146,6 +147,7 @@ class ContractStore {
       );
       for (const contract of contracts) {
         if (this.addressToContract[contract.contract_address]) continue;
+        if (contract.active) this.activeContracts[contract.governance_type] = contract;
         this.addressToContract[contract.contract_address] = contract;
       }
     } catch (error) {
