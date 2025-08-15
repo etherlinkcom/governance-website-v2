@@ -6,6 +6,7 @@ import { FuturePeriodCard } from "@/components/future/FuturePeriodCard";
 export const Future = observer(() => {
   const isLoading = contractStore.isLoadingFuturePeriods;
   const futurePeriods = contractStore.futurePeriodsData;
+  console.log({futurePeriods})
 
   if (isLoading) return <>Loading...</>;
 
