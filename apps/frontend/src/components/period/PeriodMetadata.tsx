@@ -24,7 +24,6 @@ export const PeriodMetadata = observer(({
   renderHash,
 }: PeriodMetadataProps) => (
   <Box sx={{ flex: 1 }}>
-
     <Typography
       variant="subtitle2"
       sx={{ display: { xs: "block", sm: "none" }, mb: 0 }}
@@ -36,7 +35,8 @@ export const PeriodMetadata = observer(({
       variant="subtitle2"
       sx={{ display: { xs: "none", sm: "block" }, mb: 0 }}
     >
-      Start {formatDate(period.startDateTime)} - End {formatDate(period.endDateTime)}
+      Start {formatDate(period.startDateTime)} - End{" "}
+      {formatDate(period.endDateTime)}
     </Typography>
     <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
       Levels: {period.startLevel.toLocaleString()} -{" "}
@@ -44,26 +44,35 @@ export const PeriodMetadata = observer(({
     </Typography>
 
     {hasProposals && (
-      <Box sx={{ mt: 2}}>
-        <Typography variant="subtitle2">
-          Proposals:
-        </Typography>
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="subtitle2">Proposals:</Typography>
         {period.proposals?.map((proposal: Proposal, index) => (
           <Box
             key={index}
             sx={{
               justifyContent: "space-between",
               display: "flex",
-              width: '100%' ,
+              width: "100%",
               alignItems: "center",
-              }}>
+            }}
+          >
             <EllipsisBox
-              sx={{maxWidth: '65vw'}}>
-                {renderHash(proposal.proposal_hash)}
-              </EllipsisBox>
-            <Box sx={{display: {xs: 'none', md: 'block', wordBreak: 'nobreak'}}}>
+              sx={{
+                width: {
+                  xs: "100%",
+                  md: "50vw",
+                },
+              }}
+            >
+              {renderHash(proposal.proposal_hash)}
+            </EllipsisBox>
+            <Box
+              sx={{
+                display: { xs: "none", md: "block", wordBreak: "nobreak" },
+              }}
+            >
               {isLoading ? (
-                <ComponentLoading width={115} sx={{ display: 'flex' }} />
+                <ComponentLoading width={115} sx={{ display: "flex" }} />
               ) : (
                 proposals && proposals[index] && (
                   <Typography variant="body2" sx={{ wordWrap: 'normal', whiteSpace: 'nowrap', ml: 2}}>
@@ -78,11 +87,20 @@ export const PeriodMetadata = observer(({
     )}
 
     {hasPromotion && (
-      <Box>
+      <Box sx={{ width: "100%" }}>
         <Typography variant="subtitle2" sx={{ mt: 2 }}>
           Promotion:
         </Typography>
-        <EllipsisBox>{renderHash(period.promotion?.proposal_hash || "")}</EllipsisBox>
+        <EllipsisBox
+          sx={{
+            width: {
+              xs: "100%",
+              md: "50vw",
+            },
+          }}
+        >
+          {renderHash(period.promotion?.proposal_hash || "")}
+        </EllipsisBox>
       </Box>
     )}
   </Box>
