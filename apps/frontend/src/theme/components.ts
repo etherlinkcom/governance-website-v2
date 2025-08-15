@@ -50,8 +50,6 @@ export const components: Components<Theme> = {
         borderRadius: 12,
         "&.table-card": {
           padding: theme.spacing(2),
-          marginLeft: theme.spacing(1),
-          marginRight: theme.spacing(1),
           marginTop: theme.spacing(2),
           marginBottom: theme.spacing(2),
           borderRadius: theme.shape.borderRadius,
@@ -145,7 +143,7 @@ export const components: Components<Theme> = {
           boxShadow: 24,
           display: "flex",
           flexDirection: "column",
-          overflow: "hidden",
+          overflow: "auto",
           [theme.breakpoints.up("lg")]: {
             width: "90vw",
             height: "90dvh",
@@ -232,8 +230,6 @@ export const components: Components<Theme> = {
         color: theme.palette.text.primary,
         fontFamily: typography.fontFamily,
         minWidth: "375px",
-        paddingRight: "0px !important",
-        overflowY: "auto !important",
       },
       "*::-webkit-scrollbar": {
         width: "8px",
@@ -298,8 +294,9 @@ export const components: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         borderRadius: "25px",
-        overflow: "hidden",
+        overflow: "auto",
         overflowX: "auto",
+        maxHeight: "500px",
         "&::-webkit-scrollbar": {
           height: "8px",
         },
@@ -327,7 +324,6 @@ export const components: Components<Theme> = {
       root: {
         borderCollapse: "separate",
         borderSpacing: 0,
-        padding: "12px",
       },
     },
   },

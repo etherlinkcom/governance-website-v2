@@ -13,6 +13,7 @@ import { observer } from 'mobx-react-lite';
 import { PeriodVotingStatsPanel } from '@/components/period/PeriodVotingStatsPanel';
 import { PeriodMetadata } from '@/components/period/PeriodMetadata';
 import { FrontendPeriod } from '@/types/api';
+import { PromotionModal } from './PromotionModal';
 
 interface PastPeriodCardProps {
   period: FrontendPeriod;
@@ -26,7 +27,7 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
   const hasPromotion = period.promotion?.proposal_hash;
 
   const isLoading = contractStore.isLoadingPastPeriods;
-  const contractAndConfig = contractStore.currentContract;
+  const contractAndConfig = contractStore.currentContract!;
 
   const handleCardClick = () => {
     if (hasProposals || hasPromotion) {
@@ -39,32 +40,6 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
     if (linkData) return <HashLink hash={hash} />;
     return <HashDisplay hash={hash} />;
   }
-
-  // if (isFuture) {
-  //   return (
-  //     <Card variant="outlined" sx={{ py: 1, px: 2 }}>
-  //       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  //         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-  //           <Typography variant="body2" color="text.secondary">
-  //             Period {period.contract_voting_index}
-  //           </Typography>
-  //           <Chip label="Future" size="small" variant="outlined" color="info" sx={{display: {xs: 'none', sm: 'block'}}} />
-  //         </Box>
-  //         <Box sx={{ textAlign: 'right', mb: 1 }}>
-  //           <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: { xs: 'none', sm: 'block' } }}>
-  //             {/* Levels: {period.level_start.toLocaleString()} - {period.level_end.toLocaleString()} */}
-  //           </Typography>
-  //           <Typography variant="caption" color="text.secondary" sx={{ mb: -1, display: { xs: 'block', sm: 'none' } }}>
-  //             {/* {formatDate(period.date_start, false)} - {formatDate(period.date_end, false)} */}
-  //           </Typography>
-  //           <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
-  //             {/* Start {formatDate(period.date_start)} - End {formatDate(period.date_end)} */}
-  //           </Typography>
-  //         </Box>
-  //       </Box>
-  //     </Card>
-  //   );
-  // }
 
   return (
     <>
@@ -99,11 +74,12 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
             />
           </Box>
       </Card>
-      {/* <PeriodDetailsModal
+      {/* if proposal open proposal modal, if promotion open promotion modal */}
+      <PromotionModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         period={period}
-      /> */}
+      />
     </>
   );
 });

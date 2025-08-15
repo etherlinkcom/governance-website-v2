@@ -1,4 +1,4 @@
-import { makeAutoObservable, flow, computed } from 'mobx';
+import { makeAutoObservable, flow, computed, runInAction } from 'mobx';
 import { GovernanceType, Period, ContractAndConfig, Vote, Promotion, Upvote, Proposal } from '@trilitech/types';
 import { FuturePeriod, PeriodData, PeriodDetailsResponse, FrontendPeriod } from '@/types/api';
 import { fetchJson } from '@/lib/fetchJson';
@@ -7,8 +7,10 @@ class ContractStore {
   private currentGovernance: GovernanceType | null = null;
 
   // TODO get all contracts by contractaddress as well and look up periods that way
-  // We could also join periods on contract quorum
-  private contracts: Partial<Record<string, ContractAndConfig>> = {};
+  // TODO all contracts to look up past contracts quorum etc.
+
+  private addressToContract: Partial<Record<string, ContractAndConfig>> = {};
+  private activeContracts: Partial<Record<string, ContractAndConfig>> = {};
 
   // Caches
   // TODO make strings so we only need one cache?
@@ -16,27 +18,26 @@ class ContractStore {
   private currentPeriod: Partial<Record<GovernanceType, FrontendPeriod>> = {};
   private futurePeriods: Partial<Record<GovernanceType, FuturePeriod[]>> = {};
 
-  // Loading states
+  // Loading states TODO one loading state with string keys?
   private loadingPastPeriods: Partial<Record<GovernanceType, boolean>> = {};
   private loadingCurrentPeriod: Partial<Record<GovernanceType, boolean>> = {};
   private loadingFuturePeriods: Partial<Record<GovernanceType, boolean>> = {};
+  private loadingVotes: Partial<Record<string, boolean>> = {};
 
-  // Error states?
 
   private error: string | null = null;
 
   private readonly futurePeriodsCount: number = 10;
   private readonly tzktApiUrl: string = 'https://api.tzkt.io/v1';
 
+  // Add to state properties at the top
+  private votes: Partial<Record<string, Vote[]>> = {};
+
   constructor() {
     makeAutoObservable(this, {
       setGovernance: flow,
     });
-    this.getActiveContracts();
-  }
-
-  get allContracts(): Partial<Record<string, ContractAndConfig>> {
-    return this.contracts;
+    this.getContracts();
   }
 
   get currentError(): string | null {
@@ -44,7 +45,11 @@ class ContractStore {
   }
 
   get currentContract(): ContractAndConfig | undefined {
-    return this.currentGovernance ? this.contracts[this.currentGovernance] : undefined;
+    return this.currentGovernance ? this.activeContracts[this.currentGovernance] : undefined;
+  }
+
+  public getContract(address: string): ContractAndConfig | undefined {
+    return this.addressToContract[address];
   }
 
   get selectedGovernance(): GovernanceType | null {
@@ -74,6 +79,25 @@ class ContractStore {
   get futurePeriodsData(): FuturePeriod[] | undefined {
     return this.currentGovernance ? this.futurePeriods[this.currentGovernance] : undefined;
   }
+
+  public getVotesForPeriod(proposalHash: string): {
+    votes: Vote[];
+    isLoading: boolean;
+  } {
+    const key = proposalHash;
+
+    if (!this.votes[key] && !this.loadingVotes[key]) {
+      runInAction(() => {
+        this.getVotes(proposalHash);
+      });
+    }
+
+    return {
+      votes: this.votes[key] || [],
+      isLoading: this.loadingVotes[key] || false
+    };
+  }
+
 
   private getPastPeriods = flow(function* (this: ContractStore) {
     if (!this.currentGovernance) return;
@@ -115,14 +139,14 @@ class ContractStore {
 
 
 
-  private getActiveContracts = flow(function* (this: ContractStore) {
+  private getContracts = flow(function* (this: ContractStore) {
     try {
       const {contracts}: { contracts: ContractAndConfig[] } = yield fetchJson<{ contracts: ContractAndConfig[] }>(
         `/api/contracts`
       );
       for (const contract of contracts) {
-        if (this.contracts[contract.governance_type]) continue;
-        this.contracts[contract.governance_type] = contract;
+        if (this.addressToContract[contract.contract_address]) continue;
+        this.addressToContract[contract.contract_address] = contract;
       }
     } catch (error) {
       console.error('[ContractStore] Error fetching contracts:', error);
@@ -134,7 +158,7 @@ class ContractStore {
   private getFuturePeriods = flow(function* (this: ContractStore) {
     if (!this.currentGovernance) return;
     if (this.loadingFuturePeriods[this.currentGovernance]) return;
-    const contract: ContractAndConfig | undefined = this.contracts[this.currentGovernance];
+    const contract: ContractAndConfig | undefined = this.activeContracts[this.currentGovernance];
     if (!contract) return;
 
     const cachedFuturePeriods: FuturePeriod[] | undefined = this.futurePeriods[this.currentGovernance];
@@ -179,16 +203,36 @@ class ContractStore {
       yield this.getCurrentPeriod();
       yield this.getPastPeriods();
       yield this.getFuturePeriods();
-      console.log(`[ContractStore] Set governance to ${governanceType}`);
-      console.log(`[ContractStore] Current period:`, this.currentPeriod[governanceType]);
-      console.log(`[ContractStore] Past periods:`, this.pastPeriods[governanceType]);
-      console.log(`[ContractStore] Future periods:`, this.futurePeriods[governanceType]);
     } catch (error) {
       console.error('[ContractStore] Error setting governance:', error);
       this.error = 'Failed to set governance';
     }
   });
 
+  public getVotes = flow(function* (this: ContractStore, proposalHash: string) {
+    const key = proposalHash;
+
+    if (this.votes[key]) return this.votes[key];
+
+    if (this.loadingVotes[key]) return;
+
+    try {
+      this.loadingVotes[key] = true;
+
+      const response: { votes: Vote[] } = yield fetchJson<{ votes: Vote[] }>(
+        `/api/votes?proposalHash=${proposalHash}`
+      );
+
+      this.votes[key] = response.votes;
+      return response.votes;
+    } catch (error) {
+      console.error('[ContractStore] Error fetching votes:', error);
+      this.error = 'Failed to fetch votes';
+      return [];
+    } finally {
+      this.loadingVotes[key] = false;
+    }
+  });
 }
 
 export const contractStore = new ContractStore();

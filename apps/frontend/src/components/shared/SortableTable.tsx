@@ -59,7 +59,7 @@ export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort
   return (
     <Box sx={{ width: '100%' }}>
       <TableContainer component={Paper} sx={{ display: { xs: 'none', sm: 'block' }, minWidth: 320 }}>
-        <Table>
+        <Table stickyHeader>
           <TableHead>
             <TableRow>
               {columns.map((column) => (
