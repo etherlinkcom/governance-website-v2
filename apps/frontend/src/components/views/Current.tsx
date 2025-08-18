@@ -2,13 +2,13 @@ import { observer } from "mobx-react-lite";
 import {
   Box,
   Typography,
-  Button,
   Card,
-  CardContent,
 } from "@mui/material";
 import { contractStore } from "@/stores/ContractStore";
 import { CurrentCardHeader } from "@/components/current/CurrentCardHeader";
-import { EmptyPeriod } from "../current/EmptyPeriod";
+import { EmptyPeriod } from "@/components/current/EmptyPeriod";
+import { ProposalView } from "@/components/proposal/ProposalView";
+import { PromotionView } from "@/components/promotion/PromotionView";
 
 export const Current = observer(() => {
   const currentPeriod = contractStore.currentPeriodData;
@@ -36,25 +36,17 @@ export const Current = observer(() => {
 
   return (
     <Box sx={{ width: "100%", mx: "auto" }}>
-      <Card sx={{ p: 1, height: "600px", borderRadius: "16px" }}>
-        <CardContent>
-          <CurrentCardHeader currentPeriod={currentPeriod} />
+      <Card sx={{ height: "auto", borderRadius: "16px" }}>
           {currentPeriod.proposals && currentPeriod.proposals.length > 0 ? (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Current Proposals
-              </Typography>
-            </Box>
+            <ProposalView period={currentPeriod} isCurrent />
           ) : currentPeriod.promotion ? (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Promotion Period
-              </Typography>
-            </Box>
+            <PromotionView period={currentPeriod} isCurrent />
           ) : (
-            <EmptyPeriod />
+            <Box sx={{ p: 3, height: 600 }}>
+              <CurrentCardHeader currentPeriod={currentPeriod} />
+              <EmptyPeriod />
+            </Box>
           )}
-        </CardContent>
       </Card>
     </Box>
   );
