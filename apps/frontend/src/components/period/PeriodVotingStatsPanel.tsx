@@ -69,6 +69,10 @@ export const PromotionVotingStatsPanel = ({
   );
 };
 
+
+
+// TODO break this into two files
+// Promotion voting stats and proposal voting stats
 export const PeriodVotingStatsPanel = ({
   hasPromotion,
   hasProposals,
@@ -78,7 +82,6 @@ export const PeriodVotingStatsPanel = ({
   isLoading,
   period,
 }: PeriodVotingStatsPanelProps) => {
-  const theme = useTheme();
 
   if (hasPromotion) {
     let totalVotingPower = 0;
