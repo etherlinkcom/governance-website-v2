@@ -5,8 +5,7 @@ import {
   Card,
 } from "@mui/material";
 import { contractStore } from "@/stores/ContractStore";
-import { CurrentCardHeader } from "@/components/current/CurrentCardHeader";
-import { EmptyPeriod } from "@/components/current/EmptyPeriod";
+import { EmptyCurrentPeriod } from "@/components/current/EmptyCurrentPeriod";
 import { ProposalView } from "@/components/proposal/ProposalView";
 import { PromotionView } from "@/components/promotion/PromotionView";
 
@@ -42,10 +41,7 @@ export const Current = observer(() => {
           ) : currentPeriod.promotion ? (
             <PromotionView period={currentPeriod} isCurrent />
           ) : (
-            <Box sx={{ p: 3, height: 600 }}>
-              <CurrentCardHeader currentPeriod={currentPeriod} />
-              <EmptyPeriod />
-            </Box>
+              <EmptyCurrentPeriod currentPeriod={currentPeriod} />
           )}
       </Card>
     </Box>
