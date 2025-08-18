@@ -133,12 +133,6 @@ export class Database {
       AND periods.contract_voting_index = proposals.contract_period_index
     WHERE contracts.governance_type = ?
       AND contracts.active = 1
-      -- and periods.promotion_hash IS NOT NULL
-      -- AND EXISTS (
-      -- SELECT 1 FROM proposals p
-       -- WHERE p.contract_address = periods.contract_address
-         -- AND p.contract_period_index = periods.contract_voting_index
-     -- )  -- Only periods with proposals
     ORDER BY periods.level_end DESC, periods.contract_voting_index DESC
     LIMIT 1`,
       [governanceType]

@@ -8,14 +8,14 @@ import { Current } from '@/components/views/Current';
 import { Past } from '@/components/views/Past';
 import { Future } from '@/components/views/Future';
 
-type ViewType = 'Current' | 'Past' | 'Future';
+type ViewType = 'Current' | 'Past' | 'Upcoming';
 
 export default observer(() => {
   const router = useRouter();
   const { governance } = router.query;
   const [selectedView, setSelectedView] = useState<ViewType | null>(null);
 
-  const views: ViewType[] = ['Current', 'Past', 'Future'];
+  const views: ViewType[] = ['Current', 'Past', 'Upcoming'];
 
   useEffect(() => {
     if (governance && typeof governance === 'string') {
@@ -59,7 +59,7 @@ export default observer(() => {
           display: "flex",
           flexDirection: "column",
           gap: 2,
-          alignItems: { xs: "center", sm: "flex-start" },
+          alignItems: "flex-start",
           maxWidth: "1200px",
           mx: "auto",
         }}
@@ -89,7 +89,7 @@ export default observer(() => {
             <Past />
           )}
 
-          {selectedView === 'Future' && (
+          {selectedView === 'Upcoming' && (
             <Future />
           )}
         </Box>

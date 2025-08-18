@@ -41,7 +41,7 @@ export const Current = observer(() => {
           ) : currentPeriod.promotion ? (
             <PromotionView period={currentPeriod} isCurrent />
           ) : (
-              <EmptyCurrentPeriod currentPeriod={currentPeriod} />
+            <EmptyCurrentPeriod currentPeriod={currentPeriod} />
           )}
       </Card>
     </Box>
