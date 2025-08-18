@@ -4,6 +4,7 @@ import { BeaconWallet } from '@taquito/beacon-wallet';
 import { ColorMode } from '@airgap/beacon-types';
 import BigNumber from 'bignumber.js';
 import { formatNumber } from '@/lib/formatNumber';
+import { VoteOption } from '@trilitech/types';
 
 
 export type VotingPower = {
@@ -16,6 +17,7 @@ export class WalletStore {
   private balance: number = 0;
   private votingPower: VotingPower | null = null;
   private delegates = new Map<string, VotingPower | null>();
+  private voting: boolean = false;
 
   private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
   private wallet: BeaconWallet;
@@ -173,6 +175,75 @@ export class WalletStore {
         this.refreshBalance(),
         this.refreshVotingPower(),
       ]);
+    }
+  }
+
+  async vote(contractAddress: string, voteType: VoteOption) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      const operation = await contract.methodsObject.vote(voteType).send();
+      await operation.confirmation();
+      return operation.opHash;
+    } catch (error) {
+      console.error(`Error voting ${voteType} for ${contractAddress}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
+  async upvoteProposal(contractAddress: string, proposal: string) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      let sequencerProposal;
+
+      try {
+        const parsed = JSON.parse(proposal);
+        if (parsed && parsed.sequencer_pk && parsed.pool_address) {
+          sequencerProposal = {
+            sequencer_pk: parsed.sequencer_pk,
+            pool_address: parsed.pool_address,
+          };
+        }
+      } catch {}
+
+      const operation = await contract.methodsObject.upvote_proposal(sequencerProposal ?? proposal).send();
+      await operation.confirmation();
+      return operation.opHash;
+    } catch (error) {
+      console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
+  async submitProposal(contractAddress: string, proposal: string) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      let sequencerProposal;
+
+      try {
+        const parsed = JSON.parse(proposal);
+        if (parsed && parsed.sequencer_pk && parsed.pool_address) {
+          sequencerProposal = {
+            sequencer_pk: parsed.sequencer_pk,
+            pool_address: parsed.pool_address,
+          };
+        }
+      } catch {}
+
+      const operation = await contract.methodsObject.new_proposal(sequencerProposal ?? proposal).send();
+      await operation.confirmation();
+      return operation.opHash;
+    } catch (error) {
+      console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
+    } finally {
+      this.voting = false;
     }
   }
 }
