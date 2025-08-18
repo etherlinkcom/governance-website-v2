@@ -271,12 +271,13 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
     console.log(`[Database] Fetching votes for promotion: ${proposalHash}`);
 
     const rows = await this.query<Vote>(`
-      SELECT *
+      SELECT votes.*
       FROM votes
-      WHERE proposal_hash = ?
-      AND contract_period_index = ?
+      INNER JOIN periods
+        ON periods.promotion_hash = votes.proposal_hash
+      WHERE votes.proposal_hash = ?
+        AND periods.contract_voting_index = ?
     `, [proposalHash, contractVotingIndex]);
-
     return rows;
   }
 
