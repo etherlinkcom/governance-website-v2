@@ -1,4 +1,4 @@
-import { Card, Box } from '@mui/material';
+import { Card, Box, Modal } from '@mui/material';
 import { useState } from 'react';
 import { HashDisplay } from '@/components/shared/HashDisplay';
 import { HashLink } from '@/components/shared/HashLink';
@@ -9,8 +9,8 @@ import { observer } from 'mobx-react-lite';
 import { PeriodVotingStatsPanel } from '@/components/period/PeriodVotingStatsPanel';
 import { PeriodMetadata } from '@/components/period/PeriodMetadata';
 import { FrontendPeriod } from '@/types/api';
-import { PromotionModal } from './PromotionModal';
-import { ProposalModal } from './ProposalModal';
+import { PromotionView } from '../promotion/PromotionView';
+import { ProposalView } from '../proposal/ProposalView';
 
 interface PastPeriodCardProps {
   period: FrontendPeriod;
@@ -71,17 +71,17 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
             />
           </Box>
       </Card>
-      {/* if proposal open proposal modal, if promotion open promotion modal */}
-      <PromotionModal
-        open={modalOpen && !!hasPromotion}
-        onClose={() => setModalOpen(false)}
-        period={period}
-      />
-      <ProposalModal
-        open={modalOpen && !!hasProposals}
-        onClose={() => setModalOpen(false)}
-        period={period}
-      />
+
+      {/* Modals */}
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Box className="modal-content">
+          {hasPromotion ? (
+            <PromotionView period={period} />
+          ) : hasProposals ? (
+            <ProposalView period={period} />
+          ) : null}
+        </Box>
+      </Modal>
     </>
   );
 });
