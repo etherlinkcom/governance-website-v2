@@ -1,9 +1,5 @@
 import { Card, Box } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import { Period } from '@trilitech/types';
 import { useState } from 'react';
-import { PeriodDetailsModal } from '@/components/period/PeriodDetailsModal';
-import { formatDate } from '@/lib/formatDate';
 import { HashDisplay } from '@/components/shared/HashDisplay';
 import { HashLink } from '@/components/shared/HashLink';
 import { PayloadKey } from '@/data/proposalLinks';
@@ -14,17 +10,18 @@ import { PeriodVotingStatsPanel } from '@/components/period/PeriodVotingStatsPan
 import { PeriodMetadata } from '@/components/period/PeriodMetadata';
 import { FrontendPeriod } from '@/types/api';
 import { PromotionModal } from './PromotionModal';
+import { ProposalModal } from './ProposalModal';
 
 interface PastPeriodCardProps {
   period: FrontendPeriod;
 }
 
 export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
-  const theme = useTheme();
   const [modalOpen, setModalOpen] = useState(false);
 
-  const hasProposals = period.proposals && period.proposals.length > 0;
-  const hasPromotion = period.promotion?.proposal_hash;
+  // TODO change both of these to booleans
+  const hasProposals: boolean | undefined = period.proposals && period.proposals.length > 0;
+  const hasPromotion: string | undefined = period.promotion?.proposal_hash;
 
   const isLoading = contractStore.isLoadingPastPeriods;
   const contractAndConfig = contractStore.currentContract!;
@@ -76,7 +73,12 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
       </Card>
       {/* if proposal open proposal modal, if promotion open promotion modal */}
       <PromotionModal
-        open={modalOpen}
+        open={modalOpen && !!hasPromotion}
+        onClose={() => setModalOpen(false)}
+        period={period}
+      />
+      <ProposalModal
+        open={modalOpen && !!hasProposals}
         onClose={() => setModalOpen(false)}
         period={period}
       />

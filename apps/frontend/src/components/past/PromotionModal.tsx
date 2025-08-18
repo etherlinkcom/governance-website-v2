@@ -1,14 +1,13 @@
 import { FrontendPeriod } from "@/types/api";
-import { Box, Button, Modal, Typography } from "@mui/material";
+import { Box, Modal, Typography } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { formatDate } from "@/lib/formatDate";
 import { HashDisplay } from "../shared/HashDisplay";
 import { EllipsisBox } from "../shared/EllipsisBox";
 import { VotersTable } from "../promotion/VotersTable";
 import { contractStore } from "@/stores/ContractStore";
 import { PromotionVotingStatsPanel } from "../period/PeriodVotingStatsPanel";
-import { getLinkData } from "@/lib/getLinkData";
-import { allLinkData, PayloadKey } from "@/data/proposalLinks";
+import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
+import { LearnMoreButton } from "../shared/LearnMoreButton";
 
 interface PromotionModalProps {
   open: boolean;
@@ -24,7 +23,7 @@ export const PromotionModal = observer(
       <Modal open={open} onClose={onClose} disableAutoFocus>
         <Box
           className="modal-content"
-          sx={{ p: {xs: 2, sm: 4 }, display: "flex", flexDirection: "column", gap: 5 }}
+          sx={{ p: {xs: 2, sm: 4 }, pt: {xs: 5, sm: 4}, display: "flex", flexDirection: "column", gap: 5 }}
         >
           {/* Header */}
           <Box
@@ -35,26 +34,9 @@ export const PromotionModal = observer(
               gap: { xs: 2, md: 0 },
             }}
           >
-            <Box>
-              <Typography
-                variant="body1"
-                sx={{ display: { xs: "block", sm: "none" }, mb: 0 }}
-              >
-                Dates: {formatDate(period.startDateTime, false)} -{" "}
-                {formatDate(period.endDateTime, false)}
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{ display: { xs: "none", sm: "block" }, mb: 0 }}
-              >
-                Start {formatDate(period.startDateTime)} - End{" "}
-                {formatDate(period.endDateTime)}
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                Levels: {period.startLevel.toLocaleString()} -{" "}
-                {period.endLevel.toLocaleString()}
-              </Typography>
-            </Box>
+
+
+            <PeriodDateAndLevels period={period} />
 
             <PromotionVotingStatsPanel
               promotion={period.promotion!}
@@ -74,22 +56,12 @@ export const PromotionModal = observer(
           >
             <Box>
               <Typography>Candidate:</Typography>
-              <EllipsisBox>
+              <EllipsisBox sx={{ width: { xs: "100vw", md: "70vw" } }}>
                 <HashDisplay hash={period.promotion?.proposal_hash || ""} />
               </EllipsisBox>
             </Box>
             <Box>
-              { period.promotion?.proposal_hash && getLinkData(period.promotion?.proposal_hash as PayloadKey) && (
-                <Button
-                  variant="contained"
-                  href={allLinkData.find(link => link.payloadKey === period.promotion?.proposal_hash)?.href || ''}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{ whiteSpace: "nowrap" }}
-                >
-                  Learn More
-                </Button>
-              )}
+              <LearnMoreButton proposalHash={period.promotion?.proposal_hash} />
             </Box>
           </Box>
 

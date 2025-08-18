@@ -381,6 +381,7 @@ export const components: Components<Theme> = {
       root: ({ theme }) => ({
         width: "100%",
         borderRadius: theme.shape.borderRadius,
+        boxShadow: `0px 0px 3px 0px ${theme.palette.primary.main}`,
         border: "none",
         "&:before": {
           display: "none",
