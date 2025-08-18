@@ -11,11 +11,11 @@ const voterKeys: (keyof Vote)[] = ['baker', 'voting_power', 'vote', 'time'];
 
 interface VotersTableProps {
   proposalHash: string;
+  contractVotingIndex: number;
 }
 
-// TODO pass contractAddress + contractVotingIndex to fetch votes for specific period
-export const VotersTable = observer(({ proposalHash }: VotersTableProps) => {
-  const { votes, isLoading } = contractStore.getVotesForProposal(proposalHash);
+export const VotersTable = observer(({ proposalHash, contractVotingIndex }: VotersTableProps) => {
+  const { votes, isLoading } = contractStore.getVotesForProposal(proposalHash, contractVotingIndex);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     votes,

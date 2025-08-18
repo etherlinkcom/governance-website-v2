@@ -77,7 +77,7 @@ export const PromotionModal = observer(
             </Box>
           </Box>
 
-          <VotersTable proposalHash={period.promotion?.proposal_hash || ""} />
+          <VotersTable proposalHash={period.promotion?.proposal_hash || ""} contractVotingIndex={period.contract_voting_index} />
         </Box>
       </Modal>
     );
