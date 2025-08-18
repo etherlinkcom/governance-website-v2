@@ -1,14 +1,11 @@
 import mysql from "mysql2/promise";
 import {
   GovernanceType,
-  Period,
   ContractAndConfig,
-  Proposal,
   Upvote,
-  Promotion,
   Vote,
 } from "@trilitech/types";
-import { PeriodDetailsResponse, FrontendPeriod } from "@/types/api";
+import { FrontendPeriod } from "@/types/api";
 
 export class Database {
   private connection: mysql.Connection | null = null;
@@ -267,18 +264,18 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
       }
     }
 
-    // Return as array - already sorted by SQL!
     return Array.from(periodsMap.values());
   }
 
-  async getVotes(proposalHash: string): Promise<Vote[]> {
+  async getVotes(proposalHash: string, contractVotingIndex: number): Promise<Vote[]> {
     console.log(`[Database] Fetching votes for promotion: ${proposalHash}`);
 
     const rows = await this.query<Vote>(`
       SELECT *
       FROM votes
       WHERE proposal_hash = ?
-    `, [proposalHash]);
+      AND contract_period_index = ?
+    `, [proposalHash, contractVotingIndex]);
 
     return rows;
   }
