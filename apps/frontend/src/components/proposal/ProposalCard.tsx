@@ -13,42 +13,17 @@ import { HashDisplay } from "@/components/shared/HashDisplay";
 import { formatNumber } from "@/lib/formatNumber";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { LearnMoreButton } from "../shared/LearnMoreButton";
+import { UpvotersTable } from "./UpvotersTable";
+import { defaultHead } from "next/head";
 
 interface ProposalCardProps {
-  proposal: FrontendProposal;
-  contractAddress: string;
-  isCurrentPeriod?: boolean;
-  contractVotingIndex: number;
+  proposal: Proposal;
+  defaultExpanded?: boolean;
 }
 
-export const ProposalCard = observer(({ proposal, contractAddress, isCurrentPeriod, contractVotingIndex }: ProposalCardProps) => {
-  const walletStore = getWalletStore();
-  const isUpvoting = walletStore?.isVoting;
-
-  const handleUpvote = async () => {
-    if (!contractAddress || !walletStore) return;
-
-    try {
-      const operation: OperationResult | undefined = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
-
-      if (!operation?.completed) return;
-      contractStore.createUpvote(
-        operation?.level || 0,
-        proposal.proposal_hash,
-        walletStore.address || '',
-        walletStore.alias,
-        walletStore.votingPowerAmount,
-        operation?.opHash || '',
-        contractAddress,
-        contractVotingIndex
-      );
-    } catch (error) {
-      console.error('Error upvoting proposal:', error);
-    }
-  };
-
+export const ProposalCard = ({ proposal, defaultExpanded }: ProposalCardProps) => {
   return (
-    <Accordion sx={{ mx: 1 }}>
+    <Accordion sx={{ mx: 1 }} defaultExpanded={defaultExpanded}>
       <AccordionSummary
         component="div"
         expandIcon={<ExpandMoreIcon />}
@@ -70,7 +45,13 @@ export const ProposalCard = observer(({ proposal, contractAddress, isCurrentPeri
           <EllipsisBox sx={{
             maxWidth: {xs: '70vw', md: '55vw'},
           }}>
-            <HashDisplay hash={proposal.proposal_hash} sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} />
+            <HashDisplay
+              hash={proposal.proposal_hash}
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}/>
             <Typography
               variant="subtitle2"
               sx={{
@@ -138,9 +119,10 @@ export const ProposalCard = observer(({ proposal, contractAddress, isCurrentPeri
       </AccordionSummary>
 
       <AccordionDetails>
-        <Typography>
-          Voters table TODO
+        <Typography variant='body1'>
+          Upvoters
         </Typography>
+        <UpvotersTable proposalHash={proposal.proposal_hash} />
       </AccordionDetails>
     </Accordion>
   );

@@ -15,7 +15,7 @@ interface VotersTableProps {
 
 // TODO pass contractAddress + contractVotingIndex to fetch votes for specific period
 export const VotersTable = observer(({ proposalHash }: VotersTableProps) => {
-  const { votes, isLoading } = contractStore.getVotesForPeriod(proposalHash);
+  const { votes, isLoading } = contractStore.getVotesForProposal(proposalHash);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     votes,
