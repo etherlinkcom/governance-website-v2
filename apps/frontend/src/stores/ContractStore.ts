@@ -1,22 +1,20 @@
-import { makeAutoObservable, flow, computed, runInAction } from 'mobx';
-import { GovernanceType, Period, ContractAndConfig, Vote, Promotion, Upvote, Proposal } from '@trilitech/types';
-import { FuturePeriod, PeriodData, PeriodDetailsResponse, FrontendPeriod } from '@/types/api';
+import { makeAutoObservable, flow, runInAction } from 'mobx';
+import { GovernanceType, ContractAndConfig, Vote, Upvote } from '@trilitech/types';
+import { FuturePeriod, FrontendPeriod } from '@/types/api';
 import { fetchJson } from '@/lib/fetchJson';
 
 class ContractStore {
   private currentGovernance: GovernanceType | null = null;
 
-  // TODO get all contracts by contractaddress as well and look up periods that way
-  // TODO all contracts to look up past contracts quorum etc.
-
   private addressToContract: Partial<Record<string, ContractAndConfig>> = {};
   private activeContracts: Partial<Record<string, ContractAndConfig>> = {};
 
-  // Caches
   // TODO make strings so we only need one cache?
   private pastPeriods: Partial<Record<GovernanceType,  FrontendPeriod[]>> = {};
   private currentPeriod: Partial<Record<GovernanceType, FrontendPeriod>> = {};
   private futurePeriods: Partial<Record<GovernanceType, FuturePeriod[]>> = {};
+  private votes: Partial<Record<string, Vote[]>> = {};
+  private upvotes: Partial<Record<string, Upvote[]>> = {};
 
   // Loading states TODO one loading state with string keys?
   private loadingPastPeriods: Partial<Record<GovernanceType, boolean>> = {};
@@ -25,17 +23,12 @@ class ContractStore {
   private loadingVotes: Partial<Record<string, boolean>> = {};
   private loadingUpvotes: Partial<Record<string, boolean>> = {};
 
-
   private error: string | null = null;
 
   private readonly futurePeriodsCount: number = 10;
   private readonly tzktApiUrl: string = 'https://api.tzkt.io/v1';
 
-  // Add to state properties at the top
-  private votes: Partial<Record<string, Vote[]>> = {};
-  private upvotes: Partial<Record<string, Upvote[]>> = {};
-
-  constructor() {
+    constructor() {
     makeAutoObservable(this, {
       setGovernance: flow,
     });
@@ -83,15 +76,15 @@ class ContractStore {
     return this.currentGovernance ? this.futurePeriods[this.currentGovernance] : undefined;
   }
 
-  public getVotesForProposal(proposalHash: string): {
+  public getVotesForProposal(proposalHash: string, contractVotingIndex: number): {
     votes: Vote[];
     isLoading: boolean;
   } {
-    const key = proposalHash;
+    const key = `${proposalHash} - ${contractVotingIndex}`;
 
     if (!this.votes[key] && !this.loadingVotes[key]) {
       runInAction(() => {
-        this.getVotes(proposalHash);
+        this.getVotes(proposalHash, contractVotingIndex);
       });
     }
 
@@ -231,8 +224,8 @@ class ContractStore {
     }
   });
 
-  public getVotes = flow(function* (this: ContractStore, proposalHash: string) {
-    const key = proposalHash;
+  public getVotes = flow(function* (this: ContractStore, proposalHash: string, contractVotingIndex: number) {
+    const key = `${proposalHash} - ${contractVotingIndex}`;
 
     if (this.votes[key]) return this.votes[key];
 
@@ -242,7 +235,7 @@ class ContractStore {
       this.loadingVotes[key] = true;
 
       const response: { votes: Vote[] } = yield fetchJson<{ votes: Vote[] }>(
-        `/api/votes?proposalHash=${proposalHash}`
+        `/api/votes?proposalHash=${proposalHash}&contractVotingIndex=${contractVotingIndex}`
       );
 
       this.votes[key] = response.votes;
