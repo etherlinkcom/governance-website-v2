@@ -5,9 +5,10 @@ import { contractStore } from "@/stores/ContractStore";
 import { VotersTable } from "@/components/promotion/VotersTable";
 import { HashDisplay } from "@/components/shared/HashDisplay";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
-import { PeriodDateAndLevels } from "../shared/PeriodDateAndLevels";
-import { PromotionVotingStatsPanel } from "../period/PeriodVotingStatsPanel";
-import { LearnMoreButton } from "../shared/LearnMoreButton";
+import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
+import { PromotionVotingStatsPanel } from "@/components/period/PeriodVotingStatsPanel";
+import { LearnMoreButton } from "@/components/shared/LearnMoreButton";
+import { TimeRemaining } from "@/components/current/TimeRemaining";
 
 interface PromotionViewProps {
   period: FrontendPeriod;
@@ -24,14 +25,13 @@ export const PromotionView = observer(
         sx={{
           display: "flex",
           flexDirection: "column",
-          gap: isCurrent ? 2 : 5,
-          height: isCurrent ? "400px" : "100%",
-          overflow: isCurrent ? "hidden" : "auto",
+          gap: 5,
+          height: "100%",
+          overflow: "auto",
           p: { xs: 2, sm: 4 },
           pt: { xs: 5, sm: 4 },
         }}
       >
-
         {/* Header */}
         <Box
           sx={{
@@ -41,8 +41,10 @@ export const PromotionView = observer(
             gap: { xs: 2, md: 0 },
           }}
         >
-
-          <PeriodDateAndLevels period={period} />
+          <Box>
+            <PeriodDateAndLevels period={period} />
+            {isCurrent && <TimeRemaining currentPeriod={period} />}
+          </Box>
 
           <PromotionVotingStatsPanel
             promotion={period.promotion!}
@@ -61,10 +63,9 @@ export const PromotionView = observer(
             alignItems: { xs: "flex-start", md: "center" },
           }}
         >
-
-          <Box>
+          <Box sx={{ width: { xs: "100%", md: "80%" } }}>
             <Typography>Candidate:</Typography>
-            <EllipsisBox sx={{ width: { xs: "100vw", md: "70vw" } }}>
+            <EllipsisBox sx={{ maxWidth: "100%" }}>
               <HashDisplay hash={period.promotion?.proposal_hash || ""} />
             </EllipsisBox>
           </Box>
