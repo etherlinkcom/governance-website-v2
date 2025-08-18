@@ -50,6 +50,7 @@ export const ProposalModal = observer(
           </Box>
 
           {/* Proposal List */}
+          <Box sx={{gap: 2, display: "flex", flexDirection: "column"}}>
           {period.proposals?.map((proposal: Proposal, index: number) => (
             <ProposalCard
               key={proposal.proposal_hash}
@@ -57,6 +58,7 @@ export const ProposalModal = observer(
               defaultExpanded={index === (period.proposals?.length || 0) - 1}
             />
           ))}
+          </Box>
         </Box>
       </Modal>
     );

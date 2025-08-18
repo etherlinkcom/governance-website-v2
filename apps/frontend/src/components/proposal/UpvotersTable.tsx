@@ -1,20 +1,15 @@
 import { useTableSort } from '@/hooks/useTableSort';
-import { Typography, Link } from '@mui/material';
+import { Link } from '@mui/material';
 import { SortableTable, SortableTableSkeleton } from '@/components/shared/SortableTable';
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { Upvote } from '@trilitech/types';
-import { HashDisplay } from '@/components/shared/HashDisplay';
 import { formatNumber } from '@/lib/formatNumber';
 import { contractStore } from '@/stores/ContractStore';
 
-const upvoterKeys: (keyof Upvote)[] = ['baker', 'voting_power', 'proposal_hash', 'time'];
+const upvoterKeys: (keyof Upvote)[] = ['baker', 'voting_power', 'time'];
 
-interface UpvotersTableProps {
-  contractVotingIndex?: number;
-  contractAddress?: string;
-}
-
+// TODO combine with voting_index and contract address for better sql queries
 export const UpvotersTable = observer(({ proposalHash }: {proposalHash: string}) => {
   const { upvotes, isLoading } = contractStore.getUpvotesForProposal(proposalHash);
 
@@ -51,10 +46,6 @@ export const UpvotersTable = observer(({ proposalHash }: {proposalHash: string})
         );
       case 'voting_power':
         return formatNumber(row.voting_power);
-      case 'proposal_hash':
-        return (
-          <HashDisplay hash={row.proposal_hash} sx={{overflow: 'hidden', textOverflow: 'ellipsis'}} />
-        );
       case 'time':
         return new Date(row.time).toLocaleString();
       default:
