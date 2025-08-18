@@ -9,9 +9,13 @@ import { contractStore } from '@/stores/ContractStore';
 
 const upvoterKeys: (keyof Upvote)[] = ['baker', 'voting_power', 'time'];
 
-// TODO combine with voting_index and contract address for better sql queries
-export const UpvotersTable = observer(({ proposalHash }: {proposalHash: string}) => {
-  const { upvotes, isLoading } = contractStore.getUpvotesForProposal(proposalHash);
+interface UpvotesTableProps {
+  proposalHash: string;
+  contractVotingIndex: number;
+}
+
+export const UpvotersTable = observer(({ proposalHash, contractVotingIndex }: UpvotesTableProps) => {
+  const { upvotes, isLoading } = contractStore.getUpvotesForProposal(proposalHash, contractVotingIndex);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     upvotes,
