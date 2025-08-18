@@ -122,7 +122,7 @@ export const ProposalCard = ({ proposal, defaultExpanded }: ProposalCardProps) =
         <Typography variant='body1'>
           Upvoters
         </Typography>
-        <UpvotersTable proposalHash={proposal.proposal_hash} />
+        <UpvotersTable proposalHash={proposal.proposal_hash} contractVotingIndex={proposal.contract_period_index} />
       </AccordionDetails>
     </Accordion>
   );

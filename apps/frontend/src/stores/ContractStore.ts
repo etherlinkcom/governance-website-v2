@@ -101,15 +101,15 @@ class ContractStore {
     };
   }
 
-  public getUpvotesForProposal(proposalHash: string): {
+  public getUpvotesForProposal(proposalHash: string, contractVotingIndex: number): {
     upvotes: Upvote[];
     isLoading: boolean;
   } {
-    const key = proposalHash;
+    const key = `${proposalHash} - ${contractVotingIndex}`;
 
     if (!this.upvotes[key] && !this.loadingUpvotes[key]) {
       runInAction(() => {
-        this.getUpvotes(proposalHash);
+        this.getUpvotes(proposalHash, contractVotingIndex);
       });
     }
 
@@ -256,8 +256,8 @@ class ContractStore {
     }
   });
 
-  public getUpvotes = flow(function* (this: ContractStore, proposalHash: string) {
-    const key = proposalHash;
+  public getUpvotes = flow(function* (this: ContractStore, proposalHash: string, contractVotingIndex: number) {
+    const key = `${proposalHash} - ${contractVotingIndex}`;
 
     if (this.upvotes[key]) return this.upvotes[key];
 
@@ -267,7 +267,7 @@ class ContractStore {
       this.loadingUpvotes[key] = true;
 
       const response: { upvotes: Upvote[] } = yield fetchJson<{ upvotes: Upvote[] }>(
-        `/api/upvotes?proposalHash=${proposalHash}`
+        `/api/upvotes?proposalHash=${proposalHash}&contractVotingIndex=${contractVotingIndex}`
       );
 
       this.upvotes[key] = response.upvotes;

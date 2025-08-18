@@ -283,14 +283,15 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
     return rows;
   }
 
-  async getUpvotes(proposalHash: string): Promise<Upvote[]> {
+  async getUpvotes(proposalHash: string, contractVotingIndex: number): Promise<Upvote[]> {
     console.log(`[Database] Fetching upvotes for proposal: ${proposalHash}`);
 
     const rows = await this.query<Upvote>(`
       SELECT *
-      FROM votes
+      FROM upvotes
       WHERE proposal_hash = ?
-    `, [proposalHash]);
+      AND contract_period_index = ?
+    `, [proposalHash, contractVotingIndex]);
 
     return rows;
   }
