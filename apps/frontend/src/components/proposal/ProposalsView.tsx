@@ -7,15 +7,17 @@ import {UpvotersTable} from '@/components/proposal/UpvotersTable';
 interface ProposalsViewProps {
   contractVotingIndex?: number;
   contractAddress?: string;
+  isCurrentPeriod?: boolean;
 }
 
-export const ProposalsView = observer(({ contractVotingIndex, contractAddress }: ProposalsViewProps) => {
+export const ProposalsView = observer(({ contractVotingIndex, contractAddress, isCurrentPeriod }: ProposalsViewProps) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <ProposalsList
         contractVotingIndex={contractVotingIndex}
         contractAddress={contractAddress}
+        isCurrentPeriod={isCurrentPeriod}
       />
 
       <Box>

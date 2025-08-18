@@ -1,18 +1,56 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import { CandidateInfo } from '@/components/promotion/CandidateInfo';
 import { VotingResults } from '@/components/promotion/VotingResults';
 import { VotersTable } from '@/components/promotion/VotersTable';
+import { getWalletStore } from '@/stores/WalletStore';
+import { useState } from 'react';
+import { VoteOption } from '@trilitech/types';
+import HowToVoteIcon from '@mui/icons-material/HowToVote';
 
 interface PromotionViewProps {
   contractVotingIndex?: number;
   contractAddress?: string;
   promotionHash?: string;
+  isCurrentPeriod?: boolean;
 }
 
-export const PromotionView = ({ contractVotingIndex, contractAddress, promotionHash }: PromotionViewProps) => {
+export const PromotionView = ({ contractVotingIndex, contractAddress, promotionHash, isCurrentPeriod }: PromotionViewProps) => {
+  const [voteModalOpen, setVoteModalOpen] = useState(false);
+  const [selectedVote, setSelectedVote] = useState<VoteOption>('yea');
+  const [isVoting, setIsVoting] = useState(false);
+  const walletStore = getWalletStore();
+
+  const handleVote = async () => {
+    if (!contractAddress || !walletStore) return;
+    
+    setIsVoting(true);
+    try {
+      const opHash = await walletStore.vote(contractAddress, selectedVote);
+      if (opHash) {
+        setVoteModalOpen(false);
+        console.log('Vote submitted successfully:', opHash);
+      }
+    } catch (error) {
+      console.error('Error submitting vote:', error);
+    } finally {
+      setIsVoting(false);
+    }
+  };
 
   return (
     <Box sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+      {isCurrentPeriod && walletStore?.address && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<HowToVoteIcon />}
+            onClick={() => setVoteModalOpen(true)}
+          >
+            Vote
+          </Button>
+        </Box>
+      )}
+
       {/* Candidate Section */}
       <Box>
         <CandidateInfo
@@ -37,6 +75,32 @@ export const PromotionView = ({ contractVotingIndex, contractAddress, promotionH
           contractAddress={contractAddress}
         />
       </Box>
+
+      <Dialog open={voteModalOpen} onClose={() => setVoteModalOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Vote on Promotion</DialogTitle>
+        <DialogContent>
+          <FormControl component="fieldset" sx={{ mt: 2 }}>
+            <RadioGroup
+              value={selectedVote}
+              onChange={(e) => setSelectedVote(e.target.value as VoteOption)}
+            >
+              <FormControlLabel value="yay" control={<Radio />} label="Yay (Approve)" />
+              <FormControlLabel value="nay" control={<Radio />} label="Nay (Reject)" />
+              <FormControlLabel value="pass" control={<Radio />} label="Pass (Abstain)" />
+            </RadioGroup>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setVoteModalOpen(false)}>Cancel</Button>
+          <Button 
+            onClick={handleVote} 
+            variant="contained"
+            disabled={isVoting}
+          >
+            {isVoting ? 'Submitting Vote...' : 'Submit Vote'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
