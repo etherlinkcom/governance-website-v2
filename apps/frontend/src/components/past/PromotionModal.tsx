@@ -23,7 +23,13 @@ export const PromotionModal = observer(
       <Modal open={open} onClose={onClose} disableAutoFocus>
         <Box
           className="modal-content"
-          sx={{ p: {xs: 2, sm: 4 }, pt: {xs: 5, sm: 4}, display: "flex", flexDirection: "column", gap: 5 }}
+          sx={{
+            p: { xs: 2, sm: 4 },
+            pt: { xs: 5, sm: 4 },
+            display: "flex",
+            flexDirection: "column",
+            gap: 5,
+          }}
         >
           {/* Header */}
           <Box
@@ -34,8 +40,6 @@ export const PromotionModal = observer(
               gap: { xs: 2, md: 0 },
             }}
           >
-
-
             <PeriodDateAndLevels period={period} />
 
             <PromotionVotingStatsPanel
@@ -44,6 +48,7 @@ export const PromotionModal = observer(
               contractAndConfig={contract!}
             />
           </Box>
+
           {/* Candidate Info */}
           <Box
             sx={{
@@ -57,7 +62,14 @@ export const PromotionModal = observer(
             <Box>
               <Typography>Candidate:</Typography>
               <EllipsisBox sx={{ width: { xs: "100vw", md: "70vw" } }}>
-                <HashDisplay hash={period.promotion?.proposal_hash || ""} />
+                <HashDisplay
+                  hash={period.promotion?.proposal_hash || ""}
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                />
               </EllipsisBox>
             </Box>
             <Box>

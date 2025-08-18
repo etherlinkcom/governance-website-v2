@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import { PeriodDateAndLevels } from "../shared/PeriodDateAndLevels";
 import { ProposalVotingStats } from "../shared/VotingStats";
 import { contractStore } from "@/stores/ContractStore";
-import { ContractAndConfig } from "@trilitech/types";
+import { ContractAndConfig, Proposal } from "@trilitech/types";
 import { ProposalCard } from "../proposal/ProposalCard";
 
 interface ProposalModalProps {
@@ -41,9 +41,7 @@ export const ProposalModal = observer(
             }}
           >
             <PeriodDateAndLevels period={period} />
-          </Box>
 
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <ProposalVotingStats
               proposals={period.proposals!}
               totalVotingPower={period.totalVotingPower}
@@ -51,14 +49,14 @@ export const ProposalModal = observer(
             />
           </Box>
 
-
-        {/* Proposal List */}
-        {
-          period.proposals?.map((proposal) => (
-            <ProposalCard key={proposal.proposal_hash} proposal={proposal} />
-          ))
-        }
-
+          {/* Proposal List */}
+          {period.proposals?.map((proposal: Proposal, index: number) => (
+            <ProposalCard
+              key={proposal.proposal_hash}
+              proposal={proposal}
+              defaultExpanded={index === (period.proposals?.length || 0) - 1}
+            />
+          ))}
         </Box>
       </Modal>
     );
