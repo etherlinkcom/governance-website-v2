@@ -23,7 +23,7 @@ interface ProposalCardProps {
 
 export const ProposalCard = ({ proposal, defaultExpanded }: ProposalCardProps) => {
   return (
-    <Accordion sx={{ mx: 1 }} defaultExpanded={defaultExpanded}>
+    <Accordion defaultExpanded={defaultExpanded}>
       <AccordionSummary
         component="div"
         expandIcon={<ExpandMoreIcon />}

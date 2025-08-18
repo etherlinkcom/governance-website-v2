@@ -386,6 +386,9 @@ export const components: Components<Theme> = {
         "&:before": {
           display: "none",
         },
+        "&.Mui-expanded": {
+          margin: "0",
+        },
       }),
     },
   },
@@ -408,7 +411,6 @@ export const components: Components<Theme> = {
       root: ({ theme }) => ({
         display: "flex",
         flexDirection: "column",
-        gap: theme.spacing(4),
       }),
     },
   },
