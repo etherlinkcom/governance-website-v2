@@ -23,6 +23,7 @@ class ContractStore {
   private loadingCurrentPeriod: Partial<Record<GovernanceType, boolean>> = {};
   private loadingFuturePeriods: Partial<Record<GovernanceType, boolean>> = {};
   private loadingVotes: Partial<Record<string, boolean>> = {};
+  private loadingUpvotes: Partial<Record<string, boolean>> = {};
 
 
   private error: string | null = null;
@@ -32,6 +33,7 @@ class ContractStore {
 
   // Add to state properties at the top
   private votes: Partial<Record<string, Vote[]>> = {};
+  private upvotes: Partial<Record<string, Upvote[]>> = {};
 
   constructor() {
     makeAutoObservable(this, {
@@ -81,7 +83,7 @@ class ContractStore {
     return this.currentGovernance ? this.futurePeriods[this.currentGovernance] : undefined;
   }
 
-  public getVotesForPeriod(proposalHash: string): {
+  public getVotesForProposal(proposalHash: string): {
     votes: Vote[];
     isLoading: boolean;
   } {
@@ -96,6 +98,24 @@ class ContractStore {
     return {
       votes: this.votes[key] || [],
       isLoading: this.loadingVotes[key] || false
+    };
+  }
+
+  public getUpvotesForProposal(proposalHash: string): {
+    upvotes: Upvote[];
+    isLoading: boolean;
+  } {
+    const key = proposalHash;
+
+    if (!this.upvotes[key] && !this.loadingUpvotes[key]) {
+      runInAction(() => {
+        this.getUpvotes(proposalHash);
+      });
+    }
+
+    return {
+      upvotes: this.upvotes[key] || [],
+      isLoading: this.loadingUpvotes[key] || false
     };
   }
 
@@ -233,6 +253,31 @@ class ContractStore {
       return [];
     } finally {
       this.loadingVotes[key] = false;
+    }
+  });
+
+  public getUpvotes = flow(function* (this: ContractStore, proposalHash: string) {
+    const key = proposalHash;
+
+    if (this.upvotes[key]) return this.upvotes[key];
+
+    if (this.loadingUpvotes[key]) return;
+
+    try {
+      this.loadingUpvotes[key] = true;
+
+      const response: { upvotes: Upvote[] } = yield fetchJson<{ upvotes: Upvote[] }>(
+        `/api/upvotes?proposalHash=${proposalHash}`
+      );
+
+      this.upvotes[key] = response.upvotes;
+      return response.upvotes;
+    } catch (error) {
+      console.error('[ContractStore] Error fetching votes:', error);
+      this.error = 'Failed to fetch votes';
+      return [];
+    } finally {
+      this.loadingUpvotes[key] = false;
     }
   });
 }

@@ -13,14 +13,17 @@ import { HashDisplay } from "@/components/shared/HashDisplay";
 import { formatNumber } from "@/lib/formatNumber";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { LearnMoreButton } from "../shared/LearnMoreButton";
+import { UpvotersTable } from "./UpvotersTable";
+import { defaultHead } from "next/head";
 
 interface ProposalCardProps {
   proposal: Proposal;
+  defaultExpanded?: boolean;
 }
 
-export const ProposalCard = ({ proposal }: ProposalCardProps) => {
+export const ProposalCard = ({ proposal, defaultExpanded }: ProposalCardProps) => {
   return (
-    <Accordion sx={{ mx: 1 }}>
+    <Accordion sx={{ mx: 1 }} defaultExpanded={defaultExpanded}>
       <AccordionSummary
         component="div"
         expandIcon={<ExpandMoreIcon />}
@@ -42,7 +45,13 @@ export const ProposalCard = ({ proposal }: ProposalCardProps) => {
           <EllipsisBox sx={{
             maxWidth: {xs: '70vw', md: '55vw'},
           }}>
-            <HashDisplay hash={proposal.proposal_hash} sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} />
+            <HashDisplay
+              hash={proposal.proposal_hash}
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}/>
             <Typography
               variant="subtitle2"
               sx={{
@@ -110,9 +119,10 @@ export const ProposalCard = ({ proposal }: ProposalCardProps) => {
       </AccordionSummary>
 
       <AccordionDetails>
-        <Typography>
-          Voters table TODO
+        <Typography variant='body1'>
+          Upvoters
         </Typography>
+        <UpvotersTable proposalHash={proposal.proposal_hash} />
       </AccordionDetails>
     </Accordion>
   );

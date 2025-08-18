@@ -283,6 +283,18 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
     return rows;
   }
 
+  async getUpvotes(proposalHash: string): Promise<Upvote[]> {
+    console.log(`[Database] Fetching upvotes for proposal: ${proposalHash}`);
+
+    const rows = await this.query<Upvote>(`
+      SELECT *
+      FROM votes
+      WHERE proposal_hash = ?
+    `, [proposalHash]);
+
+    return rows;
+  }
+
   async close(): Promise<void> {
     if (this.connection) {
       await this.connection.end();
@@ -290,6 +302,7 @@ async getPastPeriods(governanceType: GovernanceType): Promise<FrontendPeriod[]> 
       console.log("[Database] Database connection closed");
     }
   }
+
 }
 
 export const database = new Database();
