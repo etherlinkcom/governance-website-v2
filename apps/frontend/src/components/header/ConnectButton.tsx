@@ -1,9 +1,10 @@
 import { observer } from 'mobx-react-lite';
 import { useState, useEffect } from 'react';
-import { Button, Box, useTheme } from '@mui/material';
+import { Button, Box, useTheme, Icon } from '@mui/material';
 import { getWalletStore } from '@/stores/WalletStore';
 import { EllipsisBox } from '@/components/shared/EllipsisBox';
 import {WalletDialog} from '@/components/header/WalletDialog';
+import Image from 'next/image';
 
 interface ConnectButtonProps {
   sx?: object;
@@ -39,13 +40,29 @@ export const ConnectButton = observer(({ sx }: ConnectButtonProps) => {
 
   if (!walletStore.address) {
     return (
-      <>
-      <Button variant="contained" onClick={handleConnect} sx={sx}>
-        <Box sx={{ color: theme.palette.primary.contrastText }}>
+      <Button
+        variant="contained"
+        onClick={handleConnect}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          ...sx
+        }}
+      >
+        <Box sx={{ color: theme.palette.custom.background?.dropdown, fontWeight: 600 }}>
           Connect
         </Box>
+        <Image
+          src="/IoWalletOutline.svg"
+          alt="Wallet"
+          width={20}
+          height={20}
+          style={{
+            filter: `brightness(0) saturate(100%) invert(${theme.palette.mode === 'dark' ? '0' : '1'})`
+          }}
+        />
       </Button>
-      </>
     );
   }
 

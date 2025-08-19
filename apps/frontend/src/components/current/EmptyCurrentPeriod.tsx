@@ -32,8 +32,8 @@ export const EmptyCurrentPeriod = ({
           mb: 3,
         }}
       >
-        <Box>
           <PeriodDateAndLevels period={currentPeriod} />
+        <Box>
           <TimeRemaining currentPeriod={currentPeriod} />
         </Box>
       </Box>

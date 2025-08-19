@@ -71,9 +71,8 @@ export const TimeRemaining = ({ currentPeriod }: TimeRemainingProps) => {
             alignItems: "center",
           }}
         >
-          <Typography variant="subtitle1">Time Remaining:</Typography>
           <Typography variant="subtitle1">
-            {timeRemaining}
+            Time Remaining: {timeRemaining}
           </Typography>
         </Box>
 

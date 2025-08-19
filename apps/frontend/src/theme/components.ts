@@ -408,27 +408,68 @@ export const components: Components<Theme> = {
   },
   MuiAccordionDetails: {
     styleOverrides: {
-      root: ({ theme }) => ({
+      root: () => ({
         display: "flex",
         flexDirection: "column",
       }),
     },
   },
+  MuiSelect: {
+  styleOverrides: {
+    root: ({ theme }) => ({
+      color: "#bcbcbc",
+      padding: 0,
+      "&[aria-expanded='true']": {
+        "& .MuiSelect-select": {
+          color: theme.palette.primary.main,
+        },
+      },
+      "& .MuiSelect-select": {
+        fontWeight: 700,
+        padding: 0,
+      },
+      "& .MuiSvgIcon-root": {
+        color: "#bcbcbc",
+      },
+    }),
+  },
+},
+MuiMenu: {
+  styleOverrides: {
+    paper: ({ theme }) => ({
+      color: "#bcbcbc",
+      background: theme.palette.custom.background?.dropdown,
+      marginTop: theme.spacing(2),
+      marginLeft: theme.spacing(-1),
+      width: 290,
+      borderRadius: "24px",
+      padding: theme.spacing(0.5),
+      border: 0,
+      "& .MuiList-root": {
+        background: theme.palette.custom.background?.dropdown,
+        borderRadius: "24px",
+        padding: 0,
+        margin: 0,
+      },
+    }),
+  },
+},
   MuiMenuItem: {
     styleOverrides: {
       root: ({ theme }) => ({
+        background: theme.palette.custom.background?.dropdown + " !important",
         transition: "all 0.2s ease-in-out",
+        borderRadius: "100px",
+        fontWeight: 700,
+        fontSize: "14px",
+        margin: theme.spacing(0.5),
+        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
         "&:hover": {
-          backgroundColor: "inherit",
+          backgroundColor: theme.palette.custom.tableBg.odd + " !important",
           color: theme.palette.primary.main,
-        },
-        "&.Mui-selected": {
-          color: theme.palette.primary.main,
-          backgroundColor: "inherit",
-          "&:hover": {
-            backgroundColor: "inherit",
-            color: theme.palette.primary.main,
-          },
         },
       }),
     },
