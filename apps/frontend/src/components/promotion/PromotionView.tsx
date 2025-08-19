@@ -41,16 +41,16 @@ export const PromotionView = observer(
             gap: { xs: 2, md: 0 },
           }}
         >
+          <PeriodDateAndLevels period={period} />
           <Box>
-            <PeriodDateAndLevels period={period} />
             {isCurrent && <TimeRemaining currentPeriod={period} />}
-          </Box>
 
-          <PromotionVotingStatsPanel
-            promotion={period.promotion!}
-            period={period}
-            contractAndConfig={contract!}
-          />
+            <PromotionVotingStatsPanel
+              promotion={period.promotion!}
+              period={period}
+              contractAndConfig={contract!}
+            />
+          </Box>
         </Box>
 
         {/* Candidate Info */}
