@@ -13,11 +13,22 @@ export class TzktListener {
   private readonly trackedFunctions: string[] = ['new_proposal', 'upvote_proposal', 'vote'];
   private database: Database = new Database();
   private readonly eventsUrl: string = 'https://api.mainnet.tzkt.io/v1/events';
+  private proposalCache: Map<string, Proposal> = new Map();
+  private processedUpvotes: Set<string> = new Set();
 
   constructor(contracts: Contract[]) {
     logger.info(`[TzktListener] constructor(contracts=${contracts.map(c => c.address).join(',')})`);
     this.contracts = contracts;
     this.start().catch(error => logger.error('[TzktListener] start error', error));
+  }
+
+  private keyForProposal(contractAddress: string, proposalHash: string): string {
+    return `${contractAddress}:${proposalHash}`;
+  }
+
+  private upvoteKey(txHash: string, baker: string): string {
+    return `${txHash}:${baker}`;
+
   }
 
   private async start(): Promise<void> {
@@ -156,6 +167,9 @@ export class TzktListener {
       upvotes: voting_power
     };
 
+    const cacheKey = this.keyForProposal(proposal.contract_address, proposal.proposal_hash);
+    this.proposalCache.set(cacheKey, proposal);
+
     // Upsert the proposal
     logger.info(`[TzktListener] New proposal: ${JSON.stringify(proposal)}`);
     await this.database.upsertProposals([proposal]);
@@ -226,6 +240,26 @@ export class TzktListener {
     logger.info(`[TzktListener] upvote_proposal at ${transactionEvent.target.address} level=${level} period=${periodIndex} hash=${upvote.proposal_hash} voting_power=${upvote.voting_power}`);
     logger.info(`[TzktListener] Upvote: ${JSON.stringify(upvote)}`);
     await this.database.upsertUpvotes([upvote]);
+
+      // mirror totals to proposals using in-memory cache (no DB code change)
+    const dedupeKey = this.upvoteKey(upvote.transaction_hash, upvote.baker);
+    if (this.processedUpvotes.has(dedupeKey)) {
+      logger.warn(`[TzktListener] Duplicate upvote seen in session, skipping proposal total bump: ${dedupeKey}`);
+      return;
+    }
+    this.processedUpvotes.add(dedupeKey);
+    const cacheKey = this.keyForProposal(upvote.contract_address, upvote.proposal_hash);
+    const cached = this.proposalCache.get(cacheKey);
+    if (!cached) {
+      // We didn't see the original new_proposal in this process; avoid overwriting fields blindly.
+      logger.warn(`[TzktListener] No in-memory baseline for proposal ${cacheKey}; skipping proposal.upvotes update to avoid corrupting level/time/proposer/alias`);
+      return;
+    }
+    const nextTotal = (cached.upvotes ?? 0) + upvote.voting_power;
+    const updated: Proposal = { ...cached, upvotes: nextTotal };
+    // Keep cache in sync and persist via existing upsertProposals
+    this.proposalCache.set(cacheKey, updated);
+    await this.database.upsertProposals([updated]);
   }
 
   private async handleVote(transactionEvent: TzktTransactionEvent): Promise<void> {
