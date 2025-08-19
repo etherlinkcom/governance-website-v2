@@ -1,16 +1,15 @@
 import {
   Box,
-  Drawer,
-  IconButton,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
   useTheme,
+  Select,
+  MenuItem,
+  FormControl,
+  Divider,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import ConnectButton from "@/components/header/ConnectButton";
+import { MobileMenu } from "@/components/header/MobileMenu";
 import type { GovernanceType } from "@trilitech/types";
-import { useState } from "react";
 import { contractStore } from "@/stores/ContractStore";
 import { useRouter } from "next/router";
 
@@ -18,16 +17,16 @@ interface MenuProps {
   currentPage?: GovernanceType | null;
 }
 
-const GOVERNANCES: { [key: string]: GovernanceType } = {
-  slow: "slow",
-  fast: "fast",
-  sequencer: "sequencer",
+export const KERNEL_TRACKS: {
+  [key: string]: { value: GovernanceType; label: string };
+} = {
+  slow: { value: "slow", label: "Slow track" },
+  fast: { value: "fast", label: "Fast track" },
 };
 
 export const Menu = ({ currentPage = null }: MenuProps) => {
   const theme = useTheme();
   const router = useRouter();
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleGovernanceChange = (newGovernance: GovernanceType) => {
     if (newGovernance !== null) {
@@ -36,81 +35,76 @@ export const Menu = ({ currentPage = null }: MenuProps) => {
     }
   };
 
+  const isKernelTrack = currentPage === "slow" || currentPage === "fast";
+  const kernelValue = isKernelTrack ? currentPage : "";
+
   return (
     <>
       {/* Desktop Menu */}
-      <ToggleButtonGroup
-        value={currentPage}
-        exclusive
-        onChange={(_event, value) => value && handleGovernanceChange(value)}
-        size="small"
-        sx={{ display: { xs: "none", md: "flex" } }}
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          alignItems: "center",
+          gap: 4,
+        }}
       >
-        {Object.entries(GOVERNANCES).map(([key, value]) => (
-          <ToggleButton
-            key={key}
-            value={value}
-            sx={{ textTransform: "capitalize" }}
-          >
-            {key}
-          </ToggleButton>
-        ))}
-        <ConnectButton />
-      </ToggleButtonGroup>
-
-      {/* Mobile Menu */}
-      <Box sx={{ display: { sm: "block", md: "none" } }}>
-        <IconButton
-          sx={{ ml: 1 }}
-          onClick={() => setDrawerOpen(true)}
-          color="primary"
-          size="large"
-        >
-          <MenuIcon />
-        </IconButton>
-        <Drawer
-          anchor="bottom"
-          aria-hidden={false}
-          open={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          ModalProps={{
-            keepMounted: true,
-          }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
+        {/* Kernel Dropdown */}
+        <FormControl size="small" variant="filled">
+          <Select
+            value={kernelValue}
+            onChange={(event) =>
+              handleGovernanceChange(event.target.value as GovernanceType)
+            }
+            displayEmpty
+            variant="standard"
+            disableUnderline
+            renderValue={() => "Kernel"}
+            MenuProps={{
+              anchorOrigin: {
+                vertical: "bottom",
+                horizontal: "left",
+              },
+              transformOrigin: {
+                vertical: "top",
+                horizontal: "left",
+              },
             }}
           >
-            {Object.entries(GOVERNANCES).map(([key, value]) => (
-              <Typography
-                key={key}
-                onClick={() => {
-                  handleGovernanceChange(value);
-                  setDrawerOpen(false);
-                }}
-                sx={{
-                  textTransform: "capitalize",
-                  color: theme.palette.secondary.contrastText,
-                  fontWeight: 700,
-                  justifyContent: "flex-start",
-                  px: 2,
-                  py: 2,
-                }}
-              >
-                {value} Governance
-              </Typography>
+            {Object.entries(KERNEL_TRACKS).map(([key, { value, label }]) => (
+              <MenuItem key={key} value={value}>
+                {label}
+              </MenuItem>
             ))}
-            <Box sx={{ flexGrow: 1 }} />
-            <Box sx={{ width: "100%", pb: 2 }}>
-              <ConnectButton sx={{ width: "100%" }} />
-            </Box>
-          </Box>
-        </Drawer>
+          </Select>
+        </FormControl>
+
+        {/* Sequencer */}
+        <Typography
+          onClick={() => handleGovernanceChange("sequencer")}
+          sx={{
+            cursor: "pointer",
+            color: "#bcbcbc !important",
+            fontWeight: 700,
+            "&:hover": {
+              color: theme.palette.primary.main,
+            },
+          }}
+        >
+          Sequencer
+        </Typography>
+        <Divider
+          orientation="vertical"
+          flexItem
+          sx={{ borderColor: "#9b9b9b", borderRadius: '24px'}}
+        />
+        <ConnectButton />
       </Box>
+
+      {/* Mobile Menu */}
+      <MobileMenu
+        currentPage={currentPage}
+        onGovernanceChange={handleGovernanceChange}
+      />
     </>
   );
 };

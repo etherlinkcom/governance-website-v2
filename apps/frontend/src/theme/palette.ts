@@ -48,6 +48,9 @@ export const theme: PaletteOptions = {
   },
   divider: 'rgba(56, 255, 156, 0.4)',
   custom: {
+    background: {
+      dropdown: "#101010"
+    },
     tableBg: {
       odd: '#1b1b1b',
       even: '#151515',
