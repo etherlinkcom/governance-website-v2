@@ -1,7 +1,6 @@
 import {
   Box,
   Drawer,
-  IconButton,
   Typography,
   useTheme,
   AccordionDetails,
@@ -17,30 +16,28 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useRouter } from "next/router";
 
 interface MobileMenuProps {
-  onGovernanceChange: (governance: GovernanceType) => void;
+  handleGovernanceChange: (governance: GovernanceType) => void;
 }
 
-export const MobileMenu = ({
-  onGovernanceChange,
-}: MobileMenuProps) => {
-
-
+export const MobileMenu = ({ handleGovernanceChange }: MobileMenuProps) => {
   const theme = useTheme();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [accordionExpanded, setAccordionExpanded] = useState(false);
 
-  const {governance} = router.query;
+  const { governance } = router.query;
 
-  const handleGovernanceChange = (governance: GovernanceType) => {
-    onGovernanceChange(governance);
+  const isKernelTrack = governance === "slow" || governance === "fast";
+
+  const onGovernanceChange = (governance: GovernanceType) => {
+    handleGovernanceChange(governance);
     setDrawerOpen(false);
   };
 
   const handleHomeClick = () => {
     setDrawerOpen(false);
     router.push("/");
-  }
+  };
 
   useEffect(() => {
     if (!drawerOpen) {
@@ -50,13 +47,11 @@ export const MobileMenu = ({
 
   return (
     <Box sx={{ display: { sm: "block", md: "none" } }}>
-      <IconButton
+      <MenuIcon
+        fontSize="small"
         onClick={() => setDrawerOpen(true)}
-        color="primary"
-        size="large"
-      >
-        <MenuIcon />
-      </IconButton>
+        sx={{ color: "#BCBCBC", fontSize: "18px", mt: 0.8 }}
+      />
       <Drawer
         anchor="bottom"
         aria-hidden={false}
@@ -123,14 +118,24 @@ export const MobileMenu = ({
               className="mobile-menu-accordion"
             >
               <AccordionSummary
-                expandIcon={<KeyboardArrowDownIcon sx={{ color: "#bcbcbc" }} />}
+                expandIcon={
+                  <KeyboardArrowDownIcon
+                    sx={{
+                      color: isKernelTrack
+                        ? theme.palette.primary.dark + " !important"
+                        : "#bcbcbc !important",
+                    }}
+                  />
+                }
                 className="mobile-menu-summary"
               >
                 <Typography
                   sx={{
                     fontWeight: 700,
                     fontSize: "14px",
-                    color: "#bcbcbc !important",
+                    color: isKernelTrack
+                      ? theme.palette.primary.dark + " !important"
+                      : "#bcbcbc !important",
                   }}
                 >
                   Kernel
@@ -141,8 +146,14 @@ export const MobileMenu = ({
                   ([key, { value, label }]) => (
                     <Typography
                       key={key}
-                      onClick={() => handleGovernanceChange(value)}
+                      onClick={() => onGovernanceChange(value)}
                       className="mobile-menu-track"
+                      sx={{
+                        color:
+                          governance === value
+                            ? theme.palette.primary.dark + " !important"
+                            : "#bcbcbc !important",
+                      }}
                     >
                       {label}
                     </Typography>
@@ -154,10 +165,11 @@ export const MobileMenu = ({
 
           {/* Sequencer Section */}
           <Typography
-            onClick={() => handleGovernanceChange("sequencer")}
+            onClick={() => onGovernanceChange("sequencer")}
             className="mobile-menu-item"
             sx={{
-              color: governance === "sequencer"
+              color:
+                governance === "sequencer"
                   ? theme.palette.primary.dark + " !important"
                   : "#bcbcbc !important",
             }}
