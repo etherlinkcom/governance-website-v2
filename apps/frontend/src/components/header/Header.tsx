@@ -4,11 +4,8 @@ import { observer } from 'mobx-react-lite';
 import Image from 'next/image';
 import Link from 'next/link';
 
-interface HeaderProps {
-  currentPage?: 'slow' | 'fast' | 'sequencer' | null;
-}
 
-export const Header = observer(({ currentPage = null }: HeaderProps) => {
+export const Header = observer(() => {
   const theme = useTheme();
 
   return (
@@ -51,7 +48,7 @@ export const Header = observer(({ currentPage = null }: HeaderProps) => {
           </Link>
 
         </Box>
-          <Menu currentPage={currentPage} />
+          <Menu />
         </Box>
       </AppBar>
   );

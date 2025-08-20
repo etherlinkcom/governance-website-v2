@@ -65,7 +65,7 @@ export const components: Components<Theme> = {
         boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
         border: "none",
         borderRadius: "25px",
-        "&.past-card":{
+        "&.past-card": {
           "&:hover": {
             boxShadow: `0px 0px 10px 2px ${theme.palette.custom.shadow.secondary}`,
             transform: "translateY(-2px)",
@@ -204,9 +204,9 @@ export const components: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         fontFamily: typography.fontFamily,
-        overflow: 'inherit',
-        textOverflow: 'inherit',
-        whiteSpace: 'inherit',
+        overflow: "inherit",
+        textOverflow: "inherit",
+        whiteSpace: "inherit",
         "&.MuiTypography-h1, &.MuiTypography-h2, &.MuiTypography-h3, &.MuiTypography-h4, &.MuiTypography-h5, &.MuiTypography-h6":
           {
             color: theme.palette.text.primary,
@@ -219,6 +219,35 @@ export const components: Components<Theme> = {
         },
         "&.MuiTypography-subtitle1, &.MuiTypography-subtitle2": {
           color: theme.palette.text.secondary,
+        },
+        "&.mobile-menu-item": {
+          fontWeight: 700,
+          fontSize: "14px",
+          color: "#bcbcbc",
+          cursor: "pointer",
+          height: "40px",
+          padding: theme.spacing(1.5, 3),
+          borderRadius: "24px",
+          transition: "all 0.2s ease-in-out",
+          "&:hover": {
+            color: theme.palette.primary.dark,
+            backgroundColor: theme.palette.custom.tableBg.odd,
+          },
+        },
+        "&.mobile-menu-track": {
+          fontWeight: 700,
+          fontSize: "14px",
+          color: "#bcbcbc",
+          cursor: "pointer",
+          margin: theme.spacing(0.5, 0),
+          padding: theme.spacing(1, 4.5),
+          borderRadius: "100px",
+          border: "0 !important",
+          transition: "all 0.2s ease-in-out",
+          "&:hover": {
+            backgroundColor: theme.palette.custom.tableBg.odd,
+            color: theme.palette.primary.dark + " !important",
+          },
         },
       }),
     },
@@ -389,6 +418,11 @@ export const components: Components<Theme> = {
         "&.Mui-expanded": {
           margin: "0",
         },
+        "&.mobile-menu-accordion": {
+          boxShadow: "none",
+          backgroundColor: "transparent",
+          borderRadius: "24px",
+        },
       }),
     },
   },
@@ -403,57 +437,96 @@ export const components: Components<Theme> = {
         "& .MuiAccordionSummary-expandIconWrapper": {
           color: theme.palette.primary.main,
         },
+        "&.mobile-menu-summary": {
+          padding: theme.spacing(1.5, 3),
+          height: "40px",
+          minHeight: "40px",
+          backgroundColor: "transparent",
+          "&.Mui-expanded": {
+            backgroundColor: theme.palette.custom.tableBg.odd,
+            borderBottomLeftRadius: "0",
+            borderBottomRightRadius: "0",
+            "& .MuiTypography-root": {
+              color: theme.palette.primary.dark + " !important",
+            },
+            "& .MuiSvgIcon-root": {
+              color: theme.palette.primary.dark + " !important",
+            },
+          },
+          "&:hover": {
+            backgroundColor: theme.palette.custom.tableBg.odd,
+            "& .MuiTypography-root": {
+              color: theme.palette.primary.dark + " !important",
+            },
+            "& .MuiSvgIcon-root": {
+              color: theme.palette.primary.dark + " !important",
+            },
+          },
+          "& .MuiAccordionSummary-content": {
+            margin: 0,
+          },
+        },
       }),
     },
   },
   MuiAccordionDetails: {
     styleOverrides: {
-      root: () => ({
+      root: ({ theme }) => ({
         display: "flex",
         flexDirection: "column",
+        "&.mobile-menu-details": {
+          padding: 0,
+          backgroundColor: theme.palette.custom.tableBg.even,
+          borderBottomLeftRadius: "24px",
+          borderBottomRightRadius: "24px",
+        },
       }),
     },
   },
   MuiSelect: {
-  styleOverrides: {
-    root: ({ theme }) => ({
-      color: "#bcbcbc",
-      padding: 0,
-      "&[aria-expanded='true']": {
-        "& .MuiSelect-select": {
-          color: theme.palette.primary.main,
-        },
-      },
-      "& .MuiSelect-select": {
-        fontWeight: 700,
-        padding: 0,
-      },
-      "& .MuiSvgIcon-root": {
+    styleOverrides: {
+      root: ({ theme }) => ({
         color: "#bcbcbc",
-      },
-    }),
-  },
-},
-MuiMenu: {
-  styleOverrides: {
-    paper: ({ theme }) => ({
-      color: "#bcbcbc",
-      background: theme.palette.custom.background?.dropdown,
-      marginTop: theme.spacing(2),
-      marginLeft: theme.spacing(-1),
-      width: 290,
-      borderRadius: "24px",
-      padding: theme.spacing(0.5),
-      border: 0,
-      "& .MuiList-root": {
-        background: theme.palette.custom.background?.dropdown,
-        borderRadius: "24px",
         padding: 0,
-        margin: 0,
-      },
-    }),
+        "&[aria-expanded='true']": {
+          color: theme.palette.primary.dark,
+        },
+        "& .MuiSelect-select": {
+          fontWeight: 700,
+          padding: 0,
+        },
+        "& .MuiSvgIcon-root": {
+          color: "#bcbcbc",
+        },
+        "&:hover": {
+          color: theme.palette.primary.dark,
+          "& .MuiSvgIcon-root": {
+            color: theme.palette.primary.dark,
+          },
+        },
+      }),
+    },
   },
-},
+  MuiMenu: {
+    styleOverrides: {
+      paper: ({ theme }) => ({
+        color: "#bcbcbc",
+        background: theme.palette.custom.background?.dropdown,
+        marginTop: theme.spacing(2),
+        marginLeft: theme.spacing(-1),
+        width: 290,
+        borderRadius: "24px",
+        padding: theme.spacing(0.5),
+        border: 0,
+        "& .MuiList-root": {
+          background: theme.palette.custom.background?.dropdown,
+          borderRadius: "24px",
+          padding: 0,
+          margin: 0,
+        },
+      }),
+    },
+  },
   MuiMenuItem: {
     styleOverrides: {
       root: ({ theme }) => ({
@@ -463,10 +536,7 @@ MuiMenu: {
         fontWeight: 700,
         fontSize: "14px",
         margin: theme.spacing(0.5),
-        paddingTop: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
-        paddingLeft: theme.spacing(3),
-        paddingRight: theme.spacing(3),
+        padding: theme.spacing(1, 3),
         "&:hover": {
           backgroundColor: theme.palette.custom.tableBg.odd + " !important",
           color: theme.palette.primary.main,
