@@ -1,6 +1,5 @@
 import { Box, Container, Link, Typography } from '@mui/material';
 import { ReactNode } from 'react';
-import { useRouter } from 'next/router';
 import {Header} from '@/components/header/Header';
 
 interface LayoutProps {
@@ -8,10 +7,6 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
-  const router = useRouter();
-  const { contract } = router.query;
-
-  const currentPage = contract as 'slow' | 'fast' | 'sequencer' | null;
 
   return (
     <Box
@@ -21,7 +16,7 @@ export const Layout = ({ children }: LayoutProps) => {
         flexDirection: 'column',
       }}
     >
-      <Header currentPage={currentPage} />
+      <Header />
 
       <Box component="main" sx={{ flex: 1 }}>
         {children}
