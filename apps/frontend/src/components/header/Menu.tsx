@@ -8,9 +8,7 @@ import {
   Divider,
 } from "@mui/material";
 import ConnectButton from "@/components/header/ConnectButton";
-import { MobileMenu } from "@/components/header/MobileMenu";
 import type { GovernanceType } from "@trilitech/types";
-import { contractStore } from "@/stores/ContractStore";
 import { useRouter } from "next/router";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { observer } from "mobx-react-lite";
@@ -22,16 +20,13 @@ export const KERNEL_TRACKS: {
   fast: { value: "fast", label: "Fast track" },
 };
 
-export const Menu = observer(() => {
+interface MenuProps {
+  handleGovernanceChange: (governance: GovernanceType) => void;
+}
+
+export const Menu = observer(({ handleGovernanceChange }: MenuProps) => {
   const theme = useTheme();
   const router = useRouter();
-
-  const handleGovernanceChange = (newGovernance: GovernanceType) => {
-    if (newGovernance !== null) {
-      contractStore.setGovernance(newGovernance);
-      router.push(`/governance/${newGovernance}`);
-    }
-  };
 
   const { governance } = router.query;
   const isKernelTrack = governance === "slow" || governance === "fast";
@@ -123,8 +118,7 @@ export const Menu = observer(() => {
         <ConnectButton />
       </Box>
 
-      {/* Mobile Menu */}
-      <MobileMenu onGovernanceChange={handleGovernanceChange} />
+      <ConnectButton sx={{display: { xs: "flex", md: "none" }}} />
     </>
   );
 });
