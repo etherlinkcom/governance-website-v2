@@ -12,10 +12,8 @@ import { MobileMenu } from "@/components/header/MobileMenu";
 import type { GovernanceType } from "@trilitech/types";
 import { contractStore } from "@/stores/ContractStore";
 import { useRouter } from "next/router";
-
-interface MenuProps {
-  currentPage?: GovernanceType | null;
-}
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { observer } from "mobx-react-lite";
 
 export const KERNEL_TRACKS: {
   [key: string]: { value: GovernanceType; label: string };
@@ -24,7 +22,7 @@ export const KERNEL_TRACKS: {
   fast: { value: "fast", label: "Fast track" },
 };
 
-export const Menu = ({ currentPage = null }: MenuProps) => {
+export const Menu = observer(() => {
   const theme = useTheme();
   const router = useRouter();
 
@@ -35,8 +33,9 @@ export const Menu = ({ currentPage = null }: MenuProps) => {
     }
   };
 
-  const isKernelTrack = currentPage === "slow" || currentPage === "fast";
-  const kernelValue = isKernelTrack ? currentPage : "";
+  const { governance } = router.query;
+  const isKernelTrack = governance === "slow" || governance === "fast";
+  const kernelValue = isKernelTrack ? governance : "";
 
   return (
     <>
@@ -59,6 +58,18 @@ export const Menu = ({ currentPage = null }: MenuProps) => {
             variant="standard"
             disableUnderline
             renderValue={() => "Kernel"}
+            IconComponent={KeyboardArrowDownIcon}
+            sx={{
+              color: isKernelTrack
+                ? theme.palette.primary.dark + " !important"
+                : "#bcbcbc !important",
+
+              "& .MuiSvgIcon-root": {
+                color: isKernelTrack
+                  ? theme.palette.primary.dark + " !important"
+                  : "#bcbcbc !important",
+              },
+            }}
             MenuProps={{
               anchorOrigin: {
                 vertical: "bottom",
@@ -71,7 +82,16 @@ export const Menu = ({ currentPage = null }: MenuProps) => {
             }}
           >
             {Object.entries(KERNEL_TRACKS).map(([key, { value, label }]) => (
-              <MenuItem key={key} value={value}>
+              <MenuItem
+                key={key}
+                value={value}
+                sx={{
+                  color:
+                    governance === value
+                      ? theme.palette.primary.dark
+                      : "#bcbcbc !important",
+                }}
+              >
                 {label}
               </MenuItem>
             ))}
@@ -83,10 +103,13 @@ export const Menu = ({ currentPage = null }: MenuProps) => {
           onClick={() => handleGovernanceChange("sequencer")}
           sx={{
             cursor: "pointer",
-            color: "#bcbcbc !important",
+            color:
+              governance === "sequencer"
+                ? theme.palette.primary.dark + " !important"
+                : "#bcbcbc !important",
             fontWeight: 700,
             "&:hover": {
-              color: theme.palette.primary.main,
+              color: theme.palette.primary.dark + " !important",
             },
           }}
         >
@@ -95,16 +118,13 @@ export const Menu = ({ currentPage = null }: MenuProps) => {
         <Divider
           orientation="vertical"
           flexItem
-          sx={{ borderColor: "#9b9b9b", borderRadius: '24px'}}
+          sx={{ borderColor: "#9b9b9b", borderRadius: "24px" }}
         />
         <ConnectButton />
       </Box>
 
       {/* Mobile Menu */}
-      <MobileMenu
-        currentPage={currentPage}
-        onGovernanceChange={handleGovernanceChange}
-      />
+      <MobileMenu onGovernanceChange={handleGovernanceChange} />
     </>
   );
-};
+});

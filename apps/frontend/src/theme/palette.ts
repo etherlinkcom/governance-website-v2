@@ -5,7 +5,7 @@ export const theme: PaletteOptions = {
   primary: {
     main: '#38FF9C',
     light: '#A3FFD1',
-    dark: '#2ECC7F',
+    dark: '#28B56F',
     contrastText: '#000000',
   },
   secondary: {
