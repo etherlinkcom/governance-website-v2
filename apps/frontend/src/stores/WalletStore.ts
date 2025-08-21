@@ -255,8 +255,8 @@ export class WalletStore {
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.new_proposal(proposal).send();
       await operation.confirmation();
-
       console.log(`Proposal submitted for ${contractAddress}: ${proposal} at ${operation.opHash}`);
+      return operation.opHash;
     } catch (error) {
       console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
     } finally {
