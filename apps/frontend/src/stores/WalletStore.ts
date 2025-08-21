@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { Contract, TezosToolkit } from '@taquito/taquito';
 import { BeaconWallet } from '@taquito/beacon-wallet';
-import { ColorMode } from '@airgap/beacon-types';
+import { ColorMode, NetworkType } from '@airgap/beacon-types';
 import BigNumber from 'bignumber.js';
 import { formatNumber } from '@/lib/formatNumber';
 import { VoteOption } from '@trilitech/types';
@@ -29,6 +29,9 @@ export class WalletStore {
       name: 'Etherlink Governance',
         colorMode: ColorMode.DARK,
         iconUrl: '/favicon.ico',
+        preferredNetwork: process.env.NEXT_PUBLIC_NETWORK_TYPE === "mainnet" ?
+          "mainnet" as NetworkType :
+          "ghostnet" as NetworkType,
     });
     this.Tezos.setWalletProvider(this.wallet);
     makeAutoObservable(this);
@@ -252,8 +255,8 @@ export class WalletStore {
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.new_proposal(proposal).send();
       await operation.confirmation();
-      return operation.opHash;
 
+      console.log(`Proposal submitted for ${contractAddress}: ${proposal} at ${operation.opHash}`);
     } catch (error) {
       console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
     } finally {

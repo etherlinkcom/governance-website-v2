@@ -17,7 +17,6 @@ import { VotersTable } from "@/components/promotion/VotersTable";
 import { getWalletStore } from "@/stores/WalletStore";
 import { useState } from "react";
 import { VoteOption } from "@trilitech/types";
-import HowToVoteIcon from "@mui/icons-material/HowToVote";
 
 interface PromotionViewProps {
   contractVotingIndex?: number;
@@ -42,6 +41,7 @@ export const PromotionView = ({
 
     setIsVoting(true);
     try {
+      console.log({selectedVote})
       const opHash = await walletStore.vote(contractAddress, selectedVote);
       if (opHash) {
         setVoteModalOpen(false);
@@ -103,9 +103,9 @@ export const PromotionView = ({
               onChange={(e) => setSelectedVote(e.target.value as VoteOption)}
             >
               <FormControlLabel
-                value="yay"
+                value="yea"
                 control={<Radio />}
-                label="Yay (Approve)"
+                label="Yea (Approve)"
               />
               <FormControlLabel
                 value="nay"

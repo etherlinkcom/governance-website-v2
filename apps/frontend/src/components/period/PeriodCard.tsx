@@ -28,7 +28,6 @@ interface PeriodCardProps {
 export const PeriodCard = observer(({ period }: PeriodCardProps) => {
   const theme = useTheme();
   const [modalOpen, setModalOpen] = useState(false);
-  const [proposalModalOpen, setProposalModalOpen] = useState(false);
   const isCurrentPeriod = period.period_class === "current";
   const isFuture = period.period_class === "future";
 
@@ -152,7 +151,7 @@ export const PeriodCard = observer(({ period }: PeriodCardProps) => {
               renderHash={renderHash}
             />
           </Box>
-      {isCurrentPeriod && <SubmitProposalButton
+      {isCurrentPeriod && !hasPromotion && <SubmitProposalButton
         contractAddress={period.contract_address}
         governanceType={contractAndConfig?.governance_type}
       />}

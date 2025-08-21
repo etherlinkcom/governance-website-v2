@@ -17,7 +17,6 @@ import { VotingProgress } from "@/components/shared/VotingProgress";
 import { contractStore } from "@/stores/ContractStore";
 import { getWalletStore } from "@/stores/WalletStore";
 import { useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
 
 const ProposalsListSkeleton = () => (
   <Box>

@@ -321,6 +321,7 @@ export class Database {
       period.total_voting_power
     ];
 
+    // TODO is this overwriting the promotion hash if two periods have the same promotion hash
     await this.upsert(
       `INSERT INTO periods (
         contract_voting_index,
