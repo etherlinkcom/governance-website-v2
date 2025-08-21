@@ -21,7 +21,7 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
 
   const handleUpvote = async () => {
     if (!contractAddress || !walletStore) return;
-    
+
     setIsUpvoting(true);
     try {
       const opHash = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
@@ -83,7 +83,7 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
             <Typography variant="body1" sx={{ display: "block" }}>
               {formatNumber(proposal.upvotes)}
             </Typography>
-            
+
             {isCurrentPeriod && walletStore?.address && (
               <Button
                 variant="outlined"

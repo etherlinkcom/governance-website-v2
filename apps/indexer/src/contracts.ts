@@ -63,6 +63,11 @@ const testnet_contracts: Contract[] = [
     address: "KT1GqWFzt7Rm9i8TfEgmCtAETtQqVLwT4Agm",
     active: true,
   },
+  {
+    type: "sequencer",
+    address: "KT1WvJNQWA6HSP5xbZTfHoPYdUVxk5UvqN9B",
+    active: true,
+  }
 ]
 
 export const all_contracts = process.env.NETWORK === "mainnet" ? mainnet_contracts : testnet_contracts;

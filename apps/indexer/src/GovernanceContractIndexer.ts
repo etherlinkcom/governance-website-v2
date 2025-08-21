@@ -14,7 +14,7 @@ type PeriodIndexToPeriod = {
 export class GovernanceContractIndexer {
 
     tzkt_api_url: string = process.env.TZKT_API_URL || "https://api.tzkt.io/v1";
-    tzkt_rpc_url: string = process.env.TZKT_RPC_URL || "https://rpc.tzkt.io/mainnet";
+    rpc_url: string = process.env.RPC_URL || "https://rpc.tzkt.io/mainnet";
     delegate_view_contract: string =  process.env.DELEGATE_VIEW_CONTRACT || 'KT1Ut6kfrTV9tK967tDYgQPMvy9t578iN7iH';
     cache: LRUCache<any> = new LRUCache();
     database: Database = new Database();
@@ -105,7 +105,7 @@ export class GovernanceContractIndexer {
     public async getDelegatesForAddress(address: string, level: number): Promise<string[]> {
         logger.info(`[GovernanceContractIndexer] getDelegatesForAddress(${address}, ${level})`);
         try {
-            const rpc_client = new HistoricalRpcClient(this.tzkt_rpc_url, level);
+            const rpc_client = new HistoricalRpcClient(this.rpc_url, level);
             const tezos_toolkit = new TezosToolkit(rpc_client);
             const contract = await tezos_toolkit.contract.at(this.delegate_view_contract);
             const view = contract.contractViews.list_voters({
@@ -253,7 +253,7 @@ export class GovernanceContractIndexer {
 
     public async getTotalVotingPower(level: number): Promise<number> {
         logger.info(`[GovernanceContractIndexer] getTotalVotingPower(${level})`);
-        const url = `${this.tzkt_rpc_url}/chains/main/blocks/${level}/votes/total_voting_power`;
+        const url = `${this.rpc_url}/chains/main/blocks/${level}/votes/total_voting_power`;
         return Number(await this.fetchJson<string>(url));
     }
 

@@ -19,7 +19,7 @@ export class WalletStore {
   private delegates = new Map<string, VotingPower | null>();
   private voting: boolean = false;
 
-  private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
+  private Tezos = new TezosToolkit(process.env.NEXT_PUBLIC_RPC_URL || "https://rpc.tzkt.io/mainnet");
   private wallet: BeaconWallet;
   private delegatesViewContractAddress: string = process.env.NEXT_PUBLIC_VOTING_RIGHTS_DELEGATION_CONTRACT || "KT1Ut6kfrTV9tK967tDYgQPMvy9t578iN7iH";
   private readonly tzktApiUrl: string = process.env.NEXT_PUBLIC_TZKT_API_URL || 'https://api.tzkt.io/v1';
@@ -220,26 +220,40 @@ export class WalletStore {
     }
   }
 
+  async submitSequencerProposal(
+    contractAddress: string,
+    poolAddress: string,
+    sequencerPublicKey: string
+  ) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      const operation = await contract.methodsObject.new_proposal({
+        sequencer_pk:sequencerPublicKey,
+        pool_address: poolAddress,
+    }).send();
+      await operation.confirmation();
+      return operation.opHash;
+
+    } catch (error) {
+      console.error(`Error submitting sequencer proposal for ${contractAddress}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
   async submitProposal(contractAddress: string, proposal: string) {
     if (this.voting) return;
     this.voting = true;
     try {
+
       const contract = await this.Tezos.wallet.at(contractAddress);
-      let sequencerProposal;
-
-      try {
-        const parsed = JSON.parse(proposal);
-        if (parsed && parsed.sequencer_pk && parsed.pool_address) {
-          sequencerProposal = {
-            sequencer_pk: parsed.sequencer_pk,
-            pool_address: parsed.pool_address,
-          };
-        }
-      } catch {}
-
-      const operation = await contract.methodsObject.new_proposal(sequencerProposal ?? proposal).send();
+      const operation = await contract.methodsObject.new_proposal(proposal).send();
       await operation.confirmation();
       return operation.opHash;
+
     } catch (error) {
       console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
     } finally {
