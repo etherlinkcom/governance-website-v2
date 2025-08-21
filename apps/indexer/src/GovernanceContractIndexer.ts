@@ -12,9 +12,10 @@ type PeriodIndexToPeriod = {
 }
 
 export class GovernanceContractIndexer {
-    tzkt_api_url: string = 'https://api.tzkt.io/v1';
-    tzkt_rpc_url: string = 'https://rpc.tzkt.io/mainnet';
-    delegate_view_contract: string = 'KT1Ut6kfrTV9tK967tDYgQPMvy9t578iN7iH';
+
+    tzkt_api_url: string = process.env.TZKT_API_URL || "https://api.tzkt.io/v1";
+    tzkt_rpc_url: string = process.env.TZKT_RPC_URL || "https://rpc.tzkt.io/mainnet";
+    delegate_view_contract: string =  process.env.DELEGATE_VIEW_CONTRACT || 'KT1Ut6kfrTV9tK967tDYgQPMvy9t578iN7iH';
     cache: LRUCache<any> = new LRUCache();
     database: Database = new Database();
 

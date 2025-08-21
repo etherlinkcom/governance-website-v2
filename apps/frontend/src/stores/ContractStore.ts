@@ -20,7 +20,7 @@ class ContractStore {
   futurePeriodsCount: number = 3;
   periodDetailsLoading: Record<string, Record<number, boolean>> = {};
   periodDetailsErrors: Record<string, Record<number, string | null>> = {};
-  readonly tzktApiUrl: string = 'https://api.tzkt.io/v1';
+  readonly tzktApiUrl: string = process.env.NEXT_PUBLIC_TZKT_API_URL || 'https://api.tzkt.io/v1';
 
   constructor() {
     makeAutoObservable(this, {
