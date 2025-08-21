@@ -41,7 +41,7 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
 
   const handleSubmitProposal = async () => {
     if (!contractAddress || !proposalText.trim() || !walletStore) return;
-    
+
     setIsSubmitting(true);
     try {
       const opHash = await walletStore.submitProposal(contractAddress, proposalText);
@@ -89,18 +89,18 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
       <Box sx={{
         display: "flex",
         flexDirection: { xs: 'column', sm: 'row' },
-        alignItems: { xs: 'center', sm: 'flex-start' },
+        alignItems: 'flex-start',
         justifyContent: { xs: 'center', sm: 'space-between' },
         mb: 2,
         mx: 0.5,
         mr: { xs: 0, sm: 1 },
       }}>
+
         {isCurrentPeriod && walletStore?.address && (
           <Button
             variant="contained"
-            startIcon={<AddIcon />}
             onClick={() => setSubmitModalOpen(true)}
-            sx={{ mb: { xs: 2, sm: 0 } }}
+            sx={{ mb: { xs: 2, sm: 0 }}}
           >
             Submit Proposal
           </Button>
@@ -140,8 +140,8 @@ export const ProposalsList = observer(({ contractVotingIndex, contractAddress }:
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setSubmitModalOpen(false)}>Cancel</Button>
-          <Button 
-            onClick={handleSubmitProposal} 
+          <Button
+            onClick={handleSubmitProposal}
             variant="contained"
             disabled={!proposalText.trim() || isSubmitting}
           >

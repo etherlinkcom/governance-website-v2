@@ -7,7 +7,6 @@ import { HashLink } from "@/components/shared/HashLink";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { getWalletStore } from "@/stores/WalletStore";
 import { useState } from "react";
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -88,7 +87,6 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<ThumbUpIcon />}
                 onClick={handleUpvote}
                 disabled={isUpvoting}
                 sx={{ mt: 1 }}
