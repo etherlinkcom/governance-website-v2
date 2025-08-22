@@ -238,18 +238,24 @@ export class GovernanceContractIndexer {
         );
         if (!data) throw new Error(`No data found for contract ${contract_address}`);
 
-        if (!data.voting_context?.period?.promotion) return undefined;
+        const period = data.voting_context?.period;
+        const is_promotion = !!period?.promotion;
+        if (!period?.promotion && !period?.proposal) {
+            logger.error(`[GovernanceContractIndexer] No promotion or proposal found for contract ${contract_address} at level ${promotion_end_level}`);
+            return undefined;
+        }
 
-        const winner_candidate = data.voting_context?.period?.promotion?.winner_candidate;
+        const winner_candidate = period.promotion?.winner_candidate || period.proposal?.winner_candidate;
+        const expected_index = is_promotion ? parseInt(data.voting_context?.period_index) : parseInt(data.voting_context?.period_index) + 1;
 
-        if (promotion_period_index !== parseInt(data.voting_context?.period_index)) {
+        if (expected_index !== promotion_period_index) {
             throw new Error(`
                 Period index mismatch for contract ${contract_address} at level ${promotion_end_level}
                 expecting ${promotion_period_index}
-                got ${parseInt(data.voting_context?.period_index)}
+                got ${expected_index}
             `);
         }
-        return winner_candidate;
+        return winner_candidate || undefined;
     }
 
     public async getTotalVotingPower(level: number): Promise<number> {
@@ -341,7 +347,6 @@ export class GovernanceContractIndexer {
 
         const current_promotion_periods: {periods: PeriodIndexToPeriod, promotion: Promotion} | undefined = await this.checkCurrentPromotion(contract_and_config, periods);
         if (current_promotion_periods) {
-            console.log({current_promotion_periods})
             periods = current_promotion_periods.periods;
             promotions_hash_to_promotion[current_promotion_periods.promotion.proposal_hash] = current_promotion_periods.promotion;
         }
@@ -484,11 +489,17 @@ export class GovernanceContractIndexer {
             period_index
         );
 
+        if (!promotion_hash) {
+            logger.error(`[GovernanceContractIndexer] No winning candidate found for contract ${contract_and_config.contract_address} at level ${entry.level}`);
+            logger.error(`Skipping vote entry: ${JSON.stringify(entry, null, 2)}`);
+            return;
+        }
+
         for (let i = 0; i < delegates.length; i++) {
             votes.push({
                 level: entry.level,
                 time: entry.timestamp,
-                proposal_hash: promotion_hash || '',
+                proposal_hash: promotion_hash,
                 baker: delegates[i].address,
                 alias: delegates[i].alias,
                 voting_power: delegates[i].votingPower,

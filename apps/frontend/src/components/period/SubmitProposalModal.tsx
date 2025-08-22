@@ -42,7 +42,7 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
           console.log("Pool address and sequencer public key cannot be blank");
           return;
         }
-        if (getBytesError(poolAddress)) return;
+        // if (getBytesError(poolAddress)) return; // TODO pool address validation
 
         await walletStore?.submitSequencerProposal(
           contractAddress,
@@ -67,15 +67,17 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
 
     const validateForm = (): boolean => {
       if (isSequencer) {
-        if (poolAddress.trim() === "") return false;
-        if (sequencerPublicKey.trim() === "") return false;
-        return !getBytesError(poolAddress);
+        return false; // TODO validation logic for sequencer
+        // if (poolAddress.trim() === "") return false;
+        // if (sequencerPublicKey.trim() === "") return false;
+        // return !getBytesError(poolAddress);
       } else {
         return !getBytesError(proposalText);
       }
     };
 
     const isFormValid = validateForm();
+    // const isFormValid = true
 
     const bytesError = !isSequencer ? getBytesError(proposalText) : null;
     const poolAddressBytesError = isSequencer ? getBytesError(poolAddress) : null;
@@ -109,12 +111,12 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
                     placeholder="Enter pool address"
                     value={poolAddress}
                     onChange={(e) => setPoolAddress(e.target.value)}
-                    error={!!poolAddressBytesError && poolAddress.trim() !== ""}
-                    helperText={
-                      poolAddressBytesError && poolAddress.trim() !== ""
-                        ? poolAddressBytesError
-                        : "Enter hex bytes (0-9, a-f), >65 chars, even length"
-                    }
+                    // error={!!poolAddressBytesError && poolAddress.trim() !== ""}
+                    // helperText={
+                    //   poolAddressBytesError && poolAddress.trim() !== ""
+                    //     ? poolAddressBytesError
+                    //     : "Enter hex bytes (0-9, a-f), >65 chars, even length"
+                    // }
                   />
                   <TextField
                     fullWidth

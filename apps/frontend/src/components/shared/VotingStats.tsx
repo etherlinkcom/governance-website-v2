@@ -51,17 +51,18 @@ export const PromotionVotingStats = ({
   contractQuorum,
   contractSupermajority,
 }: PromotionVotingStatsProps) => {
-  const quorumPercent = getPromotionQuorumPercent(
+  const quorumPercent = Number(getPromotionQuorumPercent(
     yeaVotingPower,
     nayVotingPower,
     passVotingPower,
     totalVotingPower
-  ).toNumber();
+  ).toNumber()) || 0;
 
-  const supermajorityPercent = getPromotionSupermajorityPercent(
+  const supermajorityPercent = Number(getPromotionSupermajorityPercent(
     yeaVotingPower,
     nayVotingPower
-  ).toNumber();
+  ).toNumber()) || 0;
+
 
   const quorumProgress = contractQuorum > 0 ? Math.min(((quorumPercent / contractQuorum) || 0) * 100, 100) : 0;
   const supermajorityProgress = contractSupermajority > 0 ? Math.min(((supermajorityPercent / contractSupermajority) || 0) * 100, 100) : 0;

@@ -140,6 +140,8 @@ export class Database {
   }
 
   async upsertProposal(proposal: Proposal): Promise<void> {
+    try {
+
     const values = [
       proposal.contract_period_index,
       proposal.level,
@@ -174,9 +176,15 @@ export class Database {
          updated_at = CURRENT_TIMESTAMP`,
          this.sanitizeValues(values)
     );
+  } catch (error) {
+      logger.error(`[Database] Error upserting proposal: ${error}`);
+      throw error;
+    }
   }
 
   async upsertVote(vote: Vote): Promise<void> {
+    try {
+
     const values = [
       vote.proposal_hash,
       vote.baker,
@@ -206,9 +214,15 @@ export class Database {
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
     );
+  } catch (error) {
+      logger.error(`[Database] Error upserting vote: ${error}`);
+      throw error;
+    }
   }
 
   async upsertPromotion(promotion: Promotion): Promise<void> {
+    try {
+
     const values = [
       promotion.proposal_hash,
       promotion.contract_period_index,
@@ -238,9 +252,15 @@ export class Database {
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
     );
+    } catch (error) {
+      logger.error(`[Database] Error upserting promotion: ${error}`);
+      throw error;
+    }
   }
 
   async upsertUpvote(upvote: Upvote): Promise<void> {
+    try {
+
     const values = [
       upvote.level,
       this.formatDateForMySQL(upvote.time),
@@ -261,9 +281,15 @@ export class Database {
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
     );
+    } catch (error) {
+      logger.error(`[Database] Error upserting upvote: ${error}`);
+      throw error;
+    }
   }
 
   async upsertContract(contract: ContractAndConfig): Promise<void> {
+    try {
+
     const values = [
       contract.contract_address,
       contract.governance_type,
@@ -306,9 +332,15 @@ export class Database {
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
     );
+  } catch (error) {
+      logger.error(`[Database] Error upserting contract: ${error}`);
+      throw error;
+    }
   }
 
   async upsertPeriod(period: Period): Promise<void> {
+    try {
+
     const values = [
       period.contract_voting_index,
       period.contract_address,
@@ -321,7 +353,6 @@ export class Database {
       period.total_voting_power
     ];
 
-    // TODO is this overwriting the promotion hash if two periods have the same promotion hash
     await this.upsert(
       `INSERT INTO periods (
         contract_voting_index,
@@ -341,11 +372,18 @@ export class Database {
          date_start = VALUES(date_start),
          date_end = VALUES(date_end),
          proposal_hashes = VALUES(proposal_hashes),
-         promotion_hash = VALUES(promotion_hash),
+          promotion_hash = CASE
+            WHEN VALUES(promotion_hash) IS NOT NULL THEN VALUES(promotion_hash)
+            ELSE promotion_hash
+          END,
          total_voting_power = VALUES(total_voting_power),
          updated_at = CURRENT_TIMESTAMP`,
       this.sanitizeValues(values)
     );
+  } catch (error) {
+      logger.error(`[Database] Error upserting period: ${error}`);
+      throw error;
+    }
   }
 
   async upsertContracts(contracts: (ContractAndConfig)[]): Promise<void> {

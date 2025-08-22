@@ -17,6 +17,7 @@ import { VotersTable } from "@/components/promotion/VotersTable";
 import { getWalletStore } from "@/stores/WalletStore";
 import { useState } from "react";
 import { VoteOption } from "@trilitech/types";
+import { observer } from "mobx-react-lite";
 
 interface PromotionViewProps {
   contractVotingIndex?: number;
@@ -25,7 +26,7 @@ interface PromotionViewProps {
   isCurrentPeriod?: boolean;
 }
 
-export const PromotionView = ({
+export const PromotionView = observer(({
   contractVotingIndex,
   contractAddress,
   promotionHash,
@@ -126,4 +127,4 @@ export const PromotionView = ({
       </Dialog>
     </Box>
   );
-};
+});
