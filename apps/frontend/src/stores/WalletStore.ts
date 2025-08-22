@@ -44,6 +44,10 @@ export class WalletStore {
     return this._address;
   }
 
+  get isVoting(): boolean {
+    return this.voting;
+  }
+
   get formattedBalance(): string {
     return formatNumber(this.balance);
   }
@@ -193,8 +197,10 @@ export class WalletStore {
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.vote(voteType).send();
       await operation.confirmation();
+      toast.success(`Successfully voted ${voteType}\nUpdates will be reflected in <1min`);
       return operation.opHash;
     } catch (error) {
+      toast.error(`Error voting`);
       console.error(`Error voting ${voteType} for ${contractAddress}: ${error}`);
     } finally {
       this.voting = false;
@@ -220,8 +226,10 @@ export class WalletStore {
 
       const operation = await contract.methodsObject.upvote_proposal(sequencerProposal ?? proposal).send();
       await operation.confirmation();
+      toast.success(`Successfully upvoted proposal\nUpdates will be reflected in <1min`);
       return operation.opHash;
     } catch (error) {
+      toast.error(`Error upvoting proposal`);
       console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
     } finally {
       this.voting = false;
@@ -243,9 +251,11 @@ export class WalletStore {
         pool_address: poolAddress,
     }).send();
       await operation.confirmation();
+      toast.success(`Submitted sequencer proposal\nUpdates will be reflected in <1min`)
       return operation.opHash;
 
     } catch (error) {
+      toast.error(`Error submitting sequencer proposal`);
       console.error(`Error submitting sequencer proposal for ${contractAddress}: ${error}`);
     } finally {
       this.voting = false;
@@ -260,10 +270,11 @@ export class WalletStore {
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.new_proposal(proposal).send();
       await operation.confirmation();
-      console.log(`Proposal submitted for ${contractAddress}: ${proposal} at ${operation.opHash}`);
+      toast.success(`Submitted proposal\nUpdates will be reflected in <1min`);
       return operation.opHash;
     } catch (error) {
-      console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
+      toast.error(`Error submitting proposal`);
+      console.error(`Error submitting proposal for ${contractAddress}: ${error}`);
     } finally {
       this.voting = false;
     }

@@ -33,13 +33,12 @@ export const PromotionView = ({
 }: PromotionViewProps) => {
   const [voteModalOpen, setVoteModalOpen] = useState(false);
   const [selectedVote, setSelectedVote] = useState<VoteOption>("yea");
-  const [isVoting, setIsVoting] = useState(false);
   const walletStore = getWalletStore();
+  const isVoting = walletStore?.isVoting;
 
   const handleVote = async () => {
     if (!contractAddress || !walletStore) return;
 
-    setIsVoting(true);
     try {
       const opHash = await walletStore.vote(contractAddress, selectedVote);
       if (opHash) {
@@ -49,7 +48,6 @@ export const PromotionView = ({
     } catch (error) {
       console.error("Error submitting vote:", error);
     } finally {
-      setIsVoting(false);
     }
   };
 

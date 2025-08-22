@@ -9,13 +9,14 @@ import {
 import { useState } from "react";
 import type { GovernanceType } from "@trilitech/types";
 import { getWalletStore } from "@/stores/WalletStore";
+import { observer } from "mobx-react-lite";
 
 interface SubmitProposalButtonProps {
   contractAddress: string;
   governanceType?: GovernanceType;
 }
 
-export const SubmitProposalButton = ({
+export const SubmitProposalButton = observer(({
   contractAddress,
   governanceType,
 }: SubmitProposalButtonProps) => {
@@ -26,16 +27,16 @@ export const SubmitProposalButton = ({
 
   const isSequencer = governanceType === "sequencer";
   const walletStore = getWalletStore();
+  const isSubmitting = walletStore?.isVoting;
 
-  const handleSubmitProposal = () => {
+  const handleSubmitProposal = async () => {
     if (isSequencer) {
-      // Validate sequencer fields
       if (poolAddress.trim() === "" || sequencerPublicKey.trim() === "") {
         console.log("Pool address and sequencer public key cannot be blank");
         return;
       }
 
-      walletStore?.submitSequencerProposal(
+      await walletStore?.submitSequencerProposal(
         contractAddress,
         poolAddress.trim(),
         sequencerPublicKey.trim(),
@@ -46,7 +47,7 @@ export const SubmitProposalButton = ({
         return;
       }
 
-      walletStore?.submitProposal(
+      await walletStore?.submitProposal(
         contractAddress,
         proposalText.trim()
       );
@@ -72,7 +73,7 @@ export const SubmitProposalButton = ({
         variant="contained"
         onClick={() => setModalOpen(true)}
       >
-        Submit Proposal
+        {isSubmitting ? "Submitting..." : "Submit Proposal"}
       </Button>
 
       <Dialog
@@ -119,14 +120,14 @@ export const SubmitProposalButton = ({
               variant="contained"
               color="primary"
               onClick={handleSubmitProposal}
-              disabled={!isFormValid}
+              disabled={!isFormValid || isSubmitting}
               fullWidth
             >
-              Submit
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </Box>
         </DialogContent>
       </Dialog>
     </>
   );
-};
+});

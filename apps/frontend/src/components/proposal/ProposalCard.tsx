@@ -6,7 +6,6 @@ import { formatNumber } from "@/lib/formatNumber";
 import { HashLink } from "@/components/shared/HashLink";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { getWalletStore } from "@/stores/WalletStore";
-import { useState } from "react";
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -15,22 +14,18 @@ interface ProposalCardProps {
 }
 
 export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: ProposalCardProps) => {
-  const [isUpvoting, setIsUpvoting] = useState(false);
   const walletStore = getWalletStore();
+  const isUpvoting = walletStore?.isVoting;
 
   const handleUpvote = async () => {
     if (!contractAddress || !walletStore) return;
 
-    setIsUpvoting(true);
     try {
       const opHash = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
-      if (opHash) {
-        console.log('Proposal upvoted successfully:', opHash);
-      }
+      if (opHash) console.log('Proposal upvoted successfully:', opHash);
     } catch (error) {
       console.error('Error upvoting proposal:', error);
     } finally {
-      setIsUpvoting(false);
     }
   };
 
