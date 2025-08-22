@@ -16,9 +16,10 @@ export const ProposalVotingStats = ({
     contractQuorum,
 }: ProposalVotingStatsProps) => {
     const totalProposalUpvotes = proposals.map((proposal: Proposal) => proposal.upvotes).reduce((a: number, b: number) => a + b, 0);
-    const quorumPercent = Number(getProposalQuorumPercent(totalProposalUpvotes, totalVotingPower));
+    const quorumPercent = Number(getProposalQuorumPercent(totalProposalUpvotes, totalVotingPower)) || 0;
 
-    const progress = Math.min((quorumPercent / contractQuorum) * 100, 100);
+    const progress = contractQuorum > 0 ? Math.min((quorumPercent / contractQuorum) * 100, 100) : 0;
+
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -62,8 +63,8 @@ export const PromotionVotingStats = ({
     nayVotingPower
   ).toNumber();
 
-  const quorumProgress = Math.min((quorumPercent / contractQuorum) * 100, 100);
-  const supermajorityProgress = Math.min((supermajorityPercent / contractSupermajority) * 100, 100);
+  const quorumProgress = contractQuorum > 0 ? Math.min(((quorumPercent / contractQuorum) || 0) * 100, 100) : 0;
+  const supermajorityProgress = contractSupermajority > 0 ? Math.min(((supermajorityPercent / contractSupermajority) || 0) * 100, 100) : 0;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column'}}>
