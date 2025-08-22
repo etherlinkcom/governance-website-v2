@@ -41,7 +41,6 @@ export const PromotionView = ({
 
     setIsVoting(true);
     try {
-      console.log({selectedVote})
       const opHash = await walletStore.vote(contractAddress, selectedVote);
       if (opHash) {
         setVoteModalOpen(false);

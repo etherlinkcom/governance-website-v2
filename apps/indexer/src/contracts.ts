@@ -70,6 +70,7 @@ const testnet_contracts: Contract[] = [
   {
     type: "sequencer",
     address: "KT1WvJNQWA6HSP5xbZTfHoPYdUVxk5UvqN9B",
+    active: true
   }
 ]
 

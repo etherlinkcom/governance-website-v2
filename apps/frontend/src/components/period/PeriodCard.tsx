@@ -151,10 +151,14 @@ export const PeriodCard = observer(({ period }: PeriodCardProps) => {
               renderHash={renderHash}
             />
           </Box>
-      {isCurrentPeriod && !hasPromotion && <SubmitProposalButton
-        contractAddress={period.contract_address}
-        governanceType={contractAndConfig?.governance_type}
-      />}
+          {isCurrentPeriod && !hasPromotion && (
+            <Box onClick={(e) => e.stopPropagation()}>
+              <SubmitProposalButton
+                contractAddress={period.contract_address}
+                governanceType={contractAndConfig?.governance_type}
+              />
+            </Box>
+          )}
         </CardContent>
       </Card>
       <PeriodDetailsModal
