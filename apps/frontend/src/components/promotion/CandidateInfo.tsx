@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { HashDisplay } from '@/components/shared/HashDisplay';
-import { getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
+import { calculateVotingProgress, getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
 import { VotingProgress } from '@/components/shared/VotingProgress';
 import { contractStore } from '@/stores/ContractStore';
 import { EllipsisBox } from '@/components/shared/EllipsisBox';
@@ -75,16 +75,16 @@ export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, p
     promotions[0]?.nay_voting_power,
     promotions[0]?.pass_voting_power,
     promotions[0]?.total_voting_power
-  )).toNumber();
+  )).toNumber() || 0;
   const promotionSupermajority = (getPromotionSupermajorityPercent(
     promotions[0]?.yea_voting_power,
     promotions[0]?.nay_voting_power
-  )).toNumber();
+  )).toNumber() || 0;
 
   const contractQuorum = contractAndConfig.promotion_quorum;
   const contractSupermajority = contractAndConfig.promotion_supermajority;
-  const quorumProgess = Math.min((promotionQuorum / contractQuorum) * 100, 100);
-  const supermajorityProgress = Math.min((promotionSupermajority / contractSupermajority) * 100, 100);
+  const quorumProgress = calculateVotingProgress(promotionQuorum, contractQuorum);
+  const supermajorityProgress = calculateVotingProgress(promotionSupermajority, contractSupermajority);
 
   return (
     <Box sx={{ mb: 2 }}>
@@ -116,7 +116,7 @@ export const CandidateInfo = observer(({ contractAddress, contractVotingIndex, p
             label="Quorum"
             value={promotionQuorum.toFixed(2)}
             required={contractQuorum}
-            progress={quorumProgess}
+            progress={quorumProgress}
             variant='body1'
           />
           <VotingProgress

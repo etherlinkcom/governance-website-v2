@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { VotingProgress } from '@/components/shared/VotingProgress';
-import { getProposalQuorumPercent } from '@/lib/votingCalculations';
+import { calculateVotingProgress, getProposalQuorumPercent } from '@/lib/votingCalculations';
 import { getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
 import { Proposal } from '@trilitech/types';
 
@@ -64,8 +64,8 @@ export const PromotionVotingStats = ({
   ).toNumber()) || 0;
 
 
-  const quorumProgress = contractQuorum > 0 ? Math.min(((quorumPercent / contractQuorum) || 0) * 100, 100) : 0;
-  const supermajorityProgress = contractSupermajority > 0 ? Math.min(((supermajorityPercent / contractSupermajority) || 0) * 100, 100) : 0;
+  const quorumProgress = calculateVotingProgress(quorumPercent, contractQuorum);
+  const supermajorityProgress = calculateVotingProgress(supermajorityPercent, contractSupermajority);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column'}}>

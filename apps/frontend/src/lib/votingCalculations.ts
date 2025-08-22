@@ -64,3 +64,7 @@ export const parseVotingPower = (value: string): number => {
                     value.includes('B') ? 1000000000 : 1;
   return num * multiplier;
 };
+
+export const calculateVotingProgress = (percent: number, required: number): number => {
+  return required > 0 ? Math.min((percent / required) * 100, 100) : 0;
+};
