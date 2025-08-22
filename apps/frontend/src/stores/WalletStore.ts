@@ -5,6 +5,7 @@ import { ColorMode, NetworkType } from '@airgap/beacon-types';
 import BigNumber from 'bignumber.js';
 import { formatNumber } from '@/lib/formatNumber';
 import { VoteOption } from '@trilitech/types';
+import toast from 'react-hot-toast';
 
 
 export type VotingPower = {
@@ -77,6 +78,10 @@ export class WalletStore {
       this.refreshBalance(),
       this.refreshVotingPower(),
     ]);
+    if (this.votingPower?.votingAmount?.isZero()) {
+      toast.error("Only wallets with voting power can connect");
+      await this.disconnect();
+    }
   }
 
   async disconnect(): Promise<void> {
