@@ -56,6 +56,10 @@ export class WalletStore {
     return this.votingPower?.votingAmount ? formatNumber(this.votingPower.votingAmount) : '0';
   }
 
+  get hasVotingPower(): boolean {
+    return this.votingPower?.votingAmount ? this.votingPower.votingAmount.isGreaterThan(0) : false;
+  }
+
   get formattedVotingPercent(): string {
     return this.votingPower?.votingPercent ? this.votingPower.votingPercent.toPrecision(2) : '0';
   }
@@ -82,10 +86,6 @@ export class WalletStore {
       this.refreshBalance(),
       this.refreshVotingPower(),
     ]);
-    if (this.votingPower?.votingAmount?.isZero()) {
-      toast.error("Only wallets with voting power can connect");
-      await this.disconnect();
-    }
   }
 
   async disconnect(): Promise<void> {

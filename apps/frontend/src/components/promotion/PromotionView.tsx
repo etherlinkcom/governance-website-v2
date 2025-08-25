@@ -68,7 +68,7 @@ export const PromotionView = observer(({
         />
       </Box>
 
-      {isCurrentPeriod && walletStore?.address && (
+      {isCurrentPeriod && walletStore?.hasVotingPower && (
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
           <Button variant="contained" onClick={() => setVoteModalOpen(true)}>
             Vote

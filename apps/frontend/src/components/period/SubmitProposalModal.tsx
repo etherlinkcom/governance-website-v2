@@ -105,9 +105,13 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
 
     return (
       <>
+      {
+        walletStore?.hasVotingPower && (
         <Button variant="contained" onClick={() => setModalOpen(true)}>
           {isSubmitting ? "Submitting..." : "Submit Proposal"}
         </Button>
+        )
+      }
 
         <Dialog
           open={modalOpen}

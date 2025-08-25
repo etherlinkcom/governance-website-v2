@@ -135,7 +135,7 @@ export const ProposalsList = observer(
           }}
         >
           <Box>
-            {isCurrentPeriod && walletStore?.address && (
+            {isCurrentPeriod && walletStore?.hasVotingPower && (
               <Button
                 variant="contained"
                 onClick={() => setSubmitModalOpen(true)}

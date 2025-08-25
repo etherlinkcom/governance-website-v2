@@ -7,7 +7,6 @@ import {
   Box,
   Button,
 } from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
 import { CopyButton } from "@/components/shared/CopyButton";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { getWalletStore } from "@/stores/WalletStore";
@@ -87,14 +86,9 @@ export const WalletDialog = observer(({
         )}
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          startIcon={<LogoutIcon />}
-          onClick={onDisconnect}
-        >
-          Disconnect
-        </Button>
-        <Button onClick={onClose}>Close</Button>
+        <Button variant="outlined">Claim Voting Power</Button>
+        <Button onClick={onDisconnect} variant="outlined">Disconnect</Button>
+        <Button onClick={onClose} variant="contained">Close</Button>
       </DialogActions>
     </Dialog>
   );

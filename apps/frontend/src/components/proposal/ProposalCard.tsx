@@ -78,7 +78,7 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
               {formatNumber(proposal.upvotes)}
             </Typography>
 
-            {isCurrentPeriod && walletStore?.address && (
+            {isCurrentPeriod && walletStore?.hasVotingPower && (
               <Button
                 variant="outlined"
                 size="small"
