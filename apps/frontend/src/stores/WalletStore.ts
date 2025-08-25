@@ -1,9 +1,11 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { Contract, TezosToolkit } from '@taquito/taquito';
 import { BeaconWallet } from '@taquito/beacon-wallet';
-import { ColorMode } from '@airgap/beacon-types';
+import { ColorMode, NetworkType } from '@airgap/beacon-types';
 import BigNumber from 'bignumber.js';
 import { formatNumber } from '@/lib/formatNumber';
+import { VoteOption } from '@trilitech/types';
+import toast from 'react-hot-toast';
 
 
 export type VotingPower = {
@@ -16,17 +18,21 @@ export class WalletStore {
   private balance: number = 0;
   private votingPower: VotingPower | null = null;
   private delegates = new Map<string, VotingPower | null>();
+  private voting: boolean = false;
 
-  private Tezos = new TezosToolkit('https://mainnet.tezos.ecadinfra.com');
+  private Tezos = new TezosToolkit(process.env.NEXT_PUBLIC_RPC_URL || "https://rpc.tzkt.io/mainnet");
   private wallet: BeaconWallet;
-  private delegatesViewContractAddress: string = process.env.NEXT_PUBLIC_VOTING_RIGHTS_DELEGATION_CONTRACT!;
-  private readonly tzktApiUrl: string = 'https://api.tzkt.io/v1';
+  private delegatesViewContractAddress: string = process.env.NEXT_PUBLIC_VOTING_RIGHTS_DELEGATION_CONTRACT || "KT1Ut6kfrTV9tK967tDYgQPMvy9t578iN7iH";
+  private readonly tzktApiUrl: string = process.env.NEXT_PUBLIC_TZKT_API_URL || 'https://api.tzkt.io/v1';
 
   constructor() {
     this.wallet = new BeaconWallet({
       name: 'Etherlink Governance',
         colorMode: ColorMode.DARK,
         iconUrl: '/favicon.ico',
+        preferredNetwork: process.env.NEXT_PUBLIC_NETWORK_TYPE === "mainnet" ?
+          "mainnet" as NetworkType :
+          "ghostnet" as NetworkType,
     });
     this.Tezos.setWalletProvider(this.wallet);
     makeAutoObservable(this);
@@ -38,12 +44,20 @@ export class WalletStore {
     return this._address;
   }
 
+  get isVoting(): boolean {
+    return this.voting;
+  }
+
   get formattedBalance(): string {
     return formatNumber(this.balance);
   }
 
   get formattedVotingAmount(): string {
     return this.votingPower?.votingAmount ? formatNumber(this.votingPower.votingAmount) : '0';
+  }
+
+  get hasVotingPower(): boolean {
+    return this.votingPower?.votingAmount ? this.votingPower.votingAmount.isGreaterThan(0) : false;
   }
 
   get formattedVotingPercent(): string {
@@ -175,6 +189,114 @@ export class WalletStore {
       ]);
     }
   }
+
+  async vote(contractAddress: string, voteType: VoteOption) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      const operation = await contract.methodsObject.vote(voteType).send();
+      await operation.confirmation();
+      toast.success(`Successfully voted ${voteType}\nUpdates will be reflected in <1min`);
+      return operation.opHash;
+    } catch (error) {
+      toast.error(`Error voting`);
+      console.error(`Error voting ${voteType} for ${contractAddress}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
+  async upvoteProposal(contractAddress: string, proposal: string) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      let sequencerProposal;
+
+      try {
+        const parsed = JSON.parse(proposal);
+        if (parsed && parsed.sequencer_pk && parsed.pool_address) {
+          sequencerProposal = {
+            sequencer_pk: parsed.sequencer_pk,
+            pool_address: parsed.pool_address,
+          };
+        }
+      } catch {}
+
+      const operation = await contract.methodsObject.upvote_proposal(sequencerProposal ?? proposal).send();
+      await operation.confirmation();
+      toast.success(`Successfully upvoted proposal\nUpdates will be reflected in <1min`);
+      return operation.opHash;
+    } catch (error) {
+      toast.error(`Error upvoting proposal`);
+      console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
+  async submitSequencerProposal(
+    contractAddress: string,
+    poolAddress: string,
+    sequencerPublicKey: string
+  ) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      const operation = await contract.methodsObject.new_proposal({
+        sequencer_pk:sequencerPublicKey,
+        pool_address: poolAddress,
+    }).send();
+      await operation.confirmation();
+      toast.success(`Submitted sequencer proposal\nUpdates will be reflected in <1min`)
+      return operation.opHash;
+
+    } catch (error) {
+      toast.error(`Error submitting sequencer proposal`);
+      console.error(`Error submitting sequencer proposal for ${contractAddress}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
+  async submitProposal(contractAddress: string, proposal: string) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+
+      const contract = await this.Tezos.wallet.at(contractAddress);
+      const operation = await contract.methodsObject.new_proposal(proposal).send();
+      await operation.confirmation();
+      toast.success(`Submitted proposal\nUpdates will be reflected in <1min`);
+      return operation.opHash;
+    } catch (error) {
+      toast.error(`Error submitting proposal`);
+      console.error(`Error submitting proposal for ${contractAddress}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
+  async claimVotingRights(keyHash: string) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+      const contract = await this.Tezos.wallet.at(this.delegatesViewContractAddress);
+      const operation = await contract.methodsObject.claim_voting_rights(keyHash).send();
+      await operation.confirmation();
+      toast.success(`Successfully claimed voting rights`);
+      return operation.opHash;
+    } catch (error) {
+      toast.error(`Error claiming voting rights`);
+      console.error(`Error claiming voting rights for ${keyHash}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
 }
 
 let walletStore: WalletStore | null = null;

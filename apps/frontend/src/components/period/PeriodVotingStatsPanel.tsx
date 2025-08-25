@@ -70,13 +70,13 @@ export const PeriodVotingStatsPanel = ({
             />
             <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between" }}>
                 <Typography sx={{ color: `${theme.palette.success.main} !important` }}>
-                  Yea: {((promotions[0].yea_voting_power / totalVotingPower) * 100).toFixed(0)}%
+                  Yea: {(((promotions[0].yea_voting_power / totalVotingPower) || 0) * 100).toFixed(0)}%
                 </Typography>
                 <Typography sx={{ color: `${theme.palette.error.main} !important` }}>
-                  Nay: {((promotions[0].nay_voting_power / promotions[0].total_voting_power) * 100).toFixed(0)}%
+                  Nay: {(((promotions[0].nay_voting_power / totalVotingPower) || 0) * 100).toFixed(0)}%
                 </Typography>
                 <Typography sx={{ color: `${theme.palette.warning.main} !important` }}>
-                  Pass: {((promotions[0].pass_voting_power / totalVotingPower) * 100).toFixed(0)}%
+                  Pass: {(((promotions[0].pass_voting_power / totalVotingPower) || 0) * 100).toFixed(0)}%
                 </Typography>
             </Box>
           </>
