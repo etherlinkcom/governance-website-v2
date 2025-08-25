@@ -279,6 +279,24 @@ export class WalletStore {
       this.voting = false;
     }
   }
+
+  async claimVotingRights(keyHash: string) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+      const contract = await this.Tezos.wallet.at(this.delegatesViewContractAddress);
+      const operation = await contract.methodsObject.claim_voting_rights(keyHash).send();
+      await operation.confirmation();
+      toast.success(`Successfully claimed voting rights`);
+      return operation.opHash;
+    } catch (error) {
+      toast.error(`Error claiming voting rights`);
+      console.error(`Error claiming voting rights for ${keyHash}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
 }
 
 let walletStore: WalletStore | null = null;
