@@ -77,5 +77,4 @@ const testnet_contracts: Contract[] = [
     active: true
   }
 ]
-
 export const all_contracts = process.env.NETWORK === "mainnet" ? mainnet_contracts : testnet_contracts;

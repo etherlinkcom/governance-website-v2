@@ -1,11 +1,14 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express, {Request, Response} from "express";
-import { TzktListener } from "./TzktListener";
+// import { TzktListener } from "./TzktListener";
 import { all_contracts } from "./contracts";
 import { GovernanceContractIndexer } from "./GovernanceContractIndexer";
 import { logger } from "./utils/logger";
 
 const app = express();
 const port = process.env.PORT || 8080;
+console.log("index.ts: ", process.env.NETWORK);
 
 // let listener: TzktListener | null = null;
 

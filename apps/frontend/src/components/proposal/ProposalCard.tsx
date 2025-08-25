@@ -1,14 +1,14 @@
 import { formatDate } from "@/lib/formatDate";
 import { Card, CardContent, Box, Typography, Link, Button, Chip } from "@mui/material";
-import { Proposal } from "@trilitech/types";
 import { HashDisplay } from "@/components/shared/HashDisplay";
 import { formatNumber } from "@/lib/formatNumber";
 import { HashLink } from "@/components/shared/HashLink";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { getWalletStore } from "@/stores/WalletStore";
+import { FrontendProposal } from "@/types/api";
 
 interface ProposalCardProps {
-  proposal: Proposal;
+  proposal: FrontendProposal;
   contractAddress?: string;
   isCurrentPeriod?: boolean;
 }

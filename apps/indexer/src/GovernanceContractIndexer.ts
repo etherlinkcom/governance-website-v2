@@ -410,7 +410,6 @@ export class GovernanceContractIndexer {
             contract_address: contract_and_config.contract_address,
             proposer: delegates[0].address,
             alias: delegates[0]?.alias || '',
-            upvotes: voting_power,
         });
 
         proposals_hash_to_proposal[proposal_hash] = proposals[proposals.length - 1];
@@ -466,10 +465,6 @@ export class GovernanceContractIndexer {
                 contract_address: contract_and_config.contract_address,
                 contract_period_index: period_index,
             });
-        }
-
-        if (proposals_hash_to_proposal[proposal_hash]) {
-            proposals_hash_to_proposal[proposal_hash].upvotes += voting_power;
         }
     }
 

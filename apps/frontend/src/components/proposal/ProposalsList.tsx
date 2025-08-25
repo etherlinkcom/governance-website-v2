@@ -12,11 +12,11 @@ import { observer } from "mobx-react-lite";
 import { ComponentLoading } from "@/components/shared/ComponentLoading";
 import { ProposalCard } from "@/components/proposal/ProposalCard";
 import { getProposalQuorumPercent } from "@/lib/votingCalculations";
-import { Proposal } from "@trilitech/types";
 import { VotingProgress } from "@/components/shared/VotingProgress";
 import { contractStore } from "@/stores/ContractStore";
 import { getWalletStore } from "@/stores/WalletStore";
 import { useState } from "react";
+import { FrontendProposal } from "@/types/api";
 
 const ProposalsListSkeleton = () => (
   <Box>
@@ -110,8 +110,8 @@ export const ProposalsList = observer(
     }
 
     const totalProposalUpvotes = proposals
-      .map((e: Proposal) => e.upvotes)
-      .reduce((a: number, b: number) => a + b, 0);
+      .map((e: FrontendProposal) => BigInt(e.upvotes))
+      .reduce((a: bigint, b: bigint) => a + b, BigInt(0));
     const quorumPercent = Number(
       getProposalQuorumPercent(
         totalProposalUpvotes,
