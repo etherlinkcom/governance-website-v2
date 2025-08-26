@@ -146,7 +146,7 @@ export const WalletDialog = observer(
             <Button onClick={() => setClaimOpen(false)}>Cancel</Button>
             <Button
               onClick={() =>  claimVotingRights(claimInput)}
-              disabled={!claimInput.trim() || !isValidateAddress(claimInput)}
+              disabled={!claimInput.trim() || !isValidateAddress(claimInput) || walletStore?.isVoting}
               variant="contained"
             >
               {walletStore?.isVoting ? "Claiming..." : "Claim"}
