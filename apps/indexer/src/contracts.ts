@@ -1,7 +1,6 @@
 import { Contract } from "./types";
 
-export const past_contracts: Contract[] = [
-  // Level 5316609 contracts
+const mainnet_contracts: Contract[] = [
   {
     type: "slow",
     address: "KT1H5pCmFuhAwRExzNNrPQFKpunJx1yEVa6J",
@@ -40,10 +39,7 @@ export const past_contracts: Contract[] = [
     type: "sequencer",
     address: "KT1NnH9DCAoY1pfPNvb9cw9XPKQnHAFYFHXa",
   },
-];
-
-export const latest_contracts: Contract[] = [
-  // Level 8767489 4.1
+    // Level 8767489 4.1
   {
     address: "KT1VZVNCNnhUp7s15d9RsdycP7C1iwYhAQ8r",
     type: "slow",
@@ -61,7 +57,25 @@ export const latest_contracts: Contract[] = [
   },
 ];
 
-export const all_contracts: Contract[] = [
-  ...past_contracts,
-  ...latest_contracts,
-];
+const testnet_contracts: Contract[] = [
+  {
+    type: "slow",
+    address: "KT1GqWFzt7Rm9i8TfEgmCtAETtQqVLwT4Agm",
+  },
+  {
+    type: 'slow',
+    address: "KT1HetEeotaRtEKeWyHg8Y7u5gbRwjepebXe",
+    active: true,
+  },
+  {
+    type: "sequencer",
+    address: "KT1WvJNQWA6HSP5xbZTfHoPYdUVxk5UvqN9B",
+  },
+  {
+    type: "sequencer",
+    address: "KT1GUyHNzTSbpEmKoY8Zbop63rGD4GCGd3rY",
+    active: true
+  }
+]
+
+export const all_contracts = process.env.NETWORK === "mainnet" ? mainnet_contracts : testnet_contracts;

@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { VotingProgress } from '@/components/shared/VotingProgress';
-import { getProposalQuorumPercent } from '@/lib/votingCalculations';
+import { calculateVotingProgress, getProposalQuorumPercent } from '@/lib/votingCalculations';
 import { getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
 import { Proposal } from '@trilitech/types';
 
@@ -16,9 +16,10 @@ export const ProposalVotingStats = ({
     contractQuorum,
 }: ProposalVotingStatsProps) => {
     const totalProposalUpvotes = proposals.map((proposal: Proposal) => proposal.upvotes).reduce((a: number, b: number) => a + b, 0);
-    const quorumPercent = Number(getProposalQuorumPercent(totalProposalUpvotes, totalVotingPower));
+    const quorumPercent = Number(getProposalQuorumPercent(totalProposalUpvotes, totalVotingPower)) || 0;
 
-    const progress = Math.min((quorumPercent / contractQuorum) * 100, 100);
+    const progress = contractQuorum > 0 ? Math.min((quorumPercent / contractQuorum) * 100, 100) : 0;
+
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -50,20 +51,21 @@ export const PromotionVotingStats = ({
   contractQuorum,
   contractSupermajority,
 }: PromotionVotingStatsProps) => {
-  const quorumPercent = getPromotionQuorumPercent(
+  const quorumPercent = Number(getPromotionQuorumPercent(
     yeaVotingPower,
     nayVotingPower,
     passVotingPower,
     totalVotingPower
-  ).toNumber();
+  ).toNumber()) || 0;
 
-  const supermajorityPercent = getPromotionSupermajorityPercent(
+  const supermajorityPercent = Number(getPromotionSupermajorityPercent(
     yeaVotingPower,
     nayVotingPower
-  ).toNumber();
+  ).toNumber()) || 0;
 
-  const quorumProgress = Math.min((quorumPercent / contractQuorum) * 100, 100);
-  const supermajorityProgress = Math.min((supermajorityPercent / contractSupermajority) * 100, 100);
+
+  const quorumProgress = calculateVotingProgress(quorumPercent, contractQuorum);
+  const supermajorityProgress = calculateVotingProgress(supermajorityPercent, contractSupermajority);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column'}}>

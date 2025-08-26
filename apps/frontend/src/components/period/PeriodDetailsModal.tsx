@@ -136,6 +136,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
         <ProposalsView
           contractVotingIndex={proposalsPeriod}
           contractAddress={period.contract_address}
+          isCurrentPeriod={proposalsPeriodData?.period_class === 'current'}
         />
       ),
       isPrimaryPeriod
@@ -151,6 +152,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
           contractVotingIndex={promotionsPeriod}
           contractAddress={period.contract_address}
           promotionHash={period.promotion_hash}
+          isCurrentPeriod={promotionsPeriodData?.period_class === 'current'}
         />
       ),
       isPrimaryPeriod

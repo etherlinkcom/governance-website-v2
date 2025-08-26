@@ -4,7 +4,7 @@ import { theme } from './index';
 export const toastConfig: ToasterProps = {
   position: "bottom-center",
   toastOptions: {
-    duration: 2000,
+    duration: 3000,
     style: {
       background: theme.palette.background.paper,
       color: theme.palette.text.primary,

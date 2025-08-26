@@ -147,7 +147,9 @@ export class Database {
         `SELECT v.*
          FROM votes v
          JOIN promotions pr ON v.proposal_hash = pr.proposal_hash
+         JOIN periods ON pr.contract_period_index = periods.contract_voting_index
          WHERE pr.contract_address = ? AND pr.contract_period_index = ?
+         AND v.level >= periods.level_start AND v.level <= periods.level_end
          ORDER BY v.created_at DESC`,
         [contractAddress, contractVotingIndex]
       );

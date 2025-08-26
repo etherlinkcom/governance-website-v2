@@ -30,7 +30,6 @@ export const ConnectButton = observer(({ sx }: ConnectButtonProps) => {
 
   const handleConnect = async () => {
     await walletStore.connect();
-    setOpen(true);
   };
 
   const handleDisconnect = async () => {
