@@ -13,6 +13,7 @@ import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { getWalletStore } from "@/stores/WalletStore";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { validateAddress, ValidationResult } from '@taquito/utils';
 
 interface WalletDialogProps {
   open: boolean;
@@ -33,6 +34,10 @@ export const WalletDialog = observer(
       await walletStore.claimVotingRights(input);
       setClaimOpen(false);
       setClaimInput("")
+    };
+
+    const isValidateAddress = (address: string): boolean => {
+      return validateAddress(address) === ValidationResult.VALID;
     };
 
     return (
@@ -127,16 +132,20 @@ export const WalletDialog = observer(
           <DialogContent>
             <TextField
               fullWidth
-              placeholder="Enter Key Hash"
+              placeholder="Enter Bakers Address"
               value={claimInput}
               onChange={e => setClaimInput(e.target.value)}
+              error={!isValidateAddress(claimInput)}
+              helperText={
+                claimInput && !isValidateAddress(claimInput) ? "Invalid address" : ""
+              }
             />
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setClaimOpen(false)}>Cancel</Button>
             <Button
               onClick={() =>  claimVotingRights(claimInput)}
-              disabled={!claimInput.trim()}
+              disabled={!claimInput.trim() || !isValidateAddress(claimInput)}
               variant="contained"
             >
               {walletStore?.isVoting ? "Claiming..." : "Claim"}
