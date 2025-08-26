@@ -1,14 +1,15 @@
 import { Box, Typography, Chip, SxProps } from "@mui/material";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
-import { Period, Proposal } from "@trilitech/types";
+import { Period } from "@trilitech/types";
 import { JSX } from "react";
 import { formatDate } from "@/lib/formatDate";
 import { formatNumber } from "@/lib/formatNumber";
 import { ComponentLoading } from "@/components/shared/ComponentLoading";
+import { FrontendProposal } from "@/types/api";
 
 interface PeriodMetadataProps {
   period: Period;
-  proposals?: Proposal[];
+  proposals?: FrontendProposal[];
   hasProposals?: boolean;
   hasPromotion?: string;
   isLoading?: boolean;
@@ -104,7 +105,7 @@ export const PeriodMetadata = ({
               ) : (
                 proposals && proposals[index] && (
                   <Typography variant="body2" sx={{ wordWrap: 'normal', whiteSpace: 'nowrap', ml: 2}}>
-                  {formatNumber(proposals[index].upvotes)} Upvotes
+                  {formatNumber(parseInt(proposals[index].upvotes))} Upvotes
                 </Typography>
               )
             )}

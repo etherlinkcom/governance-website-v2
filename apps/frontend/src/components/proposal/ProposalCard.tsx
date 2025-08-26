@@ -6,9 +6,10 @@ import { formatNumber } from "@/lib/formatNumber";
 import { HashLink } from "@/components/shared/HashLink";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { getWalletStore } from "@/stores/WalletStore";
+import { FrontendProposal } from "@/types/api";
 
 interface ProposalCardProps {
-  proposal: Proposal;
+  proposal: FrontendProposal;
   contractAddress?: string;
   isCurrentPeriod?: boolean;
 }
@@ -75,7 +76,7 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
           <Box sx={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
             <Typography variant="subtitle2">Upvotes:</Typography>
             <Typography variant="body1" sx={{ display: "block" }}>
-              {formatNumber(proposal.upvotes)}
+              {formatNumber(parseInt(proposal.upvotes))}
             </Typography>
 
             {isCurrentPeriod && walletStore?.hasVotingPower && (

@@ -2,10 +2,10 @@ import { Box } from '@mui/material';
 import { VotingProgress } from '@/components/shared/VotingProgress';
 import { calculateVotingProgress, getProposalQuorumPercent } from '@/lib/votingCalculations';
 import { getPromotionQuorumPercent, getPromotionSupermajorityPercent } from '@/lib/votingCalculations';
-import { Proposal } from '@trilitech/types';
+import { FrontendProposal } from '@/types/api';
 
 interface ProposalVotingStatsProps {
-    proposals: Proposal[];
+    proposals: FrontendProposal[];
     totalVotingPower: number;
     contractQuorum: number;
 }
@@ -15,7 +15,9 @@ export const ProposalVotingStats = ({
     totalVotingPower,
     contractQuorum,
 }: ProposalVotingStatsProps) => {
-    const totalProposalUpvotes = proposals.map((proposal: Proposal) => proposal.upvotes).reduce((a: number, b: number) => a + b, 0);
+    const totalProposalUpvotes = proposals
+      .map((proposal: FrontendProposal) => BigInt(proposal.upvotes))
+      .reduce((a: bigint, b: bigint) => a + b, BigInt(0));
     const quorumPercent = Number(getProposalQuorumPercent(totalProposalUpvotes, totalVotingPower)) || 0;
 
     const progress = contractQuorum > 0 ? Math.min((quorumPercent / contractQuorum) * 100, 100) : 0;

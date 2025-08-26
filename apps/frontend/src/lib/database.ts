@@ -1,6 +1,6 @@
 import mysql from 'mysql2/promise';
 import { GovernanceType, Period, ContractAndConfig, Proposal, Upvote, Promotion, Vote } from '@trilitech/types';
-import { PeriodDetailsResponse } from '@/types/api';
+import { FrontendProposal, PeriodDetailsResponse } from '@/types/api';
 
 export class Database {
   private connection: mysql.Connection | null = null;
@@ -120,10 +120,20 @@ export class Database {
     console.log(`[Database] Fetching period details for contract ${contractAddress}, period ${contractVotingIndex}`);
 
     try {
-      const proposals = await this.query<Proposal>(
-        `SELECT * FROM proposals
-         WHERE contract_address = ? AND contract_period_index = ?
-         ORDER BY created_at DESC`,
+      const proposals = await this.query<FrontendProposal>(
+        `SELECT
+          proposals.*,
+          (
+            SELECT COALESCE(SUM(upvotes.voting_power), 0)
+            FROM upvotes
+            WHERE
+              upvotes.contract_period_index = proposals.contract_period_index
+              AND upvotes.proposal_hash = proposals.proposal_hash
+          ) AS upvotes
+        FROM proposals
+        WHERE contract_address = ?
+          AND contract_period_index = ?
+        ORDER BY created_at DESC;`,
         [contractAddress, contractVotingIndex]
       );
 

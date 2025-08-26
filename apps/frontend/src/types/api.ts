@@ -1,7 +1,7 @@
 import { Proposal, Upvote, Promotion, Vote, Period, ContractAndConfig } from "@trilitech/types";
 
 export interface PeriodDetailsResponse {
-  proposals?: Proposal[];
+  proposals?: FrontendProposal[];
   upvotes?: Upvote[];
   promotions?: Promotion[];
   votes?: Vote[];
@@ -14,7 +14,7 @@ export interface PeriodDetailsResponse {
 }
 
 export interface PeriodData {
-  proposals: Proposal[];
+  proposals: FrontendProposal[];
   promotions: Promotion[];
   upvoters: Upvote[];
   votes: Vote[];
@@ -26,4 +26,8 @@ export interface PeriodData {
   proposalsPeriodData: Period | null;
   promotionsPeriodData: Period | null;
   contractAndConfig: ContractAndConfig | undefined;
+}
+
+export interface FrontendProposal extends Proposal {
+  upvotes: string;
 }
