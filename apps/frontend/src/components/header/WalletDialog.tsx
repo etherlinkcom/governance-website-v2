@@ -136,7 +136,7 @@ export const WalletDialog = observer(
               placeholder="Enter Bakers Address"
               value={claimInput}
               onChange={e => setClaimInput(e.target.value)}
-              error={!isValidateAddress(claimInput)}
+              error={!isValidateAddress(claimInput) && claimInput !== ""}
               helperText={
                 claimInput && !isValidateAddress(claimInput) ? "Invalid address" : ""
               }
