@@ -34,6 +34,7 @@ export const WalletDialog = observer(
       await walletStore.claimVotingRights(input);
       setClaimOpen(false);
       setClaimInput("")
+      await walletStore.refreshVotingPower();
     };
 
     const isValidateAddress = (address: string): boolean => {
