@@ -151,7 +151,6 @@ export class Database {
       proposal.contract_address,
       proposal.proposer,
       proposal.alias,
-      proposal.upvotes
     ];
 
     await this.upsert(
@@ -164,15 +163,13 @@ export class Database {
         contract_address,
         proposer,
         alias,
-        upvotes
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          level = VALUES(level),
          time = VALUES(time),
          proposer = VALUES(proposer),
          alias = VALUES(alias),
-         upvotes = VALUES(upvotes),
          updated_at = CURRENT_TIMESTAMP`,
          this.sanitizeValues(values)
     );

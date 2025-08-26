@@ -328,9 +328,7 @@ export class GovernanceContractIndexer {
             total_voting_power: 0,
         };
         periods[period_index] = new_period;
-
         return {periods, promotion}
-
     }
 
     private async createProposalsPromotionsVotesAndUpvotes(
@@ -340,7 +338,6 @@ export class GovernanceContractIndexer {
     ): Promise<{ promotions: Promotion[], proposals: Proposal[], upvotes: Upvote[], votes: Vote[] }> {
         logger.info(`[GovernanceContractIndexer] createProposalsPromotionsVotesAndUpvotes(${contract_and_config.contract_address}, ${periods}, ${transactions.length} entries)`);
         const promotions_hash_to_promotion: Record<any, Promotion> = {};
-        const proposals_hash_to_proposal: Record<any, Proposal> = {};
         const proposals: Proposal[] = [];
         const upvotes: Upvote[] = [];
         const votes: Vote[] = [];
@@ -353,10 +350,10 @@ export class GovernanceContractIndexer {
 
         for (const entry of transactions) {
             if (entry.parameter?.entrypoint === 'new_proposal') {
-                await this.handleNewProposal(entry, contract_and_config, periods, proposals, upvotes, proposals_hash_to_proposal, promotions_hash_to_promotion);
+                await this.handleNewProposal(entry, contract_and_config, periods, proposals, upvotes, promotions_hash_to_promotion);
             }
             if (entry.parameter?.entrypoint === 'upvote_proposal') {
-                await this.handleUpvoteProposal(entry, contract_and_config, upvotes, proposals_hash_to_proposal);
+                await this.handleUpvoteProposal(entry, contract_and_config, upvotes);
             }
             if (entry.parameter?.entrypoint === 'vote') {
                 await this.handleVote(entry, contract_and_config, votes, promotions_hash_to_promotion);
@@ -373,7 +370,6 @@ export class GovernanceContractIndexer {
         periods: PeriodIndexToPeriod,
         proposals: Proposal[],
         upvotes: Upvote[],
-        proposals_hash_to_proposal: Record<any, Proposal>,
         promotions_hash_to_promotion: Record<any, Promotion>
     ) {
         const period_index: number = Number((await this.getContractStorageAtLevel(contract_and_config.contract_address, entry.level)).voting_context.period_index);
@@ -410,10 +406,7 @@ export class GovernanceContractIndexer {
             contract_address: contract_and_config.contract_address,
             proposer: delegates[0].address,
             alias: delegates[0]?.alias || '',
-            upvotes: voting_power,
         });
-
-        proposals_hash_to_proposal[proposal_hash] = proposals[proposals.length - 1];
 
         const promotion_period_index = period_index + 1;
         if (!periods[promotion_period_index] || periods[promotion_period_index]?.promotion_hash) return;
@@ -445,7 +438,6 @@ export class GovernanceContractIndexer {
         entry: TzktTransactionEvent,
         contract_and_config: ContractAndConfig,
         upvotes: Upvote[],
-        proposals_hash_to_proposal: Record<any, Proposal>
     ) {
         const period_index: number = Number((await this.getContractStorageAtLevel(contract_and_config.contract_address, entry.level)).voting_context.period_index);
         const global_voting_index: number = await this.getGlobalVotingPeriodIndex(entry.level, entry.level + 1);
@@ -466,10 +458,6 @@ export class GovernanceContractIndexer {
                 contract_address: contract_and_config.contract_address,
                 contract_period_index: period_index,
             });
-        }
-
-        if (proposals_hash_to_proposal[proposal_hash]) {
-            proposals_hash_to_proposal[proposal_hash].upvotes += voting_power;
         }
     }
 
