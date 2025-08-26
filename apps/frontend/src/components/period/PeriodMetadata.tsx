@@ -1,4 +1,4 @@
-import { Box, Typography, Chip, SxProps } from "@mui/material";
+import { Box, Typography, Chip } from "@mui/material";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { Period } from "@trilitech/types";
 import { JSX } from "react";
