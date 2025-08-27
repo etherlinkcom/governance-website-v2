@@ -162,7 +162,7 @@ export class Database {
         transaction_hash,
         contract_address,
         proposer,
-        alias,
+        alias
       )
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
