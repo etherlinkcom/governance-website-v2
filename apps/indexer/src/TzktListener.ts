@@ -1,7 +1,7 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { GovernanceContractIndexer } from './GovernanceContractIndexer';
 import { logger } from './utils/logger';
-import { Contract, TzktTransactionEvent, TzktContractStorageHistory, Voter, TzktHeadEvent } from './types';
+import { Contract, TzktTransactionEvent, TzktContractStorageHistory, Voter, TzktApiHead} from './types';
 import { Period, Proposal, Upvote, Vote, Promotion } from 'packages/types';
 import { Database } from './db/Database';
 
@@ -12,17 +12,18 @@ export class TzktListener {
   private governanceContractIndexer = new GovernanceContractIndexer();
   private readonly trackedFunctions: string[] = ['new_proposal', 'upvote_proposal', 'vote'];
   private database: Database = new Database();
-  private readonly eventsUrl: string = 'https://api.mainnet.tzkt.io/v1/events';
+  private readonly eventsUrl: string = process.env.TZKT_API_URL + '/events';
 
   constructor(contracts: Contract[]) {
     logger.info(`[TzktListener] constructor(contracts=${contracts.map(c => c.address).join(',')})`);
     this.contracts = contracts;
-    this.start().catch(error => logger.error('[TzktListener] start error', error));
   }
 
-  private async start(): Promise<void> {
+
+  public async start(): Promise<void> {
     logger.info('[TzktListener] start()');
 
+    await this.database.initialize();
     await this.loadContractConfigs();
 
     this.connection = new HubConnectionBuilder()
@@ -31,9 +32,10 @@ export class TzktListener {
       .withAutomaticReconnect()
       .build();
 
-    this.connection.on('head', (head: TzktHeadEvent) => {
+    this.connection.on('head', (head: TzktApiHead) => {
       logger.info('[TzktListener] on "head" event');
       logger.info(`[TzktListener] New block received: Level ${head.data.level}`);
+      console.log(head)
       this.handleBlock(head.data);
     });
 
@@ -153,7 +155,6 @@ export class TzktListener {
       contract_address: transactionEvent.target.address,
       proposer: transactionEvent.sender.address,
       alias: transactionEvent.sender.alias,
-      upvotes: voting_power
     };
 
     // Upsert the proposal
@@ -257,7 +258,7 @@ export class TzktListener {
     }
 
     const winnerCandidate = transactionEvent.storage?.voting_context?.period?.promotion?.winner_candidate;
-    
+
     const voteRecord: Vote = {
       proposal_hash: winnerCandidate,
       baker: transactionEvent.sender.address,

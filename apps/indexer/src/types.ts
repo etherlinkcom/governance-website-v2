@@ -168,3 +168,32 @@ export interface Voter {
   alias?: string;
   votingPower: number;
 }
+
+export type TzktApiHead = {
+  type: 1;
+  data: {
+    chain: 'mainnet';
+    chainId: string;
+    cycle: number;
+    level: number;
+    hash: string;
+    protocol: string;
+    nextProtocol: string;
+    timestamp: string; // ISO date string
+    votingEpoch: number;
+    votingPeriod: number;
+    knownLevel: number;
+    lastSync: string; // ISO date string
+    synced: boolean;
+    quoteLevel: number;
+    quoteBtc: number;
+    quoteEur: number;
+    quoteUsd: number;
+    quoteCny: number;
+    quoteJpy: number;
+    quoteKrw: number;
+    quoteEth: number;
+    quoteGbp: number;
+  };
+  state: number;
+};

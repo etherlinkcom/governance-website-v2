@@ -155,7 +155,7 @@ export class GovernanceContractIndexer {
         }
     }
 
-    private async getDateFromLevel(level: number): Promise<Date> {
+    public async getDateFromLevel(level: number): Promise<Date> {
         logger.info(`[GovernanceContractIndexer] getDateFromLevel(${level})`);
             const utc = await this.fetchJson<string>(`${this.tzkt_api_url}/blocks/${level}/timestamp`);
             return new Date(utc);
