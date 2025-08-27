@@ -1,23 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { database } from '@/lib/database';
+import { PeriodDetailsResponse } from '@/types/api';
 
-type PeriodDetailsResponse = {
-  proposals?: any[];
-  upvotes?: any[];
-  promotions?: any[];
-  votes?: any[];
-  periodInfo: {
-    contractAddress: string;
-    contractVotingIndex: number;
-    hasProposals: boolean;
-    hasPromotions: boolean;
-  };
+interface PeriodDetailsApiResponse extends PeriodDetailsResponse {
   error?: string;
 }
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<PeriodDetailsResponse>
+  res: NextApiResponse<PeriodDetailsApiResponse>
 ) {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');

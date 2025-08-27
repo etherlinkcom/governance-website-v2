@@ -1,5 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express, {Request, Response} from "express";
-import { TzktListener } from "./TzktListener";
+// import { TzktListener } from "./TzktListener";
 import { all_contracts } from "./contracts";
 import { GovernanceContractIndexer } from "./GovernanceContractIndexer";
 import { logger } from "./utils/logger";

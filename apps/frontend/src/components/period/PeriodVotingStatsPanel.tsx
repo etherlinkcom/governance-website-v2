@@ -8,14 +8,14 @@ import {
   ContractAndConfig,
   Period,
   Promotion,
-  Proposal,
 } from "@trilitech/types";
+import { FrontendProposal } from "@/types/api";
 
 interface PeriodVotingStatsPanelProps {
   hasPromotion?: string;
   hasProposals?: boolean;
   promotions?: Promotion[];
-  proposals?: Proposal[];
+  proposals?: FrontendProposal[];
   contractAndConfig?: ContractAndConfig;
   isLoading: boolean;
   period?: Period;

@@ -1,6 +1,6 @@
 import { makeAutoObservable, flow, computed } from 'mobx';
-import { GovernanceType, Period, ContractAndConfig, Vote, Promotion, Upvote, Proposal } from '@trilitech/types';
-import { PeriodData, PeriodDetailsResponse } from '@/types/api';
+import { GovernanceType, Period, ContractAndConfig, Vote, Promotion, Upvote } from '@trilitech/types';
+import { FrontendProposal, PeriodData, PeriodDetailsResponse } from '@/types/api';
 import { fetchJson } from '@/lib/fetchJson';
 
 class ContractStore {
@@ -10,7 +10,7 @@ class ContractStore {
   loadingByGovernance: Partial<Record<GovernanceType, boolean>> = {};
   loadingPeriodsByGovernance: Partial<Record<GovernanceType, Record<string, boolean>>> = {};
   periodDetails: Record<string, Record<number, {
-    proposals?: Proposal[];
+    proposals?: FrontendProposal[];
     upvotes?: Upvote[];
     promotions?: Promotion[];
     votes?: Vote[];
@@ -257,7 +257,7 @@ class ContractStore {
   }
 
   get proposalsForPeriod() {
-    return (contractAddress: string, periodIndex: number): Proposal[] => {
+    return (contractAddress: string, periodIndex: number): FrontendProposal[] => {
       const cached = this.periodDetails[contractAddress]?.[periodIndex];
       if (cached?.proposals) return cached.proposals;
 
