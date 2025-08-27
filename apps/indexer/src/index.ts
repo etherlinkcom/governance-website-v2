@@ -13,6 +13,8 @@ const port = process.env.PORT || 8080;
 
 let listener: TzktListener | null = null;
 
+// TODO initialize db and run migrations here
+
 app.get("/start-listener", (_req: Request, res: Response) => {
   if (listener) {
     return res.status(400).send("Listener already running");

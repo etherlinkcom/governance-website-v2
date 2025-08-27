@@ -35,7 +35,6 @@ export class TzktListener {
     this.connection.on('head', (head: TzktApiHead) => {
       logger.info('[TzktListener] on "head" event');
       logger.info(`[TzktListener] New block received: Level ${head.data.level}`);
-      console.log(head)
       this.handleBlock(head.data);
     });
 
@@ -157,11 +156,9 @@ export class TzktListener {
       alias: transactionEvent.sender.alias,
     };
 
-    // Upsert the proposal
     logger.info(`[TzktListener] New proposal: ${JSON.stringify(proposal)}`);
     await this.database.upsertProposals([proposal]);
 
-    // Automatically register an upvote by the proposer
     logger.info(`[TzktListener] Registering automatic upvote for proposal ${proposalHash} by proposer ${proposal.proposer}`);
     const globalVotingIndex = await this.governanceContractIndexer.getGlobalVotingPeriodIndex(level, level + 1);
     const voter = await this.governanceContractIndexer.getVotingPowerForAddress(transactionEvent.sender.address, globalVotingIndex);
@@ -184,6 +181,21 @@ export class TzktListener {
     };
     logger.info(`[TzktListener] Automatic upvote: ${JSON.stringify(upvote)}`);
     await this.database.upsertUpvotes([upvote]);
+
+
+    const periodRecord: Period | null = await this.database.getPeriod(transactionEvent.target.address, periodIndex);
+    if (!periodRecord) {
+      logger.error(`[TzktListener] No period record found for ${transactionEvent.target.address} period ${periodIndex}`);
+      return;
+    }
+
+    if (!periodRecord.proposal_hashes?.includes(proposalHash)) {
+      periodRecord.proposal_hashes?.push(proposalHash);
+      await this.database.upsertPeriods([periodRecord]);
+      logger.info(`[TzktListener] Updated period ${transactionEvent.target.address}-${periodIndex} with new proposal hash ${proposalHash}`);
+    } else {
+      logger.info(`[TzktListener] Period ${transactionEvent.target.address}-${periodIndex} already contains proposal hash ${proposalHash}`);
+    }
   }
 
   private async handleUpvoteProposal(transactionEvent: TzktTransactionEvent): Promise<void> {
@@ -306,10 +318,10 @@ export class TzktListener {
   private async handleBlock(headBlock: { level: number; timestamp: string }): Promise<void> {
     logger.info(`[TzktListener] handleBlock(level=${headBlock.level})`);
 
-    // Only process every 100th block to reduce unnecessary checks
-    if (headBlock.level % 100 !== 0) return;
+    logger.info(`[TzktListener] Checking for new periods at level ${headBlock.level}`);
 
     for (const contract of this.contracts) {
+      logger.info(`[TzktListener] Checking contract ${contract.address} for new period`);
       const contractConfig = this.contractConfigs[contract.address];
       if (!contractConfig) {
         logger.error(`[TzktListener] handleBlock—no config for ${contract.address}`);
@@ -318,7 +330,10 @@ export class TzktListener {
 
       const { startedAtLevel, periodLength } = contractConfig;
       const levelDifference = headBlock.level - startedAtLevel;
-      if (levelDifference < 0 || levelDifference % periodLength !== 0) continue;
+      if (levelDifference < 0 || levelDifference % periodLength !== 0) {
+        logger.info(`[TzktListener] ${periodLength - (levelDifference % periodLength)} blocks until next period for ${contract.address}`);
+        continue;
+      };
 
       const periodIndex = levelDifference / periodLength;
 
@@ -338,6 +353,7 @@ export class TzktListener {
         promotion_hash: undefined,
         total_voting_power: 0
       };
+      // TODO check if promotion period
 
       logger.info(`[TzktListener] New period ${contract.address}-${periodIndex}: ${JSON.stringify(periodRecord)}`);
       await this.database.upsertPeriods([periodRecord]);

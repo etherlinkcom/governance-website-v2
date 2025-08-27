@@ -10,6 +10,7 @@ import { useState } from "react";
 import type { GovernanceType } from "@trilitech/types";
 import { getWalletStore } from "@/stores/WalletStore";
 import { observer } from "mobx-react-lite";
+import { contractStore } from "@/stores/ContractStore";
 
 interface SubmitProposalButtonProps {
   contractAddress: string;
@@ -75,6 +76,7 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
         await walletStore?.submitProposal(contractAddress, proposalText.trim());
       }
 
+      await contractStore.getPeriods(contractAddress);
       handleClose();
     };
 

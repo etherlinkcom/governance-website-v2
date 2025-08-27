@@ -433,4 +433,14 @@ export class Database {
       ) as [Period[], FieldPacket[]];
       return rows.length > 0 ? rows[0] : null;
   }
+
+
+  async getPeriod(contract_address: string, contract_voting_index: number): Promise<Period | null> {
+      const connection = await this.getConnection();
+      const [rows] = await connection.execute(
+          `SELECT * FROM periods WHERE contract_address = ? AND contract_voting_index = ?`,
+          [contract_address, contract_voting_index]
+      ) as [Period[], FieldPacket[]];
+      return rows.length > 0 ? rows[0] : null;
+  }
 }
