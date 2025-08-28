@@ -18,9 +18,10 @@ import { getWalletStore } from "@/stores/WalletStore";
 import { useState } from "react";
 import { VoteOption } from "@trilitech/types";
 import { observer } from "mobx-react-lite";
+import { contractStore } from "@/stores/ContractStore";
 
 interface PromotionViewProps {
-  contractVotingIndex?: number;
+  contractVotingIndex: number;
   contractAddress?: string;
   promotionHash?: string;
   isCurrentPeriod?: boolean;
@@ -46,9 +47,10 @@ export const PromotionView = observer(({
         setVoteModalOpen(false);
         console.log("Vote submitted successfully:", opHash);
       }
+      await new Promise(res => setTimeout(res, 2000))
+      contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true);
     } catch (error) {
       console.error("Error submitting vote:", error);
-    } finally {
     }
   };
 

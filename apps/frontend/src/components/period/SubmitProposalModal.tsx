@@ -77,9 +77,11 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
         await walletStore?.submitProposal(contractAddress, proposalText.trim());
       }
 
-      await new Promise(res => setTimeout(res, 2000))
-      contractStore.getPeriods(contractAddress);
-      contractStore.getPeriodDetails(contractAddress, contractVotingIndex, false);
+      await new Promise(res => setTimeout(res, 3000))
+      await Promise.all([
+        contractStore.getPeriods(contractAddress),
+        contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true)
+      ]);
       handleClose();
     };
 
@@ -147,6 +149,11 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
                         ? poolAddressError
                         : "Pool address must be 40 characters"
                     }
+                      onKeyDown={e => {
+                        if (e.key === "Enter" && isFormValid && !isSubmitting) {
+                          handleSubmitProposal();
+                        }
+                      }}
                   />
                   <TextField
                     fullWidth
@@ -159,6 +166,11 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
                         ? sequencerPublicKeyError
                         : "Base58Check encoded, 54-55 chars, starts with edpk/sppk/p2pk"
                     }
+                      onKeyDown={e => {
+                      if (e.key === "Enter" && isFormValid && !isSubmitting) {
+                        handleSubmitProposal();
+                      }
+                    }}
                   />
                 </>
               ) : (
@@ -174,6 +186,11 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
                       ? bytesError
                       : "Enter hex bytes (0-9, a-f), >66 chars, even length"
                   }
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && isFormValid && !isSubmitting) {
+                        handleSubmitProposal();
+                      }
+                    }}
                 />
               )}
 

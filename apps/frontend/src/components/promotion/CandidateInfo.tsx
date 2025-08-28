@@ -9,7 +9,7 @@ import { EllipsisBox } from '@/components/shared/EllipsisBox';
 
 const CandidateInfoSkeleton = () => {
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box sx={{ mb: 2  }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <Box sx={{ flex: 1 }}>
           <Typography variant="subtitle2">

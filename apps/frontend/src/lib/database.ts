@@ -87,34 +87,35 @@ export class Database {
   }
 
    async getPeriods(contractAddress: string): Promise<Period[]> {
-  console.log(`[Database] Fetching periods for contract ${contractAddress}`);
+    console.log(`[Database] Fetching periods for contract ${contractAddress}`);
 
-  const rows = await this.query<any>(
-    `SELECT * FROM periods
-    WHERE contract_address = ?
-      AND (
-        JSON_LENGTH(proposal_hashes) > 0
-        OR (promotion_hash IS NOT NULL AND promotion_hash != '')
-      )
-    ORDER BY contract_voting_index DESC`,
-    [contractAddress]
-  );
+    const rows = await this.query<any>(
+      `SELECT * FROM periods
+      WHERE contract_address = ?
+        AND (
+          JSON_LENGTH(proposal_hashes) > 0
+          OR (promotion_hash IS NOT NULL AND promotion_hash != '')
+        )
+      ORDER BY contract_voting_index DESC LIMIT 30`,
+      // TODO remove in prod
+      [contractAddress]
+    );
 
-  const periods: Period[] = rows.map((row: any) => ({
-    contract_voting_index: row.contract_voting_index,
-    contract_address: row.contract_address,
-    level_start: row.level_start,
-    level_end: row.level_end,
-    date_start: row.date_start,
-    date_end: row.date_end,
-    proposal_hashes: row.proposal_hashes || [],
-    promotion_hash: row.promotion_hash || undefined,
-    total_voting_power: row.total_voting_power
-  }));
+    const periods: Period[] = rows.map((row: any) => ({
+      contract_voting_index: row.contract_voting_index,
+      contract_address: row.contract_address,
+      level_start: row.level_start,
+      level_end: row.level_end,
+      date_start: row.date_start,
+      date_end: row.date_end,
+      proposal_hashes: row.proposal_hashes || [],
+      promotion_hash: row.promotion_hash || undefined,
+      total_voting_power: row.total_voting_power
+    }));
 
-  console.log(`[Database] Returned ${periods.length} periods for contract ${contractAddress}`);
-  return periods;
-}
+    console.log(`[Database] Returned ${periods.length} periods for contract ${contractAddress}`);
+    return periods;
+  }
 
   async getPeriodDetails(contractAddress: string, contractVotingIndex: number): Promise<PeriodDetailsResponse> {
     console.log(`[Database] Fetching period details for contract ${contractAddress}, period ${contractVotingIndex}`);
