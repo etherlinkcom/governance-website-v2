@@ -39,7 +39,7 @@ const ProposalsListSkeleton = () => (
 );
 
 interface ProposalsListProps {
-  contractVotingIndex?: number;
+  contractVotingIndex: number;
   contractAddress?: string;
   isCurrentPeriod?: boolean;
 }
@@ -75,6 +75,8 @@ export const ProposalsList = observer(
           setSubmitModalOpen(false);
           setProposalText("");
         }
+        await new Promise(res => setTimeout(res, 3000))
+        await contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true);
       } catch (error) {
         console.error("Error submitting proposal:", error);
       } finally {
@@ -202,6 +204,7 @@ export const ProposalsList = observer(
                 proposal={proposal}
                 contractAddress={contractAddress}
                 isCurrentPeriod={isCurrentPeriod}
+                contractVotingIndex={contractVotingIndex}
               />
             ))
           ) : (

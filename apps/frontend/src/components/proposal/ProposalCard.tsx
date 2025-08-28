@@ -7,14 +7,17 @@ import { HashLink } from "@/components/shared/HashLink";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { getWalletStore } from "@/stores/WalletStore";
 import { FrontendProposal } from "@/types/api";
+import { contractStore } from "@/stores/ContractStore";
+import { observer } from "mobx-react-lite";
 
 interface ProposalCardProps {
   proposal: FrontendProposal;
   contractAddress?: string;
   isCurrentPeriod?: boolean;
+  contractVotingIndex: number;
 }
 
-export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: ProposalCardProps) => {
+export const ProposalCard = observer(({ proposal, contractAddress, isCurrentPeriod, contractVotingIndex }: ProposalCardProps) => {
   const walletStore = getWalletStore();
   const isUpvoting = walletStore?.isVoting;
 
@@ -24,9 +27,10 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
     try {
       const opHash = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
       if (opHash) console.log('Proposal upvoted successfully:', opHash);
+      await new Promise(res => setTimeout(res, 3000))
+      await contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true);
     } catch (error) {
       console.error('Error upvoting proposal:', error);
-    } finally {
     }
   };
 
@@ -95,4 +99,4 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
       </CardContent>
     </Card>
   );
-};
+});

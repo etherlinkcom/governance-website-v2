@@ -197,7 +197,7 @@ export class WalletStore {
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.vote(voteType).send();
       await operation.confirmation();
-      toast.success(`Successfully voted ${voteType}\nUpdates will be reflected in <1min`);
+      toast.success(`Successfully voted ${voteType}`);
       return operation.opHash;
     } catch (error) {
       toast.error(`Error voting`);
@@ -226,7 +226,7 @@ export class WalletStore {
 
       const operation = await contract.methodsObject.upvote_proposal(sequencerProposal ?? proposal).send();
       await operation.confirmation();
-      toast.success(`Successfully upvoted proposal\nUpdates will be reflected in <1min`);
+      toast.success(`Successfully upvoted proposal`);
       return operation.opHash;
     } catch (error) {
       toast.error(`Error upvoting proposal`);
