@@ -78,11 +78,10 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
       }
 
       await new Promise(res => setTimeout(res, 3000))
-      await Promise.all([
-        contractStore.getPeriods(contractAddress),
-        contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true)
-      ]);
+      await contractStore.getPeriods(contractAddress);
+      await contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true);
       handleClose();
+
     };
 
     const handleClose = () => {

@@ -47,8 +47,8 @@ export const PromotionView = observer(({
         setVoteModalOpen(false);
         console.log("Vote submitted successfully:", opHash);
       }
-      await new Promise(res => setTimeout(res, 2000))
-      contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true);
+      await new Promise(res => setTimeout(res, 3000))
+      await contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true);
     } catch (error) {
       console.error("Error submitting vote:", error);
     }
