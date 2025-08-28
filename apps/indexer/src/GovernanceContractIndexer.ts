@@ -157,8 +157,8 @@ export class GovernanceContractIndexer {
 
     public async getDateFromLevel(level: number): Promise<Date> {
         logger.info(`[GovernanceContractIndexer] getDateFromLevel(${level})`);
-            const utc = await this.fetchJson<string>(`${this.tzkt_api_url}/blocks/${level}/timestamp`);
-            return new Date(utc);
+        const utc: string = await this.fetchJson<string>(`${this.tzkt_api_url}/blocks/${level}/timestamp`);
+        return new Date(utc);
     }
 
     private async getCurrentLevel(): Promise<number> {
@@ -230,7 +230,7 @@ export class GovernanceContractIndexer {
         }
     }
 
-    private async getPromotionHashAtPromotionLevel(contract_address: string, promotion_end_level: number, promotion_period_index: number): Promise<string | undefined> {
+    public async getPromotionHashAtPromotionLevel(contract_address: string, promotion_end_level: number, promotion_period_index: number): Promise<string | undefined> {
         logger.info(`[GovernanceContractIndexer] getPromotionHashAtPromotionLevel(${contract_address}, ${promotion_end_level}, ${promotion_period_index})`);
         const url = `${this.tzkt_api_url}/contracts/${contract_address}/storage`;
         const data = await this.fetchJson<TzktContractStorage>(url,
@@ -509,7 +509,7 @@ export class GovernanceContractIndexer {
         }
     }
 
-    protected async fetchJson<T>(
+    public async fetchJson<T>(
         endpoint: string,
         params?: Record<string, string>,
         fetchParams: RequestInit = { cache: 'no-store' }

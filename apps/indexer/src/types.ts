@@ -21,6 +21,24 @@ export type ContractConfig = {
     promotion_supermajority: string;
 };
 
+export type PromotionContext = {
+    voters: number;
+    nay_voting_power: string;
+    winner_candidate: string;
+    yea_voting_power: string;
+    pass_voting_power: string;
+    total_voting_power: string;
+}
+
+export type ProposalContext = {
+    proposals: number;
+    winner_candidate: string | null;
+    total_voting_power: string;
+    upvoters_proposals: number;
+    upvoters_upvotes_count: number;
+    max_upvotes_voting_power: string | null;
+}
+
 export type TzktContractStorage = {
   config: ContractConfig;
   metadata: number;
@@ -30,22 +48,8 @@ export type TzktContractStorage = {
   };
   voting_context: {
     period: {
-      proposal?: {
-        proposals: number;
-        winner_candidate: string | null;
-        total_voting_power: string;
-        upvoters_proposals: number;
-        upvoters_upvotes_count: number;
-        max_upvotes_voting_power: string | null;
-      };
-      promotion?: {
-        voters: number;
-        nay_voting_power: string;
-        winner_candidate: string;
-        yea_voting_power: string;
-        pass_voting_power: string;
-        total_voting_power: string;
-      };
+      proposal?: ProposalContext;
+      promotion?: PromotionContext;
     };
     period_index: string;
   };
@@ -96,7 +100,11 @@ export type TzktContractStorageHistory = {
   };
 };
 
-
+export interface OperationsPayload {
+  type: number;
+  state: number;
+  data?: TzktTransactionEvent[];
+}
 export interface TzktTransactionEvent {
   type: string;
   id: number;
@@ -197,3 +205,4 @@ export type TzktApiHead = {
   };
   state: number;
 };
+
