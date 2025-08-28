@@ -15,9 +15,10 @@ import { contractStore } from "@/stores/ContractStore";
 interface SubmitProposalButtonProps {
   contractAddress: string;
   governanceType?: GovernanceType;
+  contractVotingIndex: number;
 }
 
-export const SubmitProposalButton = observer(({ contractAddress, governanceType }: SubmitProposalButtonProps) => {
+export const SubmitProposalButton = observer(({ contractAddress, governanceType, contractVotingIndex }: SubmitProposalButtonProps) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [proposalText, setProposalText] = useState("");
     const [poolAddress, setPoolAddress] = useState("");
@@ -78,6 +79,7 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
 
       await new Promise(res => setTimeout(res, 2000))
       contractStore.getPeriods(contractAddress);
+      contractStore.getPeriodDetails(contractAddress, contractVotingIndex, false);
       handleClose();
     };
 

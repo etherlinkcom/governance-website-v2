@@ -42,6 +42,14 @@ export class TzktListener {
       this.onOperations(operations_payload);
     });
 
+    this.connection.onreconnected(() => {
+      logger.info('[TzktListener] Reconnected, re-subscribing...');
+      this.connection.invoke('SubscribeToHead');
+      for (const contract of this.contracts) {
+        this.connection.invoke('SubscribeToOperations', { address: contract.address, types: 'transaction' });
+      }
+    });
+
     await this.connection.start();
     logger.info('[TzktListener] SignalR connected');
 

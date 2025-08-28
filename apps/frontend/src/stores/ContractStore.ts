@@ -189,13 +189,19 @@ class ContractStore {
   });
 
 
-  private getPeriodDetails = flow(function* (this: ContractStore, contractAddress: string, periodIndex: number) {
+  public getPeriodDetails = flow(function* (
+      this: ContractStore,
+      contractAddress: string,
+      periodIndex: number,
+      forceRefresh = false
+    ) {
+
     if (!this.periodDetails[contractAddress]) {
       this.periodDetails[contractAddress] = {};
     }
 
     const cached = this.periodDetails[contractAddress][periodIndex];
-    if (cached && this.isValidCache(cached)) {
+    if (!forceRefresh && cached && this.isValidCache(cached)) {
       return cached;
     }
 

@@ -156,6 +156,7 @@ export const PeriodCard = observer(({ period }: PeriodCardProps) => {
               <SubmitProposalButton
                 contractAddress={period.contract_address}
                 governanceType={contractAndConfig?.governance_type}
+                contractVotingIndex={period.contract_voting_index}
               />
             </Box>
           )}

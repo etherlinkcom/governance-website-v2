@@ -251,7 +251,7 @@ export class WalletStore {
         pool_address: poolAddress,
     }).send();
       await operation.confirmation();
-      toast.success(`Submitted sequencer proposal\nUpdates will be reflected in <1min`)
+      toast.success(`Submitted proposal`)
       return operation.opHash;
 
     } catch (error) {
@@ -270,7 +270,7 @@ export class WalletStore {
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.new_proposal(proposal).send();
       await operation.confirmation();
-      toast.success(`Submitted proposal\nUpdates will be reflected in <1min`);
+      toast.success(`Submitted proposal`);
       return operation.opHash;
     } catch (error) {
       toast.error(`Error submitting proposal`);
