@@ -460,7 +460,8 @@ class ContractStore {
       upvotes,
       transaction_hash,
       contract_address,
-      contract_period_index
+      contract_period_index,
+      false
     )
   })
 
@@ -520,6 +521,7 @@ class ContractStore {
     transaction_hash: string,
     contract_address: string,
     contract_period_index: number,
+    addToProposal: boolean = true
   ): void => {
     const newUpvote: Upvote = {
       level: level,
@@ -537,13 +539,15 @@ class ContractStore {
       if (!details.upvotes) details.upvotes = observable.array([]);
       details.upvotes.push(newUpvote);
     }
+    if (!addToProposal) return;
+
     details.proposals?.forEach(proposal => {
       if (proposal.proposal_hash === proposal_hash) {
-        proposal.upvotes = (parseInt(proposal.upvotes) + parseInt(voting_power)).toString();
+        proposal.upvotes = (BigInt(proposal.upvotes) + BigInt(voting_power)).toString();
       }
     });
 
-})
+  })
 
 }
 
