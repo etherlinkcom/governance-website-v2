@@ -59,7 +59,7 @@ export const ProposalCard = observer(({ proposal, contractAddress, isCurrentPeri
               by{" "}
               {proposal.transaction_hash ? (
                 <Link
-                  href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${proposal.transaction_hash}`}
+                  href={`${process.env.NEXT_PUBLIC_TZKT_URL}/${proposal.transaction_hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{

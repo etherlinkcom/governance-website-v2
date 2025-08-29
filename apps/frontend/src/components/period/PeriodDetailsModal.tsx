@@ -204,7 +204,7 @@ export const PeriodDetailsModal = observer(({ open, onClose, period }: PeriodDet
             <EllipsisBox sx={{display:'flex'}}>
             <Link
               className="contract-link"
-              href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${period.contract_address}`}
+              href={`${process.env.NEXT_PUBLIC_TZKT_URL}/${period.contract_address}`}
               target="_blank"
               rel="noopener noreferrer"
             >

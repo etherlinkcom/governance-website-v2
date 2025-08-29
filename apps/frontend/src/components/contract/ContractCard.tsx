@@ -48,7 +48,7 @@ export const ContractCard = observer(({ contract, expanded, onChange }: Contract
               }}>
                 <Link
                   variant="body2"
-                  href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${contract.contract_address}`}
+                  href={`${process.env.NEXT_PUBLIC_TZKT_URL}/${contract.contract_address}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(event) => event.stopPropagation()}
