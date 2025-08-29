@@ -79,7 +79,6 @@ export const PromotionView = observer(({
         <VotingResults
           contractVotingIndex={contractVotingIndex}
           contractAddress={contractAddress}
-          promotionHash={promotionHash}
         />
       </Box>
 

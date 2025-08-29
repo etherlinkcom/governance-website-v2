@@ -220,7 +220,7 @@ export class WalletStore {
     }
   }
 
-  async upvoteProposal(contractAddress: string, proposal: string) {
+  async upvoteProposal(contractAddress: string, proposal: string): Promise<{opHash: string, level?: number} | undefined> {
     if (this.voting) return;
     this.voting = true;
     try {
@@ -238,9 +238,9 @@ export class WalletStore {
       } catch {}
 
       const operation = await contract.methodsObject.upvote_proposal(sequencerProposal ?? proposal).send();
-      await operation.confirmation();
+      const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
       toast.success(`Successfully upvoted proposal`);
-      return operation.opHash;
+      return { opHash: operation.opHash, level: confirmation?.block.header.level };
     } catch (error) {
       toast.error(`Error upvoting proposal`);
       console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);

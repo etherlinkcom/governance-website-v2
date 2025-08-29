@@ -493,6 +493,22 @@ class ContractStore {
       if (!details.votes) details.votes = observable.array([]);
       details.votes.push(newVote);
     }
+
+    const promotion: Promotion | undefined = this.promotionsForPeriod(contract_address, contract_period_index)[0];
+    if (promotion) {
+      switch (vote) {
+        case 'yea':
+          promotion.yea_voting_power += parseInt(voting_power);
+          break;
+        case 'nay':
+          promotion.nay_voting_power += parseInt(voting_power);
+          break;
+        case 'pass':
+          promotion.pass_voting_power += parseInt(voting_power);
+          break;
+      }
+      promotion.total_voting_power += parseInt(voting_power);
+    }
   })
 
   public createUpvote = action((

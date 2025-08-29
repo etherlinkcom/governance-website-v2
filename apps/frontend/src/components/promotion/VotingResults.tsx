@@ -20,10 +20,9 @@ export const VotingResultsSkeleton = () => {
 interface VotingResultsProps {
   contractVotingIndex?: number;
   contractAddress?: string;
-  promotionHash?: string;
 }
 
-export const VotingResults = observer(({ contractVotingIndex, contractAddress, promotionHash }: VotingResultsProps) => {
+export const VotingResults = observer(({ contractVotingIndex, contractAddress }: VotingResultsProps) => {
   const { votes, promotions, isLoading, error, hasValidParams } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
 
   if (!hasValidParams) {

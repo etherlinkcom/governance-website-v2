@@ -12,7 +12,7 @@ import { observer } from "mobx-react-lite";
 
 interface ProposalCardProps {
   proposal: FrontendProposal;
-  contractAddress?: string;
+  contractAddress: string;
   isCurrentPeriod?: boolean;
   contractVotingIndex: number;
 }
@@ -25,10 +25,17 @@ export const ProposalCard = observer(({ proposal, contractAddress, isCurrentPeri
     if (!contractAddress || !walletStore) return;
 
     try {
-      const opHash = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
-      if (opHash) console.log('Proposal upvoted successfully:', opHash);
-      await new Promise(res => setTimeout(res, 3000))
-      await contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true);
+      const result: { opHash: string, level?: number } | undefined = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
+      contractStore.createUpvote(
+        result?.level || 0,
+        proposal.proposal_hash,
+        walletStore.address || '',
+        walletStore.alias,
+        walletStore.votingPowerAmount,
+        result?.opHash || '',
+        contractAddress,
+        contractVotingIndex
+      );
     } catch (error) {
       console.error('Error upvoting proposal:', error);
     }
