@@ -17,7 +17,8 @@ let listener: TzktListener | null = null;
 
 app.get("/start-listener", (_req: Request, res: Response) => {
   if (listener) {
-    return res.status(400).send("Listener already running");
+    logger.info(`[Indexer] Listener already running`);
+    return res.status(200).send("Listener already running");
   }
   listener = new TzktListener(all_contracts.filter((contract: Contract) => contract.active));
   listener.start()
