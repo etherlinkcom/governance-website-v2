@@ -20,7 +20,7 @@ export class Database {
       dateStrings: false,
       connectionLimit: 10,
       queueLimit: 0,
-      connectTimeout: 30000,
+      connectTimeout: 60000,
       keepAliveInitialDelay: 0,
       idleTimeout: 300000,
       maxIdle: 10,
@@ -45,19 +45,24 @@ export class Database {
       }
     } catch (error) {
       logger.error('[Database] Error connecting to MySQL database:', error);
-      throw error;
     }
   }
 
-  async getPool(): Promise<mysql.Pool> {
+  async getPool(): Promise<mysql.Pool | null> {
     logger.info('[Database] getPool()');
     try {
       if (!this.pool) await this.connect();
-      return this.pool!;
-    } catch (error) {
+      return this.pool;
+    } catch (error: any) {
+      if (error.code === 'PROTOCOL_CONNECTION_LOST') {
+        logger.warn('[Database] Pool lost, recreating...');
+        await this.close();
+        await this.connect();
+        return this.pool;
+      }
       logger.error('[Database] Error getting database pool:', error);
-      throw error;
     }
+    return null;
   }
 
   private async runMigrations(): Promise<void> {
@@ -120,12 +125,29 @@ export class Database {
 
   async upsert(sql: string, params?: any[]): Promise<{ insertId?: number; affectedRows: number }> {
     logger.info(`[Database] upsert(${sql}, ${params})`);
-    const connection = await this.getPool();
-    const [result] = await connection.execute(sql, params) as any;
-    return {
-      insertId: result.insertId,
-      affectedRows: result.affectedRows
-    };
+    const retries = 3;
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const connection = await this.getPool();
+        if (!connection) {
+          logger.error('[Database] No pool available, skipping upsert.');
+          return { affectedRows: 0, insertId: undefined };
+        }
+        const [result] = await connection.execute(sql, params) as any;
+        return {
+          insertId: result.insertId,
+          affectedRows: result.affectedRows
+        };
+      } catch (error) {
+          logger.error(`[Database] Error executing upsert (attempt ${attempt}): ${error}`);
+          logger.info(`[Database] Retrying upsert (attempt ${attempt + 1})...`);
+          await this.close();
+          await this.connect();
+          await new Promise(res => setTimeout(res, attempt * 1000));
+          continue;
+      }
+    }
+    return { affectedRows: 0, insertId: undefined };
   }
 
   private formatDateForMySQL(isoString: string): string {
@@ -183,7 +205,6 @@ export class Database {
     );
   } catch (error) {
       logger.error(`[Database] Error upserting proposal: ${error}`);
-      throw error;
     }
   }
 
@@ -221,7 +242,6 @@ export class Database {
     );
   } catch (error) {
       logger.error(`[Database] Error upserting vote: ${error}`);
-      throw error;
     }
   }
 
@@ -259,7 +279,6 @@ export class Database {
     );
     } catch (error) {
       logger.error(`[Database] Error upserting promotion: ${error}`);
-      throw error;
     }
   }
 
@@ -288,7 +307,6 @@ export class Database {
     );
     } catch (error) {
       logger.error(`[Database] Error upserting upvote: ${error}`);
-      throw error;
     }
   }
 
@@ -339,7 +357,6 @@ export class Database {
     );
   } catch (error) {
       logger.error(`[Database] Error upserting contract: ${error}`);
-      throw error;
     }
   }
 
@@ -387,7 +404,6 @@ export class Database {
     );
   } catch (error) {
       logger.error(`[Database] Error upserting period: ${error}`);
-      throw error;
     }
   }
 
@@ -435,6 +451,10 @@ export class Database {
 
   async getLastProcessedPeriod(contract_address: string): Promise<Period | null> {
       const connection = await this.getPool();
+      if (!connection) {
+          logger.error('[Database] No pool available, skipping getLastProcessedPeriod.');
+          return null;
+      }
       const [rows] = await connection.execute(
           `SELECT * FROM periods WHERE contract_address = ? ORDER BY contract_voting_index DESC LIMIT 1`,
           [contract_address]
@@ -445,6 +465,10 @@ export class Database {
 
   async getPeriod(contract_address: string, contract_voting_index: number): Promise<Period | null> {
       const connection = await this.getPool();
+      if (!connection) {
+          logger.error('[Database] No pool available, skipping getPeriod.');
+          return null;
+      }
       const [rows] = await connection.execute(
           `SELECT * FROM periods WHERE contract_address = ? AND contract_voting_index = ?`,
           [contract_address, contract_voting_index]

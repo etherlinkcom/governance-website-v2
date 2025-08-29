@@ -537,7 +537,13 @@ class ContractStore {
       if (!details.upvotes) details.upvotes = observable.array([]);
       details.upvotes.push(newUpvote);
     }
-  })
+    details.proposals?.forEach(proposal => {
+      if (proposal.proposal_hash === proposal_hash) {
+        proposal.upvotes = (parseInt(proposal.upvotes) + parseInt(voting_power)).toString();
+      }
+    });
+
+})
 
 }
 
