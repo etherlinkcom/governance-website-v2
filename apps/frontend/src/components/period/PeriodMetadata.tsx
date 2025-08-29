@@ -6,6 +6,7 @@ import { formatDate } from "@/lib/formatDate";
 import { formatNumber } from "@/lib/formatNumber";
 import { ComponentLoading } from "@/components/shared/ComponentLoading";
 import { FrontendProposal } from "@/types/api";
+import { observer } from "mobx-react-lite";
 
 interface PeriodMetadataProps {
   period: Period;
@@ -15,7 +16,7 @@ interface PeriodMetadataProps {
   isLoading?: boolean;
   renderHash: (hash: string) => JSX.Element;
 }
-export const PeriodMetadata = ({
+export const PeriodMetadata = observer(({
   period,
   proposals,
   hasProposals,
@@ -124,4 +125,4 @@ export const PeriodMetadata = ({
       </Box>
     )}
   </Box>
-);
+));

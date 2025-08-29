@@ -1,4 +1,5 @@
 import { Proposal, Upvote, Promotion, Vote, Period, ContractAndConfig } from "@trilitech/types";
+import { BlockResponse } from '@taquito/rpc';
 
 export interface PeriodDetailsResponse {
   proposals?: FrontendProposal[];
@@ -30,4 +31,12 @@ export interface PeriodData {
 
 export interface FrontendProposal extends Proposal {
   upvotes: string;
+}
+
+export interface TransactionOperationConfirmation {
+    block: BlockResponse;
+    expectedConfirmation: number;
+    currentConfirmation: number;
+    completed: boolean;
+    isInCurrentBranch: () => Promise<boolean>;
 }

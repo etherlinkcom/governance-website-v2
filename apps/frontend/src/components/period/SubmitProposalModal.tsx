@@ -14,7 +14,7 @@ import { contractStore } from "@/stores/ContractStore";
 
 interface SubmitProposalButtonProps {
   contractAddress: string;
-  governanceType?: GovernanceType;
+  governanceType: GovernanceType;
   contractVotingIndex: number;
 }
 
@@ -57,6 +57,10 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
     };
 
     const handleSubmitProposal = async () => {
+      let _level: number | undefined = undefined;
+      let _opHash: string = '';
+      let proposalHash: string = '';
+
       if (isSequencer) {
 
         if (poolAddress.trim() === "" || sequencerPublicKey.trim() === "") {
@@ -66,22 +70,42 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
 
         if (getPoolAddressError(poolAddress) || getSequencerPublicKeyError(sequencerPublicKey)) return;
 
-        await walletStore?.submitSequencerProposal(
+        const result: {opHash: string, level?: number} | undefined = await walletStore?.submitSequencerProposal(
           contractAddress,
           poolAddress.trim(),
           sequencerPublicKey.trim()
         );
+        if (result) {
+          _opHash = result.opHash;
+          _level = result.level || 0;
+        }
+
+        proposalHash = JSON.stringify({
+          sequencer_pk: sequencerPublicKey.trim(),
+          pool_address: poolAddress.trim(),
+        });
 
       } else {
         if (getBytesError(proposalText)) return;
-        await walletStore?.submitProposal(contractAddress, proposalText.trim());
+        const result: {opHash: string, level?: number} | undefined = await walletStore?.submitProposal(contractAddress, proposalText.trim());
+        if (result) {
+          _opHash = result.opHash;
+          _level = result.level || 0;
+        }
+        proposalHash = proposalText.trim();
       }
 
-      await new Promise(res => setTimeout(res, 3000))
-      await contractStore.getPeriods(contractAddress);
-      await contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true);
+      contractStore.createProposal(
+        contractVotingIndex,
+        _level || 0,
+        proposalText,
+        _opHash,
+        walletStore?.address || "",
+        walletStore?.alias,
+        contractAddress,
+        walletStore?.votingPowerAmount || "0",
+      )
       handleClose();
-
     };
 
     const handleClose = () => {

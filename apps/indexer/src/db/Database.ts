@@ -8,9 +8,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export class Database {
-  private connection: mysql.Connection | null = null;
+  private pool: mysql.Pool | null = null;
   private migrationsDir: string = path.join(process.cwd(), 'src/db/migrations');
-  private connectionConfig: mysql.ConnectionOptions = {
+  private poolConfig: mysql.ConnectionOptions = {
       host: process.env.DB_HOST!,
       user: process.env.DB_USER!,
       password: process.env.DB_PASSWORD!,
@@ -37,25 +37,33 @@ export class Database {
 
   private async connect(): Promise<void> {
     logger.info('[Database] connect()');
-    if (!this.connection) {
-      this.connection = await mysql.createConnection(this.connectionConfig);
-      await this.connection.execute("SET time_zone = '+00:00'");
-      logger.info('[Database] Connected to MySQL database');
+    try {
+      if (!this.pool) {
+        this.pool = mysql.createPool(this.poolConfig);
+        await this.pool.execute("SET time_zone = '+00:00'");
+        logger.info('[Database] Connected to MySQL database');
+      }
+    } catch (error) {
+      logger.error('[Database] Error connecting to MySQL database:', error);
+      throw error;
     }
   }
 
-  async getConnection(): Promise<mysql.Connection> {
-    logger.info('[Database] getConnection()');
-    if (!this.connection) {
-      await this.connect();
+  async getPool(): Promise<mysql.Pool> {
+    logger.info('[Database] getPool()');
+    try {
+      if (!this.pool) await this.connect();
+      return this.pool!;
+    } catch (error) {
+      logger.error('[Database] Error getting database pool:', error);
+      throw error;
     }
-    return this.connection!;
   }
 
   private async runMigrations(): Promise<void> {
     logger.info('[Database] runMigrations()');
 
-    await this.connection!.execute(`
+    await this.pool!.execute(`
       CREATE TABLE IF NOT EXISTS migrations (
         id INT NOT NULL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -63,7 +71,7 @@ export class Database {
       );
     `);
 
-    const [rows] = await this.connection!.execute('SELECT name FROM migrations ORDER BY id') as any;
+    const [rows] = await this.pool!.execute('SELECT name FROM migrations ORDER BY id') as any;
     const applied = new Set(rows.map((row: any) => row.name));
 
     const files = fs.readdirSync(this.migrationsDir)
@@ -86,11 +94,11 @@ export class Database {
       const statements = sql.split(';').filter(stmt => stmt.trim());
       for (const statement of statements) {
         if (statement.trim()) {
-          await this.connection!.execute(statement);
+          await this.pool!.execute(statement);
         }
       }
 
-      await this.connection!.execute(
+      await this.pool!.execute(
         'INSERT INTO migrations (id, name, applied_at) VALUES (?, ?, NOW())',
         [id, file]
       );
@@ -103,16 +111,16 @@ export class Database {
 
   async close(): Promise<void> {
     logger.info('[Database] close() Closing database connection...');
-    if (this.connection) {
-      await this.connection.end();
-      this.connection = null;
+    if (this.pool) {
+      await this.pool.end();
+      this.pool = null;
       logger.info('[Database] Database connection closed');
     }
   }
 
   async upsert(sql: string, params?: any[]): Promise<{ insertId?: number; affectedRows: number }> {
     logger.info(`[Database] upsert(${sql}, ${params})`);
-    const connection = await this.getConnection();
+    const connection = await this.getPool();
     const [result] = await connection.execute(sql, params) as any;
     return {
       insertId: result.insertId,
@@ -426,7 +434,7 @@ export class Database {
   }
 
   async getLastProcessedPeriod(contract_address: string): Promise<Period | null> {
-      const connection = await this.getConnection();
+      const connection = await this.getPool();
       const [rows] = await connection.execute(
           `SELECT * FROM periods WHERE contract_address = ? ORDER BY contract_voting_index DESC LIMIT 1`,
           [contract_address]
@@ -436,7 +444,7 @@ export class Database {
 
 
   async getPeriod(contract_address: string, contract_voting_index: number): Promise<Period | null> {
-      const connection = await this.getConnection();
+      const connection = await this.getPool();
       const [rows] = await connection.execute(
           `SELECT * FROM periods WHERE contract_address = ? AND contract_voting_index = ?`,
           [contract_address, contract_voting_index]

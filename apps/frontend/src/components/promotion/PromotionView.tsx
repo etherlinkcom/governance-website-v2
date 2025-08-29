@@ -42,13 +42,26 @@ export const PromotionView = observer(({
     if (!contractAddress || !walletStore) return;
 
     try {
-      const opHash = await walletStore.vote(contractAddress, selectedVote);
-      if (opHash) {
+      let level: number | undefined;
+      let opHash: string = '';
+      const operation: { level?: number; opHash: string } | undefined = await walletStore.vote(contractAddress, selectedVote);
+      if (operation) {
         setVoteModalOpen(false);
+        level = operation.level;
+        opHash = operation.opHash;
         console.log("Vote submitted successfully:", opHash);
       }
-      await new Promise(res => setTimeout(res, 3000))
-      await contractStore.getPeriodDetails(contractAddress, contractVotingIndex, true);
+      contractStore.createVote(
+        promotionHash || "",
+        walletStore.address || "",
+        walletStore.alias,
+        walletStore.votingPowerAmount,
+        selectedVote,
+        level || 0,
+        opHash || "",
+        contractAddress,
+        contractVotingIndex
+      )
     } catch (error) {
       console.error("Error submitting vote:", error);
     }

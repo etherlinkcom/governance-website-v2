@@ -1,11 +1,13 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { Contract, TezosToolkit } from '@taquito/taquito';
+import { Contract, TezosToolkit, TransactionWalletOperation } from '@taquito/taquito';
 import { BeaconWallet } from '@taquito/beacon-wallet';
-import { ColorMode, NetworkType } from '@airgap/beacon-types';
+import { ColorMode, NetworkType, TezosOperation } from '@airgap/beacon-types';
 import BigNumber from 'bignumber.js';
 import { formatNumber } from '@/lib/formatNumber';
 import { VoteOption } from '@trilitech/types';
 import toast from 'react-hot-toast';
+import { TransactionOperationConfirmation } from '@/types/api';
+import { fetchJson } from '@/lib/fetchJson';
 
 
 export type VotingPower = {
@@ -15,6 +17,7 @@ export type VotingPower = {
 
 export class WalletStore {
   private _address: string | null = null;
+  private _alias: string | undefined = undefined;
   private balance: number = 0;
   private votingPower: VotingPower | null = null;
   private delegates = new Map<string, VotingPower | null>();
@@ -44,12 +47,20 @@ export class WalletStore {
     return this._address;
   }
 
+  get alias(): string | undefined {
+    return this._alias;
+  }
+
   get isVoting(): boolean {
     return this.voting;
   }
 
   get formattedBalance(): string {
     return formatNumber(this.balance);
+  }
+
+  get votingPowerAmount(): string {
+    return this.votingPower?.votingAmount ? this.votingPower.votingAmount.toString() : '0';
   }
 
   get formattedVotingAmount(): string {
@@ -79,8 +90,10 @@ export class WalletStore {
   async connect(): Promise<void> {
     await this.wallet.requestPermissions({});
     const address = await this.wallet.getPKH();
+    const alias = await fetchJson<{ alias?: string }>(`${this.tzktApiUrl}/accounts/${address}`);
     runInAction(() => {
       this._address = address;
+      this._alias = alias.alias || undefined;
     });
     await Promise.all([
       this.refreshBalance(),
@@ -190,15 +203,15 @@ export class WalletStore {
     }
   }
 
-  async vote(contractAddress: string, voteType: VoteOption) {
+  async vote(contractAddress: string, voteType: VoteOption): Promise<{opHash: string, level?: number} | undefined> {
     if (this.voting) return;
     this.voting = true;
     try {
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.vote(voteType).send();
-      await operation.confirmation();
+      const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
       toast.success(`Successfully voted ${voteType}`);
-      return operation.opHash;
+      return { opHash: operation.opHash, level: confirmation?.block.header.level };
     } catch (error) {
       toast.error(`Error voting`);
       console.error(`Error voting ${voteType} for ${contractAddress}: ${error}`);
@@ -240,7 +253,7 @@ export class WalletStore {
     contractAddress: string,
     poolAddress: string,
     sequencerPublicKey: string
-  ) {
+  ): Promise<{opHash: string, level?: number} | undefined> {
     if (this.voting) return;
     this.voting = true;
     try {
@@ -250,9 +263,10 @@ export class WalletStore {
         sequencer_pk:sequencerPublicKey,
         pool_address: poolAddress,
     }).send();
-      await operation.confirmation();
-      toast.success(`Submitted proposal`)
-      return operation.opHash;
+
+      const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
+      toast.success(`Submitted proposal`);
+      return { opHash: operation.opHash, level: confirmation?.block.header.level };
 
     } catch (error) {
       toast.error(`Error submitting sequencer proposal`);
@@ -262,16 +276,17 @@ export class WalletStore {
     }
   }
 
-  async submitProposal(contractAddress: string, proposal: string) {
+  async submitProposal(contractAddress: string, proposal: string): Promise<{opHash: string, level?: number} | undefined> {
     if (this.voting) return;
     this.voting = true;
     try {
 
       const contract = await this.Tezos.wallet.at(contractAddress);
-      const operation = await contract.methodsObject.new_proposal(proposal).send();
-      await operation.confirmation();
+      const operation: TransactionWalletOperation = await contract.methodsObject.new_proposal(proposal).send();
+      const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
       toast.success(`Submitted proposal`);
-      return operation.opHash;
+      return { opHash: operation.opHash, level: confirmation?.block.header.level };
+
     } catch (error) {
       toast.error(`Error submitting proposal`);
       console.error(`Error submitting proposal for ${contractAddress}: ${error}`);
