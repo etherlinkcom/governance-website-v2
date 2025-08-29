@@ -1,6 +1,7 @@
 import { formatNumber } from '@/lib/formatNumber';
 import { Box, Typography } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
+import { observer } from 'mobx-react-lite';
 
 interface VoteResultCardProps {
   type: 'yea' | 'nay' | 'pass';
@@ -9,7 +10,7 @@ interface VoteResultCardProps {
   label: string;
 }
 
-export const VoteResultCard = ({ type, percentage, count, label }: VoteResultCardProps) => {
+export const VoteResultCard = observer(({ type, percentage, count, label }: VoteResultCardProps) => {
   const theme = useTheme();
 
   const getThemeColors = () => {
@@ -89,4 +90,4 @@ export const VoteResultCard = ({ type, percentage, count, label }: VoteResultCar
       </Typography>
     </Box>
   );
-};
+});

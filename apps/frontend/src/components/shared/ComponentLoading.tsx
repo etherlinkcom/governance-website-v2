@@ -21,6 +21,8 @@ export const ComponentLoading = ({
       sx={{
         width,
         height,
+        display: 'flex',
+        mb: 0.5,
         borderRadius: theme.spacing(borderRadius),
         backgroundColor: alpha(theme.palette.primary.main, 0.1),
         animation: 'pulse 2s ease-in-out infinite',

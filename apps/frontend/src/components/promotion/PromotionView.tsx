@@ -10,17 +10,19 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  CircularProgress,
 } from "@mui/material";
 import { CandidateInfo } from "@/components/promotion/CandidateInfo";
 import { VotingResults } from "@/components/promotion/VotingResults";
 import { VotersTable } from "@/components/promotion/VotersTable";
-import { getWalletStore } from "@/stores/WalletStore";
+import { getWalletStore, OperationResult } from "@/stores/WalletStore";
 import { useState } from "react";
 import { VoteOption } from "@trilitech/types";
 import { observer } from "mobx-react-lite";
+import { contractStore } from "@/stores/ContractStore";
 
 interface PromotionViewProps {
-  contractVotingIndex?: number;
+  contractVotingIndex: number;
   contractAddress?: string;
   promotionHash?: string;
   isCurrentPeriod?: boolean;
@@ -41,14 +43,25 @@ export const PromotionView = observer(({
     if (!contractAddress || !walletStore) return;
 
     try {
-      const opHash = await walletStore.vote(contractAddress, selectedVote);
-      if (opHash) {
-        setVoteModalOpen(false);
-        console.log("Vote submitted successfully:", opHash);
-      }
+      const operation: OperationResult | undefined = await walletStore.vote(contractAddress, selectedVote);
+
+      if (!operation?.completed) return;
+
+      contractStore.createVote(
+        promotionHash || "",
+        walletStore.address || "",
+        walletStore.alias,
+        walletStore.votingPowerAmount,
+        selectedVote,
+        operation?.level || 0,
+        operation?.opHash || '',
+        contractAddress,
+        contractVotingIndex
+      )
+
+      setVoteModalOpen(false);
     } catch (error) {
       console.error("Error submitting vote:", error);
-    } finally {
     }
   };
 
@@ -64,7 +77,6 @@ export const PromotionView = observer(({
         <VotingResults
           contractVotingIndex={contractVotingIndex}
           contractAddress={contractAddress}
-          promotionHash={promotionHash}
         />
       </Box>
 
@@ -120,8 +132,8 @@ export const PromotionView = observer(({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setVoteModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleVote} variant="contained" disabled={isVoting}>
-            {isVoting ? "Submitting Vote..." : "Submit Vote"}
+          <Button onClick={handleVote} variant="contained" disabled={isVoting} sx={{ minWidth: 128 }}>
+            {isVoting ? <CircularProgress size="20px" sx={{color: theme => theme.palette.custom.tableBg.even}} /> : "Submit Vote"}
           </Button>
         </DialogActions>
       </Dialog>

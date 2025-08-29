@@ -1,19 +1,22 @@
 import { formatDate } from "@/lib/formatDate";
-import { Card, CardContent, Box, Typography, Link, Button, Chip } from "@mui/material";
-import { Proposal } from "@trilitech/types";
+import { Card, CardContent, Box, Typography, Link, Button, Chip, CircularProgress } from "@mui/material";
 import { HashDisplay } from "@/components/shared/HashDisplay";
 import { formatNumber } from "@/lib/formatNumber";
 import { HashLink } from "@/components/shared/HashLink";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
-import { getWalletStore } from "@/stores/WalletStore";
+import { getWalletStore, OperationResult } from "@/stores/WalletStore";
+import { FrontendProposal } from "@/types/api";
+import { contractStore } from "@/stores/ContractStore";
+import { observer } from "mobx-react-lite";
 
 interface ProposalCardProps {
-  proposal: Proposal;
-  contractAddress?: string;
+  proposal: FrontendProposal;
+  contractAddress: string;
   isCurrentPeriod?: boolean;
+  contractVotingIndex: number;
 }
 
-export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: ProposalCardProps) => {
+export const ProposalCard = observer(({ proposal, contractAddress, isCurrentPeriod, contractVotingIndex }: ProposalCardProps) => {
   const walletStore = getWalletStore();
   const isUpvoting = walletStore?.isVoting;
 
@@ -21,11 +24,21 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
     if (!contractAddress || !walletStore) return;
 
     try {
-      const opHash = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
-      if (opHash) console.log('Proposal upvoted successfully:', opHash);
+      const operation: OperationResult | undefined = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
+
+      if (!operation?.completed) return;
+      contractStore.createUpvote(
+        operation?.level || 0,
+        proposal.proposal_hash,
+        walletStore.address || '',
+        walletStore.alias,
+        walletStore.votingPowerAmount,
+        operation?.opHash || '',
+        contractAddress,
+        contractVotingIndex
+      );
     } catch (error) {
       console.error('Error upvoting proposal:', error);
-    } finally {
     }
   };
 
@@ -75,7 +88,7 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
           <Box sx={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
             <Typography variant="subtitle2">Upvotes:</Typography>
             <Typography variant="body1" sx={{ display: "block" }}>
-              {formatNumber(proposal.upvotes)}
+              {formatNumber(parseInt(proposal.upvotes))}
             </Typography>
 
             {isCurrentPeriod && walletStore?.hasVotingPower && (
@@ -84,9 +97,9 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
                 size="small"
                 onClick={handleUpvote}
                 disabled={isUpvoting}
-                sx={{ mt: 1 }}
+                sx={{ mt: 1, minWidth: 97 }}
               >
-                {isUpvoting ? 'Upvoting...' : 'Upvote'}
+                {isUpvoting ? <CircularProgress size="20px" sx={{color: theme => theme.palette.primary.main}} /> : 'Upvote'}
               </Button>
             )}
           </Box>
@@ -94,4 +107,4 @@ export const ProposalCard = ({ proposal, contractAddress, isCurrentPeriod }: Pro
       </CardContent>
     </Card>
   );
-};
+});

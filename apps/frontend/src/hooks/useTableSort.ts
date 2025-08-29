@@ -47,7 +47,7 @@ export function useTableSort<T>(
       if (aValue > bValue) return order === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [data, order, orderBy]);
+  }, [data,, data.length, order, orderBy]);
 
   return { sortedData, order, orderBy, handleRequestSort };
 }

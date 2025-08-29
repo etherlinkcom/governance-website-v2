@@ -8,9 +8,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export class Database {
-  private connection: mysql.Connection | null = null;
+  private pool: mysql.Pool | null = null;
   private migrationsDir: string = path.join(process.cwd(), 'src/db/migrations');
-  private connectionConfig: mysql.ConnectionOptions = {
+  private poolConfig: mysql.ConnectionOptions = {
       host: process.env.DB_HOST!,
       user: process.env.DB_USER!,
       password: process.env.DB_PASSWORD!,
@@ -20,7 +20,7 @@ export class Database {
       dateStrings: false,
       connectionLimit: 10,
       queueLimit: 0,
-      connectTimeout: 30000,
+      connectTimeout: 60000,
       keepAliveInitialDelay: 0,
       idleTimeout: 300000,
       maxIdle: 10,
@@ -37,25 +37,38 @@ export class Database {
 
   private async connect(): Promise<void> {
     logger.info('[Database] connect()');
-    if (!this.connection) {
-      this.connection = await mysql.createConnection(this.connectionConfig);
-      await this.connection.execute("SET time_zone = '+00:00'");
-      logger.info('[Database] Connected to MySQL database');
+    try {
+      if (!this.pool) {
+        this.pool = mysql.createPool(this.poolConfig);
+        await this.pool.execute("SET time_zone = '+00:00'");
+        logger.info('[Database] Connected to MySQL database');
+      }
+    } catch (error) {
+      logger.error('[Database] Error connecting to MySQL database:', error);
     }
   }
 
-  async getConnection(): Promise<mysql.Connection> {
-    logger.info('[Database] getConnection()');
-    if (!this.connection) {
-      await this.connect();
+  async getPool(): Promise<mysql.Pool | null> {
+    logger.info('[Database] getPool()');
+    try {
+      if (!this.pool) await this.connect();
+      return this.pool;
+    } catch (error: any) {
+      if (error.code === 'PROTOCOL_CONNECTION_LOST') {
+        logger.warn('[Database] Pool lost, recreating...');
+        await this.close();
+        await this.connect();
+        return this.pool;
+      }
+      logger.error('[Database] Error getting database pool:', error);
     }
-    return this.connection!;
+    return null;
   }
 
   private async runMigrations(): Promise<void> {
     logger.info('[Database] runMigrations()');
 
-    await this.connection!.execute(`
+    await this.pool!.execute(`
       CREATE TABLE IF NOT EXISTS migrations (
         id INT NOT NULL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -63,7 +76,7 @@ export class Database {
       );
     `);
 
-    const [rows] = await this.connection!.execute('SELECT name FROM migrations ORDER BY id') as any;
+    const [rows] = await this.pool!.execute('SELECT name FROM migrations ORDER BY id') as any;
     const applied = new Set(rows.map((row: any) => row.name));
 
     const files = fs.readdirSync(this.migrationsDir)
@@ -86,11 +99,11 @@ export class Database {
       const statements = sql.split(';').filter(stmt => stmt.trim());
       for (const statement of statements) {
         if (statement.trim()) {
-          await this.connection!.execute(statement);
+          await this.pool!.execute(statement);
         }
       }
 
-      await this.connection!.execute(
+      await this.pool!.execute(
         'INSERT INTO migrations (id, name, applied_at) VALUES (?, ?, NOW())',
         [id, file]
       );
@@ -103,21 +116,38 @@ export class Database {
 
   async close(): Promise<void> {
     logger.info('[Database] close() Closing database connection...');
-    if (this.connection) {
-      await this.connection.end();
-      this.connection = null;
+    if (this.pool) {
+      await this.pool.end();
+      this.pool = null;
       logger.info('[Database] Database connection closed');
     }
   }
 
   async upsert(sql: string, params?: any[]): Promise<{ insertId?: number; affectedRows: number }> {
     logger.info(`[Database] upsert(${sql}, ${params})`);
-    const connection = await this.getConnection();
-    const [result] = await connection.execute(sql, params) as any;
-    return {
-      insertId: result.insertId,
-      affectedRows: result.affectedRows
-    };
+    const retries = 3;
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const connection = await this.getPool();
+        if (!connection) {
+          logger.error('[Database] No pool available, skipping upsert.');
+          return { affectedRows: 0, insertId: undefined };
+        }
+        const [result] = await connection.execute(sql, params) as any;
+        return {
+          insertId: result.insertId,
+          affectedRows: result.affectedRows
+        };
+      } catch (error) {
+          logger.error(`[Database] Error executing upsert (attempt ${attempt}): ${error}`);
+          logger.info(`[Database] Retrying upsert (attempt ${attempt + 1})...`);
+          await this.close();
+          await this.connect();
+          await new Promise(res => setTimeout(res, attempt * 1000));
+          continue;
+      }
+    }
+    return { affectedRows: 0, insertId: undefined };
   }
 
   private formatDateForMySQL(isoString: string): string {
@@ -151,7 +181,6 @@ export class Database {
       proposal.contract_address,
       proposal.proposer,
       proposal.alias,
-      proposal.upvotes
     ];
 
     await this.upsert(
@@ -163,22 +192,19 @@ export class Database {
         transaction_hash,
         contract_address,
         proposer,
-        alias,
-        upvotes
+        alias
       )
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          level = VALUES(level),
          time = VALUES(time),
          proposer = VALUES(proposer),
          alias = VALUES(alias),
-         upvotes = VALUES(upvotes),
          updated_at = CURRENT_TIMESTAMP`,
          this.sanitizeValues(values)
     );
   } catch (error) {
       logger.error(`[Database] Error upserting proposal: ${error}`);
-      throw error;
     }
   }
 
@@ -216,7 +242,6 @@ export class Database {
     );
   } catch (error) {
       logger.error(`[Database] Error upserting vote: ${error}`);
-      throw error;
     }
   }
 
@@ -254,7 +279,6 @@ export class Database {
     );
     } catch (error) {
       logger.error(`[Database] Error upserting promotion: ${error}`);
-      throw error;
     }
   }
 
@@ -283,7 +307,6 @@ export class Database {
     );
     } catch (error) {
       logger.error(`[Database] Error upserting upvote: ${error}`);
-      throw error;
     }
   }
 
@@ -334,7 +357,6 @@ export class Database {
     );
   } catch (error) {
       logger.error(`[Database] Error upserting contract: ${error}`);
-      throw error;
     }
   }
 
@@ -382,7 +404,6 @@ export class Database {
     );
   } catch (error) {
       logger.error(`[Database] Error upserting period: ${error}`);
-      throw error;
     }
   }
 
@@ -429,10 +450,28 @@ export class Database {
   }
 
   async getLastProcessedPeriod(contract_address: string): Promise<Period | null> {
-      const connection = await this.getConnection();
+      const connection = await this.getPool();
+      if (!connection) {
+          logger.error('[Database] No pool available, skipping getLastProcessedPeriod.');
+          return null;
+      }
       const [rows] = await connection.execute(
           `SELECT * FROM periods WHERE contract_address = ? ORDER BY contract_voting_index DESC LIMIT 1`,
           [contract_address]
+      ) as [Period[], FieldPacket[]];
+      return rows.length > 0 ? rows[0] : null;
+  }
+
+
+  async getPeriod(contract_address: string, contract_voting_index: number): Promise<Period | null> {
+      const connection = await this.getPool();
+      if (!connection) {
+          logger.error('[Database] No pool available, skipping getPeriod.');
+          return null;
+      }
+      const [rows] = await connection.execute(
+          `SELECT * FROM periods WHERE contract_address = ? AND contract_voting_index = ?`,
+          [contract_address, contract_voting_index]
       ) as [Period[], FieldPacket[]];
       return rows.length > 0 ? rows[0] : null;
   }

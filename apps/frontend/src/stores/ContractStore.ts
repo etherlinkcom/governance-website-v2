@@ -1,6 +1,6 @@
-import { makeAutoObservable, flow, computed } from 'mobx';
-import { GovernanceType, Period, ContractAndConfig, Vote, Promotion, Upvote, Proposal } from '@trilitech/types';
-import { PeriodData, PeriodDetailsResponse } from '@/types/api';
+import { makeAutoObservable, flow, computed, action, observable } from 'mobx';
+import { GovernanceType, Period, ContractAndConfig, Vote, Promotion, Upvote, VoteOption } from '@trilitech/types';
+import { FrontendProposal, PeriodData, PeriodDetailsResponse } from '@/types/api';
 import { fetchJson } from '@/lib/fetchJson';
 
 class ContractStore {
@@ -10,7 +10,7 @@ class ContractStore {
   loadingByGovernance: Partial<Record<GovernanceType, boolean>> = {};
   loadingPeriodsByGovernance: Partial<Record<GovernanceType, Record<string, boolean>>> = {};
   periodDetails: Record<string, Record<number, {
-    proposals?: Proposal[];
+    proposals?: FrontendProposal[];
     upvotes?: Upvote[];
     promotions?: Promotion[];
     votes?: Vote[];
@@ -66,7 +66,10 @@ class ContractStore {
 
     try {
       const data = yield fetchJson<{ periods: Period[] }>(`/api/contract/${contractAddress}/periods`);
-      let allPeriods = data.periods;
+      let allPeriods = data.periods.map((period: Period) => ({
+        ...period,
+        proposal_hashes: observable.array(period.proposal_hashes || []),
+      }));
 
       const contract = this.contracts.find(c => c.contract_address === contractAddress);
       if (contract?.active) {
@@ -173,7 +176,7 @@ class ContractStore {
         level_end: periodLevelEnd,
         date_start: new Date(startDateStr) || 'Error retrieving date',
         date_end: new Date(endDateStr) || 'Error retrieving date',
-        proposal_hashes: [],
+        proposal_hashes: observable.array([]),
         promotion_hash: undefined,
         period_class: i === 0 ? 'current' : 'future',
         total_voting_power: 0,
@@ -189,13 +192,19 @@ class ContractStore {
   });
 
 
-  private getPeriodDetails = flow(function* (this: ContractStore, contractAddress: string, periodIndex: number) {
+  public getPeriodDetails = flow(function* (
+      this: ContractStore,
+      contractAddress: string,
+      periodIndex: number,
+      forceRefresh = false
+    ) {
+
     if (!this.periodDetails[contractAddress]) {
       this.periodDetails[contractAddress] = {};
     }
 
     const cached = this.periodDetails[contractAddress][periodIndex];
-    if (cached && this.isValidCache(cached)) {
+    if (!forceRefresh && cached && this.isValidCache(cached)) {
       return cached;
     }
 
@@ -217,6 +226,10 @@ class ContractStore {
       const data = yield fetchJson<PeriodDetailsResponse>(`/api/contract/${contractAddress}/${periodIndex}/details`);
       this.periodDetails[contractAddress][periodIndex] = {
         ...data,
+        proposals: observable.array(data.proposals ?? []),
+        upvotes: observable.array(data.upvotes ?? []),
+        promotions: observable.array(data.promotions ?? []),
+        votes: observable.array(data.votes ?? []),
         timestamp: Date.now()
       };
 
@@ -257,7 +270,7 @@ class ContractStore {
   }
 
   get proposalsForPeriod() {
-    return (contractAddress: string, periodIndex: number): Proposal[] => {
+    return (contractAddress: string, periodIndex: number): FrontendProposal[] => {
       const cached = this.periodDetails[contractAddress]?.[periodIndex];
       if (cached?.proposals) return cached.proposals;
 
@@ -405,6 +418,137 @@ class ContractStore {
   private isValidCache(cached: any): boolean {
     return cached && (Date.now() - cached.timestamp) < 5 * 60 * 1000; // 5 min
   }
+
+  public createProposal = action((
+    contract_period_index: number,
+    level: number,
+    proposal_hash: string,
+    transaction_hash: string,
+    proposer: string,
+    alias: string | undefined,
+    contract_address: string,
+    upvotes: string,
+  ): void => {
+    const newProposal: FrontendProposal = {
+      contract_period_index: contract_period_index,
+      level: level,
+      time: new Date().toISOString(),
+      proposal_hash: proposal_hash,
+      transaction_hash: transaction_hash,
+      proposer: proposer,
+      alias: alias,
+      contract_address: contract_address,
+      upvotes: upvotes
+    };
+
+    const details = this.periodDetails[contract_address]?.[contract_period_index];
+    if (details) {
+      if (!details.proposals) details.proposals = observable.array([]);
+      details.proposals.push(newProposal);
+    }
+    const periods: Period[] = this.periodsForContract(contract_address);
+    const period = periods.find(p => p.contract_voting_index === contract_period_index);
+    if (period) {
+      if (!period.proposal_hashes) period.proposal_hashes = observable.array([]);
+      period.proposal_hashes.push(proposal_hash);
+    }
+    this.createUpvote(
+      level,
+      proposal_hash,
+      proposer,
+      alias,
+      upvotes,
+      transaction_hash,
+      contract_address,
+      contract_period_index,
+      false
+    )
+  })
+
+  public createVote = action((
+    proposal_hash: string,
+    baker: string,
+    alias: string | undefined,
+    voting_power: string,
+    vote: VoteOption,
+    level: number,
+    transaction_hash: string,
+    contract_address: string,
+    contract_period_index: number,
+  ): void => {
+    const newVote: Vote = {
+      proposal_hash: proposal_hash,
+      baker: baker,
+      alias: alias,
+      voting_power: parseInt(voting_power),
+      vote: vote,
+      time: new Date().toISOString(),
+      level: level,
+      transaction_hash: transaction_hash,
+      contract_address: contract_address,
+    };
+
+
+    const details = this.periodDetails[contract_address]?.[contract_period_index];
+    if (details) {
+      if (!details.votes) details.votes = observable.array([]);
+      details.votes.push(newVote);
+    }
+
+    const promotion: Promotion | undefined = this.promotionsForPeriod(contract_address, contract_period_index)[0];
+    if (promotion) {
+      switch (vote) {
+        case 'yea':
+          promotion.yea_voting_power += parseInt(voting_power);
+          break;
+        case 'nay':
+          promotion.nay_voting_power += parseInt(voting_power);
+          break;
+        case 'pass':
+          promotion.pass_voting_power += parseInt(voting_power);
+          break;
+      }
+      promotion.total_voting_power += parseInt(voting_power);
+    }
+  })
+
+  public createUpvote = action((
+    level: number,
+    proposal_hash: string,
+    baker: string,
+    alias: string | undefined,
+    voting_power: string,
+    transaction_hash: string,
+    contract_address: string,
+    contract_period_index: number,
+    addToProposal: boolean = true
+  ): void => {
+    const newUpvote: Upvote = {
+      level: level,
+      time: new Date().toISOString(),
+      proposal_hash: proposal_hash,
+      baker: baker,
+      alias: alias,
+      voting_power: parseInt(voting_power),
+      transaction_hash: transaction_hash,
+      contract_address: contract_address,
+      contract_period_index: contract_period_index,
+    };
+    const details = this.periodDetails[contract_address]?.[contract_period_index];
+    if (details) {
+      if (!details.upvotes) details.upvotes = observable.array([]);
+      details.upvotes.push(newUpvote);
+    }
+    if (!addToProposal) return;
+
+    details.proposals?.forEach(proposal => {
+      if (proposal.proposal_hash === proposal_hash) {
+        proposal.upvotes = (BigInt(proposal.upvotes) + BigInt(voting_power)).toString();
+      }
+    });
+
+  })
+
 }
 
 export const contractStore = new ContractStore();

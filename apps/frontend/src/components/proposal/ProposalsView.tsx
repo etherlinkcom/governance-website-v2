@@ -5,8 +5,8 @@ import {UpvotersTable} from '@/components/proposal/UpvotersTable';
 
 
 interface ProposalsViewProps {
-  contractVotingIndex?: number;
-  contractAddress?: string;
+  contractVotingIndex: number;
+  contractAddress: string;
   isCurrentPeriod?: boolean;
 }
 

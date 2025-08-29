@@ -1,22 +1,13 @@
-import {
-  Box,
-  Typography,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-} from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import { ComponentLoading } from "@/components/shared/ComponentLoading";
 import { ProposalCard } from "@/components/proposal/ProposalCard";
 import { getProposalQuorumPercent } from "@/lib/votingCalculations";
-import { Proposal } from "@trilitech/types";
 import { VotingProgress } from "@/components/shared/VotingProgress";
 import { contractStore } from "@/stores/ContractStore";
 import { getWalletStore } from "@/stores/WalletStore";
-import { useState } from "react";
+import { FrontendProposal } from "@/types/api";
+import { SubmitProposalButton } from "../period/SubmitProposalModal";
 
 const ProposalsListSkeleton = () => (
   <Box>
@@ -39,16 +30,12 @@ const ProposalsListSkeleton = () => (
 );
 
 interface ProposalsListProps {
-  contractVotingIndex?: number;
-  contractAddress?: string;
+  contractVotingIndex: number;
+  contractAddress: string;
   isCurrentPeriod?: boolean;
 }
 
-export const ProposalsList = observer(
-  ({ contractVotingIndex, contractAddress }: ProposalsListProps) => {
-    const [submitModalOpen, setSubmitModalOpen] = useState(false);
-    const [proposalText, setProposalText] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
+export const ProposalsList = observer(({ contractVotingIndex, contractAddress }: ProposalsListProps) => {
     const walletStore = getWalletStore();
 
     const {
@@ -61,26 +48,6 @@ export const ProposalsList = observer(
     } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
 
     const isCurrentPeriod = proposalsPeriodData?.period_class === "current";
-
-    const handleSubmitProposal = async () => {
-      if (!contractAddress || !proposalText.trim() || !walletStore) return;
-
-      setIsSubmitting(true);
-      try {
-        const opHash = await walletStore.submitProposal(
-          contractAddress,
-          proposalText
-        );
-        if (opHash) {
-          setSubmitModalOpen(false);
-          setProposalText("");
-        }
-      } catch (error) {
-        console.error("Error submitting proposal:", error);
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
 
     if (!hasValidParams) {
       return (
@@ -110,8 +77,8 @@ export const ProposalsList = observer(
     }
 
     const totalProposalUpvotes = proposals
-      .map((e: Proposal) => e.upvotes)
-      .reduce((a: number, b: number) => a + b, 0);
+      .map((e: FrontendProposal) => BigInt(e.upvotes))
+      .reduce((a: bigint, b: bigint) => a + b, BigInt(0));
     const quorumPercent = Number(
       getProposalQuorumPercent(
         totalProposalUpvotes,
@@ -136,13 +103,11 @@ export const ProposalsList = observer(
         >
           <Box>
             {isCurrentPeriod && walletStore?.hasVotingPower && (
-              <Button
-                variant="contained"
-                onClick={() => setSubmitModalOpen(true)}
-                sx={{ mb: { xs: 2, sm: 0 } }}
-              >
-                Submit Proposal
-              </Button>
+              <SubmitProposalButton
+                contractAddress={contractAddress}
+                governanceType={contractAndConfig!.governance_type}
+                contractVotingIndex={contractVotingIndex}
+              />
             )}
           </Box>
           <Box
@@ -160,40 +125,6 @@ export const ProposalsList = observer(
           </Box>
         </Box>
 
-        <Dialog
-          open={submitModalOpen}
-          onClose={() => setSubmitModalOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>Submit New Proposal</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Proposal"
-              type="text"
-              fullWidth
-              multiline
-              rows={4}
-              value={proposalText}
-              onChange={(e) => setProposalText(e.target.value)}
-              placeholder="Enter your proposal details..."
-              variant="outlined"
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setSubmitModalOpen(false)}>Cancel</Button>
-            <Button
-              onClick={handleSubmitProposal}
-              variant="contained"
-              disabled={!proposalText.trim() || isSubmitting}
-            >
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </Button>
-          </DialogActions>
-        </Dialog>
-
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {proposals.length > 0 ? (
             proposals.map((proposal, i) => (
@@ -202,6 +133,7 @@ export const ProposalsList = observer(
                 proposal={proposal}
                 contractAddress={contractAddress}
                 isCurrentPeriod={isCurrentPeriod}
+                contractVotingIndex={contractVotingIndex}
               />
             ))
           ) : (

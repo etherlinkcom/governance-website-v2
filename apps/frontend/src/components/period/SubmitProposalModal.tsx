@@ -5,18 +5,22 @@ import {
   Button,
   TextField,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import { useState } from "react";
 import type { GovernanceType } from "@trilitech/types";
-import { getWalletStore } from "@/stores/WalletStore";
+import { getWalletStore, OperationResult } from "@/stores/WalletStore";
 import { observer } from "mobx-react-lite";
+import { contractStore } from "@/stores/ContractStore";
 
 interface SubmitProposalButtonProps {
   contractAddress: string;
-  governanceType?: GovernanceType;
+  governanceType: GovernanceType;
+  contractVotingIndex: number;
 }
 
-export const SubmitProposalButton = observer(({ contractAddress, governanceType }: SubmitProposalButtonProps) => {
+export const SubmitProposalButton = observer(({ contractAddress, governanceType, contractVotingIndex }: SubmitProposalButtonProps) => {
+
     const [modalOpen, setModalOpen] = useState(false);
     const [proposalText, setProposalText] = useState("");
     const [poolAddress, setPoolAddress] = useState("");
@@ -55,6 +59,11 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
     };
 
     const handleSubmitProposal = async () => {
+      let level: number = 0;
+      let opHash: string = '';
+      let proposalHash: string = '';
+      let completed: boolean = false;
+
       if (isSequencer) {
 
         if (poolAddress.trim() === "" || sequencerPublicKey.trim() === "") {
@@ -64,17 +73,46 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
 
         if (getPoolAddressError(poolAddress) || getSequencerPublicKeyError(sequencerPublicKey)) return;
 
-        await walletStore?.submitSequencerProposal(
+        const result: OperationResult | undefined = await walletStore?.submitSequencerProposal(
           contractAddress,
           poolAddress.trim(),
           sequencerPublicKey.trim()
         );
+        if (result) {
+          opHash = result.opHash;
+          level = result.level || 0;
+          completed = result.completed || false
+        }
+
+        proposalHash = JSON.stringify({
+          sequencer_pk: sequencerPublicKey.trim(),
+          pool_address: poolAddress.trim(),
+        });
 
       } else {
         if (getBytesError(proposalText)) return;
-        await walletStore?.submitProposal(contractAddress, proposalText.trim());
+        const result: OperationResult | undefined = await walletStore?.submitProposal(
+          contractAddress, proposalText.trim()
+        );
+        if (result) {
+          opHash = result.opHash;
+          level = result.level || 0;
+          completed = result.completed || false
+        }
+        proposalHash = proposalText.trim();
       }
 
+      if (!completed) return;
+      contractStore.createProposal(
+        contractVotingIndex,
+        level,
+        proposalHash,
+        opHash,
+        walletStore?.address || "",
+        walletStore?.alias,
+        contractAddress,
+        walletStore?.votingPowerAmount || "0",
+      )
       handleClose();
     };
 
@@ -107,8 +145,8 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
       <>
       {
         walletStore?.hasVotingPower && (
-        <Button variant="contained" onClick={() => setModalOpen(true)}>
-          {isSubmitting ? "Submitting..." : "Submit Proposal"}
+        <Button variant="contained" onClick={() => setModalOpen(true)}  sx={{minWidth: 108}}>
+          Submit Proposal
         </Button>
         )
       }
@@ -142,6 +180,11 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
                         ? poolAddressError
                         : "Pool address must be 40 characters"
                     }
+                      onKeyDown={e => {
+                        if (e.key === "Enter" && isFormValid && !isSubmitting) {
+                          handleSubmitProposal();
+                        }
+                      }}
                   />
                   <TextField
                     fullWidth
@@ -154,6 +197,11 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
                         ? sequencerPublicKeyError
                         : "Base58Check encoded, 54-55 chars, starts with edpk/sppk/p2pk"
                     }
+                      onKeyDown={e => {
+                      if (e.key === "Enter" && isFormValid && !isSubmitting) {
+                        handleSubmitProposal();
+                      }
+                    }}
                   />
                 </>
               ) : (
@@ -169,6 +217,11 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
                       ? bytesError
                       : "Enter hex bytes (0-9, a-f), >66 chars, even length"
                   }
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && isFormValid && !isSubmitting) {
+                        handleSubmitProposal();
+                      }
+                    }}
                 />
               )}
 
@@ -179,7 +232,7 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType 
                 disabled={!isFormValid || isSubmitting}
                 fullWidth
               >
-                {isSubmitting ? "Submitting..." : "Submit"}
+                {isSubmitting ? <CircularProgress size="20px" color="success" /> : "Submit"}
               </Button>
             </Box>
           </DialogContent>

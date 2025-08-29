@@ -21,6 +21,24 @@ export type ContractConfig = {
     promotion_supermajority: string;
 };
 
+export type PromotionContext = {
+    voters: number;
+    nay_voting_power: string;
+    winner_candidate: string;
+    yea_voting_power: string;
+    pass_voting_power: string;
+    total_voting_power: string;
+}
+
+export type ProposalContext = {
+    proposals: number;
+    winner_candidate: string | null;
+    total_voting_power: string;
+    upvoters_proposals: number;
+    upvoters_upvotes_count: number;
+    max_upvotes_voting_power: string | null;
+}
+
 export type TzktContractStorage = {
   config: ContractConfig;
   metadata: number;
@@ -30,22 +48,8 @@ export type TzktContractStorage = {
   };
   voting_context: {
     period: {
-      proposal?: {
-        proposals: number;
-        winner_candidate: string | null;
-        total_voting_power: string;
-        upvoters_proposals: number;
-        upvoters_upvotes_count: number;
-        max_upvotes_voting_power: string | null;
-      };
-      promotion?: {
-        voters: number;
-        nay_voting_power: string;
-        winner_candidate: string;
-        yea_voting_power: string;
-        pass_voting_power: string;
-        total_voting_power: string;
-      };
+      proposal?: ProposalContext;
+      promotion?: PromotionContext;
     };
     period_index: string;
   };
@@ -96,7 +100,11 @@ export type TzktContractStorageHistory = {
   };
 };
 
-
+export interface OperationsPayload {
+  type: number;
+  state: number;
+  data?: TzktTransactionEvent[];
+}
 export interface TzktTransactionEvent {
   type: string;
   id: number;
@@ -168,3 +176,33 @@ export interface Voter {
   alias?: string;
   votingPower: number;
 }
+
+export type TzktApiHead = {
+  type: 1;
+  data: {
+    chain: 'mainnet';
+    chainId: string;
+    cycle: number;
+    level: number;
+    hash: string;
+    protocol: string;
+    nextProtocol: string;
+    timestamp: string; // ISO date string
+    votingEpoch: number;
+    votingPeriod: number;
+    knownLevel: number;
+    lastSync: string; // ISO date string
+    synced: boolean;
+    quoteLevel: number;
+    quoteBtc: number;
+    quoteEur: number;
+    quoteUsd: number;
+    quoteCny: number;
+    quoteJpy: number;
+    quoteKrw: number;
+    quoteEth: number;
+    quoteGbp: number;
+  };
+  state: number;
+};
+

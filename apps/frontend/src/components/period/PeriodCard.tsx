@@ -31,8 +31,7 @@ export const PeriodCard = observer(({ period }: PeriodCardProps) => {
   const isCurrentPeriod = period.period_class === "current";
   const isFuture = period.period_class === "future";
 
-  const hasProposals =
-    period.proposal_hashes && period.proposal_hashes.length > 0;
+  const hasProposals = period.proposal_hashes && period.proposal_hashes.length > 0;
   const hasPromotion = period.promotion_hash;
 
   const { proposals, promotions, contractAndConfig, isLoading } =
@@ -155,7 +154,8 @@ export const PeriodCard = observer(({ period }: PeriodCardProps) => {
             <Box onClick={(e) => e.stopPropagation()}>
               <SubmitProposalButton
                 contractAddress={period.contract_address}
-                governanceType={contractAndConfig?.governance_type}
+                governanceType={contractAndConfig!.governance_type}
+                contractVotingIndex={period.contract_voting_index}
               />
             </Box>
           )}
