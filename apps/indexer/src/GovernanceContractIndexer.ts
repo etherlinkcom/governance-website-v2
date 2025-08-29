@@ -280,56 +280,62 @@ export class GovernanceContractIndexer {
         if (!contract_and_config.active) return;
 
         logger.info(`[GovernanceContractIndexer] checkCurrentPromotion(${contract_and_config.contract_address})`);
-        const contract: TaquitoContract = await this.tezos.contract.at(contract_and_config.contract_address);
-        const view = contract.contractViews.get_voting_state();
-        const period_view = await view.executeView({ viewCaller: contract_and_config.contract_address });
+        try {
 
-        if (!period_view.period_type.promotion) return;
+            const contract: TaquitoContract = await this.tezos.contract.at(contract_and_config.contract_address);
+            const view = contract.contractViews.get_voting_state();
+            const period_view = await view.executeView({ viewCaller: contract_and_config.contract_address });
 
-        logger.info(`[GovernanceContractIndexer] Current period is not promotion. Getting head level.`);
-        const head: number = await this.fetchJson<number>(`${this.tzkt_api_url}/blocks/count`);
-        const storage: TzktContractStorage = await this.getContractStorageAtLevel(
-            contract_and_config.contract_address, head
-        )
-        const period_index: number = period_view.period_index.toNumber();
-        const voting_context_period = storage.voting_context.period;
-        const winning_candidate: string | undefined | null = voting_context_period.proposal?.winner_candidate ?
-            voting_context_period.proposal.winner_candidate : voting_context_period.promotion?.winner_candidate;
+            if (!period_view.period_type.promotion) return;
 
-        if (!winning_candidate) return;
-        const promotion: Promotion = {
-            proposal_hash: winning_candidate,
-            contract_period_index: period_index,
-            contract_address: contract_and_config.contract_address,
-            yea_voting_power: 0,
-            nay_voting_power: 0,
-            pass_voting_power: 0,
-            total_voting_power: 0
-        }
+            logger.info(`[GovernanceContractIndexer] Current period is not promotion. Getting head level.`);
+            const head: number = await this.fetchJson<number>(`${this.tzkt_api_url}/blocks/count`);
+            const storage: TzktContractStorage = await this.getContractStorageAtLevel(
+                contract_and_config.contract_address, head
+            )
+            const period_index: number = period_view.period_index.toNumber();
+            const voting_context_period = storage.voting_context.period;
+            const winning_candidate: string | undefined | null = voting_context_period.proposal?.winner_candidate ?
+                voting_context_period.proposal.winner_candidate : voting_context_period.promotion?.winner_candidate;
+
+            if (!winning_candidate) return;
+            const promotion: Promotion = {
+                proposal_hash: winning_candidate,
+                contract_period_index: period_index,
+                contract_address: contract_and_config.contract_address,
+                yea_voting_power: 0,
+                nay_voting_power: 0,
+                pass_voting_power: 0,
+                total_voting_power: 0
+            }
 
 
-        if (periods[period_index]) {
-            periods[period_index].promotion_hash = winning_candidate;
+            if (periods[period_index]) {
+                periods[period_index].promotion_hash = winning_candidate;
+                return {periods, promotion}
+            }
+
+            const level_start: number = contract_and_config.started_at_level + ((period_index - 1) * contract_and_config.period_length);
+            const level_end: number = contract_and_config.started_at_level + ((period_index) * contract_and_config.period_length) - 1;
+            const start_date: Date = await this.getDateFromLevel(level_start);
+            const end_date: Date = await this.getDateFromLevel(level_end);
+
+            const new_period: Period = {
+                contract_voting_index: period_index,
+                contract_address: contract_and_config.contract_address,
+                level_start: level_start,
+                level_end: level_end,
+                date_start: start_date,
+                date_end: end_date,
+                promotion_hash: period_view.period_index.toNumber(),
+                total_voting_power: 0,
+            };
+            periods[period_index] = new_period;
             return {periods, promotion}
+        } catch (error) {
+            logger.error(`[GovernanceContractIndexer] Error checking current promotion for contract ${contract_and_config.contract_address}: ${error}`);
+            return;
         }
-
-        const level_start: number = contract_and_config.started_at_level + ((period_index - 1) * contract_and_config.period_length);
-        const level_end: number = contract_and_config.started_at_level + ((period_index) * contract_and_config.period_length) - 1;
-        const start_date: Date = await this.getDateFromLevel(level_start);
-        const end_date: Date = await this.getDateFromLevel(level_end);
-
-        const new_period: Period = {
-            contract_voting_index: period_index,
-            contract_address: contract_and_config.contract_address,
-            level_start: level_start,
-            level_end: level_end,
-            date_start: start_date,
-            date_end: end_date,
-            promotion_hash: period_view.period_index.toNumber(),
-            total_voting_power: 0,
-        };
-        periods[period_index] = new_period;
-        return {periods, promotion}
     }
 
     private async createProposalsPromotionsVotesAndUpvotes(
