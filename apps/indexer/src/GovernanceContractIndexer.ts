@@ -286,7 +286,8 @@ export class GovernanceContractIndexer {
 
         if (!period_view.period_type.promotion) return;
 
-        const head: number = await this.tezos.rpc.getBlockHeader().then(header => header.level);
+        logger.info(`[GovernanceContractIndexer] Current period is not promotion. Getting head level.`);
+        const head: number = await this.fetchJson<number>(`${this.tzkt_api_url}/blocks/count`);
         const storage: TzktContractStorage = await this.getContractStorageAtLevel(
             contract_and_config.contract_address, head
         )
