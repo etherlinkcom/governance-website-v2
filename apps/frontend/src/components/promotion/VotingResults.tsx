@@ -26,11 +26,11 @@ export const VotingResults = observer(({ contractVotingIndex, contractAddress }:
   const { votes, promotions, isLoading, error, hasValidParams } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
 
   if (!hasValidParams) {
-    return (
+   return (
       <Box sx={{ mb: 2 }}>
         <Card>
           <CardContent>
-            <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+            <Box sx={{ textAlign: 'center', color: 'text.secondary', mt:1 }}>
               No voting results available.
             </Box>
           </CardContent>
@@ -55,19 +55,6 @@ export const VotingResults = observer(({ contractVotingIndex, contractAddress }:
     );
   }
 
-  if (!votes || votes.length === 0) {
-    return (
-      <Box sx={{ mb: 2 }}>
-        <Card>
-          <CardContent>
-            <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
-              No voting results available.
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
-    );
-  }
 
   const promotion: Promotion = promotions[0];
   const yeaVotes = promotion.yea_voting_power || 0;

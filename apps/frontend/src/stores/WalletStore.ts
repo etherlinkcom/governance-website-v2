@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { Contract, TezosToolkit, TransactionWalletOperation } from '@taquito/taquito';
+import { Contract, Operation, TezosToolkit, TransactionWalletOperation } from '@taquito/taquito';
 import { BeaconWallet } from '@taquito/beacon-wallet';
 import { ColorMode, NetworkType, TezosOperation } from '@airgap/beacon-types';
 import BigNumber from 'bignumber.js';
@@ -13,6 +13,12 @@ import { fetchJson } from '@/lib/fetchJson';
 export type VotingPower = {
   votingAmount: BigNumber | null;
   votingPercent?: BigNumber | null;
+}
+
+export type OperationResult = {
+  opHash: string;
+  level?: number;
+  completed?: boolean
 }
 
 export class WalletStore {
@@ -203,7 +209,7 @@ export class WalletStore {
     }
   }
 
-  async vote(contractAddress: string, voteType: VoteOption): Promise<{opHash: string, level?: number} | undefined> {
+  async vote(contractAddress: string, voteType: VoteOption): Promise<OperationResult | undefined> {
     if (this.voting) return;
     this.voting = true;
     try {
@@ -211,7 +217,7 @@ export class WalletStore {
       const operation = await contract.methodsObject.vote(voteType).send();
       const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
       toast.success(`Successfully voted ${voteType}`);
-      return { opHash: operation.opHash, level: confirmation?.block.header.level };
+      return { opHash: operation.opHash, level: confirmation?.block.header.level, completed: confirmation?.completed };
     } catch (error) {
       toast.error(`Error voting`);
       console.error(`Error voting ${voteType} for ${contractAddress}: ${error}`);
@@ -220,7 +226,7 @@ export class WalletStore {
     }
   }
 
-  async upvoteProposal(contractAddress: string, proposal: string): Promise<{opHash: string, level?: number} | undefined> {
+  async upvoteProposal(contractAddress: string, proposal: string): Promise<OperationResult | undefined> {
     if (this.voting) return;
     this.voting = true;
     try {
@@ -240,7 +246,7 @@ export class WalletStore {
       const operation = await contract.methodsObject.upvote_proposal(sequencerProposal ?? proposal).send();
       const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
       toast.success(`Successfully upvoted proposal`);
-      return { opHash: operation.opHash, level: confirmation?.block.header.level };
+      return { opHash: operation.opHash, level: confirmation?.block.header.level, completed: confirmation?.completed };
     } catch (error) {
       toast.error(`Error upvoting proposal`);
       console.error(`Error upvoting proposal for ${contractAddress}: ${error}`);
@@ -253,7 +259,7 @@ export class WalletStore {
     contractAddress: string,
     poolAddress: string,
     sequencerPublicKey: string
-  ): Promise<{opHash: string, level?: number} | undefined> {
+  ): Promise<OperationResult | undefined> {
     if (this.voting) return;
     this.voting = true;
     try {
@@ -266,7 +272,7 @@ export class WalletStore {
 
       const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
       toast.success(`Submitted proposal`);
-      return { opHash: operation.opHash, level: confirmation?.block.header.level };
+      return { opHash: operation.opHash, level: confirmation?.block.header.level, completed: confirmation?.completed };
 
     } catch (error) {
       toast.error(`Error submitting sequencer proposal`);
@@ -276,7 +282,7 @@ export class WalletStore {
     }
   }
 
-  async submitProposal(contractAddress: string, proposal: string): Promise<{opHash: string, level?: number} | undefined> {
+  async submitProposal(contractAddress: string, proposal: string): Promise<OperationResult | undefined> {
     if (this.voting) return;
     this.voting = true;
     try {
@@ -285,7 +291,7 @@ export class WalletStore {
       const operation: TransactionWalletOperation = await contract.methodsObject.new_proposal(proposal).send();
       const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
       toast.success(`Submitted proposal`);
-      return { opHash: operation.opHash, level: confirmation?.block.header.level };
+      return { opHash: operation.opHash, level: confirmation?.block.header.level, completed: confirmation?.completed };
 
     } catch (error) {
       toast.error(`Error submitting proposal`);

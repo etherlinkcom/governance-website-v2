@@ -6,11 +6,10 @@ import {
   TextField,
   Box,
   CircularProgress,
-  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 import type { GovernanceType } from "@trilitech/types";
-import { getWalletStore } from "@/stores/WalletStore";
+import { getWalletStore, OperationResult } from "@/stores/WalletStore";
 import { observer } from "mobx-react-lite";
 import { contractStore } from "@/stores/ContractStore";
 
@@ -21,7 +20,6 @@ interface SubmitProposalButtonProps {
 }
 
 export const SubmitProposalButton = observer(({ contractAddress, governanceType, contractVotingIndex }: SubmitProposalButtonProps) => {
-    const theme = useTheme();
 
     const [modalOpen, setModalOpen] = useState(false);
     const [proposalText, setProposalText] = useState("");
@@ -61,9 +59,10 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
     };
 
     const handleSubmitProposal = async () => {
-      let _level: number | undefined = undefined;
-      let _opHash: string = '';
+      let level: number = 0;
+      let opHash: string = '';
       let proposalHash: string = '';
+      let completed: boolean = false;
 
       if (isSequencer) {
 
@@ -74,14 +73,15 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
 
         if (getPoolAddressError(poolAddress) || getSequencerPublicKeyError(sequencerPublicKey)) return;
 
-        const result: {opHash: string, level?: number} | undefined = await walletStore?.submitSequencerProposal(
+        const result: OperationResult | undefined = await walletStore?.submitSequencerProposal(
           contractAddress,
           poolAddress.trim(),
           sequencerPublicKey.trim()
         );
         if (result) {
-          _opHash = result.opHash;
-          _level = result.level || 0;
+          opHash = result.opHash;
+          level = result.level || 0;
+          completed = result.completed || false
         }
 
         proposalHash = JSON.stringify({
@@ -91,19 +91,21 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
 
       } else {
         if (getBytesError(proposalText)) return;
-        const result: {opHash: string, level?: number} | undefined = await walletStore?.submitProposal(contractAddress, proposalText.trim());
+        const result: OperationResult | undefined = await walletStore?.submitProposal(contractAddress, proposalText.trim());
         if (result) {
-          _opHash = result.opHash;
-          _level = result.level || 0;
+          opHash = result.opHash;
+          level = result.level || 0;
+          completed = result.completed || false
         }
         proposalHash = proposalText.trim();
       }
 
+      if (!completed) return;
       contractStore.createProposal(
         contractVotingIndex,
-        _level || 0,
+        level,
         proposalText,
-        _opHash,
+        opHash,
         walletStore?.address || "",
         walletStore?.alias,
         contractAddress,

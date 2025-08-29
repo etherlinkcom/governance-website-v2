@@ -15,7 +15,7 @@ import {
 import { CandidateInfo } from "@/components/promotion/CandidateInfo";
 import { VotingResults } from "@/components/promotion/VotingResults";
 import { VotersTable } from "@/components/promotion/VotersTable";
-import { getWalletStore } from "@/stores/WalletStore";
+import { getWalletStore, OperationResult } from "@/stores/WalletStore";
 import { useState } from "react";
 import { VoteOption } from "@trilitech/types";
 import { observer } from "mobx-react-lite";
@@ -43,26 +43,23 @@ export const PromotionView = observer(({
     if (!contractAddress || !walletStore) return;
 
     try {
-      let level: number | undefined;
-      let opHash: string = '';
-      const operation: { level?: number; opHash: string } | undefined = await walletStore.vote(contractAddress, selectedVote);
-      if (operation) {
-        setVoteModalOpen(false);
-        level = operation.level;
-        opHash = operation.opHash;
-        console.log("Vote submitted successfully:", opHash);
-      }
+      const operation: OperationResult | undefined = await walletStore.vote(contractAddress, selectedVote);
+
+      if (!operation?.completed) return;
+
       contractStore.createVote(
         promotionHash || "",
         walletStore.address || "",
         walletStore.alias,
         walletStore.votingPowerAmount,
         selectedVote,
-        level || 0,
-        opHash || "",
+        operation?.level || 0,
+        operation?.opHash || '',
         contractAddress,
         contractVotingIndex
       )
+
+      setVoteModalOpen(false);
     } catch (error) {
       console.error("Error submitting vote:", error);
     }

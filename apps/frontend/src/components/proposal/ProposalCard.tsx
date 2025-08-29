@@ -4,7 +4,7 @@ import { HashDisplay } from "@/components/shared/HashDisplay";
 import { formatNumber } from "@/lib/formatNumber";
 import { HashLink } from "@/components/shared/HashLink";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
-import { getWalletStore } from "@/stores/WalletStore";
+import { getWalletStore, OperationResult } from "@/stores/WalletStore";
 import { FrontendProposal } from "@/types/api";
 import { contractStore } from "@/stores/ContractStore";
 import { observer } from "mobx-react-lite";
@@ -24,14 +24,16 @@ export const ProposalCard = observer(({ proposal, contractAddress, isCurrentPeri
     if (!contractAddress || !walletStore) return;
 
     try {
-      const result: { opHash: string, level?: number } | undefined = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
+      const operation: OperationResult | undefined = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
+
+      if (!operation?.completed) return;
       contractStore.createUpvote(
-        result?.level || 0,
+        operation?.level || 0,
         proposal.proposal_hash,
         walletStore.address || '',
         walletStore.alias,
         walletStore.votingPowerAmount,
-        result?.opHash || '',
+        operation?.opHash || '',
         contractAddress,
         contractVotingIndex
       );
