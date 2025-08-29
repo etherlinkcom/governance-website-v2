@@ -1,6 +1,5 @@
 import { formatDate } from "@/lib/formatDate";
-import { Card, CardContent, Box, Typography, Link, Button, Chip } from "@mui/material";
-import { Proposal } from "@trilitech/types";
+import { Card, CardContent, Box, Typography, Link, Button, Chip, CircularProgress } from "@mui/material";
 import { HashDisplay } from "@/components/shared/HashDisplay";
 import { formatNumber } from "@/lib/formatNumber";
 import { HashLink } from "@/components/shared/HashLink";
@@ -96,9 +95,9 @@ export const ProposalCard = observer(({ proposal, contractAddress, isCurrentPeri
                 size="small"
                 onClick={handleUpvote}
                 disabled={isUpvoting}
-                sx={{ mt: 1 }}
+                sx={{ mt: 1, minWidth: 97 }}
               >
-                {isUpvoting ? 'Upvoting...' : 'Upvote'}
+                {isUpvoting ? <CircularProgress size="20px" sx={{color: theme => theme.palette.primary.main}} /> : 'Upvote'}
               </Button>
             )}
           </Box>

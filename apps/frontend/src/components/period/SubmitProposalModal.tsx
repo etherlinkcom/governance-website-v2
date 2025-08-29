@@ -5,6 +5,8 @@ import {
   Button,
   TextField,
   Box,
+  CircularProgress,
+  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 import type { GovernanceType } from "@trilitech/types";
@@ -19,6 +21,8 @@ interface SubmitProposalButtonProps {
 }
 
 export const SubmitProposalButton = observer(({ contractAddress, governanceType, contractVotingIndex }: SubmitProposalButtonProps) => {
+    const theme = useTheme();
+
     const [modalOpen, setModalOpen] = useState(false);
     const [proposalText, setProposalText] = useState("");
     const [poolAddress, setPoolAddress] = useState("");
@@ -137,8 +141,8 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
       <>
       {
         walletStore?.hasVotingPower && (
-        <Button variant="contained" onClick={() => setModalOpen(true)}>
-          {isSubmitting ? "Submitting..." : "Submit Proposal"}
+        <Button variant="contained" onClick={() => setModalOpen(true)}  sx={{minWidth: 108}}>
+          Submit Proposal
         </Button>
         )
       }
@@ -224,7 +228,7 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
                 disabled={!isFormValid || isSubmitting}
                 fullWidth
               >
-                {isSubmitting ? "Submitting..." : "Submit"}
+                {isSubmitting ? <CircularProgress size="20px" color="success" /> : "Submit"}
               </Button>
             </Box>
           </DialogContent>

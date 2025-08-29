@@ -10,6 +10,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  CircularProgress,
 } from "@mui/material";
 import { CandidateInfo } from "@/components/promotion/CandidateInfo";
 import { VotingResults } from "@/components/promotion/VotingResults";
@@ -134,8 +135,8 @@ export const PromotionView = observer(({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setVoteModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleVote} variant="contained" disabled={isVoting}>
-            {isVoting ? "Submitting Vote..." : "Submit Vote"}
+          <Button onClick={handleVote} variant="contained" disabled={isVoting} sx={{ minWidth: 128 }}>
+            {isVoting ? <CircularProgress size="20px" sx={{color: theme => theme.palette.custom.tableBg.even}} /> : "Submit Vote"}
           </Button>
         </DialogActions>
       </Dialog>
