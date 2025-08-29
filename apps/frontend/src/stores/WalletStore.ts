@@ -268,7 +268,7 @@ export class WalletStore {
       const operation = await contract.methodsObject.new_proposal({
         sequencer_pk:sequencerPublicKey,
         pool_address: poolAddress,
-    }).send();
+      }).send();
 
       const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
       toast.success(`Submitted proposal`);

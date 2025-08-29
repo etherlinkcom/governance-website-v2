@@ -91,7 +91,9 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
 
       } else {
         if (getBytesError(proposalText)) return;
-        const result: OperationResult | undefined = await walletStore?.submitProposal(contractAddress, proposalText.trim());
+        const result: OperationResult | undefined = await walletStore?.submitProposal(
+          contractAddress, proposalText.trim()
+        );
         if (result) {
           opHash = result.opHash;
           level = result.level || 0;
@@ -104,7 +106,7 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
       contractStore.createProposal(
         contractVotingIndex,
         level,
-        proposalText,
+        proposalHash,
         opHash,
         walletStore?.address || "",
         walletStore?.alias,
