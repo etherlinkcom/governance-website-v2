@@ -8,16 +8,15 @@ import {
   Link,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Proposal } from "@trilitech/types";
 import { HashDisplay } from "@/components/shared/HashDisplay";
 import { formatNumber } from "@/lib/formatNumber";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { LearnMoreButton } from "../shared/LearnMoreButton";
 import { UpvotersTable } from "./UpvotersTable";
-import { defaultHead } from "next/head";
+import { FrontendProposal } from "@/types/api";
 
 interface ProposalCardProps {
-  proposal: Proposal;
+  proposal: FrontendProposal;
   defaultExpanded?: boolean;
 }
 
@@ -111,7 +110,7 @@ export const ProposalCard = ({ proposal, defaultExpanded }: ProposalCardProps) =
             <Box sx={{ textAlign: "right", flexShrink: 0 }}>
               <Typography variant="subtitle2">Upvotes:</Typography>
               <Typography variant="body1" sx={{ display: "block" }}>
-                {formatNumber(proposal.upvotes)}
+                {formatNumber(parseInt(proposal.upvotes))}
               </Typography>
             </Box>
           </Box>

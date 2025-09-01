@@ -1,9 +1,8 @@
 import { Box } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { FrontendPeriod } from "@/types/api";
+import { FrontendPeriod, FrontendProposal } from "@/types/api";
 import { contractStore } from "@/stores/ContractStore";
 import { ProposalCard } from "@/components/proposal/ProposalCard";
-import { Proposal } from "@trilitech/types";
 import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
 import { ProposalVotingStats } from "@/components/shared/VotingStats";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
@@ -57,7 +56,7 @@ export const ProposalView = observer(
             flexDirection: "column",
           }}
         >
-          {period.proposals?.map((proposal: Proposal, index: number) => (
+          {period.proposals?.map((proposal: FrontendProposal, index: number) => (
             <ProposalCard
               key={proposal.proposal_hash}
               proposal={proposal}
