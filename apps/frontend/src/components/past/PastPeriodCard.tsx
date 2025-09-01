@@ -1,9 +1,5 @@
 import { Card, Box, Modal } from '@mui/material';
 import { useState } from 'react';
-import { HashDisplay } from '@/components/shared/HashDisplay';
-import { HashLink } from '@/components/shared/HashLink';
-import { PayloadKey } from '@/data/proposalLinks';
-import { getLinkData } from '@/lib/getLinkData';
 import { contractStore } from '@/stores/ContractStore';
 import { observer } from 'mobx-react-lite';
 import { PeriodVotingStatsPanel } from '@/components/period/PeriodVotingStatsPanel';
@@ -31,12 +27,6 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
       setModalOpen(true);
     }
   };
-
-  const renderHash = (hash: PayloadKey) => {
-    const linkData = getLinkData(hash);
-    if (linkData) return <HashLink hash={hash} />;
-    return <HashDisplay hash={hash} />;
-  }
 
   return (
     <>
@@ -67,7 +57,6 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
               hasProposals={hasProposals}
               hasPromotion={hasPromotion}
               isLoading={isLoading}
-              renderHash={renderHash}
             />
           </Box>
       </Card>
