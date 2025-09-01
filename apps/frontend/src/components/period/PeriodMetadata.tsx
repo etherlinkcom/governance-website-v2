@@ -1,11 +1,14 @@
 import { Box, Typography } from "@mui/material";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
-import { JSX } from "react";
 import { formatDate } from "@/lib/formatDate";
 import { formatNumber } from "@/lib/formatNumber";
 import { ComponentLoading } from "@/components/shared/ComponentLoading";
 import { FrontendPeriod, FrontendProposal } from "@/types/api";
 import { observer } from "mobx-react-lite";
+import { HashDisplay } from "../shared/HashDisplay";
+import { getLinkData } from "@/lib/getLinkData";
+import { HashLink } from "../shared/HashLink";
+import { PayloadKey } from "@/data/proposalLinks";
 
 interface PeriodMetadataProps {
   period: FrontendPeriod;
@@ -13,7 +16,6 @@ interface PeriodMetadataProps {
   hasProposals?: boolean;
   hasPromotion?: string;
   isLoading?: boolean;
-  renderHash: (hash: string) => JSX.Element;
 }
 export const PeriodMetadata = observer(({
   period,
@@ -21,13 +23,21 @@ export const PeriodMetadata = observer(({
   hasProposals,
   hasPromotion,
   isLoading,
-  renderHash,
-}: PeriodMetadataProps) => (
-  <Box sx={{ flex: 1 }}>
-    <Typography
-      variant="subtitle2"
-      sx={{ display: { xs: "block", sm: "none" }, mb: 0 }}
-    >
+}: PeriodMetadataProps) => {
+
+  const renderHash = (hash: PayloadKey) => {
+    const linkData = getLinkData(hash);
+    if (linkData) return <HashLink hash={hash} />;
+    return <HashDisplay hash={hash} />;
+  }
+
+
+  return (
+    <Box sx={{ flex: 1 }}>
+      <Typography
+        variant="subtitle2"
+        sx={{ display: { xs: "block", sm: "none" }, mb: 0 }}
+      >
       {formatDate(period.startDateTime, false)} -{" "}
       {formatDate(period.endDateTime, false)}
     </Typography>
@@ -59,8 +69,9 @@ export const PeriodMetadata = observer(({
             <EllipsisBox
               sx={{
                 width: {
-                  xs: "100%",
+                  xs: "80vw",
                   md: "50vw",
+                  lg: "70%"
                 },
               }}
             >
@@ -93,9 +104,10 @@ export const PeriodMetadata = observer(({
         </Typography>
         <EllipsisBox
           sx={{
-            width: {
-              xs: "100%",
+            maxWidth: {
+              xs: "80vw",
               md: "50vw",
+              lg: "70%"
             },
           }}
         >
@@ -104,4 +116,4 @@ export const PeriodMetadata = observer(({
       </Box>
     )}
   </Box>
-));
+)});
