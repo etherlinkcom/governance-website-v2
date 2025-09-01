@@ -4,9 +4,9 @@ import { observer } from 'mobx-react-lite';
 import { Box, Button, Container, Typography } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
 import { GovernanceType } from '@trilitech/types';
-import { Current } from '@/components/views/Current';
-import { Past } from '@/components/views/Past';
-import { Future } from '@/components/views/Future';
+import { Current } from '@/components/current/Current';
+import { Past } from '@/components/past/Past';
+import { Future } from '@/components/future/Future';
 
 type ViewType = 'Current' | 'Past' | 'Upcoming';
 
