@@ -1,15 +1,15 @@
-import { Box, Typography, Chip } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
-import { Period } from "@trilitech/types";
 import { JSX } from "react";
 import { formatDate } from "@/lib/formatDate";
 import { formatNumber } from "@/lib/formatNumber";
 import { ComponentLoading } from "@/components/shared/ComponentLoading";
-import { FrontendPeriod } from "@/types/api";
+import { FrontendPeriod, FrontendProposal } from "@/types/api";
+import { observer } from "mobx-react-lite";
 
 interface PeriodMetadataProps {
   period: FrontendPeriod;
-  proposals?: Proposal[];
+  proposals?: FrontendProposal[];
   hasProposals?: boolean;
   hasPromotion?: string;
   isLoading?: boolean;
@@ -46,7 +46,7 @@ export const PeriodMetadata = observer(({
     {hasProposals && (
       <Box sx={{ mt: 2 }}>
         <Typography variant="subtitle2">Proposals:</Typography>
-        {period.proposals?.map((proposal: Proposal, index) => (
+        {period.proposals?.map((proposal: FrontendProposal, index) => (
           <Box
             key={index}
             sx={{

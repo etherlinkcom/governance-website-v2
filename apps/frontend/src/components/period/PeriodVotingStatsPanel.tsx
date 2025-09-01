@@ -4,14 +4,14 @@ import {
   ProposalVotingStats,
 } from "@/components/shared/VotingStats";
 import { ComponentLoading } from "@/components/shared/ComponentLoading";
-import { ContractAndConfig, Promotion, Proposal } from "@trilitech/types";
-import { FrontendPeriod } from "@/types/api";
+import { ContractAndConfig, Promotion } from "@trilitech/types";
+import { FrontendPeriod, FrontendProposal } from "@/types/api";
 
 interface PeriodVotingStatsPanelProps {
   hasPromotion?: string;
   hasProposals?: boolean;
   promotions?: Promotion[];
-  proposals?: Proposal[];
+  proposals?: FrontendProposal[];
   contractAndConfig: ContractAndConfig;
   isLoading: boolean;
   period: FrontendPeriod;

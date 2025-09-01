@@ -1,4 +1,4 @@
-import { AppBar, Typography, Box, useTheme } from "@mui/material";
+import { AppBar, Box, useTheme } from "@mui/material";
 import { Menu } from "@/components/header/Menu";
 import { observer } from "mobx-react-lite";
 import Image from "next/image";

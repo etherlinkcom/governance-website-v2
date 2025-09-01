@@ -265,7 +265,7 @@ export class Database {
             proposal_hash: row.proposal_hash,
             proposer: row.proposer || undefined,
             alias: row.alias || undefined,
-            upvotes: row.upvotes || 0,
+            upvotes: row.upvotes || 0, // TODO
             level: row.level,
             time: row.time,
             transaction_hash: row.transaction_hash,
