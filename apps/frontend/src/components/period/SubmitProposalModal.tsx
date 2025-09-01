@@ -103,16 +103,16 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
       }
 
       if (!completed) return;
-      contractStore.createProposal(
-        contractVotingIndex,
-        level,
-        proposalHash,
-        opHash,
-        walletStore?.address || "",
-        walletStore?.alias,
-        contractAddress,
-        walletStore?.votingPowerAmount || "0",
-      )
+      // contractStore.createProposal(
+      //   contractVotingIndex,
+      //   level,
+      //   proposalHash,
+      //   opHash,
+      //   walletStore?.address || "",
+      //   walletStore?.alias,
+      //   contractAddress,
+      //   walletStore?.votingPowerAmount || "0",
+      // )
       handleClose();
     };
 

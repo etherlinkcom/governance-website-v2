@@ -1,4 +1,4 @@
-import { Box, Card, Typography, useTheme } from '@mui/material';
+import { Box, Card, Typography } from '@mui/material';
 import { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ComponentLoading } from '@/components/shared/ComponentLoading';

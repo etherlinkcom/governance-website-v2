@@ -29,6 +29,10 @@ export interface PeriodData {
   contractAndConfig: ContractAndConfig | undefined;
 }
 
+export interface FrontendProposal extends Proposal {
+  upvotes: string;
+}
+
 export interface FrontendPeriod {
     startDateTime: Date;
     endDateTime: Date;
@@ -38,7 +42,7 @@ export interface FrontendPeriod {
     governance: string;
     contract_voting_index: number;
     totalVotingPower: number;
-    proposals?: Proposal[];
+    proposals?: FrontendProposal[];
     promotion?: Promotion;
 }
 
@@ -47,4 +51,12 @@ export interface FuturePeriod {
     endDateTime: Date;
     startLevel: number;
     endLevel: number
+}
+
+export interface TransactionOperationConfirmation {
+    block: BlockResponse;
+    expectedConfirmation: number;
+    currentConfirmation: number;
+    completed: boolean;
+    isInCurrentBranch: () => Promise<boolean>;
 }

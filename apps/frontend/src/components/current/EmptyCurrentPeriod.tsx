@@ -3,6 +3,7 @@ import { FrontendPeriod } from "@/types/api";
 import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
 import { getWalletStore } from "@/stores/WalletStore";
+import { SubmitProposalButton } from "../period/SubmitProposalModal";
 
 interface EmptyCurrentPeriodProps {
   currentPeriod: FrontendPeriod;
@@ -19,7 +20,6 @@ export const EmptyCurrentPeriod = ({
             await walletStore.connect();
             return;
         }
-        // await walletStore.submitProposal();
     }
 
   return (
@@ -43,6 +43,7 @@ export const EmptyCurrentPeriod = ({
         </Typography>
 
         <Box sx={{ display: "flex", justifyContent: "left" }}>
+          {/* TODO walletStore.address ?  Submit Proposal Button  : ConnectButton */}
           <Button
             variant="outlined"
             size="large"
