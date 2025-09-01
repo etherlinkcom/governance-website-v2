@@ -9,6 +9,7 @@ import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
 import { PromotionVotingStatsPanel } from "@/components/period/PeriodVotingStatsPanel";
 import { LearnMoreButton } from "@/components/shared/LearnMoreButton";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
+import { CopyButton } from "../shared/CopyButton";
 
 interface PromotionViewProps {
   period: FrontendPeriod;
@@ -41,7 +42,23 @@ export const PromotionView = observer(
             gap: { xs: 2, md: 0 },
           }}
         >
+          <Box>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              mb: 0.5
+            }}>
+              <Typography variant="body2">
+                Contract: {period.contract}
+              </Typography>
+            <CopyButton
+              text={period.contract}
+              message="Contract address copied"
+              sx={{color: 'primary.main'}}
+              />
+            </Box>
           <PeriodDateAndLevels period={period} />
+          </Box>
           <Box>
             {isCurrent && <TimeRemaining currentPeriod={period} />}
 

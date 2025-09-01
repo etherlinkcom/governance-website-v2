@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import { FrontendPeriod, FrontendProposal } from "@/types/api";
 import { contractStore } from "@/stores/ContractStore";
@@ -6,6 +6,7 @@ import { ProposalCard } from "@/components/proposal/ProposalCard";
 import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
 import { ProposalVotingStats } from "@/components/shared/VotingStats";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
+import { CopyButton } from "../shared/CopyButton";
 
 interface ProposalViewProps {
   period: FrontendPeriod;
@@ -36,7 +37,23 @@ export const ProposalView = observer(
             gap: { xs: 2, md: 0 },
           }}
         >
-          <PeriodDateAndLevels period={period} />
+          <Box>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              mb: 0.5
+            }}>
+              <Typography variant="body2">
+                Contract: {period.contract}
+              </Typography>
+            <CopyButton
+              text={period.contract}
+              message="Contract address copied"
+              sx={{color: 'primary.main'}}
+              />
+            </Box>
+            <PeriodDateAndLevels period={period} />
+          </Box>
           <Box>
             {isCurrent && <TimeRemaining currentPeriod={period} />}
 
