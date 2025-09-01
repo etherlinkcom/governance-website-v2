@@ -11,7 +11,7 @@ import { useState } from "react";
 import type { GovernanceType } from "@trilitech/types";
 import { getWalletStore, OperationResult } from "@/stores/WalletStore";
 import { observer } from "mobx-react-lite";
-import { contractStore } from "@/stores/ContractStore";
+// import { contractStore } from "@/stores/ContractStore";
 
 interface SubmitProposalButtonProps {
   contractAddress: string;
