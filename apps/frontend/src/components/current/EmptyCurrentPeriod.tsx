@@ -3,7 +3,7 @@ import { FrontendPeriod } from "@/types/api";
 import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
 import { getWalletStore } from "@/stores/WalletStore";
-import { SubmitProposalButton } from "../period/SubmitProposalModal";
+import { SubmitProposalButton } from "./SubmitProposalModal";
 
 interface EmptyCurrentPeriodProps {
   currentPeriod: FrontendPeriod;

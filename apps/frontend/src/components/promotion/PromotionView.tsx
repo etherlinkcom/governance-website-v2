@@ -6,7 +6,7 @@ import { VotersTable } from "@/components/promotion/VotersTable";
 import { HashDisplay } from "@/components/shared/HashDisplay";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
-import { PromotionVotingStatsPanel } from "@/components/period/PeriodVotingStatsPanel";
+import { PromotionVotingStatsPanel } from "@/components/promotion/PeriodVotingStatsPanel";
 import { LearnMoreButton } from "@/components/shared/LearnMoreButton";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
 import { CopyButton } from "../shared/CopyButton";
