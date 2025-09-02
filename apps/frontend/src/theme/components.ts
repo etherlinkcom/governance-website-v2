@@ -31,13 +31,22 @@ export const components: Components<Theme> = {
         },
       }),
       outlined: ({ theme }) => ({
-        backgroundColor: "transparent",
+        backgroundColor: theme.palette.custom.tableBg.odd,
         color: theme.palette.primary.main,
-        boxShadow: `0px 0px 3px 0px ${theme.palette.primary.main}`,
+        boxShadow: `0px 0px 6px 0px ${alpha(theme.palette.primary.dark, 0.4)}`,
         "&:hover": {
           backgroundColor: alpha(theme.palette.primary.main, 0.1),
           transform: "translateY(-1px)",
         },
+        "&.home-page-button":{
+          paddingTop: '13px',
+          paddingBottom: '13px',
+          color: theme.palette.primary.main,
+          fontSize: 16,
+          boxShadow: `0px 0px 6px 0px ${alpha(theme.palette.primary.dark, 0.4)}`,
+          fontWeight: 600,
+          border: 'none',
+        }
       }),
     },
   },
@@ -264,52 +273,6 @@ export const components: Components<Theme> = {
         width: "8px",
       },
     }),
-  },
-  MuiToggleButton: {
-    styleOverrides: {
-      root: ({ theme }) => ({
-        fontFamily: typography.fontFamily,
-        fontWeight: typography.button?.fontWeight,
-        fontSize: typography.button?.fontSize,
-        border: "none",
-        borderRadius: "50px",
-        padding: "10px 18px",
-        color: theme.palette.text.secondary,
-        backgroundColor: theme.palette.background.paper,
-        textTransform: "none",
-        position: "relative",
-        transition: "all 0.2s ease-in-out",
-        "&:hover": {
-          color: theme.palette.primary.main,
-          boxShadow: `0px 0px 3px 0px ${theme.palette.primary.main}`,
-        },
-        "&.Mui-selected": {
-          boxShadow: `0px 0px 3px 0px ${theme.palette.primary.main}`,
-          color: theme.palette.primary.main,
-          "&:hover": {
-            color: theme.palette.primary.main,
-          },
-        },
-      }),
-    },
-  },
-  MuiToggleButtonGroup: {
-    styleOverrides: {
-      root: {
-        gap: "16px",
-        border: "none",
-        "& .MuiToggleButtonGroup-grouped": {
-          border: "none",
-          "&:not(:first-of-type)": {
-            borderLeft: "none",
-            borderRadius: "50px",
-          },
-          "&:first-of-type": {
-            borderRadius: "50px",
-          },
-        },
-      },
-    },
   },
   MuiAppBar: {
     styleOverrides: {
