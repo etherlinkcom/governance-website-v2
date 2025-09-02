@@ -4,7 +4,7 @@ export const typography: TypographyVariantsOptions = {
   fontFamily: '"Inter Variable", sans-serif',
 
   h1: {
-    fontSize: '2rem',
+    fontSize: 36,
     fontWeight: 700,
     lineHeight: 1.2,
   },

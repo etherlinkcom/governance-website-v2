@@ -1,94 +1,150 @@
-import { Box, Typography, Button, Container, Stack, Link } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Container,
+  Stack,
+  Link,
+  useTheme,
+} from "@mui/material";
 
 export default function Home() {
+  const theme = useTheme();
   return (
     <Container maxWidth="lg">
+      <Box sx={{ display: 'flex', flexDirection: 'column', textAlign: { xs: "center", sm: "left" }, mb: 4 }}>
+
+        <Typography variant="h1">
+          Etherlink Governance
+        </Typography>
+        <Typography variant="body1">
+          Your vote. Your network. Propose improvements and participate in protocol upgrades.
+        </Typography>
+      </Box>
+
+
+
+
+
       <Box
         sx={{
           py: { xs: 4, sm: 6 },
           display: "flex",
           flexDirection: "column",
           gap: 4,
-          alignItems: { xs: "center", sm: "flex-start" },
+          alignItems: "flex-start",
           maxWidth: "800px",
           mx: "auto",
         }}
       >
-        <Typography variant="h1" component="h1">
-          Etherlink
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            width: "100%",
+          }}
+        >
+        <Typography
+          variant="h3"
+          component="h3"
+          sx={{ color: theme.palette.primary.main + " !important" }}
+        >
+          What is Etherlink governance?
         </Typography>
 
-        <Typography variant="body1">
-          Etherlink is an EVM-compatible, non-custodial Layer 2 blockchain
-          powered by <Link href="https://tezos.com/developers/smart-rollups/">Tezos Smart Rollup technology.</Link>{' '}
-          It enables seamless integration with existing Ethereum tools,
-          including wallets and indexers, and facilitates asset transfers
-          to and from other EVM-compatible chains.
-          </Typography>
-
-          <Typography variant="body1">
-          Built upon the secure foundation of Tezos layer 1, Etherlink delivers a
-          fast, fair, and (nearly) free experience. This permissionless and
-          censorship-resistant environment empowers developers to actively
-          create and participate in the next generation of decentralized applications.
-        </Typography>
-
-        <Typography variant="h2" component="h2">
-          Etherlink Governance
-        </Typography>
-
-        <Typography variant="body1">
+        <Typography variant="body1" sx={{ fontWeight: 300 }}>
           Like Tezos, Etherlink has a built-in on-chain mechanism for proposing,
           selecting, testing, and activating upgrades without the need to hard
           fork. This mechanism makes Etherlink self-amending and empowers Tezos
           bakers to govern Etherlink's kernel upgrades and sequencer operators.
         </Typography>
+        </Box>
 
-        <Typography variant="body1">
-          Etherlink has separate governance processes for slow kernel updates, for
-          fast kernel updates, and for the sequencer operator. To ensure that
-          decisions accurately reflect the consensus of the Etherlink community,
-          all three governance processes are designed with the same robust
-          safeguards. Like Tezos's governance process, Etherlink's governance
-          process promotes transparency and fairness in decision-making.
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            width: "100%",
+          }}
+        >
+        <Typography
+          variant="h3"
+          component="h3"
+          sx={{ color: theme.palette.primary.main + " !important" }}
+        >
+          How it Works
         </Typography>
 
-        <Typography variant="h3" component="h3">
-          Learn more
+        <Typography variant="body1" sx={{ fontWeight: 300 }}>
+          Etherlink has separate governance processes for slow kernel updates,
+          for fast kernel updates, and for the sequencer operator. To ensure
+          that decisions accurately reflect the consensus of the Etherlink
+          community, all three governance processes are designed with the same
+          robust safeguards. Like Tezos's governance process, Etherlink's
+          governance process promotes transparency and fairness in
+          decision-making.
         </Typography>
+        </Box>
 
-        <Typography variant="body1">
-          You may find more information by using the following links:
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            width: "100%",
+          }}
+        >
+          <Typography
+            variant="h3"
+            component="h3"
+            sx={{ color: theme.palette.primary.main + " !important" }}
+          >
+            Learn more
+          </Typography>
+          <Typography variant="body1" sx={{ fontWeight: 300 }}>
+            Still want to know more? Find more information by using the
+            following links:
+          </Typography>
+        </Box>
 
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={2}
           alignItems="center"
+          width={{ xs: "100%", sm: "auto" }}
         >
           <Button
-            variant="contained"
+            variant="outlined"
+            className="home-page-button"
             href="https://etherlink.com"
             target="_blank"
             rel="noopener noreferrer"
+            sx={{ width: { xs: "100%", md: "auto" } }}
           >
             Etherlink
           </Button>
 
           <Button
             variant="outlined"
+            className="home-page-button"
             href="https://docs.etherlink.com"
             target="_blank"
             rel="noopener noreferrer"
+            sx={{ width: { xs: "100%", md: "auto" } }}
           >
             Etherlink documentation
           </Button>
 
           <Button
             variant="outlined"
+            className="home-page-button"
             href="https://docs.etherlink.com/governance/how-is-etherlink-governed"
             target="_blank"
             rel="noopener noreferrer"
+            sx={{ width: { xs: "100%", md: "auto" } }}
           >
             Governance documentation
           </Button>
