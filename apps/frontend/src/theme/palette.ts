@@ -4,7 +4,7 @@ export const theme: PaletteOptions = {
   mode: 'dark',
   primary: {
     main: '#38FF9C',
-    light: '#A3FFD1',
+    light: '#33E88E',
     dark: '#28B56F',
     contrastText: '#000000',
   },
