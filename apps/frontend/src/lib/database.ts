@@ -96,8 +96,7 @@ export class Database {
           JSON_LENGTH(proposal_hashes) > 0
           OR (promotion_hash IS NOT NULL AND promotion_hash != '')
         )
-      ORDER BY contract_voting_index DESC LIMIT 30`,
-      // TODO remove in prod
+      ORDER BY contract_voting_index DESC LIMIT 50`,
       [contractAddress]
     );
 
@@ -155,7 +154,7 @@ export class Database {
       );
 
       const votes = await this.query<Vote>(
-        `SELECT v.*
+        `SELECT DISTINCT v.*
          FROM votes v
          JOIN promotions pr ON v.proposal_hash = pr.proposal_hash
          JOIN periods ON pr.contract_period_index = periods.contract_voting_index
