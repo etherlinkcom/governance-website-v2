@@ -22,7 +22,7 @@ export class TzktListener {
   public async start(): Promise<void> {
     logger.info('[TzktListener] start()');
 
-    // await this.database.initialize();
+    await this.database.initialize();
     await this.loadContractConfigs();
 
     this.connection = new HubConnectionBuilder()
