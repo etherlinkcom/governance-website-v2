@@ -1,4 +1,4 @@
-import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel, HttpTransportType } from '@microsoft/signalr';
 import { GovernanceContractIndexer } from './GovernanceContractIndexer';
 import { logger } from './utils/logger';
 import { Contract, TzktTransactionEvent, TzktContractStorageHistory, Voter, TzktApiHead, TzktContractStorage, PromotionContext, ContractConfig, OperationsPayload} from './types';
@@ -26,7 +26,7 @@ export class TzktListener {
     await this.loadContractConfigs();
 
     this.connection = new HubConnectionBuilder()
-      .withUrl(this.eventsUrl)
+      .withUrl(this.eventsUrl, {transport: HttpTransportType.WebSockets, skipNegotiation: true,})
       .configureLogging(LogLevel.Information)
       .withAutomaticReconnect()
       .build();
