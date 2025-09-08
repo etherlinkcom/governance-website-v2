@@ -1,4 +1,4 @@
-import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel, HttpTransportType } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { GovernanceContractIndexer } from './GovernanceContractIndexer';
 import { logger } from './utils/logger';
 import { Contract, TzktTransactionEvent, TzktContractStorageHistory, Voter, TzktApiHead, TzktContractStorage, PromotionContext, ContractConfig, OperationsPayload} from './types';
@@ -12,7 +12,7 @@ export class TzktListener {
   private governance_contract_indexer: GovernanceContractIndexer = new GovernanceContractIndexer();
   private database: Database = new Database();
   private readonly trackedFunctions: string[] = ['new_proposal', 'upvote_proposal', 'vote'];
-  private readonly eventsUrl: string = process.env.TZKT_API_URL + '/events';
+  private readonly eventsUrl: string = process.env.TZKT_API_URL + '/ws';
 
   constructor(contracts: Contract[]) {
     logger.info(`[TzktListener] constructor(contracts=${contracts.map(c => c.address).join(',')})`);
@@ -22,11 +22,11 @@ export class TzktListener {
   public async start(): Promise<void> {
     logger.info('[TzktListener] start()');
 
-    await this.database.initialize();
+    // await this.database.initialize();
     await this.loadContractConfigs();
 
     this.connection = new HubConnectionBuilder()
-      .withUrl(this.eventsUrl, {transport: HttpTransportType.WebSockets, skipNegotiation: true,})
+      .withUrl(this.eventsUrl,)
       .configureLogging(LogLevel.Information)
       .withAutomaticReconnect()
       .build();
