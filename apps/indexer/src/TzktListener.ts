@@ -12,7 +12,7 @@ export class TzktListener {
   private governance_contract_indexer: GovernanceContractIndexer = new GovernanceContractIndexer();
   private database: Database = new Database();
   private readonly trackedFunctions: string[] = ['new_proposal', 'upvote_proposal', 'vote'];
-  private readonly eventsUrl: string = process.env.TZKT_API_URL + '/events';
+  private readonly eventsUrl: string = process.env.TZKT_API_URL + '/ws';
 
   constructor(contracts: Contract[]) {
     logger.info(`[TzktListener] constructor(contracts=${contracts.map(c => c.address).join(',')})`);
@@ -26,7 +26,7 @@ export class TzktListener {
     await this.loadContractConfigs();
 
     this.connection = new HubConnectionBuilder()
-      .withUrl(this.eventsUrl)
+      .withUrl(this.eventsUrl,)
       .configureLogging(LogLevel.Information)
       .withAutomaticReconnect()
       .build();
