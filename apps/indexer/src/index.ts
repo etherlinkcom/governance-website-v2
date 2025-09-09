@@ -63,5 +63,5 @@ app.get("/index-all", async (req: Request, res: Response) => {
 });
 
 app.listen(port, () => {
-  logger.info(`[Indexer] Indexer API listening on port ${port}`);
+  logger.info(`[Indexer] Indexer API listening on port ${port}\nNetwork: ${process.env.NETWORK}\nDatabase: ${process.env.DB_NAME}`);
 });
