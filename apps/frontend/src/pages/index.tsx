@@ -13,20 +13,24 @@ export default function Home() {
   const theme = useTheme();
   return (
     <Container maxWidth="lg" sx={{ position: "relative", overflow: "visible" }}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: {xs: "translate(-50%, -50%)", md: "translate(-45%, -75%)"},
-              width: "100%",
-              height: "100%",
-              zIndex: 0,
-              background: `radial-gradient(circle at 65% 50%,
+      <Box
+        sx={{
+          position: "absolute",
+          display: { xs: "none", md: "block" },
+          top: "50%",
+          left: "50%",
+          transform: {
+            xs: "translate(-50%, -50%)",
+            md: "translate(-45%, -75%)",
+          },
+          width: "100%",
+          height: "100%",
+          zIndex: 0,
+          background: `radial-gradient(circle at 70% 48%,
                 ${alpha(theme.palette.primary.main, 0.1)} 10%,
-                ${alpha(theme.palette.primary.main, 0)} 40%)`,
-            }}
-          />
+                ${alpha(theme.palette.primary.main, 0)} 30%)`,
+        }}
+      />
       <Box
         sx={{
           display: "flex",
@@ -35,7 +39,7 @@ export default function Home() {
           justifyContent: "space-between",
           gap: 6,
           minHeight: "70vh",
-          mt: 8,
+          mt: { xs: 0, md: 8 },
           mb: 4,
           position: "relative",
           zIndex: 1,
@@ -52,7 +56,6 @@ export default function Home() {
             gap: { xs: 4, sm: 3 },
           }}
         >
-
           <Typography variant="h1" sx={{ fontSize: 56 }}>
             Etherlink Governance
           </Typography>
@@ -65,13 +68,38 @@ export default function Home() {
           </Typography>
         </Box>
 
+        <Box
+          sx={{
+            position: "relative",
+            width: "min(457px, 100%)",
+            height: "auto",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            display: "flex",
+            zIndex: 0,
+            background: {
+                xs:`radial-gradient(circle at 50% 51%,
+                ${alpha(theme.palette.primary.main, 0.1)} 30%,
+                ${alpha(theme.palette.primary.main, 0)} 70%)`,
+                md: 'none'
+              }
+          }}
+        >
           <Image
             src="/HomePageBlocks.svg"
             alt="Etherlink"
             width={457}
             height={445}
-            style={{ display: "block", zIndex: 1 }}
+            style={{
+              display: "block",
+              width: "100%",
+              height: "auto",
+              zIndex: 1,
+              position: "relative",
+            }}
           />
+        </Box>
       </Box>
 
       <Box
@@ -82,7 +110,6 @@ export default function Home() {
           gap: 6,
           alignItems: "flex-start",
           maxWidth: "600px",
-
         }}
       >
         <Box
@@ -162,7 +189,7 @@ export default function Home() {
           direction={{ xs: "column", sm: "row" }}
           spacing={2}
           alignItems="center"
-          minWidth={{ xs: "100%", sm: "800px" }}
+          minWidth={{ xs: "100%", md: "800px" }}
         >
           <Button
             variant="outlined"
@@ -170,7 +197,11 @@ export default function Home() {
             href="https://etherlink.com"
             target="_blank"
             rel="noopener noreferrer"
-            sx={{ width: { xs: "100%", md: "auto" }, whiteSpace: "nowrap", textBreak: "keep-all" }}
+            sx={{
+              width: { xs: "100%", md: "auto" },
+              whiteSpace: "nowrap",
+              textBreak: "keep-all",
+            }}
           >
             Etherlink
           </Button>
