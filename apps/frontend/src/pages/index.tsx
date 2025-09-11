@@ -4,40 +4,87 @@ import {
   Button,
   Container,
   Stack,
-  Link,
   useTheme,
+  alpha,
 } from "@mui/material";
+import Image from "next/image";
 
 export default function Home() {
   const theme = useTheme();
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ display: 'flex', flexDirection: 'column', textAlign: { xs: "center", sm: "left" }, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ position: "relative", overflow: "visible" }}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: {xs: "translate(-50%, -50%)", md: "translate(-45%, -75%)"},
+              width: "100%",
+              height: "100%",
+              zIndex: 0,
+              background: `radial-gradient(circle at 65% 50%,
+                ${alpha(theme.palette.primary.main, 0.1)} 10%,
+                ${alpha(theme.palette.primary.main, 0)} 40%)`,
+            }}
+          />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column-reverse", md: "row" },
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 6,
+          minHeight: "70vh",
+          mt: 8,
+          mb: 4,
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+        }}
+      >
+        {/* Text Content */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            textAlign: { xs: "center", md: "left" },
+            mb: 4,
+            gap: { xs: 4, sm: 3 },
+          }}
+        >
 
-        <Typography variant="h1">
-          Etherlink Governance
-        </Typography>
-        <Typography variant="body1">
-          Your vote. Your network. Propose improvements and participate in protocol upgrades.
-        </Typography>
+          <Typography variant="h1" sx={{ fontSize: 56 }}>
+            Etherlink Governance
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ fontSize: 20, color: "#b5b5b5 !important" }}
+          >
+            Your vote. Your network. Propose improvements and participate in
+            protocol upgrades.
+          </Typography>
+        </Box>
+
+          <Image
+            src="/HomePageBlocks.svg"
+            alt="Etherlink"
+            width={457}
+            height={445}
+            style={{ display: "block", zIndex: 1 }}
+          />
       </Box>
-
-
-
-
 
       <Box
         sx={{
           py: { xs: 4, sm: 6 },
           display: "flex",
           flexDirection: "column",
-          gap: 4,
+          gap: 6,
           alignItems: "flex-start",
-          maxWidth: "800px",
-          mx: "auto",
+          maxWidth: "600px",
+
         }}
       >
-
         <Box
           sx={{
             display: "flex",
@@ -46,20 +93,21 @@ export default function Home() {
             width: "100%",
           }}
         >
-        <Typography
-          variant="h3"
-          component="h3"
-          sx={{ color: theme.palette.primary.main + " !important" }}
-        >
-          What is Etherlink governance?
-        </Typography>
+          <Typography
+            variant="h3"
+            component="h3"
+            sx={{ color: theme.palette.primary.main + " !important" }}
+          >
+            What is Etherlink governance?
+          </Typography>
 
-        <Typography variant="body1" sx={{ fontWeight: 300 }}>
-          Like Tezos, Etherlink has a built-in on-chain mechanism for proposing,
-          selecting, testing, and activating upgrades without the need to hard
-          fork. This mechanism makes Etherlink self-amending and empowers Tezos
-          bakers to govern Etherlink's kernel upgrades and sequencer operators.
-        </Typography>
+          <Typography variant="body1" sx={{ fontWeight: 300 }}>
+            Like Tezos, Etherlink has a built-in on-chain mechanism for
+            proposing, selecting, testing, and activating upgrades without the
+            need to hard fork. This mechanism makes Etherlink self-amending and
+            empowers Tezos bakers to govern Etherlink's kernel upgrades and
+            sequencer operators.
+          </Typography>
         </Box>
 
         <Box
@@ -70,23 +118,23 @@ export default function Home() {
             width: "100%",
           }}
         >
-        <Typography
-          variant="h3"
-          component="h3"
-          sx={{ color: theme.palette.primary.main + " !important" }}
-        >
-          How it Works
-        </Typography>
+          <Typography
+            variant="h3"
+            component="h3"
+            sx={{ color: theme.palette.primary.main + " !important" }}
+          >
+            How it Works
+          </Typography>
 
-        <Typography variant="body1" sx={{ fontWeight: 300 }}>
-          Etherlink has separate governance processes for slow kernel updates,
-          for fast kernel updates, and for the sequencer operator. To ensure
-          that decisions accurately reflect the consensus of the Etherlink
-          community, all three governance processes are designed with the same
-          robust safeguards. Like Tezos's governance process, Etherlink's
-          governance process promotes transparency and fairness in
-          decision-making.
-        </Typography>
+          <Typography variant="body1" sx={{ fontWeight: 300 }}>
+            Etherlink has separate governance processes for slow kernel updates,
+            for fast kernel updates, and for the sequencer operator. To ensure
+            that decisions accurately reflect the consensus of the Etherlink
+            community, all three governance processes are designed with the same
+            robust safeguards. Like Tezos's governance process, Etherlink's
+            governance process promotes transparency and fairness in
+            decision-making.
+          </Typography>
         </Box>
 
         <Box
@@ -114,7 +162,7 @@ export default function Home() {
           direction={{ xs: "column", sm: "row" }}
           spacing={2}
           alignItems="center"
-          width={{ xs: "100%", sm: "auto" }}
+          minWidth={{ xs: "100%", sm: "800px" }}
         >
           <Button
             variant="outlined"
@@ -122,7 +170,7 @@ export default function Home() {
             href="https://etherlink.com"
             target="_blank"
             rel="noopener noreferrer"
-            sx={{ width: { xs: "100%", md: "auto" } }}
+            sx={{ width: { xs: "100%", md: "auto" }, whiteSpace: "nowrap", textBreak: "keep-all" }}
           >
             Etherlink
           </Button>
