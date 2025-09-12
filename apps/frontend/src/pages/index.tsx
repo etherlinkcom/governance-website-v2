@@ -12,25 +12,24 @@ import Image from "next/image";
 export default function Home() {
   const theme = useTheme();
   return (
-    <Container maxWidth="lg" sx={{ position: "relative", overflow: "visible" }}>
+    <>
       <Box
         sx={{
           position: "absolute",
           display: { xs: "none", md: "block" },
-          top: "50%",
-          left: "50%",
-          transform: {
-            xs: "translate(-50%, -50%)",
-            md: "translate(-45%, -75%)",
-          },
-          width: "100%",
-          height: "100%",
+          width: "100vw",
+          height: "200vh",
+          top: 0,
+          minWidth: "100%",
+          maxWidth: "100%",
           zIndex: 0,
-          background: `radial-gradient(circle at 70% 48%,
-                ${alpha(theme.palette.primary.main, 0.1)} 10%,
-                ${alpha(theme.palette.primary.main, 0)} 30%)`,
+          background: `radial-gradient(circle at 67% 26%,
+                ${alpha(theme.palette.primary.main, 0.05)} 5%,
+                ${alpha(theme.palette.primary.main, 0.01)} 10%,
+                ${alpha(theme.palette.primary.main, 0)} 50%)`,
         }}
       />
+    <Container sx={{ position: "relative", overflow: "visible" }}>
       <Box
         sx={{
           display: "flex",
@@ -79,11 +78,11 @@ export default function Home() {
             display: "flex",
             zIndex: 0,
             background: {
-                xs:`radial-gradient(circle at 50% 51%,
+              xs:`radial-gradient(circle at 50% 51%,
                 ${alpha(theme.palette.primary.main, 0.1)} 30%,
                 ${alpha(theme.palette.primary.main, 0)} 70%)`,
-                md: 'none'
-              }
+              md: "none",
+            }
           }}
         >
           <Image
@@ -230,5 +229,6 @@ export default function Home() {
         </Stack>
       </Box>
     </Container>
+    </>
   );
 }
