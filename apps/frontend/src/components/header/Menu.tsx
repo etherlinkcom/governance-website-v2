@@ -64,6 +64,12 @@ export const Menu = observer(({ handleGovernanceChange }: MenuProps) => {
                   ? theme.palette.primary.dark + " !important"
                   : "#bcbcbc !important",
               },
+              "&:hover": {
+                color: theme.palette.primary.dark + " !important",
+                "& .MuiSvgIcon-root": {
+                  color: theme.palette.primary.dark + " !important",
+                },
+              },
             }}
             MenuProps={{
               anchorOrigin: {
@@ -85,6 +91,9 @@ export const Menu = observer(({ handleGovernanceChange }: MenuProps) => {
                     governance === value
                       ? theme.palette.primary.dark
                       : "#bcbcbc !important",
+                  "&:hover": {
+                    color: theme.palette.primary.dark + " !important",
+                  },
                 }}
               >
                 {label}
@@ -118,7 +127,7 @@ export const Menu = observer(({ handleGovernanceChange }: MenuProps) => {
         <ConnectButton />
       </Box>
 
-      <ConnectButton sx={{display: { xs: "flex", md: "none" }}} />
+      <ConnectButton sx={{ display: { xs: "flex", md: "none" } }} />
     </>
   );
 });

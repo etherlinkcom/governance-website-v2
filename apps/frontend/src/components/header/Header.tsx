@@ -33,6 +33,7 @@ export const Header = observer(() => {
           maxWidth: "1440px",
           margin: "0 auto",
           gap: "10px",
+          zIndex: 10,
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
