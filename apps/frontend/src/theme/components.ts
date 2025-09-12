@@ -276,9 +276,9 @@ export const components: Components<Theme> = {
   },
   MuiAppBar: {
     styleOverrides: {
-      root: ({ theme }) => ({
-        backgroundColor: theme.palette.background.default,
-        color: theme.palette.text.primary,
+      root: () => ({
+        backgroundColor: "transparent",
+        boxShadow: "none",
       }),
     },
   },

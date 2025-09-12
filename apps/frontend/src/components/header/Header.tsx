@@ -30,7 +30,6 @@ export const Header = observer(() => {
           justifyContent: "space-between",
           alignItems: "center",
           width: "100%",
-          backgroundColor: theme.palette.background.default,
           maxWidth: "1440px",
           margin: "0 auto",
           gap: "10px",
