@@ -9,7 +9,7 @@ export const toastConfig: ToasterProps = {
       background: theme.palette.background.paper,
       color: theme.palette.text.primary,
       borderRadius: theme.shape.borderRadius,
-      boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
+      boxShadow: `0px 0px 6px 0px ${theme.palette.divider}`,
       padding: '16px',
       fontSize: '14px',
       fontFamily: theme.typography.fontFamily,

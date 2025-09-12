@@ -71,12 +71,12 @@ export const components: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         backgroundColor: theme.palette.background.paper,
-        boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
+        boxShadow: `0px 0px 6px 0px ${theme.palette.divider}`,
         border: "none",
         borderRadius: "25px",
         "&.past-card": {
           "&:hover": {
-            boxShadow: `0px 0px 10px 2px ${theme.palette.custom.shadow.secondary}`,
+            boxShadow: `0px 0px 10px 2px ${theme.palette.divider}`,
             transform: "translateY(-2px)",
             transition: "all 0.2s ease-in-out",
           },
@@ -126,7 +126,7 @@ export const components: Components<Theme> = {
       paper: ({ theme }) => ({
         backgroundColor: theme.palette.background.paper,
         backdropFilter: "blur(12px)",
-        boxShadow: `0px 0px 6px 0px ${theme.palette.custom.shadow.primary}`,
+        boxShadow: `0px 0px 6px 0px ${theme.palette.divider}`,
         borderRadius: "25px",
         border: "none",
         minWidth: "95vw",
@@ -268,6 +268,7 @@ export const components: Components<Theme> = {
         color: theme.palette.text.primary,
         fontFamily: typography.fontFamily,
         minWidth: "375px",
+        paddingBottom: "40px",
       },
       "*::-webkit-scrollbar": {
         width: "8px",
