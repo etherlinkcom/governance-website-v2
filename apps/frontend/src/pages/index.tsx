@@ -149,7 +149,7 @@ export default function Home() {
             component="h3"
             sx={{ color: theme.palette.primary.main + " !important" }}
           >
-            How it Works
+            How it works
           </Typography>
 
           <Typography variant="body1" sx={{ fontWeight: 300 }}>
