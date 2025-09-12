@@ -1,6 +1,6 @@
-import { PaletteOptions } from '@mui/material/styles';
+import { PaletteOptions } from "@mui/material";
 
-export const theme: PaletteOptions = {
+export const palette: PaletteOptions = {
   mode: 'dark',
   primary: {
     main: '#38FF9C',
@@ -21,6 +21,7 @@ export const theme: PaletteOptions = {
   text: {
     primary: '#e9e9e9',
     secondary: '#888888',
+    disabled: '#999999'
   },
   info: {
     main: '#A3FFD1',
@@ -55,14 +56,6 @@ export const theme: PaletteOptions = {
       odd: '#1b1b1b',
       even: '#151515',
       hover: '#2a2a2a',
-    },
-    border: {
-      primary: 'rgba(56, 255, 156, 0.4)',
-      secondary: 'rgba(56, 255, 156, 0.6)',
-    },
-    shadow: {
-      primary: 'rgba(56, 255, 156, 0.4)',
-      secondary: 'rgba(56, 255, 156, 0.6)',
     },
   },
 };

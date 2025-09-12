@@ -18,14 +18,14 @@ export default function Home() {
           position: "absolute",
           display: { xs: "none", md: "block" },
           width: "100vw",
-          height: "200vh",
+          height: "170vh",
           top: 0,
           minWidth: "100%",
           maxWidth: "100%",
           zIndex: 0,
           background: `radial-gradient(circle at 67% 26%,
-                ${alpha(theme.palette.primary.main, 0.05)} 5%,
-                ${alpha(theme.palette.primary.main, 0.01)} 10%,
+                ${alpha(theme.palette.primary.main, 0.1)} 5%,
+                ${alpha(theme.palette.primary.main, 0.01)} 40%,
                 ${alpha(theme.palette.primary.main, 0)} 50%)`,
         }}
       />

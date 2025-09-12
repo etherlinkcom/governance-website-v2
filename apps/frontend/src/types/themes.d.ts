@@ -11,14 +11,6 @@ declare module '@mui/material/styles' {
         even: string;
         hover: string;
       };
-      border: {
-        primary: string;
-        secondary: string;
-      };
-      shadow: {
-        primary: string;
-        secondary: string;
-      };
     };
   }
 
@@ -31,14 +23,6 @@ declare module '@mui/material/styles' {
         odd?: string;
         even?: string;
         hover?: string;
-      };
-      border?: {
-        primary?: string;
-        secondary?: string;
-      };
-      shadow?: {
-        primary?: string;
-        secondary?: string;
       };
     };
   }
