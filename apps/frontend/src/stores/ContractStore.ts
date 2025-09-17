@@ -1,6 +1,6 @@
-import { makeAutoObservable, flow, runInAction } from 'mobx';
+import { makeAutoObservable, flow, runInAction, action, observable } from 'mobx';
 import { GovernanceType, ContractAndConfig, Vote, Upvote } from '@trilitech/types';
-import { FuturePeriod, FrontendPeriod } from '@/types/api';
+import { FuturePeriod, FrontendPeriod, FrontendProposal } from '@/types/api';
 import { fetchJson } from '@/lib/fetchJson';
 
 class ContractStore {
@@ -142,6 +142,13 @@ class ContractStore {
       const currentPeriod: {currentPeriod: FrontendPeriod} = yield fetchJson<{ currentPeriod: FrontendPeriod }>(
         `/api/${this.currentGovernance}/currentPeriod`
       );
+
+    if (currentPeriod.currentPeriod.proposals) {
+      currentPeriod.currentPeriod.proposals = observable.array(currentPeriod.currentPeriod.proposals);
+    } else {
+      currentPeriod.currentPeriod.proposals = observable.array([]);
+    }
+
       this.currentPeriod[this.currentGovernance] = currentPeriod.currentPeriod;
     } catch (error) {
       console.error('[ContractStore] Error fetching current period:', error);
@@ -273,6 +280,90 @@ class ContractStore {
       this.loadingUpvotes[key] = false;
     }
   });
+
+  public createProposal = action((
+    contract_period_index: number,
+    level: number,
+    proposal_hash: string,
+    transaction_hash: string,
+    proposer: string,
+    alias: string | undefined,
+    contract_address: string,
+    upvotes: string,
+  ): void => {
+    const newProposal: FrontendProposal = {
+      contract_period_index: contract_period_index,
+      level: level,
+      time: new Date().toISOString(),
+      proposal_hash: proposal_hash,
+      transaction_hash: transaction_hash,
+      proposer: proposer,
+      alias: alias,
+      contract_address: contract_address,
+      upvotes: upvotes
+    };
+
+    const current: FrontendPeriod | undefined = this.currentPeriod[this.currentGovernance!];
+    if (!current) return;
+
+    const proposals = current.proposals || observable.array([]);
+    proposals.push(newProposal);
+
+    this.createUpvote(
+      level,
+      proposal_hash,
+      proposer,
+      alias,
+      upvotes,
+      transaction_hash,
+      contract_address,
+      contract_period_index,
+      false
+    )
+  })
+
+  public createUpvote = action((
+    level: number,
+    proposal_hash: string,
+    baker: string,
+    alias: string | undefined,
+    voting_power: string,
+    transaction_hash: string,
+    contract_address: string,
+    contract_period_index: number,
+    addToProposal: boolean = true
+  ): void => {
+    const newUpvote: Upvote = {
+      level: level,
+      time: new Date().toISOString(),
+      proposal_hash: proposal_hash,
+      baker: baker,
+      alias: alias,
+      voting_power: parseInt(voting_power),
+      transaction_hash: transaction_hash,
+      contract_address: contract_address,
+      contract_period_index: contract_period_index,
+    };
+
+    const key: string = `${proposal_hash} - ${contract_period_index}`;
+    let upvotes: Upvote[] | undefined = this.upvotes[key];
+    if (!upvotes) upvotes = observable.array([]);
+
+    upvotes.push(newUpvote);
+    this.upvotes[key] = upvotes;
+
+    if (!addToProposal) return;
+
+    const proposals: FrontendPeriod | undefined = this.currentPeriod[this.currentGovernance!];
+    if (!proposals) return;
+
+    proposals.proposals?.forEach(proposal => {
+      if (proposal.proposal_hash === proposal_hash) {
+        proposal.upvotes = (BigInt(proposal.upvotes) + BigInt(voting_power)).toString();
+      }
+    });
+
+  })
 }
 
 export const contractStore = new ContractStore();

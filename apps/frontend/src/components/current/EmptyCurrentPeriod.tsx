@@ -4,6 +4,7 @@ import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
 import { getWalletStore } from "@/stores/WalletStore";
 import { SubmitProposalButton } from "./SubmitProposalModal";
+import { GovernanceType } from "@trilitech/types";
 
 interface EmptyCurrentPeriodProps {
   currentPeriod: FrontendPeriod;
@@ -43,14 +44,11 @@ export const EmptyCurrentPeriod = ({
         </Typography>
 
         <Box sx={{ display: "flex", justifyContent: "left" }}>
-          {/* TODO walletStore.address ?  Submit Proposal Button  : ConnectButton */}
-          <Button
-            variant="outlined"
-            size="large"
-            onClick={() => handleButtonClick()}
-          >
-            {walletStore?.address ? "Submit Proposal" : "Connect"}
-          </Button>
+          <SubmitProposalButton
+            contractAddress={currentPeriod.contract}
+            governanceType={currentPeriod.governance as GovernanceType}
+            contractVotingIndex={currentPeriod.contract_voting_index}
+          />
         </Box>
       </Box>
     </Box>

@@ -11,7 +11,7 @@ import { useState } from "react";
 import type { GovernanceType } from "@trilitech/types";
 import { getWalletStore, OperationResult } from "@/stores/WalletStore";
 import { observer } from "mobx-react-lite";
-// import { contractStore } from "@/stores/ContractStore";
+import { contractStore } from "@/stores/ContractStore";
 
 interface SubmitProposalButtonProps {
   contractAddress: string;
@@ -103,16 +103,16 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
       }
 
       if (!completed) return;
-      // contractStore.createProposal(
-      //   contractVotingIndex,
-      //   level,
-      //   proposalHash,
-      //   opHash,
-      //   walletStore?.address || "",
-      //   walletStore?.alias,
-      //   contractAddress,
-      //   walletStore?.votingPowerAmount || "0",
-      // )
+      contractStore.createProposal(
+        contractVotingIndex,
+        level,
+        proposalHash,
+        opHash,
+        walletStore?.address || "",
+        walletStore?.alias,
+        contractAddress,
+        walletStore?.votingPowerAmount || "0",
+      )
       handleClose();
     };
 
