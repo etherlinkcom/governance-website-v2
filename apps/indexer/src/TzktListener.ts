@@ -67,7 +67,9 @@ export class TzktListener {
     const base_url: string = this.governance_contract_indexer.tzkt_api_url;
 
     await Promise.all(this.contracts.map(async contract => {
-      const response: Response = await fetch(`${base_url}/contracts/${contract.address}/storage/history?limit=1`);
+      const url: string = `${base_url}/contracts/${contract.address}/storage/history?limit=1`;
+      logger.info(`[TzktListener] Fetching contract config from ${url}`);
+      const response: Response = await fetch(url);
       const storage_history: TzktContractStorageHistory[] = (await response.json()) as TzktContractStorageHistory[];
       const on_chain_config: ContractConfig = storage_history[0].value.config;
 
@@ -81,11 +83,14 @@ export class TzktListener {
         proposal_quorum: Number(on_chain_config.proposal_quorum),
         promotion_quorum: Number(on_chain_config.promotion_quorum),
         promotion_supermajority: Number(on_chain_config.promotion_supermajority),
-        active: contract.active
+        active: contract.active,
+        governance_type: contract.type
       } as ContractAndConfig;
     }));
 
     logger.info('[TzktListener] Loaded contract configs:', this.contract_configs);
+    await this.database.upsertContracts(Object.values(this.contract_configs));
+    logger.info('[TzktListener] Contract configs saved to database');
   }
 
   private onOperations(operations_payload: OperationsPayload): void {
