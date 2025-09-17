@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS proposals (
+  -- TODO remove upvotes from here
   id INT AUTO_INCREMENT PRIMARY KEY,
   contract_period_index INT NOT NULL,
   level BIGINT NOT NULL,

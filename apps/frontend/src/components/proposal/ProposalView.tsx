@@ -13,8 +13,8 @@ interface ProposalViewProps {
   isCurrent?: boolean;
 }
 
-export const ProposalView = observer(
-  ({ period, isCurrent = false }: ProposalViewProps) => {
+export const ProposalView = observer(({ period, isCurrent = false }: ProposalViewProps) => {
+
     const contract = contractStore.getContract(period.contract);
 
     return (
@@ -77,6 +77,7 @@ export const ProposalView = observer(
             <ProposalCard
               key={proposal.proposal_hash}
               proposal={proposal}
+              contractVotingIndex={period.contract_voting_index}
               defaultExpanded={
                 !isCurrent && index === (period.proposals?.length || 0) - 1
               }

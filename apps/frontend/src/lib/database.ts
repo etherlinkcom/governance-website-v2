@@ -88,12 +88,8 @@ export class Database {
     return contracts;
   }
 
-  async getCurrentPeriod(
-    governanceType: GovernanceType
-  ): Promise<FrontendPeriod | null> {
-    console.log(
-      `[Database] Fetching current period for ${governanceType} governance`
-    );
+  async getCurrentPeriod(governanceType: GovernanceType): Promise<FrontendPeriod | null> {
+    console.log(`[Database] Fetching current period for ${governanceType} governance`);
 
     const rows = await this.query<any>(
       `SELECT
@@ -118,7 +114,13 @@ export class Database {
       proposals.proposal_hash,
       proposals.proposer,
       proposals.alias,
-      proposals.upvotes,
+      (
+        SELECT COALESCE(SUM(upvotes.voting_power), 0)
+        FROM upvotes
+        WHERE
+          upvotes.contract_period_index = proposals.contract_period_index
+          AND upvotes.proposal_hash = proposals.proposal_hash
+      ) AS upvotes,
       proposals.level,
       proposals.time,
       proposals.transaction_hash,
@@ -181,7 +183,13 @@ export class Database {
       proposals.proposal_hash,
       proposals.proposer,
       proposals.alias,
-      proposals.upvotes,
+      (
+        SELECT COALESCE(SUM(upvotes.voting_power), 0)
+        FROM upvotes
+        WHERE
+          upvotes.contract_period_index = proposals.contract_period_index
+          AND upvotes.proposal_hash = proposals.proposal_hash
+      ) AS upvotes,
       proposals.level,
       proposals.time,
       proposals.transaction_hash,
@@ -265,7 +273,7 @@ export class Database {
             proposal_hash: row.proposal_hash,
             proposer: row.proposer || undefined,
             alias: row.alias || undefined,
-            upvotes: row.upvotes || 0, // TODO
+            upvotes: row.upvotes || 0,
             level: row.level,
             time: row.time,
             transaction_hash: row.transaction_hash,
