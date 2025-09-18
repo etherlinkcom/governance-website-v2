@@ -142,16 +142,12 @@ export class TzktListener {
     const period_index: number = Math.floor(level_difference / period_length);
     const proposal_hash: string = transaction_event.parameter!.value;
 
-    const voters: Voter[] = await this.governance_contract_indexer.getVotersForAddress(
-      transaction_event.sender.address, transaction_event.level, period_index
+    logger.info(`[TzktListener] new_proposal at ${transaction_event.target.address} level=${level} period=${period_index} hash=${proposal_hash}`);
+    const global_voting_index: number = await this.governance_contract_indexer.getGlobalVotingPeriodIndex(level, level + 1);
+    const delegates: Voter[] = await this.governance_contract_indexer.getVotersForAddress(
+      transaction_event.sender.address, level, global_voting_index
     );
 
-    let voting_power: number = 0;
-    for (let i = 0; i < voters.length; i++) {
-        voting_power += voters[i].votingPower;
-    }
-
-    logger.info(`[TzktListener] new_proposal at ${transaction_event.target.address} level=${level} period=${period_index} hash=${proposal_hash}`);
     const proposal: Proposal = {
       contract_period_index: period_index,
       level,
@@ -159,41 +155,38 @@ export class TzktListener {
       proposal_hash: proposal_hash,
       transaction_hash: transaction_event.hash,
       contract_address: transaction_event.target.address,
-      proposer: transaction_event.sender.address,
-      alias: transaction_event.sender.alias,
+      proposer: delegates[0].address,
+      alias: delegates[0].alias
     };
 
     logger.info(`[TzktListener] New proposal: ${JSON.stringify(proposal)}`);
     await this.database.upsertProposals([proposal]);
 
     logger.info(`[TzktListener] Registering automatic upvote for proposal ${proposal_hash} by proposer ${proposal.proposer}`);
-    const global_voting_index: number = await this.governance_contract_indexer.getGlobalVotingPeriodIndex(level, level + 1);
-    const voter: Voter | undefined = await this.governance_contract_indexer.getVotingPowerForAddress(transaction_event.sender.address, global_voting_index);
-    const delegates: string[] = await this.governance_contract_indexer.getDelegatesForAddress(transaction_event.sender.address, level);
 
-    let delegate_voting_power: number = 0;
+    const upvotes: Upvote[] = [];
     for (const delegate of delegates) {
-      const voter: Voter | undefined = await this.governance_contract_indexer.getVotingPowerForAddress(delegate, global_voting_index);
-      delegate_voting_power += voter?.votingPower ?? 0;
+      const upvote: Upvote = {
+        level,
+        time: transaction_event.timestamp,
+        proposal_hash: proposal_hash,
+        voting_power: delegate.votingPower,
+        contract_address: transaction_event.target.address,
+        baker: delegate.address,
+        alias: delegate.alias,
+        transaction_hash: transaction_event.hash,
+        contract_period_index: period_index
+      };
+      upvotes.push(upvote);
     }
-    const upvote: Upvote = {
-      level,
-      time: transaction_event.timestamp,
-      proposal_hash: proposal_hash,
-      voting_power: (voter?.votingPower ?? 0) + delegate_voting_power,
-      contract_address: transaction_event.target.address,
-      baker: transaction_event.sender.address,
-      alias: transaction_event.sender.alias,
-      transaction_hash: transaction_event.hash,
-      contract_period_index: period_index
-    };
-    logger.info(`[TzktListener] Automatic upvote: ${JSON.stringify(upvote)}`);
-    await this.database.upsertUpvotes([upvote]);
+
+    logger.info(`[TzktListener] Automatic upvote: ${JSON.stringify(upvotes, null, 2)}`);
+    await this.database.upsertUpvotes(upvotes);
 
 
     const period_record: Period | null = await this.database.getPeriod(transaction_event.target.address, period_index);
     if (!period_record) {
-      logger.error(`[TzktListener] No period record found for ${transaction_event.target.address} period ${period_index}`);
+      logger.error(`[TzktListener] No period record found for ${transaction_event.target.address} period ${period_index} to include ${proposal_hash}`);
       return;
     }
 
@@ -217,6 +210,7 @@ export class TzktListener {
     const { started_at_level, period_length } = contract_config;
     const level: number = transaction_event.level;
     const level_difference: number = level - started_at_level;
+
     if (level_difference < 0) {
       logger.error(`[TzktListener] Upvote at level ${level} is before started_at_level ${started_at_level}`);
       return;
@@ -224,29 +218,26 @@ export class TzktListener {
 
     const period_index: number = Math.floor(level_difference / period_length);
     const global_voting_index: number = await this.governance_contract_indexer.getGlobalVotingPeriodIndex(level, level + 1);
-    const voter: Voter | undefined = await this.governance_contract_indexer.getVotingPowerForAddress(transaction_event.sender.address, global_voting_index);
-    const delegates: string[] = await this.governance_contract_indexer.getDelegatesForAddress(transaction_event.sender.address, level);
-    let delegate_voting_power: number = 0;
+    const delegates: Voter[] = await this.governance_contract_indexer.getVotersForAddress(transaction_event.sender.address, level, global_voting_index);
+
+    const upvotes: Upvote[] = [];
     for (const delegate of delegates) {
-      const voter = await this.governance_contract_indexer.getVotingPowerForAddress(delegate, global_voting_index);
-      delegate_voting_power += voter?.votingPower ?? 0;
+      const upvote: Upvote = {
+        level,
+        time: transaction_event.timestamp,
+        proposal_hash: transaction_event.parameter!.value,
+        voting_power: delegate.votingPower,
+        contract_address: transaction_event.target.address,
+        baker: delegate.address,
+        alias: delegate.alias,
+        transaction_hash: transaction_event.hash,
+        contract_period_index: period_index
+      }
+      upvotes.push(upvote);
     }
 
-    const upvote: Upvote = {
-      level,
-      time: transaction_event.timestamp,
-      proposal_hash: transaction_event.parameter!.value,
-      voting_power: (voter?.votingPower ?? 0) + delegate_voting_power,
-      contract_address: transaction_event.target.address,
-      baker: transaction_event.sender.address,
-      alias: transaction_event.sender.alias,
-      transaction_hash: transaction_event.hash,
-      contract_period_index: period_index
-    };
-
-    logger.info(`[TzktListener] upvote_proposal at ${transaction_event.target.address} level=${level} period=${period_index} hash=${upvote.proposal_hash} voting_power=${upvote.voting_power}`);
-    logger.info(`[TzktListener] Upvote: ${JSON.stringify(upvote)}`);
-    await this.database.upsertUpvotes([upvote]);
+    logger.info(`[TzktListener] Upvotes: ${JSON.stringify(upvotes, null, 2)}`);
+    await this.database.upsertUpvotes(upvotes);
   }
 
   private async handleVote(transaction_event: TzktTransactionEvent): Promise<void> {
@@ -268,30 +259,26 @@ export class TzktListener {
     const promotion_period_index: number = Math.floor(level_difference / period_length);
 
     const global_voting_index: number = await this.governance_contract_indexer.getGlobalVotingPeriodIndex(level, level + 1);
-    const voter: Voter | undefined = await this.governance_contract_indexer.getVotingPowerForAddress(transaction_event.sender.address, global_voting_index);
-    const delegates: string[] = await this.governance_contract_indexer.getDelegatesForAddress(transaction_event.sender.address, level);
-    let delegate_voting_power: number = 0;
-    for (const delegate of delegates) {
-      const voter: Voter | undefined = await this.governance_contract_indexer.getVotingPowerForAddress(delegate, global_voting_index);
-      delegate_voting_power += voter?.votingPower ?? 0;
-    }
-
+    const delegates: Voter[] = await this.governance_contract_indexer.getVotersForAddress(transaction_event.sender.address, level, global_voting_index);
     const winning_candidate: string = transaction_event.storage?.voting_context?.period?.promotion?.winner_candidate;
 
-    const voteRecord: Vote = {
-      proposal_hash: winning_candidate,
-      baker: transaction_event.sender.address,
-      alias: transaction_event.sender.alias,
-      contract_address: transaction_event.target.address,
-      voting_power: (voter?.votingPower ?? 0) + delegate_voting_power,
-      vote: transaction_event.parameter!.value,
-      time: transaction_event.timestamp,
-      transaction_hash: transaction_event.hash,
-      level
-    };
+    const votes: Vote[] = [];
+    for (const delegate of delegates) {
+      const voteRecord: Vote = {
+        proposal_hash: winning_candidate,
+        baker: delegate.address,
+        alias: delegate.alias,
+        contract_address: transaction_event.target.address,
+        voting_power: delegate.votingPower,
+        vote: transaction_event.parameter!.value,
+        time: transaction_event.timestamp,
+        transaction_hash: transaction_event.hash,
+        level
+      };
+      votes.push(voteRecord);
+    }
 
-    logger.info(`[TzktListener] vote @${transaction_event.target.address} level=${level} period=${promotion_period_index} choice=${voteRecord.vote} vp=${voteRecord.voting_power}`);
-    await this.database.upsertVotes([voteRecord]);
+    await this.database.upsertVotes(votes);
 
     const storage_data: TzktContractStorage = await this.governance_contract_indexer.getContractStorageAtLevel(
       transaction_event.target.address, level
@@ -299,8 +286,10 @@ export class TzktListener {
 
     const promotion_context: PromotionContext | undefined = storage_data.voting_context?.period?.promotion;
     if (!promotion_context) {
-      throw new Error(`No on‑chain promotion context at lvl=${level} for ${transaction_event.target.address}`);
+      logger.error(`No on‑chain promotion context at lvl=${level} for ${transaction_event.target.address}`);
+      return;
     }
+
 
     const promotion_record: Promotion = {
       proposal_hash: promotion_context.winner_candidate,
