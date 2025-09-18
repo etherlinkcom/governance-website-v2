@@ -35,7 +35,7 @@ export const Current = observer(() => {
 
   return (
     <Box sx={{ width: "100%", mx: "auto" }}>
-      <Card sx={{ height: "auto", borderRadius: "16px" }}>
+      <Card sx={{ height: "auto", minHeight: 600, borderRadius: "16px" }}>
           {currentPeriod.proposals && currentPeriod.proposals.length > 0 ? (
             <ProposalView period={currentPeriod} isCurrent />
           ) : currentPeriod.promotion ? (

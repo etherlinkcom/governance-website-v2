@@ -19,6 +19,7 @@ export const components: Components<Theme> = {
         textAlign: "center",
         whiteSpace: "normal",
         wordWrap: "break-word",
+        height: 45
       }),
       contained: ({ theme }) => ({
         backgroundColor: theme.palette.primary.main,

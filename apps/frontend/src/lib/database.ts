@@ -287,6 +287,7 @@ export class Database {
     return Array.from(periodsMap.values());
   }
 
+  // TODO add start and end level
   async getVotes(
     proposalHash: string,
     contractVotingIndex: number
@@ -307,6 +308,7 @@ export class Database {
     return rows;
   }
 
+  // TODO add start and end level
   async getUpvotes(
     proposalHash: string,
     contractVotingIndex: number

@@ -9,15 +9,15 @@ import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
 import { PromotionVotingStatsPanel } from "@/components/promotion/PeriodVotingStatsPanel";
 import { LearnMoreButton } from "@/components/shared/LearnMoreButton";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
-import { CopyButton } from "../shared/CopyButton";
+import { CopyButton } from "@/components/shared/CopyButton";
+import { VoteButton } from "@/components/promotion/VoteButton";
 
 interface PromotionViewProps {
   period: FrontendPeriod;
   isCurrent?: boolean;
 }
 
-export const PromotionView = observer(
-  ({ period, isCurrent = false }: PromotionViewProps) => {
+export const PromotionView = observer(({ period, isCurrent = false }: PromotionViewProps) => {
     const contract = contractStore.getContract(period.contract);
 
     return (
@@ -87,7 +87,13 @@ export const PromotionView = observer(
             </EllipsisBox>
           </Box>
 
-          <Box>
+
+          <Box sx={{ display: "flex", gap: 2}}>
+            <VoteButton
+              isCurrentPeriod={true}
+              contractVotingIndex={period.contract_voting_index}
+              promotionHash={period.promotion?.proposal_hash || ""}
+            />
             <LearnMoreButton proposalHash={period.promotion?.proposal_hash} />
           </Box>
         </Box>
