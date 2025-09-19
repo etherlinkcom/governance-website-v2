@@ -5,8 +5,8 @@ import { observer } from 'mobx-react-lite';
 import { PeriodVotingStatsPanel } from '@/components/promotion/PeriodVotingStatsPanel';
 import { PeriodMetadata } from '@/components/past/PeriodMetadata';
 import { FrontendPeriod } from '@/types/api';
-import { PromotionView } from '../promotion/PromotionView';
-import { ProposalView } from '../proposal/ProposalView';
+import { PromotionView } from '@/components/promotion/PromotionView';
+import { ProposalView } from '@/components/proposal/ProposalView';
 
 interface PastPeriodCardProps {
   period: FrontendPeriod;
@@ -62,7 +62,7 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
       </Card>
 
       {/* Modals */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} disableAutoFocus>
         <Box className="modal-content">
           {hasPromotion ? (
             <PromotionView period={period} />
