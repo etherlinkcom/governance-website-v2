@@ -1,4 +1,3 @@
-"use client"
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
@@ -51,6 +50,8 @@ export default observer(() => {
       </Container>
     );
   }
+
+  if (!selectedView) return null;
 
   return (
     <Container maxWidth="lg">

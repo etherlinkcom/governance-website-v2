@@ -90,7 +90,7 @@ export const PromotionView = observer(({ period, isCurrent = false }: PromotionV
 
           <Box sx={{ display: "flex", gap: 2}}>
             <VoteButton
-              isCurrentPeriod={true}
+              isCurrentPeriod={isCurrent}
               contractVotingIndex={period.contract_voting_index}
               promotionHash={period.promotion?.proposal_hash || ""}
             />

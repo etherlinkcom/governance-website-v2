@@ -191,7 +191,8 @@ export class TzktListener {
 
     const period_record: Period | null = await this.database.getPeriod(transaction_event.target.address, period_index);
     if (!period_record) {
-      logger.error(`[TzktListener] No period record found for ${transaction_event.target.address} period ${period_index} to include ${proposal_hash}`);
+      logger.error(`[TzktListener] No period record found for ${transaction_event.target.address} period ${period_index}`);
+      // TODO if no period record create it
       return;
     }
 

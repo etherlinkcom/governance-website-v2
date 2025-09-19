@@ -41,17 +41,17 @@ export const VoteButton = observer(({isCurrentPeriod= false, contractVotingIndex
 
       if (!operation?.completed) return;
 
-        contractStore.createVote(
-          promotionHash || "",
-          walletStore.address || "",
-          walletStore.alias,
-          walletStore.votingPowerAmount,
-          selectedVote,
-          operation?.level || 0,
-          operation?.opHash || '',
-          contract.contract_address,
-          contractVotingIndex
-        )
+      contractStore.createVote(
+        promotionHash || "",
+        walletStore.address || "",
+        walletStore.alias,
+        walletStore.votingPowerAmount,
+        selectedVote,
+        operation?.level || 0,
+        operation?.opHash || '',
+        contract.contract_address,
+        contractVotingIndex
+      )
 
       setVoteModalOpen(false);
     } catch (error) {

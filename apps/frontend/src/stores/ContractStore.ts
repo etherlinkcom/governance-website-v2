@@ -272,7 +272,7 @@ class ContractStore {
         `/api/votes?contractAddress=${contractAddress}&proposalHash=${proposalHash}&contractVotingIndex=${contractVotingIndex}`
       );
 
-      this.votes[key] = response.votes;
+      this.votes[key] = observable.array(response.votes);
       return response.votes;
     } catch (error) {
       console.error("[ContractStore] Error fetching votes:", error);
