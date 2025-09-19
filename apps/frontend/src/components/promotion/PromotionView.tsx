@@ -99,6 +99,7 @@ export const PromotionView = observer(({ period, isCurrent = false }: PromotionV
         </Box>
 
         <VotersTable
+          contractAddress={period.contract}
           proposalHash={period.promotion?.proposal_hash || ""}
           contractVotingIndex={period.contract_voting_index}
         />

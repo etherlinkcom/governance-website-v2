@@ -289,21 +289,22 @@ export class Database {
 
   // TODO add start and end level
   async getVotes(
-    proposalHash: string,
+    contractAddress: string,
     contractVotingIndex: number
   ): Promise<Vote[]> {
-    console.log(`[Database] Fetching votes for promotion: ${proposalHash}`);
+    console.log(`[Database] Fetching votes for promotion: ${contractAddress}`);
 
     const rows = await this.query<Vote>(
       `
-      SELECT votes.*
-      FROM votes
-      INNER JOIN periods
-        ON periods.promotion_hash = votes.proposal_hash
-      WHERE votes.proposal_hash = ?
-        AND periods.contract_voting_index = ?
+      SELECT DISTINCT v.*
+         FROM votes v
+         JOIN promotions pr ON v.proposal_hash = pr.proposal_hash
+         JOIN periods ON pr.contract_period_index = periods.contract_voting_index
+         WHERE pr.contract_address = ? AND pr.contract_period_index = ?
+         AND v.level >= periods.level_start AND v.level <= periods.level_end
+         ORDER BY v.created_at DESC
     `,
-      [proposalHash, contractVotingIndex]
+      [contractAddress, contractVotingIndex]
     );
     return rows;
   }

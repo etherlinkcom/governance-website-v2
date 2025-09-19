@@ -18,12 +18,12 @@ export default async function handler(
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
 
-  const { proposalHash, contractVotingIndex } = req.query;
+  const { contractAddress, contractVotingIndex } = req.query;
 
-  if (!proposalHash || typeof proposalHash !== "string") {
+  if (!contractAddress || typeof contractAddress !== "string") {
     return res
       .status(400)
-      .json({ votes: [], error: "Valid proposalHash is required" });
+      .json({ votes: [], error: "Valid contractAddress is required" });
   }
 
   if (!contractVotingIndex || Number.isNaN(Number(contractVotingIndex))) {
@@ -34,7 +34,7 @@ export default async function handler(
 
   try {
     console.log(`[API] Fetching votes for governance`);
-    const votes: Vote[] = await database.getVotes(proposalHash, Number(contractVotingIndex));
+    const votes: Vote[] = await database.getVotes(contractAddress, Number(contractVotingIndex));
     console.log(`[API] Found ${votes.length} votes for governance`);
     res.status(200).json({ votes });
   } catch (error) {

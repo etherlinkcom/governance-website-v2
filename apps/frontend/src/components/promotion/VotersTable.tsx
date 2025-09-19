@@ -10,12 +10,13 @@ import { contractStore } from '@/stores/ContractStore';
 const voterKeys: (keyof Vote)[] = ['baker', 'voting_power', 'vote', 'time'];
 
 interface VotersTableProps {
+  contractAddress: string;
   proposalHash: string;
   contractVotingIndex: number;
 }
 
-export const VotersTable = observer(({ proposalHash, contractVotingIndex }: VotersTableProps) => {
-  const { votes, isLoading } = contractStore.getVotesForProposal(proposalHash, contractVotingIndex);
+export const VotersTable = observer(({ contractAddress, proposalHash, contractVotingIndex }: VotersTableProps) => {
+  const { votes, isLoading } = contractStore.getVotesForProposal(contractAddress, contractVotingIndex);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     votes,
