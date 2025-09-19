@@ -4,7 +4,7 @@ import { useTableSort } from '@/hooks/useTableSort';
 import { SortableTable, SortableTableSkeleton } from '@/components/shared/SortableTable';
 import { Vote } from '@trilitech/types';
 import { formatNumber } from '@/lib/formatNumber';
-import { Link, Typography } from '@mui/material';
+import { Box, Link, Typography } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
 
 const voterKeys: (keyof Vote)[] = ['baker', 'voting_power', 'vote', 'time'];
@@ -73,8 +73,16 @@ export const VotersTable = observer(({ contractAddress, proposalHash, contractVo
     }
   };
 
-  if (!Array.isArray(votes) || votes.length === 0 || isLoading) {
+  if (!Array.isArray(votes) || isLoading) {
     return <SortableTableSkeleton columns={columns} rowCount={5} />;
+  }
+
+  if (votes.length === 0) {
+    return (
+      <Box sx= {{ textAlign: 'center', p: 3 }}>
+        <Typography variant="body2">No votes found.</Typography>
+      </Box>
+    )
   }
 
   return (
