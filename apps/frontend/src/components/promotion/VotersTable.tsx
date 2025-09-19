@@ -16,7 +16,7 @@ interface VotersTableProps {
 }
 
 export const VotersTable = observer(({ contractAddress, proposalHash, contractVotingIndex }: VotersTableProps) => {
-  const { votes, isLoading } = contractStore.getVotesForProposal(contractAddress, contractVotingIndex);
+  const { votes, isLoading } = contractStore.getVotesForProposal(contractAddress, proposalHash, contractVotingIndex);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     votes,

@@ -287,9 +287,9 @@ export class Database {
     return Array.from(periodsMap.values());
   }
 
-  // TODO add start and end level
   async getVotes(
     contractAddress: string,
+    proposalHash: string,
     contractVotingIndex: number
   ): Promise<Vote[]> {
     console.log(`[Database] Fetching votes for promotion: ${contractAddress}`);
@@ -302,9 +302,10 @@ export class Database {
          JOIN periods ON pr.contract_period_index = periods.contract_voting_index
          WHERE pr.contract_address = ? AND pr.contract_period_index = ?
          AND v.level >= periods.level_start AND v.level <= periods.level_end
+         AND v.proposal_hash = ?
          ORDER BY v.created_at DESC
     `,
-      [contractAddress, contractVotingIndex]
+      [contractAddress, contractVotingIndex, proposalHash]
     );
     return rows;
   }

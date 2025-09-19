@@ -91,15 +91,15 @@ class ContractStore {
     return this.currentGovernance ? this.futurePeriods[this.currentGovernance] : undefined;
   }
 
-  public getVotesForProposal(contractAddress: string, contractVotingIndex: number): {
+  public getVotesForProposal(contractAddress: string, proposalHash: string, contractVotingIndex: number): {
     votes: Vote[];
     isLoading: boolean;
   } {
-    const key = `${contractAddress} - ${contractVotingIndex}`;
+    const key = `${contractAddress} - ${proposalHash} - ${contractVotingIndex}`;
 
     if (!this.votes[key] && !this.loadingVotes[key]) {
       runInAction(() => {
-        this.getVotes(contractAddress, contractVotingIndex);
+        this.getVotes(contractAddress, proposalHash, contractVotingIndex);
       });
     }
 
@@ -256,9 +256,10 @@ class ContractStore {
   public getVotes = flow(function* (
     this: ContractStore,
     contractAddress: string,
+    proposalHash: string,
     contractVotingIndex: number
   ) {
-    const key = `${contractAddress} - ${contractVotingIndex}`;
+    const key = `${contractAddress} - ${proposalHash} - ${contractVotingIndex}`;
 
     if (this.votes[key]) return this.votes[key];
 
@@ -268,7 +269,7 @@ class ContractStore {
       this.loadingVotes[key] = true;
 
       const response: { votes: Vote[] } = yield fetchJson<{ votes: Vote[] }>(
-        `/api/votes?contractAddress=${contractAddress}&contractVotingIndex=${contractVotingIndex}`
+        `/api/votes?contractAddress=${contractAddress}&proposalHash=${proposalHash}&contractVotingIndex=${contractVotingIndex}`
       );
 
       this.votes[key] = response.votes;
