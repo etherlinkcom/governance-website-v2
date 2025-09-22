@@ -59,23 +59,10 @@ const mainnet_contracts: Contract[] = [
 
 const testnet_contracts: Contract[] = [
   {
-    type: "slow",
-    address: "KT1GqWFzt7Rm9i8TfEgmCtAETtQqVLwT4Agm",
-  },
-  {
     type: 'slow',
-    address: "KT1HetEeotaRtEKeWyHg8Y7u5gbRwjepebXe",
+    address: "KT1DSnWJmXWXihrMixLVyAs3z4dhguLvNfgc",
     active: true,
   },
-  {
-    type: "sequencer",
-    address: "KT1WvJNQWA6HSP5xbZTfHoPYdUVxk5UvqN9B",
-  },
-  {
-    type: "sequencer",
-    address: "KT1GUyHNzTSbpEmKoY8Zbop63rGD4GCGd3rY",
-    active: true
-  }
 ]
 
 export const all_contracts = process.env.NETWORK === "mainnet" ? mainnet_contracts : testnet_contracts;

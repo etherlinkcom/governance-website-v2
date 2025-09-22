@@ -451,9 +451,7 @@ export class GovernanceContractIndexer {
         const delegates: Voter[] = await this.getVotersForAddress(entry.sender.address, entry.level, global_voting_index);
         const proposal_hash = entry.parameter!.value;
 
-        let voting_power: number = 0;
         for (let i = 0; i < delegates.length; i++) {
-            voting_power += delegates[i].votingPower;
             upvotes.push({
                 level: entry.level,
                 time: entry.timestamp,
@@ -599,7 +597,6 @@ export class GovernanceContractIndexer {
             logger.info('[GovernanceContractIndexer] Successfully saved all data to database');
         } catch (error) {
             logger.error(`[GovernanceContractIndexer] Error saving to database: ${error}`);
-            throw error;
         }
     }
 }

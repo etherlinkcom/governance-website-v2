@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { Contract, Operation, TezosToolkit, TransactionWalletOperation } from '@taquito/taquito';
 import { BeaconWallet } from '@taquito/beacon-wallet';
-import { ColorMode, NetworkType, TezosOperation } from '@airgap/beacon-types';
+import { ColorMode, NetworkType } from '@airgap/beacon-types';
 import BigNumber from 'bignumber.js';
 import { formatNumber } from '@/lib/formatNumber';
 import { VoteOption } from '@trilitech/types';
