@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { contractStore } from "@/stores/ContractStore";
 import { observer } from "mobx-react-lite";

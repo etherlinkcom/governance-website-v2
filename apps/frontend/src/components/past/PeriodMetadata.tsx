@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Typography } from "@mui/material";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { formatDate } from "@/lib/formatDate";

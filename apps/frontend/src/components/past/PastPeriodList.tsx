@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Card, Typography } from '@mui/material';
 import { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';

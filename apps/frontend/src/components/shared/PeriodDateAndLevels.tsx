@@ -1,3 +1,5 @@
+"use client";
+
 import { formatDate } from "@/lib/formatDate";
 import { FrontendPeriod } from "@/types/api";
 import { Box, Typography } from "@mui/material";
