@@ -29,6 +29,7 @@ export const PromotionVotingStatsPanel = ({
   contractAndConfig,
 }: PromotionVotingStatsPanelProps) => {
   const theme = useTheme();
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
       <PromotionVotingStats
@@ -69,10 +70,6 @@ export const PromotionVotingStatsPanel = ({
   );
 };
 
-
-
-// TODO break this into two files
-// Promotion voting stats and proposal voting stats
 export const PeriodVotingStatsPanel = ({
   hasPromotion,
   hasProposals,
@@ -84,14 +81,6 @@ export const PeriodVotingStatsPanel = ({
 }: PeriodVotingStatsPanelProps) => {
 
   if (hasPromotion) {
-    let totalVotingPower = 0;
-    if (promotions && promotions[0]) {
-      totalVotingPower =
-        promotions[0].yea_voting_power +
-          promotions[0].nay_voting_power +
-          promotions[0].pass_voting_power || 0;
-    }
-
     return (
       <Box
         sx={{

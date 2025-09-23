@@ -93,6 +93,10 @@ export class WalletStore {
     })
   }
 
+  public isVoter(address: string): boolean {
+    return this.delegates.has(address) || this._address === address || this.alias === address;
+  }
+
   async connect(): Promise<void> {
     await this.wallet.requestPermissions({});
     const address = await this.wallet.getPKH();

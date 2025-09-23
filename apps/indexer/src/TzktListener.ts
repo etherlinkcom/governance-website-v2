@@ -355,7 +355,7 @@ export class TzktListener {
         date_end: date_end,
         proposal_hashes: [],
         promotion_hash: promotion_hash,
-        total_voting_power: 0
+        total_voting_power: 0 // TODO get total voting power for period
       };
 
       logger.info(`[TzktListener] New period ${contract.address}-${period_index}: ${JSON.stringify(period_record)}`);

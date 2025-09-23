@@ -1,7 +1,8 @@
 import { theme } from '@/theme';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableSortLabel, Box} from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableSortLabel, Box, alpha} from '@mui/material';
 import { ComponentLoading } from './ComponentLoading';
 import { TableCards, TableCardsSkeleton } from './TableCards';
+import { getWalletStore } from '@/stores/WalletStore';
 
 type Order = 'asc' | 'desc';
 
@@ -56,6 +57,7 @@ interface SortableTableProps<T> {
 }
 
 export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort, renderCell }: SortableTableProps<T>) => {
+  const walletStore = getWalletStore();
   return (
     <Box sx={{ width: '100%' }}>
       <TableContainer component={Paper} sx={{ display: { xs: 'none', sm: 'block' }, minWidth: 320 }}>
@@ -89,8 +91,14 @@ export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((row, index) => (
-              <TableRow key={index}>
+            {data.map((row: any, index) => (
+              <TableRow key={index}
+                sx={
+                  Object.values(row).some(
+                    value => walletStore?.isVoter(value as string))
+                    ? { backgroundColor: `${alpha(theme.palette.primary.light, 0.1)} !important` }
+                    : {}
+                }>
                 {columns.map((column) => (
                   <TableCell
                     key={column.id as string}

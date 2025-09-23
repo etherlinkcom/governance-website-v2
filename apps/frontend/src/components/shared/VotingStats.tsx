@@ -66,8 +66,13 @@ export const PromotionVotingStats = ({
   ).toNumber()) || 0;
 
 
+
   const quorumProgress = calculateVotingProgress(quorumPercent, contractQuorum);
   const supermajorityProgress = calculateVotingProgress(supermajorityPercent, contractSupermajority);
+
+  // if (quorumPercent == "Infinity") {
+  //   console.log({ yeaVotingPower, nayVotingPower, passVotingPower, totalVotingPower, contractQuorum, contractSupermajority, quorumPercent, supermajorityPercent });
+  // }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column'}}>
