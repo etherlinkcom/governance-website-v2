@@ -213,11 +213,13 @@ export class WalletStore {
     if (this.voting) return;
     this.voting = true;
     try {
+
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.vote(voteType).send();
       const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
       toast.success(`Successfully voted ${voteType}`);
       return { opHash: operation.opHash, level: confirmation?.block.header.level, completed: confirmation?.completed };
+
     } catch (error) {
       toast.error(`Error voting`);
       console.error(`Error voting ${voteType} for ${contractAddress}: ${error}`);

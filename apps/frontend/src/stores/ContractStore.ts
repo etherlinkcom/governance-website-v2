@@ -87,7 +87,6 @@ class ContractStore {
   }
 
   get futurePeriodsData(): FuturePeriod[] | undefined {
-    console.log(this.currentGovernance, this.futurePeriods)
     return this.currentGovernance ? this.futurePeriods[this.currentGovernance] : undefined;
   }
 
@@ -422,7 +421,7 @@ class ContractStore {
         contract_address: contract_address,
       };
 
-      const key: string = `${proposal_hash} - ${contract_period_index}`;
+      const key: string = `${contract_address} - ${proposal_hash} - ${contract_period_index}`;
       let votes: Vote[] | undefined = this.votes[key];
       if (!votes) votes = observable.array([]);
 
@@ -444,7 +443,6 @@ class ContractStore {
         }
         promotion.total_voting_power += parseInt(voting_power);
       }
-
     }
   );
 }
