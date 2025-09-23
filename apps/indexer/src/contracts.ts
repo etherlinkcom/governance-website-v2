@@ -62,7 +62,6 @@ const testnet_contracts: Contract[] = [
     type: 'slow',
     address: "KT1DSnWJmXWXihrMixLVyAs3z4dhguLvNfgc",
     active: true,
-    address: "KT1DSnWJmXWXihrMixLVyAs3z4dhguLvNfgc",
   },
 ]
 
