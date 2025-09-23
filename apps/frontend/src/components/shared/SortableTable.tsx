@@ -94,10 +94,9 @@ export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort
             {data.map((row: any, index) => (
               <TableRow key={index}
                 sx={
-                  Object.values(row).some(
-                    value => walletStore?.isVoter(value as string))
-                    ? { backgroundColor: `${alpha(theme.palette.primary.light, 0.1)} !important` }
-                    : {}
+                  walletStore?.isVoter(row.baker) ?
+                  { backgroundColor: `${alpha(theme.palette.primary.light, 0.1)} !important` } :
+                  {}
                 }>
                 {columns.map((column) => (
                   <TableCell
