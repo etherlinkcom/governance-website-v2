@@ -114,6 +114,8 @@ export class WalletStore {
   async disconnect(): Promise<void> {
     await this.wallet.clearActiveAccount();
     runInAction(() => {
+      this.delegates.clear();
+      this._alias = undefined;
       this._address = null;
       this.balance = 0;
       this.votingPower = null;

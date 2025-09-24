@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import { ComponentLoading } from './ComponentLoading';
 import { TableCards, TableCardsSkeleton } from './TableCards';
 import { getWalletStore } from '@/stores/WalletStore';
+import { observer } from 'mobx-react-lite';
 
 type Order = 'asc' | 'desc';
 
@@ -56,7 +57,7 @@ interface SortableTableProps<T> {
   renderCell: (row: T, column: Column<T>) => React.ReactNode;
 }
 
-export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort, renderCell }: SortableTableProps<T>) => {
+export const SortableTable = observer(<T,>({ columns, data, order, orderBy, onRequestSort, renderCell }: SortableTableProps<T>) => {
   const walletStore = getWalletStore();
   return (
     <Box sx={{ width: '100%' }}>
@@ -120,4 +121,4 @@ export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort
       <TableCards<T> columns={columns} data={data} renderCell={renderCell} sx={{ display: { xs: 'block', sm: 'none' } }} />
     </Box>
   );
-};
+});
