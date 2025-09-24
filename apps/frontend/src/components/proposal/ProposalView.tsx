@@ -7,22 +7,23 @@ import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
 import { ProposalVotingStats } from "@/components/shared/VotingStats";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
 import { CopyButton } from "../shared/CopyButton";
+import { ContractAndConfig } from "@trilitech/types";
 
 interface ProposalViewProps {
   period: FrontendPeriod;
-  isCurrent?: boolean;
 }
 
-export const ProposalView = observer(({ period, isCurrent = false }: ProposalViewProps) => {
+export const ProposalView = observer(({ period }: ProposalViewProps) => {
 
-    const contract = contractStore.getContract(period.contract);
+    const contract: ContractAndConfig | undefined = contractStore.getContract(period.contract);
+    const isCurrentPeriod: boolean = contractStore.currentPeriodData?.contract_voting_index === period.contract_voting_index;
 
     return (
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
-          gap: isCurrent ? 2 : 5,
+          gap: isCurrentPeriod ? 2 : 5,
           minHeight: 600,
           p: { xs: 2, sm: 4 },
           pt: { xs: 5, sm: 4 },
@@ -55,7 +56,7 @@ export const ProposalView = observer(({ period, isCurrent = false }: ProposalVie
             <PeriodDateAndLevels period={period} />
           </Box>
           <Box>
-            {isCurrent && <TimeRemaining currentPeriod={period} />}
+            {isCurrentPeriod && <TimeRemaining currentPeriod={period} />}
 
             <ProposalVotingStats
               proposals={period.proposals!}
@@ -79,7 +80,7 @@ export const ProposalView = observer(({ period, isCurrent = false }: ProposalVie
               proposal={proposal}
               contractVotingIndex={period.contract_voting_index}
               defaultExpanded={
-                !isCurrent && index === (period.proposals?.length || 0) - 1
+                !isCurrentPeriod && index === (period.proposals?.length || 0) - 1
               }
             />
           ))}

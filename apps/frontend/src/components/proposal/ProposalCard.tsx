@@ -8,8 +8,6 @@ import {
   Box,
   Typography,
   Link,
-  Button,
-  CircularProgress,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { HashDisplay } from "@/components/shared/HashDisplay";
@@ -18,44 +16,16 @@ import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { LearnMoreButton } from "../shared/LearnMoreButton";
 import { UpvotersTable } from "./UpvotersTable";
 import { FrontendProposal } from "@/types/api";
-import { getWalletStore, OperationResult } from "@/stores/WalletStore";
-import { contractStore } from "@/stores/ContractStore";
-import { ContractAndConfig } from "@trilitech/types";
+import { UpvoteButton } from "./UpvoteButton";
+import { observer } from "mobx-react-lite";
 
 interface ProposalCardProps {
   proposal: FrontendProposal;
   contractVotingIndex: number;
   defaultExpanded?: boolean;
-  isCurrentPeriod?: boolean
 }
 
-export const ProposalCard = ({ proposal, contractVotingIndex, defaultExpanded, isCurrentPeriod}: ProposalCardProps) => {
-
-  const walletStore = getWalletStore();
-  const contract: ContractAndConfig | undefined = contractStore.currentContract
-  const isUpvoting = walletStore?.isVoting;
-
-  const handleUpvote = async () => {
-    if (!contract || !walletStore) return;
-
-    try {
-      const operation: OperationResult | undefined = await walletStore.upvoteProposal(contract.contract_address, proposal.proposal_hash);
-
-      if (!operation?.completed) return;
-      contractStore.createUpvote(
-        operation?.level || 0,
-        proposal.proposal_hash,
-        walletStore.address || '',
-        walletStore.alias,
-        walletStore.votingPowerAmount,
-        operation?.opHash || '',
-        contract.contract_address,
-        contractVotingIndex,
-      );
-    } catch (error) {
-      console.error('Error upvoting proposal:', error);
-    }
-  };
+export const ProposalCard = observer(({ proposal, contractVotingIndex, defaultExpanded }: ProposalCardProps) => {
 
   return (
     <Accordion defaultExpanded={defaultExpanded}>
@@ -138,19 +108,11 @@ export const ProposalCard = ({ proposal, contractVotingIndex, defaultExpanded, i
             }}
           >
 
-            {/* Upvote Button */}
             <Box sx={{ flexShrink: 0 }}>
-              {isCurrentPeriod && walletStore?.hasVotingPower && (
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleUpvote}
-                disabled={isUpvoting}
-                sx={{ mt: 1, minWidth: 97 }}
-              >
-                {isUpvoting ? <CircularProgress size="20px" sx={{color: theme => theme.palette.primary.main}} /> : 'Upvote'}
-              </Button>
-            )}
+              <UpvoteButton
+                proposalHash={proposal.proposal_hash}
+                contractVotingIndex={contractVotingIndex}
+              />
             </Box>
 
             {/* Learn More Button */}
@@ -177,4 +139,5 @@ export const ProposalCard = ({ proposal, contractVotingIndex, defaultExpanded, i
       </AccordionDetails>
     </Accordion>
   );
-};
+});
+
