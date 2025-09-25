@@ -1,4 +1,4 @@
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import { FrontendPeriod } from "@/types/api";
 import { contractStore } from "@/stores/ContractStore";
@@ -11,7 +11,7 @@ import { LearnMoreButton } from "@/components/shared/LearnMoreButton";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
 import { CopyButton } from "@/components/shared/CopyButton";
 import { VoteButton } from "@/components/promotion/VoteButton";
-import CloseIcon from '@mui/icons-material/Close';
+import { ModalCloseButton } from "../shared/ModalCloseButton";
 
 interface PromotionViewProps {
   period: FrontendPeriod;
@@ -35,21 +35,8 @@ export const PromotionView = observer(({ period, isCurrent = false, onClose }: P
           pt: { xs: 5, sm: 4 },
         }}
       >
-        {!isCurrent && onClose && (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: -4, mt: -3, mr: -2  }}>
-            <IconButton
-              onClick={onClose}
-              sx={{
-                color: 'text.secondary',
-                '&:hover': {
-                  color: 'text.primary',
-                  backgroundColor: 'action.hover',
-                },
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
+        {onClose && (
+          <ModalCloseButton onClose={onClose} />
         )}
         {/* Header */}
         <Box

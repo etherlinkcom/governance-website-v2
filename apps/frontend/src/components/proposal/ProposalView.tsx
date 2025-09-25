@@ -8,12 +8,14 @@ import { ProposalVotingStats } from "@/components/shared/VotingStats";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
 import { CopyButton } from "../shared/CopyButton";
 import { ContractAndConfig } from "@trilitech/types";
+import { ModalCloseButton } from "../shared/ModalCloseButton";
 
 interface ProposalViewProps {
   period: FrontendPeriod;
+  onClose?: () => void;
 }
 
-export const ProposalView = observer(({ period }: ProposalViewProps) => {
+export const ProposalView = observer(({ period, onClose }: ProposalViewProps) => {
 
     const contract: ContractAndConfig | undefined = contractStore.getContract(period.contract);
     const isCurrentPeriod: boolean = contractStore.currentPeriodData?.contract_voting_index === period.contract_voting_index;
@@ -29,6 +31,9 @@ export const ProposalView = observer(({ period }: ProposalViewProps) => {
           pt: { xs: 5, sm: 4 },
         }}
       >
+        {onClose && (
+          <ModalCloseButton onClose={onClose} />
+        )}
         {/* Header */}
         <Box
           sx={{
