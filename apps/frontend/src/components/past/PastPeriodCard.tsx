@@ -65,7 +65,7 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} disableAutoFocus>
         <Box className="modal-content">
           {hasPromotion ? (
-            <PromotionView period={period} />
+            <PromotionView period={period} onClose={() => setModalOpen(false)} />
           ) : hasProposals ? (
             <ProposalView period={period} />
           ) : null}

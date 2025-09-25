@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import { FrontendPeriod } from "@/types/api";
 import { contractStore } from "@/stores/ContractStore";
@@ -11,13 +11,15 @@ import { LearnMoreButton } from "@/components/shared/LearnMoreButton";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
 import { CopyButton } from "@/components/shared/CopyButton";
 import { VoteButton } from "@/components/promotion/VoteButton";
+import CloseIcon from '@mui/icons-material/Close';
 
 interface PromotionViewProps {
   period: FrontendPeriod;
   isCurrent?: boolean;
+  onClose?: () => void;
 }
 
-export const PromotionView = observer(({ period, isCurrent = false }: PromotionViewProps) => {
+export const PromotionView = observer(({ period, isCurrent = false, onClose }: PromotionViewProps) => {
     const contract = contractStore.getContract(period.contract);
 
     return (
@@ -33,6 +35,22 @@ export const PromotionView = observer(({ period, isCurrent = false }: PromotionV
           pt: { xs: 5, sm: 4 },
         }}
       >
+        {!isCurrent && onClose && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: -4, mt: -3, mr: -2  }}>
+            <IconButton
+              onClick={onClose}
+              sx={{
+                color: 'text.secondary',
+                '&:hover': {
+                  color: 'text.primary',
+                  backgroundColor: 'action.hover',
+                },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        )}
         {/* Header */}
         <Box
           sx={{
@@ -48,9 +66,14 @@ export const PromotionView = observer(({ period, isCurrent = false }: PromotionV
               alignItems: 'center',
               mb: 0.5
             }}>
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ display: { xs: 'none', md: 'block' } }}>
                 Contract: {period.contract}
               </Typography>
+
+              <Typography variant="body2" sx={{ display: { xs: 'block', md: 'none' } }}>
+                {period.contract}
+              </Typography>
+
             <CopyButton
               text={period.contract}
               message="Contract address copied"
