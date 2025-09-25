@@ -6,7 +6,7 @@ import { Box, Typography } from "@mui/material";
 
 export const PeriodDateAndLevels = ({ period }: { period: FrontendPeriod }) => {
   return (
-    <Box>
+    <Box sx={{width: { xs: "100%", sm: "auto" }}}>
       <Typography
         variant="body1"
         sx={{ display: { xs: "block", sm: "none" }, mb: 0 }}
