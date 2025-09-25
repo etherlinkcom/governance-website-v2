@@ -110,13 +110,13 @@ export const WalletDialog = observer(
         </DialogContent>
 
         <DialogActions sx={{ display: "flex", gap: 1, p: 2, flexDirection: { xs: "column", sm: "row" } }}>
-          <Button onClick={() => setClaimOpen(true)} variant="outlined">
+          <Button onClick={() => setClaimOpen(true)} variant="outlined" sx={{width: { xs: "100%", sm: "auto" }}}>
             Claim Voting Rights
           </Button>
-          <Button onClick={onDisconnect} variant="outlined">
+          <Button onClick={onDisconnect} variant="outlined" sx={{width: { xs: "100%", sm: "auto" }}}>
             Disconnect
           </Button>
-          <Button onClick={onClose} variant="contained">
+          <Button onClick={onClose} variant="contained" sx={{width: { xs: "100%", sm: "auto" }}}>
             Close
           </Button>
         </DialogActions>
