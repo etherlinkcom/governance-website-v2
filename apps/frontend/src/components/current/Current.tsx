@@ -39,7 +39,7 @@ export const Current = observer(() => {
           {currentPeriod.proposals && currentPeriod.proposals.length > 0 ? (
             <ProposalView period={currentPeriod} />
           ) : currentPeriod.promotion ? (
-            <PromotionView period={currentPeriod} isCurrent />
+            <PromotionView period={currentPeriod} />
           ) : (
             <EmptyCurrentPeriod currentPeriod={currentPeriod} />
           )}

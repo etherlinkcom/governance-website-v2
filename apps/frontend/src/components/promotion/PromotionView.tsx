@@ -15,12 +15,12 @@ import { ModalCloseButton } from "../shared/ModalCloseButton";
 
 interface PromotionViewProps {
   period: FrontendPeriod;
-  isCurrent?: boolean;
   onClose?: () => void;
 }
 
-export const PromotionView = observer(({ period, isCurrent = false, onClose }: PromotionViewProps) => {
+export const PromotionView = observer(({ period, onClose }: PromotionViewProps) => {
     const contract = contractStore.getContract(period.contract);
+    const isCurrentPeriod: boolean = contractStore.currentPeriodData?.contract_voting_index === period.contract_voting_index;
 
     return (
       <Box
@@ -70,7 +70,7 @@ export const PromotionView = observer(({ period, isCurrent = false, onClose }: P
           <PeriodDateAndLevels period={period} />
           </Box>
           <Box>
-            {isCurrent && <TimeRemaining currentPeriod={period} />}
+            {isCurrentPeriod && <TimeRemaining currentPeriod={period} />}
 
             <PromotionVotingStatsPanel
               promotion={period.promotion!}
@@ -100,7 +100,7 @@ export const PromotionView = observer(({ period, isCurrent = false, onClose }: P
 
           <Box sx={{ display: "flex", gap: 2}}>
             <VoteButton
-              isCurrentPeriod={isCurrent}
+              isCurrentPeriod={isCurrentPeriod}
               contractVotingIndex={period.contract_voting_index}
               promotionHash={period.promotion?.proposal_hash || ""}
             />
