@@ -9,6 +9,7 @@ import { TimeRemaining } from "@/components/current/TimeRemaining";
 import { CopyButton } from "../shared/CopyButton";
 import { ContractAndConfig } from "@trilitech/types";
 import { ModalCloseButton } from "../shared/ModalCloseButton";
+import { EllipsisBox } from "../shared/EllipsisBox";
 
 interface ProposalViewProps {
   period: FrontendPeriod;
@@ -49,9 +50,14 @@ export const ProposalView = observer(({ period, onClose }: ProposalViewProps) =>
               alignItems: 'center',
               mb: 0.5
             }}>
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ display: { xs: 'none', lg: 'block' } }}>
                 Contract: {period.contract}
               </Typography>
+
+              <EllipsisBox sx={{ color: theme => theme.palette.primary.main, display: { xs: 'block', lg: 'none' }}}>
+                  {period.contract}
+              </EllipsisBox>
+
             <CopyButton
               text={period.contract}
               message="Contract address copied"
