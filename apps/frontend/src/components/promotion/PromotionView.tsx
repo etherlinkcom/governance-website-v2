@@ -53,13 +53,13 @@ export const PromotionView = observer(({ period, onClose }: PromotionViewProps) 
               alignItems: 'center',
               mb: 0.5
             }}>
-              <Typography variant="body2" sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Typography variant="body2" sx={{ display: { xs: 'none', lg: 'block' } }}>
                 Contract: {period.contract}
               </Typography>
 
-              <Typography variant="body2" sx={{ display: { xs: 'block', md: 'none' } }}>
-                {period.contract}
-              </Typography>
+              <EllipsisBox sx={{ color: theme => theme.palette.primary.main, display: { xs: 'block', lg: 'none' }}}>
+                  {period.contract}
+              </EllipsisBox>
 
             <CopyButton
               text={period.contract}

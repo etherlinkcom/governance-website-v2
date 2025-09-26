@@ -27,7 +27,7 @@ export const Current = observer(() => {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
         <Typography variant="h6" color="text.secondary">
-          Empty Period
+          No period to display. Please refresh the page.
         </Typography>
       </Box>
     );
