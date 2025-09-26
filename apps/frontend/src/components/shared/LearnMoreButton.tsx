@@ -1,8 +1,12 @@
 import { PayloadKey } from "@/data/proposalLinks";
 import { getLinkData } from "@/lib/getLinkData";
-import { Button } from "@mui/material";
+import { Button, SxProps } from "@mui/material";
 
-export const LearnMoreButton = ({ proposalHash }: { proposalHash?: string }) => {
+interface LearnMoreButtonProps {
+    proposalHash?: string;
+    sx?: SxProps;
+}
+export const LearnMoreButton = ({ proposalHash, sx }: LearnMoreButtonProps) => {
 
     const linkData = getLinkData(proposalHash as PayloadKey);
     if (!linkData) return null;
@@ -13,7 +17,7 @@ export const LearnMoreButton = ({ proposalHash }: { proposalHash?: string }) => 
             href={linkData.href}
             target="_blank"
             rel="noopener noreferrer"
-            sx={{ whiteSpace: "nowrap" }}
+            sx={{ whiteSpace: "nowrap", width: { xs: "100%", sm: "auto" }, ...sx }}
         >
             Learn More
         </Button>

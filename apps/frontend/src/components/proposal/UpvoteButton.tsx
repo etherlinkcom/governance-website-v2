@@ -1,17 +1,18 @@
 "use client";
 
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress, SxProps } from "@mui/material";
 import { getWalletStore, OperationResult } from "@/stores/WalletStore";
 import { contractStore } from "@/stores/ContractStore";
 import { ContractAndConfig } from "@trilitech/types";
 import { useState } from "react";
 
-interface VoteButtonProps {
+interface UpVoteButtonProps {
   proposalHash: string;
   contractVotingIndex: number;
+  sx?: SxProps;
 }
 
-export const UpvoteButton = ({ proposalHash, contractVotingIndex }: VoteButtonProps) => {
+export const UpvoteButton = ({ proposalHash, contractVotingIndex, sx }: UpVoteButtonProps) => {
   const walletStore = getWalletStore();
   const contract: ContractAndConfig | undefined = contractStore.currentContract;
   const isCurrentPeriod: boolean = contractStore.currentPeriodData?.contract_voting_index === contractVotingIndex;
@@ -55,7 +56,7 @@ export const UpvoteButton = ({ proposalHash, contractVotingIndex }: VoteButtonPr
       size="small"
       onClick={handleUpvote}
       disabled={isUpvoting || loading}
-      sx={{ mt: 1, minWidth: 97 }}
+      sx={{ minWidth: 97, ...sx }}
     >
       {isUpvoting || loading ? (
         <CircularProgress size="20px" sx={{ color: theme => theme.palette.primary.main }} />

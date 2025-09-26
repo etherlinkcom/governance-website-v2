@@ -90,7 +90,7 @@ export const PromotionView = observer(({ period, onClose }: PromotionViewProps) 
             alignItems: { xs: "flex-start", md: "center" },
           }}
         >
-          <Box sx={{ width: { xs: "100%", md: "80%" } }}>
+          <Box sx={{ width: { xs: "100%", md: "70%" } }}>
             <Typography>Candidate:</Typography>
             <EllipsisBox sx={{ maxWidth: "100%" }}>
               <HashDisplay hash={period.promotion?.proposal_hash || ""} />
@@ -98,13 +98,13 @@ export const PromotionView = observer(({ period, onClose }: PromotionViewProps) 
           </Box>
 
 
-          <Box sx={{ display: "flex", gap: 2}}>
+          <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", sm: "row" }, width: { xs: "100%", md: "auto" } }}>
             <VoteButton
               isCurrentPeriod={isCurrentPeriod}
               contractVotingIndex={period.contract_voting_index}
               promotionHash={period.promotion?.proposal_hash || ""}
             />
-            <LearnMoreButton proposalHash={period.promotion?.proposal_hash} />
+            <LearnMoreButton proposalHash={period.promotion?.proposal_hash} sx={{width: { xs: "100%", md: "auto" }}} />
           </Box>
         </Box>
 

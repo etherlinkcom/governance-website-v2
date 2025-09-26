@@ -62,11 +62,13 @@ export const VoteButton = observer(({isCurrentPeriod= false, contractVotingIndex
   return (
     <>
         {isCurrentPeriod && walletStore?.hasVotingPower && (
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-            <Button variant="contained" onClick={() => setVoteModalOpen(true)}>
+            <Button
+              variant="contained"
+              onClick={() => setVoteModalOpen(true)}
+              sx={{ width: { xs: "100%", md: "auto" } }}
+              >
                 Vote
             </Button>
-            </Box>
         )}
       <Dialog
         open={voteModalOpen}

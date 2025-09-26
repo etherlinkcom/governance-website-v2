@@ -34,6 +34,14 @@ export const ProposalCard = observer(({ proposal, contractVotingIndex, defaultEx
         expandIcon={<ExpandMoreIcon />}
         aria-controls={`proposal-${proposal.proposal_hash}-content`}
         id={`proposal-${proposal.proposal_hash}-header`}
+        sx={{
+    marginX: 1,
+    '& .MuiAccordionSummary-content': {
+      maxWidth: 'calc(100% - 48px)',
+      overflow: 'hidden',
+      margin: 0,
+    }
+  }}
       >
         <Box
           sx={{
@@ -42,13 +50,16 @@ export const ProposalCard = observer(({ proposal, contractVotingIndex, defaultEx
             justifyContent: "space-between",
             alignItems: {xs: "flex-start", md: "center"},
             width: "100%",
+            minWidth: 0,
             gap: { xs: 2, md: 0 },
-            mr: 2
+            mr: 1,
+            mt:1,
+            overflow: 'hidden',
           }}
         >
           {/* Left side - Main content */}
           <EllipsisBox sx={{
-            maxWidth: {xs: '70vw', md: '55vw'},
+            maxWidth: {xs: '100%', md: '70%'},
           }}>
             <HashDisplay
               hash={proposal.proposal_hash}
@@ -102,23 +113,21 @@ export const ProposalCard = observer(({ proposal, contractVotingIndex, defaultEx
           <Box
             sx={{
               display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
               gap: { xs: 2, md: 3 },
               width: { xs: "100%", md: "auto" },
               justifyContent: { xs: "space-between", md: "flex-end" },
+              alignItems: "center",
             }}
           >
 
-            <Box sx={{ flexShrink: 0 }}>
               <UpvoteButton
                 proposalHash={proposal.proposal_hash}
                 contractVotingIndex={contractVotingIndex}
+                sx={{ width: {xs: "100%", sm: "auto"}}}
               />
-            </Box>
 
-            {/* Learn More Button */}
-            <Box sx={{ flexShrink: 0 }}>
-              <LearnMoreButton proposalHash={proposal.proposal_hash} />
-            </Box>
+              <LearnMoreButton proposalHash={proposal.proposal_hash}/>
 
             {/* Upvotes */}
             <Box sx={{ textAlign: "right", flexShrink: 0 }}>
