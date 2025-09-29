@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { database } from "@/lib/database";
-import { Upvote, Vote } from "@trilitech/types";
+import { Upvote } from "@trilitech/types";
 
 type UpvotesResponse = {
   upvotes: Upvote[];
