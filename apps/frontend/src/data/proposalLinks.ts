@@ -40,4 +40,9 @@ export const allLinkData: LinkData[] = [
     href: 'https://forum.tezosagora.org/t/tezos-bakers-it-s-time-to-vote-for-etherlink-4-1-dionysus-revision-1/6810',
     title: 'Tezos bakers, it’s time to vote for Etherlink 4.1 (Dionysus Revision 1)!',
   },
+  {
+    payloadKey: '00fea18ffecd0563f942b8b4c67911302754d7e505b5b5672ff03cb927b79ba830',
+    href: 'https://medium.com/@etherlink/announcing-ebisu-a-5th-upgrade-proposal-for-etherlink-mainnet-4dfdd1c8819e',
+    title: 'Announcing Ebisu: A 5th Upgrade proposal for Etherlink Mainnet',
+  },
 ];
