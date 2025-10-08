@@ -37,7 +37,11 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
           transition: 'all 0.3s ease-in-out',
           cursor: hasProposals || hasPromotion ? 'pointer' : 'default',
           position: 'relative',
-          p: 2.5
+          p: 2.5,
+          display: 'flex',
+
+          flexDirection: 'column-reverse',
+
         }}
       >
           <PeriodVotingStatsPanel

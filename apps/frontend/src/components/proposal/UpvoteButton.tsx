@@ -52,7 +52,7 @@ export const UpvoteButton = ({ proposalHash, contractVotingIndex, sx }: UpVoteBu
 
   return (
     <Button
-      variant="outlined"
+      variant="contained"
       size="small"
       onClick={handleUpvote}
       disabled={isUpvoting || loading}

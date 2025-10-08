@@ -13,7 +13,7 @@ export const LearnMoreButton = ({ proposalHash, sx }: LearnMoreButtonProps) => {
 
     return (
         <Button
-            variant="contained"
+            variant="outlined"
             href={linkData.href}
             target="_blank"
             rel="noopener noreferrer"

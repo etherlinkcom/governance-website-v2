@@ -7,6 +7,7 @@ import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { FrontendPeriod } from '@/types/api';
 import { formatDate } from '@/lib/formatDate';
 import { PastPeriodCard } from '@/components/past/PastPeriodCard';
+import { contractStore } from '@/stores/ContractStore';
 
 const PastPeriodCardSkeleton = () => {
   return (
@@ -29,11 +30,11 @@ const PeriodsListSkeleton = () => (
 
 interface PeriodsListProps {
   periods: FrontendPeriod[];
-  isLoading: boolean;
 }
 
-export const PastPeriodsList = observer(({ periods, isLoading }: PeriodsListProps) => {
+export const PastPeriodsList = observer(({ periods}: PeriodsListProps) => {
 
+  const isLoading: boolean = contractStore.isLoadingPastPeriods;
   if (isLoading) return <PeriodsListSkeleton />;
 
   if (periods.length === 0) {
