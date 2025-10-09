@@ -16,8 +16,7 @@ export const Current = observer(() => {
 
   if (isLoading || !currentPeriod) {
     return (
-      <Box sx={{ width: "100%", mx: "auto"}}>
-        <Card sx={{ p: 3, height: "600px", borderRadius: "16px" }}>
+      <Box sx={{ width: "100%", mx: "auto", p: 3}}>
           <Box sx={{
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
@@ -31,14 +30,12 @@ export const Current = observer(() => {
           <ComponentLoading width={190} height={22} sx={{width: { xs: "100%", sm: "190px" }}} />
           </Box>
           <ComponentLoading width={250} height={22} sx={{mt:3, width: { xs: "50%", sm: "250px" }}} />
-        </Card>
       </Box>
     );
   }
 
   return (
     <Box sx={{ width: "100%", mx: "auto" }}>
-      <Card sx={{ height: "auto", minHeight: 600, borderRadius: "16px", boxShadow: 'none', backgroundColor: 'transparent' }}>
           {currentPeriod.proposals && currentPeriod.proposals.length > 0 ? (
             <ProposalView period={currentPeriod} />
           ) : currentPeriod.promotion ? (
@@ -46,7 +43,6 @@ export const Current = observer(() => {
           ) : (
             <EmptyCurrentPeriod currentPeriod={currentPeriod} />
           )}
-      </Card>
     </Box>
   );
 });
