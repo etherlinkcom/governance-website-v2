@@ -141,7 +141,7 @@ export const ProposalCard = observer(({ proposal, contractVotingIndex, defaultEx
       </AccordionSummary>
 
       <AccordionDetails>
-        <Typography variant='body1'>
+        <Typography variant='body1' sx={{margin: '8px 16px'}}>
           Upvoters
         </Typography>
         <UpvotersTable proposalHash={proposal.proposal_hash} contractVotingIndex={proposal.contract_period_index} />
