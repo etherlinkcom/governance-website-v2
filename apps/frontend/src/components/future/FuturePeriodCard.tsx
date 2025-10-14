@@ -31,7 +31,7 @@ export const FuturePeriodCard = observer(({ futurePeriod }: FuturePeriodCardProp
         <Typography
           variant="caption"
           color="text.secondary"
-          sx={{ display: { xs: "none", sm: "block" } }}
+          // sx={{ display: { xs: "none", sm: "block" } }}
         >
           Levels: {futurePeriod.startLevel.toLocaleString()} - {futurePeriod.endLevel.toLocaleString()}
         </Typography>
