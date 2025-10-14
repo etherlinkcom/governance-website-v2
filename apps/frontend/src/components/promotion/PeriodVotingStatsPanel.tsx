@@ -113,6 +113,7 @@ export const PeriodVotingStatsPanel = ({
         sx={{
           position: "absolute",
           right: 24,
+          top: 25,
           display: { xs: "none", md: "block" },
           width: "255px",
         }}
