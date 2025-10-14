@@ -292,18 +292,22 @@ export const components: Components<Theme> = {
         overflowX: "auto",
         maxHeight: "500px",
         "&::-webkit-scrollbar": {
-          height: "8px",
+          height: "6px",
+          width: "8px",
         },
         "&::-webkit-scrollbar-track": {
           backgroundColor: alpha(theme.palette.primary.main, 0.1),
-          borderRadius: "4px",
+          borderRadius: "8px",
         },
         "&::-webkit-scrollbar-thumb": {
           backgroundColor: alpha(theme.palette.primary.main, 0.1),
-          borderRadius: "4px",
+          borderRadius: "8px",
           "&:hover": {
             backgroundColor: alpha(theme.palette.primary.main, 0.1),
           },
+        },
+        "&::-webkit-scrollbar-corner": {
+          backgroundColor: "transparent",
         },
         scrollbarWidth: "thin",
         scrollbarColor: `${alpha(theme.palette.primary.main, 0.1)} ${alpha(
