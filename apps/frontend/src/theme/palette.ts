@@ -12,7 +12,7 @@ export const palette: PaletteOptions = {
     main: '#FF6B6B',
     light: '#FF9999',
     dark: '#E55555',
-    contrastText: '#e9e9e9',
+    contrastText: '#BCBCBC',
   },
   background: {
     default: '#0A0A0A',
@@ -33,13 +33,13 @@ export const palette: PaletteOptions = {
     main: '#FFA726',
     light: '#FFD54F',
     dark: '#F57C00',
-    contrastText: '#000000',
+    contrastText: '#9b9b9b',
   },
   error: {
     main: '#FF6B6B',
     light: '#FF9999',
     dark: '#E55555',
-    contrastText: '#e9e9e9',
+    contrastText: '#b5b5b5',
   },
   success: {
     main: '#38FF9C',

@@ -60,7 +60,7 @@ export default function Home() {
           </Typography>
           <Typography
             variant="body1"
-            sx={{ fontSize: 20, color: "#b5b5b5 !important" }}
+            sx={{ fontSize: 20, color: theme.palette.error.contrastText + " !important" }}
           >
             Your vote. Your network. Propose improvements and participate in
             protocol upgrades.

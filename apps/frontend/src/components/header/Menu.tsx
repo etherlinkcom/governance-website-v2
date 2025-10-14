@@ -57,12 +57,12 @@ export const Menu = observer(({ handleGovernanceChange }: MenuProps) => {
             sx={{
               color: isKernelTrack
                 ? theme.palette.primary.dark + " !important"
-                : "#bcbcbc !important",
+                : theme.palette.secondary.contrastText +" !important",
 
               "& .MuiSvgIcon-root": {
                 color: isKernelTrack
                   ? theme.palette.primary.dark + " !important"
-                  : "#bcbcbc !important",
+                  : theme.palette.secondary.contrastText +" !important",
               },
               "&:hover": {
                 color: theme.palette.primary.dark + " !important",
@@ -90,7 +90,7 @@ export const Menu = observer(({ handleGovernanceChange }: MenuProps) => {
                   color:
                     governance === value
                       ? theme.palette.primary.dark
-                      : "#bcbcbc !important",
+                      : theme.palette.secondary.contrastText +" !important",
                   "&:hover": {
                     color: theme.palette.primary.dark + " !important",
                   },
@@ -110,7 +110,7 @@ export const Menu = observer(({ handleGovernanceChange }: MenuProps) => {
             color:
               governance === "sequencer"
                 ? theme.palette.primary.dark + " !important"
-                : "#bcbcbc !important",
+                : theme.palette.secondary.contrastText +" !important",
             fontWeight: 700,
             "&:hover": {
               color: theme.palette.primary.dark + " !important",
@@ -122,7 +122,7 @@ export const Menu = observer(({ handleGovernanceChange }: MenuProps) => {
         <Divider
           orientation="vertical"
           flexItem
-          sx={{ borderColor: "#9b9b9b", borderRadius: "24px" }}
+          sx={{ borderColor: theme.palette.warning.contrastText, borderRadius: "24px" }}
         />
         <ConnectButton />
       </Box>

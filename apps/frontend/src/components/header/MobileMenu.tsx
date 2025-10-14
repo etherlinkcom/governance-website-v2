@@ -50,7 +50,7 @@ export const MobileMenu = ({ handleGovernanceChange }: MobileMenuProps) => {
       <MenuIcon
         fontSize="small"
         onClick={() => setDrawerOpen(true)}
-        sx={{ color: "#BCBCBC", fontSize: "18px", mt: 0.8 }}
+        sx={{ color: theme.palette.secondary.contrastText, fontSize: "18px", mt: 0.8 }} // TODO  Add color to palette
       />
       <Drawer
         anchor="bottom"
@@ -103,7 +103,7 @@ export const MobileMenu = ({ handleGovernanceChange }: MobileMenuProps) => {
               sx={{
                 fontWeight: 600,
                 fontSize: "14px",
-                color: "#bcbcbc !important",
+                color: theme.palette.secondary.contrastText + " !important",
               }}
             >
               Home
@@ -123,7 +123,7 @@ export const MobileMenu = ({ handleGovernanceChange }: MobileMenuProps) => {
                     sx={{
                       color: isKernelTrack
                         ? theme.palette.primary.dark + " !important"
-                        : "#bcbcbc !important",
+                        : theme.palette.secondary.contrastText + " !important",
                     }}
                   />
                 }
@@ -135,7 +135,7 @@ export const MobileMenu = ({ handleGovernanceChange }: MobileMenuProps) => {
                     fontSize: "14px",
                     color: isKernelTrack
                       ? theme.palette.primary.dark + " !important"
-                      : "#bcbcbc !important",
+                      : theme.palette.secondary.contrastText + " !important",
                   }}
                 >
                   Kernel
@@ -152,7 +152,7 @@ export const MobileMenu = ({ handleGovernanceChange }: MobileMenuProps) => {
                         color:
                           governance === value
                             ? theme.palette.primary.dark + " !important"
-                            : "#bcbcbc !important",
+                            : theme.palette.secondary.contrastText + " !important",
                       }}
                     >
                       {label}
@@ -171,7 +171,7 @@ export const MobileMenu = ({ handleGovernanceChange }: MobileMenuProps) => {
               color:
                 governance === "sequencer"
                   ? theme.palette.primary.dark + " !important"
-                  : "#bcbcbc !important",
+                  : theme.palette.secondary.contrastText + " !important",
             }}
           >
             Sequencer

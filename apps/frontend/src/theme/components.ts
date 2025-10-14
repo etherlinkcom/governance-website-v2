@@ -233,7 +233,7 @@ export const components: Components<Theme> = {
         "&.mobile-menu-item": {
           fontWeight: 700,
           fontSize: "14px",
-          color: "#bcbcbc",
+          color: theme.palette.secondary.contrastText,
           cursor: "pointer",
           height: "40px",
           padding: theme.spacing(1.5, 3),
@@ -247,7 +247,7 @@ export const components: Components<Theme> = {
         "&.mobile-menu-track": {
           fontWeight: 700,
           fontSize: "14px",
-          color: "#bcbcbc",
+          color: theme.palette.secondary.contrastText,
           cursor: "pointer",
           margin: theme.spacing(0.5, 0),
           padding: theme.spacing(1, 4.5),
@@ -455,7 +455,7 @@ export const components: Components<Theme> = {
   MuiSelect: {
     styleOverrides: {
       root: ({ theme }) => ({
-        color: "#bcbcbc",
+        color: theme.palette.secondary.contrastText,
         padding: 0,
         "&[aria-expanded='true']": {
           color: theme.palette.primary.dark,
@@ -465,7 +465,7 @@ export const components: Components<Theme> = {
           padding: 0,
         },
         "& .MuiSvgIcon-root": {
-          color: "#bcbcbc",
+          color: theme.palette.secondary.contrastText,
         },
         "&:hover": {
           color: theme.palette.primary.dark,
@@ -479,7 +479,7 @@ export const components: Components<Theme> = {
   MuiMenu: {
     styleOverrides: {
       paper: ({ theme }) => ({
-        color: "#bcbcbc",
+        color: theme.palette.secondary.contrastText,
         background: theme.palette.custom.background?.dropdown,
         marginTop: theme.spacing(2),
         marginLeft: theme.spacing(-1),
