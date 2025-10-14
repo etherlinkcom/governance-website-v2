@@ -1,4 +1,4 @@
-import { Card, Box, Modal } from '@mui/material';
+import { Card, Box, Modal, Backdrop, Fade, Slide, useMediaQuery, useTheme } from '@mui/material';
 import { useState } from 'react';
 import { contractStore } from '@/stores/ContractStore';
 import { observer } from 'mobx-react-lite';
@@ -13,6 +13,8 @@ interface PastPeriodCardProps {
 }
 
 export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [modalOpen, setModalOpen] = useState(false);
 
   const hasProposals: boolean | undefined = period.proposals && period.proposals.length > 0;
@@ -27,6 +29,16 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
     }
   };
 
+  const modalContent = (
+    <Box className="modal-content">
+      {hasPromotion ? (
+        <PromotionView period={period} onClose={() => setModalOpen(false)} />
+      ) : hasProposals ? (
+        <ProposalView period={period} onClose={() => setModalOpen(false)} />
+      ) : null}
+    </Box>
+  );
+
   return (
     <>
       <Card
@@ -38,41 +50,52 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
           position: 'relative',
           p: 2.5,
           display: 'flex',
-
           flexDirection: 'column-reverse',
-
         }}
       >
-          <PeriodVotingStatsPanel
-            hasPromotion={hasPromotion}
-            hasProposals={hasProposals}
-            promotions={period.promotion ? [period.promotion] : []}
-            proposals={period.proposals}
-            contractAndConfig={contractAndConfig}
-            isLoading={isLoading}
-            period={period}
-          />
+        <PeriodVotingStatsPanel
+          hasPromotion={hasPromotion}
+          hasProposals={hasProposals}
+          promotions={period.promotion ? [period.promotion] : []}
+          proposals={period.proposals}
+          contractAndConfig={contractAndConfig}
+          isLoading={isLoading}
+          period={period}
+        />
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <PeriodMetadata
-              period={period}
-              proposals={period.proposals}
-              hasProposals={hasProposals}
-              hasPromotion={hasPromotion}
-              isLoading={isLoading}
-            />
-          </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <PeriodMetadata
+            period={period}
+            proposals={period.proposals}
+            hasProposals={hasProposals}
+            hasPromotion={hasPromotion}
+            isLoading={isLoading}
+          />
+        </Box>
       </Card>
 
-      {/* Modals */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} disableAutoFocus>
-        <Box className="modal-content">
-          {hasPromotion ? (
-            <PromotionView period={period} onClose={() => setModalOpen(false)} />
-          ) : hasProposals ? (
-            <ProposalView period={period} onClose={() => setModalOpen(false)} />
-          ) : null}
-        </Box>
+      {/* Modal with responsive transitions */}
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        closeAfterTransition
+        slots={{ backdrop: Backdrop }}
+        slotProps={{
+          backdrop: {
+            timeout: 300,
+          },
+        }}
+        disableAutoFocus
+      >
+        {isMobile ? (
+          <Slide direction="up" in={modalOpen} timeout={300}>
+            {modalContent}
+          </Slide>
+        ) : (
+          <Fade in={modalOpen} timeout={300}>
+            {modalContent}
+          </Fade>
+        )}
       </Modal>
     </>
   );

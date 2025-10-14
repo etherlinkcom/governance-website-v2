@@ -1,4 +1,4 @@
-import { AppBar, Box, useTheme } from "@mui/material";
+import { AppBar, Box } from "@mui/material";
 import { Menu } from "@/components/header/Menu";
 import { observer } from "mobx-react-lite";
 import Image from "next/image";
@@ -9,7 +9,6 @@ import { GovernanceType } from "@trilitech/types";
 import { useRouter } from "next/router";
 
 export const Header = observer(() => {
-  const theme = useTheme();
 
   const router = useRouter();
 
