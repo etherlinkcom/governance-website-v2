@@ -11,13 +11,12 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { HashDisplay } from "@/components/shared/HashDisplay";
-import { formatNumber } from "@/lib/formatNumber";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
-import { LearnMoreButton } from "../shared/LearnMoreButton";
 import { UpvotersTable } from "./UpvotersTable";
 import { FrontendProposal } from "@/types/api";
 import { UpvoteButton } from "./UpvoteButton";
 import { observer } from "mobx-react-lite";
+import { LearnMoreAndUpvotes } from "./LearnMoreAndUpvotes";
 
 interface ProposalCardProps {
   proposal: FrontendProposal;
@@ -35,13 +34,13 @@ export const ProposalCard = observer(({ proposal, contractVotingIndex, defaultEx
         aria-controls={`proposal-${proposal.proposal_hash}-content`}
         id={`proposal-${proposal.proposal_hash}-header`}
         sx={{
-    marginX: 1,
-    '& .MuiAccordionSummary-content': {
-      maxWidth: 'calc(100% - 48px)',
-      overflow: 'hidden',
-      margin: 0,
-    }
-  }}
+          marginX: 1,
+          '& .MuiAccordionSummary-content': {
+            maxWidth: 'calc(100% - 48px)',
+            overflow: 'hidden',
+            margin: 0,
+          }
+        }}
       >
         <Box
           sx={{
@@ -109,38 +108,37 @@ export const ProposalCard = observer(({ proposal, contractVotingIndex, defaultEx
             )}
           </EllipsisBox>
 
-          {/* Right side - Button and Upvotes */}
           <Box
             sx={{
               display: "flex",
               flexDirection: { xs: "column", sm: "row" },
               gap: { xs: 2, md: 3 },
               width: { xs: "100%", md: "auto" },
-              justifyContent: { xs: "space-between", md: "flex-end" },
+              justifyContent: { xs: "flex-start", md: "flex-end" },
               alignItems: "center",
             }}
           >
+            <UpvoteButton
+              proposalHash={proposal.proposal_hash}
+              contractVotingIndex={contractVotingIndex}
+              sx={{ width: {xs: "100%", sm: "auto"}}}
+            />
 
-              <UpvoteButton
-                proposalHash={proposal.proposal_hash}
-                contractVotingIndex={contractVotingIndex}
-                sx={{ width: {xs: "100%", sm: "auto"}}}
-              />
-
-              <LearnMoreButton proposalHash={proposal.proposal_hash}/>
-
-            {/* Upvotes */}
-            <Box sx={{ textAlign: "right", flexShrink: 0 }}>
-              <Typography variant="subtitle2">Upvotes:</Typography>
-              <Typography variant="body1" sx={{ display: "block" }}>
-                {formatNumber(parseInt(proposal.upvotes))}
-              </Typography>
-            </Box>
+            <LearnMoreAndUpvotes proposal={proposal} sx={{ display: { xs: 'none', md: 'flex' } }} />
           </Box>
         </Box>
       </AccordionSummary>
 
       <AccordionDetails>
+
+        <LearnMoreAndUpvotes proposal={proposal}
+          sx={{
+            display: { xs: 'flex', md: 'none' },
+            mb: 2,
+            px: 2
+          }}
+        />
+
         <Typography variant='body1' sx={{margin: '8px 16px'}}>
           Upvoters
         </Typography>

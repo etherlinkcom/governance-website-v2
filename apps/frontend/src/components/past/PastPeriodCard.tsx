@@ -15,7 +15,6 @@ interface PastPeriodCardProps {
 export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
   const [modalOpen, setModalOpen] = useState(false);
 
-  // TODO change both of these to booleans
   const hasProposals: boolean | undefined = period.proposals && period.proposals.length > 0;
   const hasPromotion: string | undefined = period.promotion?.proposal_hash;
 
