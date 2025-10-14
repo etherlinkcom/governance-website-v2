@@ -21,13 +21,19 @@ import { LearnMoreAndUpvotes } from "./LearnMoreAndUpvotes";
 interface ProposalCardProps {
   proposal: FrontendProposal;
   contractVotingIndex: number;
-  defaultExpanded?: boolean;
+  expanded: boolean;
+  onChange: () => void;
 }
 
-export const ProposalCard = observer(({ proposal, contractVotingIndex, defaultExpanded }: ProposalCardProps) => {
+export const ProposalCard = observer(({
+  proposal,
+  contractVotingIndex,
+  expanded,
+  onChange,
+}: ProposalCardProps) => {
 
   return (
-    <Accordion defaultExpanded={defaultExpanded}>
+    <Accordion expanded={expanded} onChange={onChange}>
       <AccordionSummary
         component="div"
         expandIcon={<ExpandMoreIcon />}

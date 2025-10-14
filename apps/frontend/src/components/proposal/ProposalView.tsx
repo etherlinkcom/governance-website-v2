@@ -10,6 +10,7 @@ import { CopyButton } from "../shared/CopyButton";
 import { ContractAndConfig } from "@trilitech/types";
 import { ModalCloseButton } from "../shared/ModalCloseButton";
 import { EllipsisBox } from "../shared/EllipsisBox";
+import { useState } from "react";
 
 interface ProposalViewProps {
   period: FrontendPeriod;
@@ -20,6 +21,8 @@ export const ProposalView = observer(({ period, onClose }: ProposalViewProps) =>
 
     const contract: ContractAndConfig | undefined = contractStore.getContract(period.contract);
     const isCurrentPeriod: boolean = contractStore.currentPeriodData?.contract_voting_index === period.contract_voting_index;
+    const defaultExpandedHash = isCurrentPeriod && period.proposals && period.proposals.length > 0 ? period.proposals[0].proposal_hash : null;
+    const [expandedHash, setExpandedHash] = useState<string | null>(defaultExpandedHash);
 
     return (
       <Box
@@ -85,13 +88,16 @@ export const ProposalView = observer(({ period, onClose }: ProposalViewProps) =>
             flexDirection: "column",
           }}
         >
-          {period.proposals?.map((proposal: FrontendProposal, index: number) => (
+          {period.proposals?.map((proposal: FrontendProposal) => (
             <ProposalCard
               key={proposal.proposal_hash}
               proposal={proposal}
               contractVotingIndex={period.contract_voting_index}
-              defaultExpanded={
-                !isCurrentPeriod && index === (period.proposals?.length || 0) - 1
+              expanded={expandedHash === proposal.proposal_hash}
+              onChange={() =>
+                setExpandedHash(
+                  expandedHash === proposal.proposal_hash ? null : proposal.proposal_hash
+                )
               }
             />
           ))}
