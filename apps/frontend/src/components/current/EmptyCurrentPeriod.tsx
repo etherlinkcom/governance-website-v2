@@ -9,9 +9,7 @@ interface EmptyCurrentPeriodProps {
   currentPeriod: FrontendPeriod;
 }
 
-export const EmptyCurrentPeriod = ({
-  currentPeriod,
-}: EmptyCurrentPeriodProps) => {
+export const EmptyCurrentPeriod = ({currentPeriod}: EmptyCurrentPeriodProps) => {
 
   return (
     <Box sx={{ p: 3, height: 600 }}>

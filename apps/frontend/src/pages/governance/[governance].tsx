@@ -39,17 +39,6 @@ export default observer(() => {
     localStorage.setItem('governance-selected-view', view);
   };
 
-  if (contractStore.currentError) {
-    return (
-      <Container maxWidth="lg">
-        <Box p={4}>
-          <Typography color="error">
-            Error: {contractStore.currentError}
-          </Typography>
-        </Box>
-      </Container>
-    );
-  }
 
   if (!selectedView) return null;
 

@@ -16,27 +16,25 @@ import {
 import { FuturePeriod, FrontendPeriod, FrontendProposal } from "@/types/api";
 import { fetchJson } from "@/lib/fetchJson";
 
+export type LoadingState = "loading" | "success" | "error" | undefined;
+
 class ContractStore {
   private currentGovernance: GovernanceType | null = null;
 
   private addressToContract: Partial<Record<string, ContractAndConfig>> = {};
   private activeContracts: Partial<Record<string, ContractAndConfig>> = {};
 
-  // TODO make strings so we only need one cache?
   private pastPeriods: Partial<Record<GovernanceType, FrontendPeriod[]>> = {};
   private currentPeriod: Partial<Record<GovernanceType, FrontendPeriod>> = {};
   private futurePeriods: Partial<Record<GovernanceType, FuturePeriod[]>> = {};
   private votes: Partial<Record<string, Vote[]>> = {};
   private upvotes: Partial<Record<string, Upvote[]>> = {};
 
-  // Loading states TODO one loading state with string keys?
-  private loadingPastPeriods: Partial<Record<GovernanceType, boolean>> = {};
-  private loadingCurrentPeriod: Partial<Record<GovernanceType, boolean>> = {};
-  private loadingFuturePeriods: Partial<Record<GovernanceType, boolean>> = {};
-  private loadingVotes: Partial<Record<string, boolean>> = {};
-  private loadingUpvotes: Partial<Record<string, boolean>> = {};
-
-  private error: string | null = null;
+  private loadingStatePastPeriods: Partial<Record<GovernanceType, LoadingState>> = {};
+  private loadingStateCurrentPeriod: Partial<Record<GovernanceType, LoadingState>> = {};
+  private loadingStateFuturePeriods: Partial<Record<GovernanceType, LoadingState>> = {};
+  private loadingStateVotes: Partial<Record<string, LoadingState>> = {};
+  private loadingStateUpvotes: Partial<Record<string, LoadingState>> = {};
 
   private readonly futurePeriodsCount: number = 10;
   private readonly tzktApiUrl: string = "https://api.tzkt.io/v1";
@@ -46,10 +44,6 @@ class ContractStore {
       setGovernance: flow,
     });
     this.getContracts();
-  }
-
-  get currentError(): string | null {
-    return this.error;
   }
 
   get currentContract(): ContractAndConfig | undefined {
@@ -66,16 +60,16 @@ class ContractStore {
     return this.currentGovernance;
   }
 
-  get isLoadingPastPeriods(): boolean {
-    return this.currentGovernance ? this.loadingPastPeriods[this.currentGovernance] || false : false;
+  get statePastPeriods(): LoadingState {
+    return this.currentGovernance ? this.loadingStatePastPeriods[this.currentGovernance] : undefined;
   }
 
-  get isLoadingCurrentPeriod(): boolean {
-    return this.currentGovernance ? this.loadingCurrentPeriod[this.currentGovernance] || false : false;
+  get stateCurrentPeriod(): LoadingState {
+    return this.currentGovernance ? this.loadingStateCurrentPeriod[this.currentGovernance] : undefined;
   }
 
-  get isLoadingFuturePeriods(): boolean {
-    return this.currentGovernance ? this.loadingFuturePeriods[this.currentGovernance] || false : false;
+  get stateFuturePeriods(): LoadingState {
+    return this.currentGovernance ? this.loadingStateFuturePeriods[this.currentGovernance] : undefined;
   }
 
   get pastPeriodsData(): FrontendPeriod[] | undefined {
@@ -92,11 +86,11 @@ class ContractStore {
 
   public getVotesForProposal(contractAddress: string, proposalHash: string, contractVotingIndex: number): {
     votes: Vote[];
-    isLoading: boolean;
+    loadingState: LoadingState;
   } {
     const key = `${contractAddress} - ${proposalHash} - ${contractVotingIndex}`;
 
-    if (!this.votes[key] && !this.loadingVotes[key]) {
+    if (!this.votes[key] && this.loadingStateVotes[key] === "loading") {
       runInAction(() => {
         this.getVotes(contractAddress, proposalHash, contractVotingIndex);
       });
@@ -104,17 +98,17 @@ class ContractStore {
 
     return {
       votes: this.votes[key] || [],
-      isLoading: this.loadingVotes[key] || false,
+      loadingState: this.loadingStateVotes[key],
     };
   }
 
   public getUpvotesForProposal(proposalHash: string, contractVotingIndex: number): {
     upvotes: Upvote[];
-    isLoading: boolean;
+    loadingState: LoadingState;
   } {
     const key = `${proposalHash} - ${contractVotingIndex}`;
 
-    if (!this.upvotes[key] && !this.loadingUpvotes[key]) {
+    if (!this.upvotes[key] && this.loadingStateUpvotes[key] === "loading") {
       runInAction(() => {
         this.getUpvotes(proposalHash, contractVotingIndex);
       });
@@ -122,36 +116,35 @@ class ContractStore {
 
     return {
       upvotes: this.upvotes[key] || [],
-      isLoading: this.loadingUpvotes[key] || false,
+      loadingState: this.loadingStateUpvotes[key]
     };
   }
 
   private getPastPeriods = flow(function* (this: ContractStore) {
     if (!this.currentGovernance) return;
-    if (this.loadingPastPeriods[this.currentGovernance]) return;
+    if (this.loadingStatePastPeriods[this.currentGovernance] === "loading") return;
     if (this.pastPeriods[this.currentGovernance]) return;
     try {
-      this.loadingPastPeriods[this.currentGovernance] = true;
+      this.loadingStatePastPeriods[this.currentGovernance] = "loading";
 
       const pastPeriods: { pastPeriods: FrontendPeriod[] } = yield fetchJson<{pastPeriods: FrontendPeriod[]}>(
         `/api/${this.currentGovernance}/pastPeriods`
       );
       this.pastPeriods[this.currentGovernance] = pastPeriods.pastPeriods;
 
+      this.loadingStatePastPeriods[this.currentGovernance] = "success";
     } catch (error) {
       console.error("[ContractStore] Error fetching past periods:", error);
-      this.error = "Failed to fetch past periods";
-    } finally {
-      this.loadingPastPeriods[this.currentGovernance] = false;
+      this.loadingStatePastPeriods[this.currentGovernance] = "error";
     }
   });
 
   private getCurrentPeriod = flow(function* (this: ContractStore) {
     if (!this.currentGovernance) return;
-    if (this.loadingCurrentPeriod[this.currentGovernance]) return;
+    if (this.loadingStateCurrentPeriod[this.currentGovernance] === "loading") return;
     if (this.currentPeriod[this.currentGovernance]) return;
 
-    this.loadingCurrentPeriod[this.currentGovernance] = true;
+    this.loadingStateCurrentPeriod[this.currentGovernance] = "loading";
     try {
       const currentPeriod: { currentPeriod: FrontendPeriod } = yield fetchJson<{ currentPeriod: FrontendPeriod }>(
         `/api/${this.currentGovernance}/currentPeriod`
@@ -166,13 +159,12 @@ class ContractStore {
       }
 
       this.currentPeriod[this.currentGovernance] = currentPeriod.currentPeriod;
+      this.loadingStateCurrentPeriod[this.currentGovernance] = "success";
     } catch (error) {
       console.error("[ContractStore] Error fetching current period:", error);
-      this.error = "Failed to fetch current period";
-    } finally {
-      this.loadingCurrentPeriod[this.currentGovernance] = false;
+      this.loadingStateCurrentPeriod[this.currentGovernance] = "error";
     }
-  });
+   });
 
   private getContracts = flow(function* (this: ContractStore) {
     try {
@@ -186,61 +178,64 @@ class ContractStore {
       }
     } catch (error) {
       console.error("[ContractStore] Error fetching contracts:", error);
-      this.error = "Failed to fetch contracts";
     }
   });
 
   private getFuturePeriods = flow(function* (this: ContractStore) {
     if (!this.currentGovernance) return;
-    if (this.loadingFuturePeriods[this.currentGovernance]) return;
+    if (this.loadingStateFuturePeriods[this.currentGovernance] === "loading") return;
 
-    const contract: ContractAndConfig | undefined = this.activeContracts[this.currentGovernance];
-    if (!contract) return;
+    try {
+      const contract: ContractAndConfig | undefined = this.activeContracts[this.currentGovernance];
+      if (!contract) return;
 
-    const cachedFuturePeriods: FuturePeriod[] | undefined = this.futurePeriods[this.currentGovernance];
-    if (cachedFuturePeriods) return;
+      const cachedFuturePeriods: FuturePeriod[] | undefined = this.futurePeriods[this.currentGovernance];
+      if (cachedFuturePeriods) return;
 
-    this.loadingFuturePeriods[this.currentGovernance] = true;
+      this.loadingStateFuturePeriods[this.currentGovernance] = "loading";
 
-    const tezosBlockTimeInMs: number = 8000;
-    const contractStartLevel: number = contract.started_at_level;
-    const periodLength: number = contract.period_length;
+      const tezosBlockTimeInMs: number = 8000;
+      const contractStartLevel: number = contract.started_at_level;
+      const periodLength: number = contract.period_length;
 
-    const currentLevel: [{ level: number }] = yield fetchJson<[{ level: number }]>(
-      `${this.tzktApiUrl}/blocks?limit=1&sort.desc=level`
-    );
-    const currentTime: number = new Date().getTime();
-
-    const remainder: number =
-      (currentLevel[0].level - contractStartLevel) % periodLength;
-    const nextPeriodStart: number =
-      currentLevel[0].level - remainder + periodLength;
-
-    const futurePeriods: FuturePeriod[] = [];
-    for (let i = 0; i < this.futurePeriodsCount; i++) {
-      const startLevel: number = nextPeriodStart + i * periodLength;
-      const endLevel: number = startLevel + periodLength - 1;
-
-      const startDateTime: Date = new Date(
-        currentTime + startLevel * tezosBlockTimeInMs
+      const currentLevel: [{ level: number }] = yield fetchJson<[{ level: number }]>(
+        `${this.tzktApiUrl}/blocks?limit=1&sort.desc=level`
       );
-      const endDateTime: Date = new Date(
-        currentTime + endLevel * tezosBlockTimeInMs
-      );
+      const currentTime: number = new Date().getTime();
 
-      futurePeriods.push({ startLevel, endLevel, startDateTime, endDateTime });
-    }
+      const remainder: number =
+        (currentLevel[0].level - contractStartLevel) % periodLength;
+      const nextPeriodStart: number =
+        currentLevel[0].level - remainder + periodLength;
 
-    this.futurePeriods[this.currentGovernance] = futurePeriods;
-    this.loadingFuturePeriods[this.currentGovernance] = false;
-  });
+      const futurePeriods: FuturePeriod[] = [];
+      for (let i = 0; i < this.futurePeriodsCount; i++) {
+        const startLevel: number = nextPeriodStart + i * periodLength;
+        const endLevel: number = startLevel + periodLength - 1;
+
+        const startDateTime: Date = new Date(
+          currentTime + startLevel * tezosBlockTimeInMs
+        );
+        const endDateTime: Date = new Date(
+          currentTime + endLevel * tezosBlockTimeInMs
+        );
+
+        futurePeriods.push({ startLevel, endLevel, startDateTime, endDateTime });
+      }
+
+      this.futurePeriods[this.currentGovernance] = futurePeriods;
+      this.loadingStateFuturePeriods[this.currentGovernance] = "success";
+  } catch (error) {
+    console.error("[ContractStore] Error fetching future periods:", error);
+    this.loadingStateFuturePeriods[this.currentGovernance] = "error";
+  }
+});
 
   public setGovernance = flow(function* (
     this: ContractStore,
     governanceType: GovernanceType
   ) {
     this.currentGovernance = governanceType;
-    this.error = null;
 
     try {
       yield this.getCurrentPeriod();
@@ -248,7 +243,6 @@ class ContractStore {
       yield this.getFuturePeriods();
     } catch (error) {
       console.error("[ContractStore] Error setting governance:", error);
-      this.error = "Failed to set governance";
     }
   });
 
@@ -262,23 +256,22 @@ class ContractStore {
 
     if (this.votes[key]) return this.votes[key];
 
-    if (this.loadingVotes[key]) return;
+    if (this.loadingStateVotes[key] === "loading") return;
 
     try {
-      this.loadingVotes[key] = true;
+      this.loadingStateVotes[key] = "loading";
 
       const response: { votes: Vote[] } = yield fetchJson<{ votes: Vote[] }>(
         `/api/votes?contractAddress=${contractAddress}&proposalHash=${proposalHash}&contractVotingIndex=${contractVotingIndex}`
       );
 
       this.votes[key] = observable.array(response.votes);
+      this.loadingStateVotes[key] = "success";
       return response.votes;
     } catch (error) {
       console.error("[ContractStore] Error fetching votes:", error);
-      this.error = "Failed to fetch votes";
+      this.loadingStateVotes[key] = "error";
       return [];
-    } finally {
-      this.loadingVotes[key] = false;
     }
   });
 
@@ -291,23 +284,22 @@ class ContractStore {
 
     if (this.upvotes[key]) return this.upvotes[key];
 
-    if (this.loadingUpvotes[key]) return;
+    if (this.loadingStateUpvotes[key] === "loading") return;
 
     try {
-      this.loadingUpvotes[key] = true;
+      this.loadingStateUpvotes[key] = "loading";
 
       const response: { upvotes: Upvote[] } = yield fetchJson<{upvotes: Upvote[];}>(
         `/api/upvotes?proposalHash=${proposalHash}&contractVotingIndex=${contractVotingIndex}`
       );
 
       this.upvotes[key] = response.upvotes;
+      this.loadingStateUpvotes[key] = "success";
       return response.upvotes;
     } catch (error) {
       console.error("[ContractStore] Error fetching votes:", error);
-      this.error = "Failed to fetch votes";
+      this.loadingStateUpvotes[key] = "error";
       return [];
-    } finally {
-      this.loadingUpvotes[key] = false;
     }
   });
 

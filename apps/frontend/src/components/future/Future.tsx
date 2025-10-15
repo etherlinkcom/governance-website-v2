@@ -1,14 +1,15 @@
-import { contractStore } from "@/stores/ContractStore";
+import { contractStore, LoadingState } from "@/stores/ContractStore";
 import { Box } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { FuturePeriodCard } from "@/components/future/FuturePeriodCard";
+import { FuturePeriodCard, FuturePeriodListSkeleton } from "@/components/future/FuturePeriodCard";
+import { FuturePeriod } from "@/types/api";
 
 export const Future = observer(() => {
-  const isLoading = contractStore.isLoadingFuturePeriods;
-  const futurePeriods = contractStore.futurePeriodsData;
-  console.log({futurePeriods})
+  const loadingState: LoadingState = contractStore.stateFuturePeriods;
+  const futurePeriods: FuturePeriod[] | undefined = contractStore.futurePeriodsData;
 
-  if (isLoading) return <>Loading...</>;
+  // TODO skeleton
+  if (loadingState === "loading" || !loadingState) return <FuturePeriodListSkeleton />;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

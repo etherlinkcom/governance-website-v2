@@ -9,14 +9,14 @@ export const PeriodDateAndLevels = ({ period }: { period: FrontendPeriod }) => {
     <Box sx={{width: { xs: "100%", sm: "auto" }}}>
       <Typography
         variant="body1"
-        sx={{ display: { xs: "block", sm: "none" }, mb: 0 }}
+        sx={{ display: { xs: "block", md: "none" }, mb: 0 }}
       >
         Dates: {formatDate(period.startDateTime, false)} -{" "}
         {formatDate(period.endDateTime, false)}
       </Typography>
       <Typography
         variant="body1"
-        sx={{ display: { xs: "none", sm: "block" }, mb: 0 }}
+        sx={{ display: { xs: "none", md: "block" }, mb: 0 }}
       >
         Start {formatDate(period.startDateTime)} - End{" "}
         {formatDate(period.endDateTime)}

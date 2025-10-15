@@ -16,7 +16,7 @@ interface VotersTableProps {
 }
 
 export const VotersTable = observer(({ contractAddress, proposalHash, contractVotingIndex }: VotersTableProps) => {
-  const { votes, isLoading } = contractStore.getVotesForProposal(contractAddress, proposalHash, contractVotingIndex);
+  const { votes, loadingState } = contractStore.getVotesForProposal(contractAddress, proposalHash, contractVotingIndex);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     votes,
@@ -73,7 +73,7 @@ export const VotersTable = observer(({ contractAddress, proposalHash, contractVo
     }
   };
 
-  if (!Array.isArray(votes) || isLoading) {
+  if (!Array.isArray(votes) || loadingState) {
     return <SortableTableSkeleton columns={columns} rowCount={5} />;
   }
 

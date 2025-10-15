@@ -36,20 +36,20 @@ export const PeriodMetadata = observer(({
 
   return (
     <Box sx={{ flex: 1 }}>
-      <Typography
-        variant="subtitle2"
-        sx={{ display: { xs: "block", sm: "none" }, mb: 0 }}
-      >
-      {formatDate(period.startDateTime, false)} -{" "}
-      {formatDate(period.endDateTime, false)}
-    </Typography>
-    <Typography
-      variant="subtitle2"
-      sx={{ display: { xs: "none", sm: "block" }, mb: 0 }}
-    >
-      Start {formatDate(period.startDateTime)} - End{" "}
-      {formatDate(period.endDateTime)}
-    </Typography>
+        <Typography
+    variant="subtitle2"
+    color="text.secondary"
+    sx={{ display: { xs: "none", sm: "block" } }}
+  >
+    Start {formatDate(period.startDateTime)} - End {formatDate(period.endDateTime)}
+  </Typography>
+  <Typography
+    variant="subtitle2"
+    color="text.secondary"
+    sx={{ display: { xs: "block", sm: "none" } }}
+  >
+    {formatDate(period.startDateTime)} - {formatDate(period.endDateTime)}
+  </Typography>
     <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
       Levels: {period.startLevel.toLocaleString()} -{" "}
       {period.endLevel.toLocaleString()}

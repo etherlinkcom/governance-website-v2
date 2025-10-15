@@ -18,6 +18,7 @@ export const LearnMoreButton = ({ proposalHash, sx }: LearnMoreButtonProps) => {
             target="_blank"
             rel="noopener noreferrer"
             sx={{ whiteSpace: "nowrap", width: { xs: "100%", sm: "auto" }, ...sx }}
+            onClick={(e) => e.stopPropagation()}
         >
             Learn More
         </Button>

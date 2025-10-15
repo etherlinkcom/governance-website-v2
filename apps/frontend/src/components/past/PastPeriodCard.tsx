@@ -1,27 +1,28 @@
-import { Card, Box, Modal, Backdrop, Fade, Slide, useMediaQuery, useTheme } from '@mui/material';
+import { Card, Box, Modal, Backdrop, Fade, Slide, useMediaQuery, useTheme, Theme } from '@mui/material';
 import { useState } from 'react';
-import { contractStore } from '@/stores/ContractStore';
+import { contractStore, LoadingState } from '@/stores/ContractStore';
 import { observer } from 'mobx-react-lite';
 import { PeriodVotingStatsPanel } from '@/components/promotion/PeriodVotingStatsPanel';
 import { PeriodMetadata } from '@/components/past/PeriodMetadata';
 import { FrontendPeriod } from '@/types/api';
 import { PromotionView } from '@/components/promotion/PromotionView';
 import { ProposalView } from '@/components/proposal/ProposalView';
+import { ContractAndConfig } from '@trilitech/types';
 
 interface PastPeriodCardProps {
   period: FrontendPeriod;
 }
 
 export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [modalOpen, setModalOpen] = useState(false);
+  const theme: Theme = useTheme();
+  const isMobile: boolean = useMediaQuery(theme.breakpoints.down('md'));
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const hasProposals: boolean | undefined = period.proposals && period.proposals.length > 0;
   const hasPromotion: string | undefined = period.promotion?.proposal_hash;
 
-  const isLoading = contractStore.isLoadingPastPeriods;
-  const contractAndConfig = contractStore.currentContract!;
+  const loadingState: LoadingState = contractStore.statePastPeriods;
+  const contractAndConfig: ContractAndConfig = contractStore.currentContract!;
 
   const handleCardClick = () => {
     if (hasProposals || hasPromotion) {
@@ -59,7 +60,7 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
           promotions={period.promotion ? [period.promotion] : []}
           proposals={period.proposals}
           contractAndConfig={contractAndConfig}
-          isLoading={isLoading}
+          isLoading={loadingState === 'loading' || !loadingState}
           period={period}
         />
 
@@ -69,7 +70,7 @@ export const PastPeriodCard = observer(({ period }: PastPeriodCardProps) => {
             proposals={period.proposals}
             hasProposals={hasProposals}
             hasPromotion={hasPromotion}
-            isLoading={isLoading}
+            isLoading={loadingState === 'loading' || !loadingState}
           />
         </Box>
       </Card>

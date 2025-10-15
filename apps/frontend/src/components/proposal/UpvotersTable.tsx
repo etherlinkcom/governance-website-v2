@@ -15,7 +15,7 @@ interface UpvotesTableProps {
 }
 
 export const UpvotersTable = observer(({ proposalHash, contractVotingIndex }: UpvotesTableProps) => {
-  const { upvotes, isLoading } = contractStore.getUpvotesForProposal(proposalHash, contractVotingIndex);
+  const { upvotes, loadingState } = contractStore.getUpvotesForProposal(proposalHash, contractVotingIndex);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     upvotes,
@@ -57,7 +57,7 @@ export const UpvotersTable = observer(({ proposalHash, contractVotingIndex }: Up
     }
   };
 
-  if (isLoading) return <SortableTableSkeleton columns={columns} />;
+  if (loadingState === "loading") return <SortableTableSkeleton columns={columns} />;
 
   return (
     <SortableTable

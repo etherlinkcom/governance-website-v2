@@ -7,24 +7,32 @@ import { ComponentLoading } from '@/components/shared/ComponentLoading';
 import { FrontendPeriod } from '@/types/api';
 import { formatDate } from '@/lib/formatDate';
 import { PastPeriodCard } from '@/components/past/PastPeriodCard';
-import { contractStore } from '@/stores/ContractStore';
 
 const PastPeriodCardSkeleton = () => {
   return (
-    <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-      <ComponentLoading width={80} height={20} borderRadius={1} sx={{mb: 1, mt: 1}} />
-      <ComponentLoading width={200} height={16} borderRadius={1} />
-      <ComponentLoading width={300} height={14} borderRadius={1} sx={{mb: 1}} />
-      <ComponentLoading width={80} height={24} borderRadius={3} sx={{mb: 1}} />
-      <ComponentLoading width={70} height={18} borderRadius={3} />
-      <ComponentLoading width={450} height={18} borderRadius={1} sx={{ mb:2 }} />
+    <Card sx={{ p: 2.3, display: 'flex', flexDirection: 'column'}}>
+      <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap:1}}>
+        <ComponentLoading height={16} borderRadius={1} sx={{mb: 0, width: {xs: 290, sm: 350}}} />
+        <ComponentLoading width={250} height={22} borderRadius={1} sx={{ mb:0, display: {xs: 'none', md: 'block'}}} />
+      </Box>
+      <ComponentLoading width={175} height={14} borderRadius={1} sx={{mb: 2.5, mt: 1}}/>
+      <ComponentLoading width={70} height={16} borderRadius={3} />
+      <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxHeight: 24}}>
+        <ComponentLoading width={558} height={18} borderRadius={1} sx={{ width: { xs: '95%', sm: 450 } }} />
+        <ComponentLoading width={133} height={18} borderRadius={1} sx={{m:0, display: {xs: 'none', md: 'block'}}} />
+      </Box>
   </Card>
 );
 }
 
-const PeriodsListSkeleton = () => (
+export const PeriodsListSkeleton = () => (
   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <PastPeriodCardSkeleton />
+      <Typography variant="subtitle2" sx={{mb:1}}>
+        Periods with proposals / promotions
+      </Typography>
+      {[...Array(10)].map((_, idx) => (
+        <PastPeriodCardSkeleton key={idx} />
+      ))}
   </Box>
 );
 
@@ -33,9 +41,6 @@ interface PeriodsListProps {
 }
 
 export const PastPeriodsList = observer(({ periods}: PeriodsListProps) => {
-
-  const isLoading: boolean = contractStore.isLoadingPastPeriods;
-  if (isLoading) return <PeriodsListSkeleton />;
 
   if (periods.length === 0) {
     return (
