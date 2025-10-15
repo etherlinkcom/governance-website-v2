@@ -73,7 +73,7 @@ export const VotersTable = observer(({ contractAddress, proposalHash, contractVo
     }
   };
 
-  if (!Array.isArray(votes) || loadingState) {
+  if (!Array.isArray(votes) || loadingState === "loading") {
     return <SortableTableSkeleton columns={columns} rowCount={5} />;
   }
 

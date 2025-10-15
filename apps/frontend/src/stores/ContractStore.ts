@@ -90,7 +90,7 @@ class ContractStore {
   } {
     const key = `${contractAddress} - ${proposalHash} - ${contractVotingIndex}`;
 
-    if (!this.votes[key] && this.loadingStateVotes[key] === "loading") {
+    if (!this.votes[key] && this.loadingStateVotes[key] !== "loading") {
       runInAction(() => {
         this.getVotes(contractAddress, proposalHash, contractVotingIndex);
       });
@@ -108,7 +108,7 @@ class ContractStore {
   } {
     const key = `${proposalHash} - ${contractVotingIndex}`;
 
-    if (!this.upvotes[key] && this.loadingStateUpvotes[key] === "loading") {
+    if (!this.upvotes[key] && this.loadingStateUpvotes[key] !== "loading") {
       runInAction(() => {
         this.getUpvotes(proposalHash, contractVotingIndex);
       });
