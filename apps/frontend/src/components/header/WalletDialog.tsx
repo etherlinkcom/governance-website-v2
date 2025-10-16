@@ -6,14 +6,12 @@ import {
   Typography,
   Box,
   Button,
-  TextField,
 } from "@mui/material";
 import { CopyButton } from "@/components/shared/CopyButton";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { getWalletStore } from "@/stores/WalletStore";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
-import { validateAddress, ValidationResult } from '@taquito/utils';
+import { ClaimVotingRightsButton } from "./ClaimVotingRightsButton";
 
 interface WalletDialogProps {
   open: boolean;
@@ -21,25 +19,10 @@ interface WalletDialogProps {
   onDisconnect: () => void;
 }
 
-export const WalletDialog = observer(
-  ({ open, onClose, onDisconnect }: WalletDialogProps) => {
+export const WalletDialog = observer(({ open, onClose, onDisconnect }: WalletDialogProps) => {
+
     const walletStore = getWalletStore();
     if (!walletStore) return null;
-
-    const [claimOpen, setClaimOpen] = useState(false);
-    const [claimInput, setClaimInput] = useState("");
-
-    const claimVotingRights = async (input: string) => {
-      if (!walletStore) return;
-      await walletStore.claimVotingRights(input);
-      setClaimOpen(false);
-      setClaimInput("")
-      await walletStore.refreshVotingPower();
-    };
-
-    const isValidateAddress = (address: string): boolean => {
-      return validateAddress(address) === ValidationResult.VALID;
-    };
 
     return (
       <Dialog
@@ -110,9 +93,7 @@ export const WalletDialog = observer(
         </DialogContent>
 
         <DialogActions sx={{ display: "flex", gap: 1, p: 2, flexDirection: { xs: "column", sm: "row" } }}>
-          <Button onClick={() => setClaimOpen(true)} variant="outlined" sx={{width: { xs: "100%", sm: "auto" }}}>
-            Claim Voting Rights
-          </Button>
+          <ClaimVotingRightsButton />
           <Button onClick={onDisconnect} variant="outlined" sx={{width: { xs: "100%", sm: "auto" }}}>
             Disconnect
           </Button>
@@ -120,39 +101,6 @@ export const WalletDialog = observer(
             Close
           </Button>
         </DialogActions>
-
-        {/* Claim Voting Rights */}
-        <Dialog
-          disableEnforceFocus={true}
-          open={claimOpen}
-          onClose={() => setClaimOpen(false)}
-          autoFocus={false}
-          aria-hidden="false"
-          >
-          <DialogTitle>Claim Voting Rights</DialogTitle>
-          <DialogContent>
-            <TextField
-              fullWidth
-              placeholder="Enter Bakers Address"
-              value={claimInput}
-              onChange={e => setClaimInput(e.target.value)}
-              error={!isValidateAddress(claimInput) && claimInput !== ""}
-              helperText={
-                claimInput && !isValidateAddress(claimInput) ? "Invalid address" : ""
-              }
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setClaimOpen(false)}>Cancel</Button>
-            <Button
-              onClick={() =>  claimVotingRights(claimInput)}
-              disabled={!claimInput.trim() || !isValidateAddress(claimInput) || walletStore?.isVoting}
-              variant="contained"
-            >
-              {walletStore?.isVoting ? "Claiming..." : "Claim"}
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Dialog>
     );
   }
