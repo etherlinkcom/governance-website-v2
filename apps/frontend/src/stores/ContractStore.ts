@@ -15,6 +15,7 @@ import {
 } from "@trilitech/types";
 import { FuturePeriod, FrontendPeriod, FrontendProposal } from "@/types/api";
 import { fetchJson } from "@/lib/fetchJson";
+import { getWalletStore, WalletStore } from "./WalletStore";
 
 export type LoadingState = "loading" | "success" | "error" | undefined;
 
@@ -83,6 +84,26 @@ class ContractStore {
   get futurePeriodsData(): FuturePeriod[] | undefined {
     return this.currentGovernance ? this.futurePeriods[this.currentGovernance] : undefined;
   }
+
+  public hasAlreadyVotedForPromotion(contractAddress: string, promotionHash: string, contractVotingIndex: number): boolean {
+    const walletStore: WalletStore | null = getWalletStore();
+    if (!walletStore) return false;
+    const addresses: string[] = walletStore.allVoterAddresses;
+    const { votes } = this.getVotesForProposal(contractAddress, promotionHash, contractVotingIndex);
+    return votes.some(vote => addresses.includes(vote.baker));
+  }
+
+  public hasAlreadyUpvotedForProposal(proposalHash: string, contractVotingIndex: number): boolean {
+    const walletStore: WalletStore | null = getWalletStore();
+    if (!walletStore) return false;
+    const addresses: string[] = walletStore.allVoterAddresses;
+    console.log({proposalHash, contractVotingIndex})
+    const { upvotes } = this.getUpvotesForProposal(proposalHash, contractVotingIndex);
+    console.log({addresses})
+    console.log(upvotes.map(u => u.baker))
+    return upvotes.some(upvote => addresses.includes(upvote.baker));
+  }
+
 
   public getVotesForProposal(contractAddress: string, proposalHash: string, contractVotingIndex: number): {
     votes: Vote[];
@@ -203,10 +224,8 @@ class ContractStore {
       );
       const currentTime: number = new Date().getTime();
 
-      const remainder: number =
-        (currentLevel[0].level - contractStartLevel) % periodLength;
-      const nextPeriodStart: number =
-        currentLevel[0].level - remainder + periodLength;
+      const remainder: number = (currentLevel[0].level - contractStartLevel) % periodLength;
+      const nextPeriodStart: number = currentLevel[0].level - remainder + periodLength;
 
       const futurePeriods: FuturePeriod[] = [];
       for (let i = 0; i < this.futurePeriodsCount; i++) {

@@ -1,7 +1,6 @@
 import { contractStore } from "@/stores/ContractStore";
 import { getWalletStore, OperationResult } from "@/stores/WalletStore";
 import {
-    Box,
   Button,
   CircularProgress,
   Dialog,
@@ -30,6 +29,12 @@ export const VoteButton = observer(({isCurrentPeriod= false, contractVotingIndex
   const isVoting = walletStore?.isVoting;
 
   const contract: ContractAndConfig | undefined = contractStore.currentContract;
+  const hasAlreadyVoted = contract && contractStore.hasAlreadyVotedForPromotion(
+    contract.contract_address,
+    promotionHash,
+    contractVotingIndex
+  );
+
   const handleVote = async () => {
     if (!contract || !walletStore) return;
 
@@ -59,17 +64,20 @@ export const VoteButton = observer(({isCurrentPeriod= false, contractVotingIndex
     }
   };
 
+
+  if (!isCurrentPeriod || !walletStore?.hasVotingPower || hasAlreadyVoted) {
+    return null;
+  }
+
   return (
     <>
-        {isCurrentPeriod && walletStore?.hasVotingPower && (
-            <Button
-              variant="contained"
-              onClick={() => setVoteModalOpen(true)}
-              sx={{ width: { xs: "100%", md: "auto" } }}
-              >
-                Vote
-            </Button>
-        )}
+      <Button
+        variant="contained"
+        onClick={() => setVoteModalOpen(true)}
+        sx={{ width: { xs: "100%", md: "auto" } }}
+        >
+          Vote
+      </Button>
       <Dialog
         open={voteModalOpen}
         onClose={() => setVoteModalOpen(false)}

@@ -15,6 +15,12 @@ interface UpVoteButtonProps {
 export const UpvoteButton = ({ proposalHash, contractVotingIndex, sx }: UpVoteButtonProps) => {
   const walletStore = getWalletStore();
   const contract: ContractAndConfig | undefined = contractStore.currentContract;
+
+  const hasAlreadyUpvoted: boolean = contractStore.hasAlreadyUpvotedForProposal(
+    proposalHash,
+    contractVotingIndex
+  );
+
   const isCurrentPeriod: boolean = contractStore.currentPeriodData?.contract_voting_index === contractVotingIndex;
 
   const isUpvoting = walletStore?.isVoting;
@@ -48,7 +54,7 @@ export const UpvoteButton = ({ proposalHash, contractVotingIndex, sx }: UpVoteBu
     }
   };
 
-  if (!isCurrentPeriod || !walletStore?.hasVotingPower) return null;
+  if (!isCurrentPeriod || !walletStore?.hasVotingPower || hasAlreadyUpvoted) return null;
 
   return (
     <Button

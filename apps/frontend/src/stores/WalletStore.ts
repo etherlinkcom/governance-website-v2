@@ -49,7 +49,7 @@ export class WalletStore {
     this.restoreConnection();
   }
 
-  get address(): string | null{
+  get address(): string | null {
     return this._address;
   }
 
@@ -93,8 +93,19 @@ export class WalletStore {
     })
   }
 
+  get allVoterAddresses(): string[] {
+    return [
+      this._alias,
+      ...Array.from(this.delegates.keys())
+    ].filter((addr): addr is string => typeof addr === 'string');
+  }
+
   public isVoter(address: string): boolean {
     return this.delegates.has(address) || this._address === address || this.alias === address;
+  }
+
+  public isDelegate(address: string): boolean {
+    return this.delegates.has(address);
   }
 
   async connect(): Promise<void> {
@@ -157,6 +168,7 @@ export class WalletStore {
       let ownVotingPower: BigNumber = new BigNumber(0);
       runInAction(() => this.delegates.clear());
 
+      if (delegates.length > 0) {
       await Promise.allSettled(
         delegates.map(async (delegateAddress) => {
           try {
@@ -188,6 +200,7 @@ export class WalletStore {
           }
         })
       );
+      }
 
       runInAction(() => {
         this.votingPower = {
