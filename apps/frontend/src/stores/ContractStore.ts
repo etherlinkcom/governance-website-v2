@@ -97,10 +97,7 @@ class ContractStore {
     const walletStore: WalletStore | null = getWalletStore();
     if (!walletStore) return false;
     const addresses: string[] = walletStore.allVoterAddresses;
-    console.log({proposalHash, contractVotingIndex})
     const { upvotes } = this.getUpvotesForProposal(proposalHash, contractVotingIndex);
-    console.log({addresses})
-    console.log(upvotes.map(u => u.baker))
     return upvotes.some(upvote => addresses.includes(upvote.baker));
   }
 
@@ -233,10 +230,10 @@ class ContractStore {
         const endLevel: number = startLevel + periodLength - 1;
 
         const startDateTime: Date = new Date(
-          currentTime + startLevel * tezosBlockTimeInMs
+          currentTime + ((startLevel - currentLevel[0].level) * tezosBlockTimeInMs)
         );
         const endDateTime: Date = new Date(
-          currentTime + endLevel * tezosBlockTimeInMs
+          currentTime + ((endLevel - currentLevel[0].level) * tezosBlockTimeInMs)
         );
 
         futurePeriods.push({ startLevel, endLevel, startDateTime, endDateTime });
