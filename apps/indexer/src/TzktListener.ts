@@ -67,7 +67,9 @@ export class TzktListener {
     const base_url: string = this.governance_contract_indexer.tzkt_api_url;
 
     await Promise.all(this.contracts.map(async contract => {
-      const response: Response = await fetch(`${base_url}/contracts/${contract.address}/storage/history?limit=1`);
+      const url: string = `${base_url}/contracts/${contract.address}/storage/history?limit=1`;
+      logger.info(`[TzktListener] Fetching contract config from ${url}`);
+      const response: Response = await fetch(url);
       const storage_history: TzktContractStorageHistory[] = (await response.json()) as TzktContractStorageHistory[];
       const on_chain_config: ContractConfig = storage_history[0].value.config;
 
@@ -81,11 +83,14 @@ export class TzktListener {
         proposal_quorum: Number(on_chain_config.proposal_quorum),
         promotion_quorum: Number(on_chain_config.promotion_quorum),
         promotion_supermajority: Number(on_chain_config.promotion_supermajority),
-        active: contract.active
+        active: contract.active,
+        governance_type: contract.type
       } as ContractAndConfig;
     }));
 
     logger.info('[TzktListener] Loaded contract configs:', this.contract_configs);
+    await this.database.upsertContracts(Object.values(this.contract_configs));
+    logger.info('[TzktListener] Contract configs saved to database');
   }
 
   private onOperations(operations_payload: OperationsPayload): void {
@@ -186,7 +191,26 @@ export class TzktListener {
 
     const period_record: Period | null = await this.database.getPeriod(transaction_event.target.address, period_index);
     if (!period_record) {
-      logger.error(`[TzktListener] No period record found for ${transaction_event.target.address} period ${period_index} to include ${proposal_hash}`);
+      logger.error(`[TzktListener] No period record found for ${transaction_event.target.address} period ${period_index}`);
+      const start_level: number = started_at_level + period_index * period_length;
+      const end_level: number = start_level + period_length - 1;
+      const start_date: Date = await this.governance_contract_indexer.getDateFromLevel(start_level);
+      const end_date: Date = await this.governance_contract_indexer.getDateFromLevel(end_level);
+      const total_voting_power: number = await this.governance_contract_indexer.getTotalVotingPower(start_level);
+      logger.info(`[TzktListener] Creating missing period record for ${transaction_event.target.address} period ${period_index} from level ${start_level} to ${end_level}`);
+
+      const new_period_record: Period = {
+        contract_address: transaction_event.target.address,
+        contract_voting_index: period_index,
+        date_start: start_date,
+        date_end: end_date,
+        level_start: start_level,
+        level_end: end_level,
+        proposal_hashes: [proposal_hash],
+        total_voting_power: total_voting_power
+      };
+      await this.database.upsertPeriods([new_period_record]);
+      logger.info(`[TzktListener] Created new period record for ${transaction_event.target.address} period ${period_index} with proposal hash ${proposal_hash}`);
       return;
     }
 
@@ -340,6 +364,8 @@ export class TzktListener {
         logger.warn(`[TzktListener] No promotion hash found for ${contract.address} at period ${period_index}`);
       }
 
+      const total_voting_power: number = await this.governance_contract_indexer.getTotalVotingPower(level_start);
+
       const period_record: Period = {
         contract_voting_index: period_index,
         contract_address: contract.address,
@@ -349,7 +375,7 @@ export class TzktListener {
         date_end: date_end,
         proposal_hashes: [],
         promotion_hash: promotion_hash,
-        total_voting_power: 0
+        total_voting_power: total_voting_power
       };
 
       logger.info(`[TzktListener] New period ${contract.address}-${period_index}: ${JSON.stringify(period_record)}`);

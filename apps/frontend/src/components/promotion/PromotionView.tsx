@@ -1,142 +1,119 @@
-import {
-  Box,
-  Typography,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  CircularProgress,
-} from "@mui/material";
-import { CandidateInfo } from "@/components/promotion/CandidateInfo";
-import { VotingResults } from "@/components/promotion/VotingResults";
-import { VotersTable } from "@/components/promotion/VotersTable";
-import { getWalletStore, OperationResult } from "@/stores/WalletStore";
-import { useState } from "react";
-import { VoteOption } from "@trilitech/types";
+import { Box, Typography } from "@mui/material";
 import { observer } from "mobx-react-lite";
+import { FrontendPeriod } from "@/types/api";
 import { contractStore } from "@/stores/ContractStore";
+import { VotersTable } from "@/components/promotion/VotersTable";
+import { HashDisplay } from "@/components/shared/HashDisplay";
+import { EllipsisBox } from "@/components/shared/EllipsisBox";
+import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
+import { PromotionVotingStatsPanel } from "@/components/promotion/PeriodVotingStatsPanel";
+import { LearnMoreButton } from "@/components/shared/LearnMoreButton";
+import { TimeRemaining } from "@/components/current/TimeRemaining";
+import { CopyButton } from "@/components/shared/CopyButton";
+import { VoteButton } from "@/components/promotion/VoteButton";
+import { ModalCloseButton } from "../shared/ModalCloseButton";
 
 interface PromotionViewProps {
-  contractVotingIndex: number;
-  contractAddress?: string;
-  promotionHash?: string;
-  isCurrentPeriod?: boolean;
+  period: FrontendPeriod;
+  onClose?: () => void;
 }
 
-export const PromotionView = observer(({
-  contractVotingIndex,
-  contractAddress,
-  promotionHash,
-  isCurrentPeriod,
-}: PromotionViewProps) => {
-  const [voteModalOpen, setVoteModalOpen] = useState(false);
-  const [selectedVote, setSelectedVote] = useState<VoteOption>("yea");
-  const walletStore = getWalletStore();
-  const isVoting = walletStore?.isVoting;
+export const PromotionView = observer(({ period, onClose }: PromotionViewProps) => {
+    const contract = contractStore.getContract(period.contract);
+    const isCurrentPeriod: boolean = contractStore.currentPeriodData?.contract_voting_index === period.contract_voting_index;
 
-  const handleVote = async () => {
-    if (!contractAddress || !walletStore) return;
-
-    try {
-      const operation: OperationResult | undefined = await walletStore.vote(contractAddress, selectedVote);
-
-      if (!operation?.completed) return;
-
-      contractStore.createVote(
-        promotionHash || "",
-        walletStore.address || "",
-        walletStore.alias,
-        walletStore.votingPowerAmount,
-        selectedVote,
-        operation?.level || 0,
-        operation?.opHash || '',
-        contractAddress,
-        contractVotingIndex
-      )
-
-      setVoteModalOpen(false);
-    } catch (error) {
-      console.error("Error submitting vote:", error);
-    }
-  };
-
-  return (
-    <Box sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-      {/* Candidate Section */}
-      <Box>
-        <CandidateInfo
-          contractVotingIndex={contractVotingIndex}
-          contractAddress={contractAddress}
-          promotionHash={promotionHash}
-        />
-        <VotingResults
-          contractVotingIndex={contractVotingIndex}
-          contractAddress={contractAddress}
-        />
-      </Box>
-
-      {isCurrentPeriod && walletStore?.hasVotingPower && (
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-          <Button variant="contained" onClick={() => setVoteModalOpen(true)}>
-            Vote
-          </Button>
-        </Box>
-      )}
-
-      {/* Voters Section */}
-      <Box>
-        <Typography variant="h5" component="h2" sx={{ mb: 2, ml: 2 }}>
-          Voters
-        </Typography>
-        <VotersTable
-          contractVotingIndex={contractVotingIndex}
-          contractAddress={contractAddress}
-        />
-      </Box>
-
-      <Dialog
-        open={voteModalOpen}
-        onClose={() => setVoteModalOpen(false)}
-        maxWidth="sm"
-        fullWidth
+    return (
+      <Box
+        className="modal-content"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 5,
+          height: "100%",
+          overflow: "auto",
+          p: { xs: 2, sm: 4 },
+          pt: { xs: 5, sm: 4 },
+        }}
       >
-        <DialogTitle>Vote on Promotion</DialogTitle>
-        <DialogContent>
-          <FormControl component="fieldset" sx={{ mt: 2 }}>
-            <RadioGroup
-              value={selectedVote}
-              onChange={(e) => setSelectedVote(e.target.value as VoteOption)}
-            >
-              <FormControlLabel
-                value="yea"
-                control={<Radio />}
-                label="Yea (Approve)"
+        {onClose && (
+          <ModalCloseButton onClose={onClose} />
+        )}
+        {/* Header */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            flexDirection: { xs: "column", md: "row" },
+            gap: { xs: 2, md: 0 },
+          }}
+        >
+          <Box>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              mb: 0.5
+            }}>
+              <Typography variant="body2" sx={{ display: { xs: 'none', lg: 'block' } }}>
+                Contract: {period.contract}
+              </Typography>
+
+              <EllipsisBox sx={{ color: theme => theme.palette.primary.main, display: { xs: 'block', lg: 'none' }}}>
+                  {period.contract}
+              </EllipsisBox>
+
+            <CopyButton
+              text={period.contract}
+              message="Contract address copied"
+              sx={{color: 'primary.main'}}
               />
-              <FormControlLabel
-                value="nay"
-                control={<Radio />}
-                label="Nay (Reject)"
-              />
-              <FormControlLabel
-                value="pass"
-                control={<Radio />}
-                label="Pass (Abstain)"
-              />
-            </RadioGroup>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setVoteModalOpen(false)}>Cancel</Button>
-          <Button onClick={handleVote} variant="contained" disabled={isVoting} sx={{ minWidth: 128 }}>
-            {isVoting ? <CircularProgress size="20px" sx={{color: theme => theme.palette.custom.tableBg.even}} /> : "Submit Vote"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  );
-});
+            </Box>
+          <PeriodDateAndLevels period={period} />
+          </Box>
+          <Box>
+            {isCurrentPeriod && <TimeRemaining currentPeriod={period} />}
+
+            <PromotionVotingStatsPanel
+              promotion={period.promotion!}
+              period={period}
+              contractAndConfig={contract!}
+            />
+          </Box>
+        </Box>
+
+        {/* Candidate Info */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: { xs: "flex-start", md: "space-between" },
+            flexDirection: { xs: "column", md: "row" },
+            gap: { xs: 2, md: 0 },
+            alignItems: { xs: "flex-start", md: "center" },
+          }}
+        >
+          <Box sx={{ width: { xs: "100%", md: "70%" } }}>
+            <Typography>Candidate:</Typography>
+            <EllipsisBox sx={{ maxWidth: "100%" }}>
+              <HashDisplay hash={period.promotion?.proposal_hash || ""} />
+            </EllipsisBox>
+          </Box>
+
+
+          <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", sm: "row" }, width: { xs: "100%", md: "auto" } }}>
+            <VoteButton
+              isCurrentPeriod={isCurrentPeriod}
+              contractVotingIndex={period.contract_voting_index}
+              promotionHash={period.promotion?.proposal_hash || ""}
+            />
+            <LearnMoreButton proposalHash={period.promotion?.proposal_hash} sx={{width: { xs: "100%", md: "auto" }}} />
+          </Box>
+        </Box>
+
+        <VotersTable
+          contractAddress={period.contract}
+          proposalHash={period.promotion?.proposal_hash || ""}
+          contractVotingIndex={period.contract_voting_index}
+        />
+      </Box>
+    );
+  }
+);

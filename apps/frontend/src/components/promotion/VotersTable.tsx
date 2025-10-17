@@ -4,48 +4,30 @@ import { useTableSort } from '@/hooks/useTableSort';
 import { SortableTable, SortableTableSkeleton } from '@/components/shared/SortableTable';
 import { Vote } from '@trilitech/types';
 import { formatNumber } from '@/lib/formatNumber';
-import { Link, Typography } from '@mui/material';
+import { Box, Link, Typography } from '@mui/material';
 import { contractStore } from '@/stores/ContractStore';
 
 const voterKeys: (keyof Vote)[] = ['baker', 'voting_power', 'vote', 'time'];
 
 interface VotersTableProps {
-  contractVotingIndex?: number;
-  contractAddress?: string;
+  contractAddress: string;
+  proposalHash: string;
+  contractVotingIndex: number;
 }
 
-export const VotersTable = observer(({ contractVotingIndex, contractAddress }: VotersTableProps) => {
-  const { votes, isLoading, error, hasValidParams } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
+export const VotersTable = observer(({ contractAddress, proposalHash, contractVotingIndex }: VotersTableProps) => {
+  const { votes, loadingState } = contractStore.getVotesForProposal(contractAddress, proposalHash, contractVotingIndex);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
     votes,
     'baker',
   );
 
-  if (!hasValidParams) {
-    return (
-      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-        No voters found
-      </Typography>
-    );
-  }
-
   const columns = voterKeys.map(key => ({
     id: key,
     label: key === 'proposal_hash' ? 'Proposal' : prettifyKey(key),
     sortable: true
   }));
-
-  if (isLoading) return <SortableTableSkeleton columns={columns} />;
-
-  if (error) {
-    return (
-      <Typography variant="body2" color="error" sx={{ textAlign: 'center', py: 3 }}>
-        Error loading voters: {error}
-      </Typography>
-    );
-  }
-
 
   const renderCell = (row: Vote, column: { id: keyof Vote; label: string; sortable?: boolean }) => {
     switch (column.id) {
@@ -91,15 +73,16 @@ export const VotersTable = observer(({ contractVotingIndex, contractAddress }: V
     }
   };
 
-  if (!Array.isArray(votes) || votes.length === 0) {
+  if (!Array.isArray(votes) || loadingState === "loading") {
+    return <SortableTableSkeleton columns={columns} rowCount={5} />;
+  }
+
+  if (votes.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-        {contractVotingIndex
-          ? `No voters found for period ${contractVotingIndex}`
-          : 'No voters found'
-        }
-      </Typography>
-    );
+      <Box sx= {{ textAlign: 'center', p: 3 }}>
+        <Typography variant="body2">No votes found.</Typography>
+      </Box>
+    )
   }
 
   return (

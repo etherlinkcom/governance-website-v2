@@ -1,110 +1,156 @@
+"use client";
+
 import { formatDate } from "@/lib/formatDate";
-import { Card, CardContent, Box, Typography, Link, Button, Chip, CircularProgress } from "@mui/material";
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Box,
+  Typography,
+  Link,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { HashDisplay } from "@/components/shared/HashDisplay";
-import { formatNumber } from "@/lib/formatNumber";
-import { HashLink } from "@/components/shared/HashLink";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
-import { getWalletStore, OperationResult } from "@/stores/WalletStore";
+import { UpvotersTable } from "./UpvotersTable";
 import { FrontendProposal } from "@/types/api";
-import { contractStore } from "@/stores/ContractStore";
+import { UpvoteButton } from "./UpvoteButton";
 import { observer } from "mobx-react-lite";
+import { LearnMoreAndUpvotes } from "./LearnMoreAndUpvotes";
 
 interface ProposalCardProps {
   proposal: FrontendProposal;
-  contractAddress: string;
-  isCurrentPeriod?: boolean;
   contractVotingIndex: number;
+  expanded: boolean;
+  onChange: () => void;
 }
 
-export const ProposalCard = observer(({ proposal, contractAddress, isCurrentPeriod, contractVotingIndex }: ProposalCardProps) => {
-  const walletStore = getWalletStore();
-  const isUpvoting = walletStore?.isVoting;
-
-  const handleUpvote = async () => {
-    if (!contractAddress || !walletStore) return;
-
-    try {
-      const operation: OperationResult | undefined = await walletStore.upvoteProposal(contractAddress, proposal.proposal_hash);
-
-      if (!operation?.completed) return;
-      contractStore.createUpvote(
-        operation?.level || 0,
-        proposal.proposal_hash,
-        walletStore.address || '',
-        walletStore.alias,
-        walletStore.votingPowerAmount,
-        operation?.opHash || '',
-        contractAddress,
-        contractVotingIndex
-      );
-    } catch (error) {
-      console.error('Error upvoting proposal:', error);
-    }
-  };
+export const ProposalCard = observer(({
+  proposal,
+  contractVotingIndex,
+  expanded,
+  onChange,
+}: ProposalCardProps) => {
 
   return (
-    <Card sx={{ mx: 1 }}>
-      <CardContent sx={{ p: 3 }}>
+    <Accordion expanded={expanded} onChange={onChange}>
+      <AccordionSummary
+        component="div"
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls={`proposal-${proposal.proposal_hash}-content`}
+        id={`proposal-${proposal.proposal_hash}-header`}
+        sx={{
+          marginX: 1,
+          '& .MuiAccordionSummary-content': {
+            maxWidth: 'calc(100% - 48px)',
+            overflow: 'hidden',
+            margin: 0,
+          }
+        }}
+      >
         <Box
           sx={{
             display: "flex",
+            flexDirection: { xs: "column", md: "row" },
             justifyContent: "space-between",
-            alignItems: "flex-start",
-            mb: 2,
+            alignItems: {xs: "flex-start", md: "center"},
+            width: "100%",
+            minWidth: 0,
+            gap: { xs: 2, md: 0 },
+            mr: 1,
+            mt:1,
+            overflow: 'hidden',
           }}
         >
-          <EllipsisBox sx={{ flex: 1 }}>
-            <HashDisplay hash={proposal.proposal_hash} />
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+          {/* Left side - Main content */}
+          <EllipsisBox sx={{
+            maxWidth: {xs: '100%', md: '70%'},
+          }}>
+            <HashDisplay
+              hash={proposal.proposal_hash}
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}/>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                mb: 1,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               by{" "}
-              {proposal.transaction_hash ? (
-                <Link
-                  href={`${process.env.NEXT_PUBLIC_TZKT_URL}/${proposal.transaction_hash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    color: "primary.main",
-                    textDecoration: "none",
-                    "&:hover": {
-                      textDecoration: "underline",
-                    },
-                  }}
-                >
-                  {proposal.alias || proposal.proposer}
-                </Link>
-              ) : (
-                <span>{proposal.alias || proposal.proposer}</span>
-              )}
+              <Link
+                href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${proposal.transaction_hash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  color: "primary.main",
+                  textDecoration: "none",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {proposal.alias || proposal.proposer}
+              </Link>
             </Typography>
-            <HashLink hash={proposal.proposal_hash} />
 
             {proposal.time && (
-              <Typography variant="subtitle2">
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {formatDate(proposal.time)}
               </Typography>
             )}
           </EllipsisBox>
 
-          <Box sx={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
-            <Typography variant="subtitle2">Upvotes:</Typography>
-            <Typography variant="body1" sx={{ display: "block" }}>
-              {formatNumber(parseInt(proposal.upvotes))}
-            </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: { xs: 2, md: 3 },
+              width: { xs: "100%", md: "auto" },
+              justifyContent: { xs: "flex-start", md: "flex-end" },
+              alignItems: "center",
+            }}
+          >
+            <UpvoteButton
+              proposalHash={proposal.proposal_hash}
+              contractVotingIndex={contractVotingIndex}
+              sx={{ width: {xs: "100%", sm: "auto"}}}
+            />
 
-            {isCurrentPeriod && walletStore?.hasVotingPower && (
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleUpvote}
-                disabled={isUpvoting}
-                sx={{ mt: 1, minWidth: 97 }}
-              >
-                {isUpvoting ? <CircularProgress size="20px" sx={{color: theme => theme.palette.primary.main}} /> : 'Upvote'}
-              </Button>
-            )}
+            <LearnMoreAndUpvotes proposal={proposal} sx={{ display: { xs: 'none', md: 'flex' } }} />
           </Box>
         </Box>
-      </CardContent>
-    </Card>
+      </AccordionSummary>
+
+      <AccordionDetails>
+
+        <LearnMoreAndUpvotes proposal={proposal}
+          sx={{
+            display: { xs: 'flex', md: 'none' },
+            mb: 2,
+            px: 2
+          }}
+        />
+
+        <Typography variant='body1' sx={{margin: '8px 16px'}}>
+          Upvoters
+        </Typography>
+        <UpvotersTable proposalHash={proposal.proposal_hash} contractVotingIndex={proposal.contract_period_index} />
+      </AccordionDetails>
+    </Accordion>
   );
 });
+

@@ -22,7 +22,6 @@ export const ProposalVotingStats = ({
 
     const progress = contractQuorum > 0 ? Math.min((quorumPercent / contractQuorum) * 100, 100) : 0;
 
-
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <VotingProgress
@@ -34,7 +33,6 @@ export const ProposalVotingStats = ({
         </Box>
     );
 };
-
 
 interface PromotionVotingStatsProps {
   yeaVotingPower: number;
@@ -64,7 +62,6 @@ export const PromotionVotingStats = ({
     yeaVotingPower,
     nayVotingPower
   ).toNumber()) || 0;
-
 
   const quorumProgress = calculateVotingProgress(quorumPercent, contractQuorum);
   const supermajorityProgress = calculateVotingProgress(supermajorityPercent, contractSupermajority);

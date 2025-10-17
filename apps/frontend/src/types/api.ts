@@ -33,6 +33,26 @@ export interface FrontendProposal extends Proposal {
   upvotes: string;
 }
 
+export interface FrontendPeriod {
+    startDateTime: Date;
+    endDateTime: Date;
+    startLevel: number;
+    endLevel: number;
+    contract: string;
+    governance: string;
+    contract_voting_index: number;
+    totalVotingPower: number;
+    proposals?: FrontendProposal[];
+    promotion?: Promotion;
+}
+
+export interface FuturePeriod {
+    startDateTime: Date;
+    endDateTime: Date;
+    startLevel: number;
+    endLevel: number
+}
+
 export interface TransactionOperationConfirmation {
     block: BlockResponse;
     expectedConfirmation: number;

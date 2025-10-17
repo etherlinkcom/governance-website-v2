@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS upvotes (
+  -- TODO add contract address
   id INT AUTO_INCREMENT PRIMARY KEY,
   level INT NOT NULL,
   time DATETIME NOT NULL,

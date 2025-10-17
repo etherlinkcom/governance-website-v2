@@ -1,7 +1,9 @@
 import { theme } from '@/theme';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableSortLabel, Box} from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TableSortLabel, Box, alpha} from '@mui/material';
 import { ComponentLoading } from './ComponentLoading';
 import { TableCards, TableCardsSkeleton } from './TableCards';
+import { getWalletStore } from '@/stores/WalletStore';
+import { observer } from 'mobx-react-lite';
 
 type Order = 'asc' | 'desc';
 
@@ -55,11 +57,12 @@ interface SortableTableProps<T> {
   renderCell: (row: T, column: Column<T>) => React.ReactNode;
 }
 
-export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort, renderCell }: SortableTableProps<T>) => {
+export const SortableTable = observer(<T,>({ columns, data, order, orderBy, onRequestSort, renderCell }: SortableTableProps<T>) => {
+  const walletStore = getWalletStore();
   return (
     <Box sx={{ width: '100%' }}>
       <TableContainer component={Paper} sx={{ display: { xs: 'none', sm: 'block' }, minWidth: 320 }}>
-        <Table>
+        <Table stickyHeader>
           <TableHead>
             <TableRow>
               {columns.map((column) => (
@@ -89,8 +92,13 @@ export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((row, index) => (
-              <TableRow key={index}>
+            {data.map((row: any, index) => (
+              <TableRow key={index}
+                sx={
+                  walletStore?.isVoter(row.baker) ?
+                  { backgroundColor: `${alpha(theme.palette.primary.light, 0.1)} !important` } :
+                  {}
+                }>
                 {columns.map((column) => (
                   <TableCell
                     key={column.id as string}
@@ -113,4 +121,4 @@ export const SortableTable = <T,>({ columns, data, order, orderBy, onRequestSort
       <TableCards<T> columns={columns} data={data} renderCell={renderCell} sx={{ display: { xs: 'block', sm: 'none' } }} />
     </Box>
   );
-};
+});

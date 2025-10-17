@@ -1,0 +1,74 @@
+"use client";
+
+import { Button, CircularProgress, SxProps } from "@mui/material";
+import { getWalletStore, OperationResult } from "@/stores/WalletStore";
+import { contractStore } from "@/stores/ContractStore";
+import { ContractAndConfig } from "@trilitech/types";
+import { useState } from "react";
+
+interface UpVoteButtonProps {
+  proposalHash: string;
+  contractVotingIndex: number;
+  sx?: SxProps;
+}
+
+export const UpvoteButton = ({ proposalHash, contractVotingIndex, sx }: UpVoteButtonProps) => {
+  const walletStore = getWalletStore();
+  const contract: ContractAndConfig | undefined = contractStore.currentContract;
+
+  const hasAlreadyUpvoted: boolean = contractStore.hasAlreadyUpvotedForProposal(
+    proposalHash,
+    contractVotingIndex
+  );
+
+  const isCurrentPeriod: boolean = contractStore.currentPeriodData?.contract_voting_index === contractVotingIndex;
+
+  const isUpvoting = walletStore?.isVoting;
+  const [loading, setLoading] = useState(false);
+
+  const handleUpvote = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    if (!contract || !walletStore) return;
+    setLoading(true);
+    try {
+      const operation: OperationResult | undefined = await walletStore.upvoteProposal(
+        contract.contract_address,
+        proposalHash
+      );
+
+      if (!operation?.completed) return;
+      contractStore.createUpvote(
+        operation?.level || 0,
+        proposalHash,
+        walletStore.address || '',
+        walletStore.alias,
+        walletStore.votingPowerAmount,
+        operation?.opHash || '',
+        contract.contract_address,
+        contractVotingIndex,
+      );
+    } catch (error) {
+      console.error('Error upvoting proposal:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isCurrentPeriod || !walletStore?.hasVotingPower || hasAlreadyUpvoted) return null;
+
+  return (
+    <Button
+      variant="contained"
+      size="small"
+      onClick={handleUpvote}
+      disabled={isUpvoting || loading}
+      sx={{ minWidth: 97, ...sx }}
+    >
+      {isUpvoting || loading ? (
+        <CircularProgress size="20px" sx={{ color: theme => theme.palette.primary.main }} />
+      ) : (
+        'Upvote'
+      )}
+    </Button>
+  );
+};

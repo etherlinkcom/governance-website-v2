@@ -1,10 +1,10 @@
 import { TypographyVariantsOptions } from "@mui/material";
 
 export const typography: TypographyVariantsOptions = {
-  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, "system-ui", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+  fontFamily: '"Inter Variable", sans-serif',
 
   h1: {
-    fontSize: '2rem',
+    fontSize: 36,
     fontWeight: 700,
     lineHeight: 1.2,
   },

@@ -1,6 +1,11 @@
-import mysql from 'mysql2/promise';
-import { GovernanceType, Period, ContractAndConfig, Proposal, Upvote, Promotion, Vote } from '@trilitech/types';
-import { FrontendProposal, PeriodDetailsResponse } from '@/types/api';
+import mysql from "mysql2/promise";
+import {
+  GovernanceType,
+  ContractAndConfig,
+  Upvote,
+  Vote,
+} from "@trilitech/types";
+import { FrontendPeriod } from "@/types/api";
 
 export class Database {
   private connection: mysql.Connection | null = null;
@@ -11,7 +16,7 @@ export class Database {
     password: process.env.DB_PASSWORD!,
     database: process.env.DB_NAME!,
     port: parseInt(process.env.DB_PORT!),
-    timezone: 'Z',
+    timezone: "Z",
     dateStrings: false,
     connectTimeout: 10000,
     keepAliveInitialDelay: 0,
@@ -22,7 +27,7 @@ export class Database {
     if (!this.connection) {
       this.connection = await mysql.createConnection(this.connectionConfig);
       await this.connection.execute("SET time_zone = '+00:00'");
-      console.log('[Database] Connected to MySQL database');
+      console.log("[Database] Connected to MySQL database");
     }
   }
 
@@ -39,15 +44,15 @@ export class Database {
       const [rows] = await connection.execute(sql, params || []);
       return rows as T[];
     } catch (error) {
-      console.error('[Database] Query error:', error);
-      console.error('[Database] SQL:', sql);
-      console.error('[Database] Params:', params);
+      console.error("[Database] Query error:", error);
+      console.error("[Database] SQL:", sql);
+      console.error("[Database] Params:", params);
       throw error;
     }
   }
 
-   async getContracts(governanceType: GovernanceType): Promise<ContractAndConfig[]> {
-    console.log(`[Database] Fetching contracts for ${governanceType} governance`);
+  async getContracts(): Promise<ContractAndConfig[]> {
+    console.log(`[Database] Fetching contracts for governance`);
 
     const rows = await this.query<any>(
       `SELECT
@@ -62,10 +67,7 @@ export class Database {
         proposal_quorum,
         promotion_quorum,
         promotion_supermajority
-      FROM contracts
-      WHERE governance_type = ?
-      ORDER BY active DESC, started_at_level DESC`,
-      [governanceType]
+      FROM contracts`,
     );
 
     const contracts: ContractAndConfig[] = rows.map((row: any) => ({
@@ -82,129 +84,257 @@ export class Database {
       promotion_supermajority: row.promotion_supermajority,
     }));
 
-    console.log(`[Database] Returned ${contracts.length} contracts for ${governanceType}`);
+    console.log(`[Database] Returned ${contracts.length} contracts`);
     return contracts;
   }
 
-   async getPeriods(contractAddress: string): Promise<Period[]> {
-    console.log(`[Database] Fetching periods for contract ${contractAddress}`);
+  async getCurrentPeriod(governanceType: GovernanceType): Promise<FrontendPeriod | null> {
+    console.log(`[Database] Fetching current period for ${governanceType} governance`);
 
     const rows = await this.query<any>(
-      `SELECT * FROM periods
-      WHERE contract_address = ?
-        AND (
-          JSON_LENGTH(proposal_hashes) > 0
-          OR (promotion_hash IS NOT NULL AND promotion_hash != '')
-        )
-      ORDER BY contract_voting_index DESC LIMIT 50`,
-      [contractAddress]
+      `SELECT
+      periods.date_start,
+      periods.date_end,
+      periods.contract_address,
+      periods.level_start,
+      periods.level_end,
+      periods.total_voting_power,
+
+      contracts.governance_type,
+      periods.contract_voting_index,
+      periods.promotion_hash,
+
+      -- Promotion data
+      promotions.yea_voting_power,
+      promotions.nay_voting_power,
+      promotions.pass_voting_power,
+      promotions.created_at as promotion_created_at,
+
+      -- Proposal data
+      proposals.proposal_hash,
+      proposals.proposer,
+      proposals.alias,
+      (
+        SELECT COALESCE(SUM(upvotes.voting_power), 0)
+        FROM upvotes
+        WHERE
+          upvotes.contract_period_index = proposals.contract_period_index
+          AND upvotes.proposal_hash = proposals.proposal_hash
+      ) AS upvotes,
+      proposals.level,
+      proposals.time,
+      proposals.transaction_hash,
+      proposals.created_at as proposal_created_at
+
+    FROM periods
+    JOIN contracts ON periods.contract_address = contracts.contract_address
+    LEFT JOIN promotions ON periods.promotion_hash = promotions.proposal_hash
+      AND periods.contract_voting_index = promotions.contract_period_index
+      AND periods.contract_address = promotions.contract_address
+    LEFT JOIN proposals ON periods.contract_address = proposals.contract_address
+      AND periods.contract_voting_index = proposals.contract_period_index
+    WHERE contracts.governance_type = ?
+      AND contracts.active = 1
+    ORDER BY periods.level_end DESC, periods.contract_voting_index DESC
+    LIMIT 1`,
+      [governanceType]
     );
 
-    const periods: Period[] = rows.map((row: any) => ({
-      contract_voting_index: row.contract_voting_index,
-      contract_address: row.contract_address,
-      level_start: row.level_start,
-      level_end: row.level_end,
-      date_start: row.date_start,
-      date_end: row.date_end,
-      proposal_hashes: row.proposal_hashes || [],
-      promotion_hash: row.promotion_hash || undefined,
-      total_voting_power: row.total_voting_power
-    }));
+    if (rows.length === 0) {
+      console.log(
+        `[Database] No current period found for ${governanceType} governance`
+      );
+      return null;
+    }
 
-    console.log(`[Database] Returned ${periods.length} periods for contract ${contractAddress}`);
-    return periods;
+    const result: FrontendPeriod = this.buildPeriodFromRows(rows)[0];
+    console.log(
+      `[Database] Found current period with level_end: ${result.endLevel}`
+    );
+    return result;
   }
 
-  async getPeriodDetails(contractAddress: string, contractVotingIndex: number): Promise<PeriodDetailsResponse> {
-    console.log(`[Database] Fetching period details for contract ${contractAddress}, period ${contractVotingIndex}`);
+  async getPastPeriods(
+    governanceType: GovernanceType
+  ): Promise<FrontendPeriod[]> {
+    console.log(
+      `[Database] Fetching past periods with activity for ${governanceType} governance`
+    );
 
-    try {
-      const proposals = await this.query<FrontendProposal>(
-        `SELECT
-          proposals.*,
-          (
-            SELECT COALESCE(SUM(upvotes.voting_power), 0)
-            FROM upvotes
-            WHERE
-              upvotes.contract_period_index = proposals.contract_period_index
-              AND upvotes.proposal_hash = proposals.proposal_hash
-          ) AS upvotes
-        FROM proposals
-        WHERE contract_address = ?
-          AND contract_period_index = ?
-        ORDER BY created_at DESC;`,
-        [contractAddress, contractVotingIndex]
-      );
+    const rows = await this.query<any>(
+      `SELECT
+      periods.date_start,
+      periods.date_end,
+      periods.level_start,
+      periods.level_end,
+      periods.contract_address,
+      contracts.governance_type,
+      periods.contract_voting_index,
+      periods.promotion_hash,
+      periods.total_voting_power,
 
-      const upvotes = await this.query<Upvote>(
-        `SELECT u.*
-         FROM upvotes u
-         JOIN proposals p ON u.proposal_hash = p.proposal_hash AND u.contract_period_index = p.contract_period_index
-         WHERE p.contract_address = ? AND p.contract_period_index = ?
-         ORDER BY u.created_at DESC`,
-        [contractAddress, contractVotingIndex]
-      );
+      -- Promotion data
+      promotions.yea_voting_power,
+      promotions.nay_voting_power,
+      promotions.pass_voting_power,
+      promotions.created_at as promotion_created_at,
 
-      const promotions = await this.query<Promotion>(
-        `SELECT * FROM promotions
-         WHERE contract_address = ? AND contract_period_index = ?
-         ORDER BY created_at DESC`,
-        [contractAddress, contractVotingIndex]
-      );
+      -- Proposal data
+      proposals.proposal_hash,
+      proposals.proposer,
+      proposals.alias,
+      (
+        SELECT COALESCE(SUM(upvotes.voting_power), 0)
+        FROM upvotes
+        WHERE
+          upvotes.contract_period_index = proposals.contract_period_index
+          AND upvotes.proposal_hash = proposals.proposal_hash
+      ) AS upvotes,
+      proposals.level,
+      proposals.time,
+      proposals.transaction_hash,
+      proposals.created_at as proposal_created_at
 
-      const votes = await this.query<Vote>(
-        `SELECT DISTINCT v.*
+    FROM periods
+    JOIN contracts ON periods.contract_address = contracts.contract_address
+    LEFT JOIN promotions ON periods.promotion_hash = promotions.proposal_hash
+      AND periods.contract_voting_index = promotions.contract_period_index
+      AND periods.contract_address = promotions.contract_address
+    LEFT JOIN proposals ON periods.contract_address = proposals.contract_address
+      AND periods.contract_voting_index = proposals.contract_period_index
+    WHERE contracts.governance_type = ?
+      AND (
+        EXISTS (
+          SELECT 1 FROM proposals p
+          WHERE p.contract_address = periods.contract_address
+            AND p.contract_period_index = periods.contract_voting_index
+        )
+        OR periods.promotion_hash IS NOT NULL
+      )
+      AND NOT (contracts.active = 1 AND periods.level_end = (
+        SELECT MAX(p2.level_end)
+        FROM periods p2
+        JOIN contracts c2 ON p2.contract_address = c2.contract_address
+        WHERE c2.governance_type = ? AND c2.active = 1
+      ))
+    ORDER BY periods.level_end DESC, proposals.level DESC, proposals.created_at DESC`,
+      [governanceType, governanceType]
+    );
+
+    return this.buildPeriodFromRows(rows);
+  }
+
+  private buildPeriodFromRows(rows: any[]): FrontendPeriod[] {
+    if (rows.length === 0) return [];
+
+    const periodsMap = new Map<string, FrontendPeriod>();
+
+    for (const row of rows) {
+      const periodKey = `${row.contract_address}-${row.contract_voting_index}`;
+
+      if (!periodsMap.has(periodKey)) {
+        const period: FrontendPeriod = {
+          startDateTime: new Date(row.date_start),
+          endDateTime: new Date(row.date_end),
+          startLevel: row.level_start,
+          endLevel: row.level_end,
+          contract: row.contract_address,
+          governance: row.governance_type,
+          contract_voting_index: row.contract_voting_index,
+          totalVotingPower: row.total_voting_power,
+        };
+
+        if (row.promotion_hash) {
+          period.promotion = {
+            proposal_hash: row.promotion_hash,
+            contract_period_index: row.contract_voting_index,
+            contract_address: row.contract_address,
+            yea_voting_power: row.yea_voting_power || 0,
+            nay_voting_power: row.nay_voting_power || 0,
+            pass_voting_power: row.pass_voting_power || 0,
+            total_voting_power: row.total_voting_power || 0,
+          };
+        }
+
+        periodsMap.set(periodKey, period);
+      }
+
+      if (row.proposal_hash) {
+        const period = periodsMap.get(periodKey)!;
+
+        if (!period.proposals) period.proposals = [];
+
+        const proposalExists = period.proposals.some(
+          (p) => p.proposal_hash === row.proposal_hash
+        );
+
+        if (!proposalExists) {
+          period.proposals.push({
+            proposal_hash: row.proposal_hash,
+            proposer: row.proposer || undefined,
+            alias: row.alias || undefined,
+            upvotes: row.upvotes || 0,
+            level: row.level,
+            time: row.time,
+            transaction_hash: row.transaction_hash,
+            contract_address: row.contract_address,
+            contract_period_index: row.contract_voting_index,
+          });
+        }
+      }
+    }
+
+    return Array.from(periodsMap.values());
+  }
+
+  async getVotes(
+    contractAddress: string,
+    proposalHash: string,
+    contractVotingIndex: number
+  ): Promise<Vote[]> {
+    console.log(`[Database] Fetching votes for promotion: ${contractAddress}`);
+
+    const rows = await this.query<Vote>(
+      `
+      SELECT DISTINCT v.*
          FROM votes v
          JOIN promotions pr ON v.proposal_hash = pr.proposal_hash
          JOIN periods ON pr.contract_period_index = periods.contract_voting_index
          WHERE pr.contract_address = ? AND pr.contract_period_index = ?
          AND v.level >= periods.level_start AND v.level <= periods.level_end
-         ORDER BY v.created_at DESC`,
-        [contractAddress, contractVotingIndex]
-      );
+         AND v.proposal_hash = ?
+         ORDER BY v.created_at DESC
+    `,
+      [contractAddress, contractVotingIndex, proposalHash]
+    );
+    return rows;
+  }
 
-      const response: PeriodDetailsResponse = {
-        periodInfo: {
-          contractAddress,
-          contractVotingIndex,
-          hasProposals: proposals.length > 0,
-          hasPromotions: promotions.length > 0,
-        }
-      };
+  // TODO add start and end level
+  async getUpvotes(
+    proposalHash: string,
+    contractVotingIndex: number
+  ): Promise<Upvote[]> {
+    console.log(`[Database] Fetching upvotes for proposal: ${proposalHash}`);
 
-      // Only include arrays that have data
-      if (proposals.length > 0) {
-        response.proposals = proposals;
-      }
+    const rows = await this.query<Upvote>(
+      `
+      SELECT *
+      FROM upvotes
+      WHERE proposal_hash = ?
+      AND contract_period_index = ?
+    `,
+      [proposalHash, contractVotingIndex]
+    );
 
-      if (upvotes.length > 0) {
-        response.upvotes = upvotes;
-      }
-
-      if (promotions.length > 0) {
-        response.promotions = promotions;
-      }
-
-      if (votes.length > 0) {
-        response.votes = votes;
-      }
-
-      console.log(`[Database] Period details - Proposals: ${proposals.length}, Upvotes: ${upvotes.length}, Promotions: ${promotions.length}, Votes: ${votes.length}`);
-
-      return response;
-
-    } catch (error) {
-      console.error(`[Database] Error fetching period details for ${contractAddress}, period ${contractVotingIndex}:`, error);
-      throw error;
-    }
+    return rows;
   }
 
   async close(): Promise<void> {
     if (this.connection) {
       await this.connection.end();
       this.connection = null;
-      console.log('[Database] Database connection closed');
+      console.log("[Database] Database connection closed");
     }
   }
 }

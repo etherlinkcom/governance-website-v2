@@ -1,58 +1,62 @@
-import { AppBar, Typography, Box, useTheme } from '@mui/material';
-import { Menu } from '@/components/header/Menu';
-import { observer } from 'mobx-react-lite';
-import Image from 'next/image';
-import Link from 'next/link';
+import { AppBar, Box } from "@mui/material";
+import { Menu } from "@/components/header/Menu";
+import { observer } from "mobx-react-lite";
+import Image from "next/image";
+import Link from "next/link";
+import { MobileMenu } from "./MobileMenu";
+import { contractStore } from "@/stores/ContractStore";
+import { GovernanceType } from "@trilitech/types";
+import { useRouter } from "next/router";
 
-interface HeaderProps {
-  currentPage?: 'slow' | 'fast' | 'sequencer' | null;
-}
+export const Header = observer(() => {
 
-export const Header = observer(({ currentPage = null }: HeaderProps) => {
-  const theme = useTheme();
+  const router = useRouter();
 
+  const handleGovernanceChange = (newGovernance: GovernanceType) => {
+    if (newGovernance !== null) {
+      contractStore.setGovernance(newGovernance);
+      router.push(`/governance/${newGovernance}`);
+    }
+  };
   return (
     <AppBar position="static" elevation={0}>
       <Box
         sx={{
-          height: '84px',
-          px: { lg: '104px' },
-          py: '24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          width: '100%',
-          backgroundColor: theme.palette.background.default,
-          maxWidth: '1440px',
-          margin: '0 auto',
-          gap: '10px',
+          height: "84px",
+          px: { lg: "104px" },
+          py: "24px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+          maxWidth: "1440px",
+          margin: "0 auto",
+          gap: "10px",
+          zIndex: 10,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
           <Link
             href="/"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              textDecoration: 'none',
-              color: 'inherit'
+              display: "flex",
+              alignItems: "center",
+              textDecoration: "none",
+              color: "inherit",
             }}
           >
             <Image
-              src="/etherlink.svg"
+              src="/Etherlink Logo.svg"
               alt="Etherlink"
-              width={150}
-              height={32}
-              style={{ display: 'block' }}
+              width={162.5}
+              height={48}
+              style={{ display: "block" }}
             />
-            <Typography variant="h6" sx={{ml: -1}}>
-              Governance
-            </Typography>
           </Link>
-
+          <MobileMenu handleGovernanceChange={handleGovernanceChange} />
         </Box>
-        <Menu currentPage={currentPage} />
-        </Box>
-      </AppBar>
+        <Menu handleGovernanceChange={handleGovernanceChange} />
+      </Box>
+    </AppBar>
   );
 });

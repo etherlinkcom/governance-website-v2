@@ -1,0 +1,108 @@
+import { Box, Typography } from "@mui/material";
+import { observer } from "mobx-react-lite";
+import { FrontendPeriod, FrontendProposal } from "@/types/api";
+import { contractStore } from "@/stores/ContractStore";
+import { ProposalCard } from "@/components/proposal/ProposalCard";
+import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
+import { ProposalVotingStats } from "@/components/shared/VotingStats";
+import { TimeRemaining } from "@/components/current/TimeRemaining";
+import { CopyButton } from "../shared/CopyButton";
+import { ContractAndConfig } from "@trilitech/types";
+import { ModalCloseButton } from "../shared/ModalCloseButton";
+import { EllipsisBox } from "../shared/EllipsisBox";
+import { useState } from "react";
+
+interface ProposalViewProps {
+  period: FrontendPeriod;
+  onClose?: () => void;
+}
+
+export const ProposalView = observer(({ period, onClose }: ProposalViewProps) => {
+
+    const contract: ContractAndConfig | undefined = contractStore.getContract(period.contract);
+    const isCurrentPeriod: boolean = contractStore.currentPeriodData?.contract_voting_index === period.contract_voting_index;
+    const defaultExpandedHash = isCurrentPeriod && period.proposals && period.proposals.length > 0 ? period.proposals[0].proposal_hash : null;
+    const [expandedHash, setExpandedHash] = useState<string | null>(defaultExpandedHash);
+
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: isCurrentPeriod ? 2 : 5,
+          minHeight: 600,
+          p: { xs: 2, sm: 4 },
+          pt: { xs: 5, sm: 4 },
+        }}
+      >
+        {onClose && (
+          <ModalCloseButton onClose={onClose} />
+        )}
+        {/* Header */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            flexDirection: { xs: "column", md: "row" },
+            gap: { xs: 2, md: 0 },
+          }}
+        >
+          <Box>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              mb: 0.5
+            }}>
+              <Typography variant="body2" sx={{ display: { xs: 'none', lg: 'block' } }}>
+                Contract: {period.contract}
+              </Typography>
+
+              <EllipsisBox sx={{ color: theme => theme.palette.primary.main, display: { xs: 'block', lg: 'none' }}}>
+                  {period.contract}
+              </EllipsisBox>
+
+            <CopyButton
+              text={period.contract}
+              message="Contract address copied"
+              sx={{color: 'primary.main'}}
+              />
+            </Box>
+            <PeriodDateAndLevels period={period} />
+          </Box>
+          <Box>
+            {isCurrentPeriod && <TimeRemaining currentPeriod={period} />}
+
+            <ProposalVotingStats
+              proposals={period.proposals!}
+              totalVotingPower={period.totalVotingPower}
+              contractQuorum={contract!.proposal_quorum}
+            />
+          </Box>
+        </Box>
+
+        {/* Proposal List */}
+        <Box
+          sx={{
+            gap: 2,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          {period.proposals?.map((proposal: FrontendProposal) => (
+            <ProposalCard
+              key={proposal.proposal_hash}
+              proposal={proposal}
+              contractVotingIndex={period.contract_voting_index}
+              expanded={expandedHash === proposal.proposal_hash}
+              onChange={() =>
+                setExpandedHash(
+                  expandedHash === proposal.proposal_hash ? null : proposal.proposal_hash
+                )
+              }
+            />
+          ))}
+        </Box>
+      </Box>
+    );
+  }
+);

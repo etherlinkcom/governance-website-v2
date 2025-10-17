@@ -1,25 +1,24 @@
 import { useTableSort } from '@/hooks/useTableSort';
-import { Typography, Link } from '@mui/material';
+import { Link } from '@mui/material';
 import { SortableTable, SortableTableSkeleton } from '@/components/shared/SortableTable';
 import { prettifyKey } from '@/lib/prettifyKey';
 import { observer } from 'mobx-react-lite';
 import { Upvote } from '@trilitech/types';
-import { HashDisplay } from '@/components/shared/HashDisplay';
 import { formatNumber } from '@/lib/formatNumber';
 import { contractStore } from '@/stores/ContractStore';
 
-const upvoterKeys: (keyof Upvote)[] = ['baker', 'voting_power', 'proposal_hash', 'time'];
+const upvoterKeys: (keyof Upvote)[] = ['baker', 'voting_power', 'time'];
 
-interface UpvotersTableProps {
-  contractVotingIndex?: number;
-  contractAddress?: string;
+interface UpvotesTableProps {
+  proposalHash: string;
+  contractVotingIndex: number;
 }
 
-export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }: UpvotersTableProps) => {
-  const { upvoters, isLoading, error, hasValidParams } = contractStore.getPeriodData(contractAddress, contractVotingIndex);
+export const UpvotersTable = observer(({ proposalHash, contractVotingIndex }: UpvotesTableProps) => {
+  const { upvotes, loadingState } = contractStore.getUpvotesForProposal(proposalHash, contractVotingIndex);
 
   const { sortedData, order, orderBy, handleRequestSort } = useTableSort(
-    upvoters,
+    upvotes,
     'baker',
   );
 
@@ -28,16 +27,6 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
     label: key === 'proposal_hash' ? 'Proposal' : prettifyKey(key),
     sortable: true
   }));
-
-  if (isLoading) return <SortableTableSkeleton columns={columns} />;
-
-  if (error) {
-    return (
-      <Typography variant="body2" color="error" sx={{ textAlign: 'center', py: 3 }}>
-        Error loading upvoters: {error}
-      </Typography>
-    );
-  }
 
 
   const renderCell = (row: Upvote, column: { id: keyof Upvote; label: string; sortable?: boolean }) => {
@@ -61,10 +50,6 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
         );
       case 'voting_power':
         return formatNumber(row.voting_power);
-      case 'proposal_hash':
-        return (
-          <HashDisplay hash={row.proposal_hash} />
-        );
       case 'time':
         return new Date(row.time).toLocaleString();
       default:
@@ -72,13 +57,7 @@ export const UpvotersTable = observer(({ contractVotingIndex, contractAddress }:
     }
   };
 
-  if (!hasValidParams) {
-    return (
-      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-        No upvoters found
-      </Typography>
-    );
-  }
+  if (loadingState === "loading") return <SortableTableSkeleton columns={columns} />;
 
   return (
     <SortableTable
