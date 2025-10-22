@@ -84,7 +84,7 @@ export const ProposalCard = observer(({
             >
               by{" "}
               <Link
-                href={`${process.env.NEXT_PUBLIC_TZKT_API_URL}/${proposal.transaction_hash}`}
+                href={`${process.env.NEXT_PUBLIC_TZKT_URL}/${proposal.transaction_hash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{
