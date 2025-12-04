@@ -5,6 +5,7 @@ import { getWalletStore, OperationResult } from "@/stores/WalletStore";
 import { contractStore } from "@/stores/ContractStore";
 import { ContractAndConfig } from "@trilitech/types";
 import { useState } from "react";
+import { observer } from "mobx-react-lite";
 
 interface UpVoteButtonProps {
   proposalHash: string;
@@ -12,7 +13,7 @@ interface UpVoteButtonProps {
   sx?: SxProps;
 }
 
-export const UpvoteButton = ({ proposalHash, contractVotingIndex, sx }: UpVoteButtonProps) => {
+export const UpvoteButton = observer(({ proposalHash, contractVotingIndex, sx }: UpVoteButtonProps) => {
   const walletStore = getWalletStore();
   const contract: ContractAndConfig | undefined = contractStore.currentContract;
 
@@ -71,4 +72,4 @@ export const UpvoteButton = ({ proposalHash, contractVotingIndex, sx }: UpVoteBu
       )}
     </Button>
   );
-};
+});
