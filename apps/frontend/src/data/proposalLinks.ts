@@ -45,4 +45,9 @@ export const allLinkData: LinkData[] = [
     href: 'https://medium.com/@etherlink/announcing-ebisu-a-5th-upgrade-proposal-for-etherlink-mainnet-4dfdd1c8819e',
     title: 'Announcing Ebisu: A 5th Upgrade proposal for Etherlink Mainnet',
   },
+  {
+    payloadKey: '0079e0f348b608ce486c9e5e1fdf84b650019922bf3383b562522c2c8f60a098da',
+    href: 'https://medium.com/@etherlink/announcing-farfadet-a-6th-upgrade-proposal-for-etherlink-mainnet-6bc59793962d',
+    title: 'Announcing Farfadet: A 6th Upgrade proposal for Etherlink Mainnet',
+  },
 ];
