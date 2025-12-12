@@ -17,14 +17,14 @@
     "@taquito/beacon-wallet": "^22.0.0",
     "@taquito/taquito": "^22.0.0",
     "@trilitech/types": "*",
-    "posthog-js": "^1.260.1",
     "mobx": "^6.13.7",
     "mobx-react-lite": "^4.1.0",
     "mysql2": "^3.14.2",
-    "next": "15.3.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-hot-toast": "^2.5.2"
+    "next": "15.0.7",
+    "posthog-js": "^1.260.1",
+    "react": "19.0.3",
+    "react-dom": "19.0.3",
+    "react-hot-toast": "^2.6.0"
   },
   "devDependencies": {
     "@types/node": "^20",
