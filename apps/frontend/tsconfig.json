@@ -8,6 +8,6 @@
       "packages/*": ["../../packages/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx","../../packages/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx","../../packages/**/*.ts", "next.config.js"],
   "exclude": ["node_modules"]
 }
