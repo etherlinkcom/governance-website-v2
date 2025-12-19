@@ -50,4 +50,9 @@ export const allLinkData: LinkData[] = [
     href: 'https://medium.com/@etherlink/announcing-farfadet-a-6th-upgrade-proposal-for-etherlink-mainnet-6bc59793962d',
     title: 'Announcing Farfadet: A 6th Upgrade proposal for Etherlink Mainnet',
   },
+  {
+    payloadKey: '0056aea7f98b2bc4d18edb450b2f098f6e95e5356f30a1fac2b50080f3e482bad1',
+    href: 'https://medium.com/@etherlink/announcing-etherlink-6-1-a-bugfix-proposal-for-fa-token-deposits-2cc08ffd6fad',
+    title: 'Announcing Etherlink 6.1: a bugfix proposal for FA token deposits',
+  },
 ];
