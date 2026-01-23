@@ -26,7 +26,9 @@ A Node.js backend service that indexes Tezos governance data into MySQL. Provide
 GET /start-listener      # Start real-time blockchain listener
 GET /stop-listener       # Stop the listener
 GET /index-active        # Index active governance contracts
+GET /index-active?indexFromStart=true # Index active governance contracts from start
 GET /index-all          # Index all contracts (active + historical)
+GET /index-all?indexFromStart=true # Index all contracts (active + historical) from start
 ```
 
 ## Setup & Usage
