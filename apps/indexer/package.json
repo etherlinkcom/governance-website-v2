@@ -16,8 +16,8 @@
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.0",
     "@microsoft/signalr": "^9.0.6",
-    "@tezos-x/octez.js-rpc": "0.9.0",
-    "@tezos-x/octez.js": "0.9.0",
+    "@tezos-x/octez.js-rpc": "1.0.0",
+    "@tezos-x/octez.js": "1.0.0",
     "@trilitech/types": "*",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
