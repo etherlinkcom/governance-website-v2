@@ -9,7 +9,7 @@ import {
 import { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { getWalletStore } from "@/stores/WalletStore";
-import { validateAddress, ValidationResult } from "@taquito/utils";
+import { validateAddress, ValidationResult } from "@tezos-x/octez.js-utils";
 
 export const ClaimVotingRightsButton = observer(() => {
   const walletStore = getWalletStore();

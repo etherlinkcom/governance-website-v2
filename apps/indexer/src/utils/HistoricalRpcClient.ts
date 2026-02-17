@@ -1,4 +1,4 @@
-import { ContractResponse, RpcClient } from "@taquito/rpc";
+import { ContractResponse, RpcClient } from "@tezos-x/octez.js-rpc";
 
 export class HistoricalRpcClient extends RpcClient {
   private blockLevel: number;

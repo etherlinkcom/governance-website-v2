@@ -1,5 +1,5 @@
 import { Proposal, Upvote, Promotion, Vote, Period, ContractAndConfig } from "@trilitech/types";
-import { BlockResponse } from '@taquito/rpc';
+import { BlockResponse } from '@tezos-x/octez.js-rpc';
 
 export interface PeriodDetailsResponse {
   proposals?: FrontendProposal[];

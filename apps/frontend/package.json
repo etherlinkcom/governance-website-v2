@@ -9,13 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@airgap/beacon-types": "^4.6.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.1.2",
     "@mui/material": "^7.1.2",
-    "@taquito/beacon-wallet": "^22.0.0",
-    "@taquito/taquito": "^22.0.0",
+    "@tezos-x/octez.connect-types": "1.0.0",
+    "@tezos-x/octez.js": "1.0.0",
+    "@tezos-x/octez.js-dapp-wallet": "1.0.0",
+    "@tezos-x/octez.js-rpc": "1.0.0",
     "@trilitech/types": "*",
     "mobx": "^6.13.7",
     "mobx-react-lite": "^4.1.0",

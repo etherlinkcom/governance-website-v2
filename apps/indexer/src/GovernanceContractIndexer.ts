@@ -3,7 +3,7 @@ import { Contract, ContractConfig, Voter, TzktContractStorage, TzktContractStora
 import {logger} from './utils/logger'
 import { LRUCache } from "./utils/LRUCache";
 
-import { Contract as TaquitoContract, TezosToolkit } from '@taquito/taquito';
+import { Contract as TaquitoContract, TezosToolkit } from '@tezos-x/octez.js';
 import { HistoricalRpcClient } from "./utils/HistoricalRpcClient";
 import { Database } from "./db/Database";
 
