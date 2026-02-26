@@ -339,6 +339,27 @@ export class WalletStore {
     }
   }
 
+  async proposeVotingKey(votingKey: string, isVotingKey: boolean, optAddresses: string[] | null) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+      const contract = await this.Tezos.wallet.at(this.delegatesViewContractAddress);
+      const operation = await contract.methodsObject.propose_voting_key({
+        0: votingKey,
+        1: isVotingKey,
+        2: optAddresses
+      }).send();
+      await operation.confirmation();
+      toast.success(`Successfully proposed voting key`);
+      return operation.opHash;
+    } catch (error) {
+      toast.error(`Error proposing voting key`);
+      console.error(`Error proposing voting key for ${votingKey}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
 }
 
 let walletStore: WalletStore | null = null;

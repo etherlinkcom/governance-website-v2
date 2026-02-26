@@ -39,15 +39,15 @@ export const ClaimVotingRightsButton = observer(() => {
       ? "Revoking..."
       : "Claiming..."
     : isDelegate
-    ? "Revoke"
-    : "Claim";
+      ? "Revoke"
+      : "Claim";
 
   return (
     <>
       <Button
         onClick={() => setOpen(true)}
         variant="outlined"
-        sx={{ width: { xs: "100%", sm: "auto" } }}
+        sx={{ width: "100%" }}
       >
         Claim Voting Rights
       </Button>
