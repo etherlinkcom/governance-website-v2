@@ -9,10 +9,12 @@ import {
     Box,
     Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { getWalletStore } from "@/stores/WalletStore";
 import { validateAddress, ValidationResult } from "@tezos-x/octez.js-utils";
+
+import { DelegationRule, fetchDelegationsForAddress } from "@/lib/delegationUtils";
 
 type ActionType = "full_access" | "revoke" | "whitelist" | "blacklist";
 
@@ -22,11 +24,72 @@ export const ManageVotingKeysButton = observer(() => {
     const [votingKey, setVotingKey] = useState("");
     const [action, setAction] = useState<ActionType>("full_access");
     const [contracts, setContracts] = useState<string[]>([""]);
+    const [fetchedWhitelist, setFetchedWhitelist] = useState<string[]>([]);
+    const [fetchedBlacklist, setFetchedBlacklist] = useState<string[]>([]);
 
-    const proposeVotingKey = async () => {
+    const isMounted = useRef<boolean>(true);
+
+    useEffect(() => {
+        isMounted.current = true;
+        return () => {
+            isMounted.current = false;
+        };
+    }, []);
+
+    const fetchDelegation = useCallback(async (key: string): Promise<void> => {
+        if (!walletStore || !walletStore.address) return;
+
+        if (validateAddress(key) !== ValidationResult.VALID) {
+            if (isMounted.current) {
+                setFetchedWhitelist([]);
+                setFetchedBlacklist([]);
+            }
+            return;
+        }
+
+        try {
+            const rules: Map<string, DelegationRule> = await fetchDelegationsForAddress(key);
+
+            if (!isMounted.current) return;
+
+            const myRule: DelegationRule | undefined = rules.get(walletStore.address);
+
+            if (!myRule) {
+                setFetchedWhitelist([]);
+                setFetchedBlacklist([]);
+                return;
+            }
+
+            const { isVotingKey, optAddresses } = myRule;
+            const hasAddresses: boolean = !!(optAddresses && optAddresses.length > 0);
+
+            if (isVotingKey) {
+                setFetchedWhitelist(hasAddresses ? (optAddresses as string[]) : []);
+                setFetchedBlacklist([]);
+                return;
+            }
+
+            setFetchedBlacklist(hasAddresses ? (optAddresses as string[]) : []);
+            setFetchedWhitelist([]);
+        } catch (error) {
+            console.error("Failed to fetch delegation details for input address", error);
+        }
+    }, [walletStore?.address]);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            fetchDelegation(votingKey);
+        }, 500);
+
+        return () => {
+            clearTimeout(timeoutId);
+        };
+    }, [votingKey, fetchDelegation]);
+
+    const proposeVotingKey = async (): Promise<void> => {
         if (!walletStore) return;
 
-        let isVotingKey = true;
+        let isVotingKey: boolean = true;
         let optionalAddresses: string[] | null = null;
 
         if (action === "revoke") {
@@ -37,10 +100,10 @@ export const ManageVotingKeysButton = observer(() => {
             optionalAddresses = null;
         } else if (action === "whitelist") {
             isVotingKey = true;
-            optionalAddresses = contracts.filter(c => c !== "");
+            optionalAddresses = contracts.filter((c: string) => c !== "");
         } else if (action === "blacklist") {
             isVotingKey = false;
-            optionalAddresses = contracts.filter(c => c !== "");
+            optionalAddresses = contracts.filter((c: string) => c !== "");
         }
 
         await walletStore.proposeVotingKey(votingKey, isVotingKey, optionalAddresses);
@@ -53,23 +116,36 @@ export const ManageVotingKeysButton = observer(() => {
     const isVotingKeyError: boolean = votingKey !== "" && validateAddress(votingKey) !== ValidationResult.VALID;
 
     const hasInvalidContracts: boolean = (action === "whitelist" || action === "blacklist") &&
-        contracts.some(c => c !== "" && validateAddress(c) !== ValidationResult.VALID);
+        contracts.some((c: string) => c !== "" && validateAddress(c) !== ValidationResult.VALID);
 
     const isValid: boolean = votingKey !== "" && !isVotingKeyError && !hasInvalidContracts &&
-        ((action === "whitelist" || action === "blacklist") ? contracts.some(c => c !== "") : true);
+        ((action === "whitelist" || action === "blacklist") ? contracts.some((c: string) => c !== "") : true);
 
-    const handleContractChange = (index: number, value: string) => {
-        const newContracts = [...contracts];
+    const handleActionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newAction = e.target.value as ActionType;
+        setAction(newAction);
+
+        if (newAction === "whitelist" && fetchedWhitelist.length > 0) {
+            setContracts(fetchedWhitelist);
+        } else if (newAction === "blacklist" && fetchedBlacklist.length > 0) {
+            setContracts(fetchedBlacklist);
+        } else {
+            setContracts([""]);
+        }
+    };
+
+    const handleContractChange = (index: number, value: string): void => {
+        const newContracts: string[] = [...contracts];
         newContracts[index] = value;
         setContracts(newContracts);
     };
 
-    const addContract = () => {
+    const addContract = (): void => {
         setContracts([...contracts, ""]);
     };
 
-    const removeContract = (index: number) => {
-        const newContracts = contracts.filter((_, i) => i !== index);
+    const removeContract = (index: number): void => {
+        const newContracts: string[] = contracts.filter((_: string, i: number) => i !== index);
         if (newContracts.length === 0) {
             newContracts.push("");
         }
@@ -83,7 +159,7 @@ export const ManageVotingKeysButton = observer(() => {
                 variant="outlined"
                 sx={{ width: "100%" }}
             >
-                Propose Voting Key
+                Manage Voting Keys
             </Button>
             <Dialog
                 disableEnforceFocus={true}
@@ -94,7 +170,7 @@ export const ManageVotingKeysButton = observer(() => {
                 maxWidth="sm"
                 fullWidth
             >
-                <DialogTitle>Propose Voting Key</DialogTitle>
+                <DialogTitle>Manage Voting Keys</DialogTitle>
                 <DialogContent>
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
                         <TextField
@@ -112,7 +188,7 @@ export const ManageVotingKeysButton = observer(() => {
                             fullWidth
                             label="Action"
                             value={action}
-                            onChange={e => setAction(e.target.value as ActionType)}
+                            onChange={handleActionChange}
                         >
                             <MenuItem value="full_access">Add (Full Access)</MenuItem>
                             <MenuItem value="revoke">Revoke</MenuItem>

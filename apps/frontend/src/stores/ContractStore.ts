@@ -145,7 +145,7 @@ class ContractStore {
     try {
       this.loadingStatePastPeriods[this.currentGovernance] = "loading";
 
-      const pastPeriods: { pastPeriods: FrontendPeriod[] } = yield fetchJson<{pastPeriods: FrontendPeriod[]}>(
+      const pastPeriods: { pastPeriods: FrontendPeriod[] } = yield fetchJson<{ pastPeriods: FrontendPeriod[] }>(
         `/api/${this.currentGovernance}/pastPeriods`
       );
       this.pastPeriods[this.currentGovernance] = pastPeriods.pastPeriods;
@@ -182,7 +182,7 @@ class ContractStore {
       console.error("[ContractStore] Error fetching current period:", error);
       this.loadingStateCurrentPeriod[this.currentGovernance] = "error";
     }
-   });
+  });
 
   private getContracts = flow(function* (this: ContractStore) {
     try {
@@ -241,11 +241,11 @@ class ContractStore {
 
       this.futurePeriods[this.currentGovernance] = futurePeriods;
       this.loadingStateFuturePeriods[this.currentGovernance] = "success";
-  } catch (error) {
-    console.error("[ContractStore] Error fetching future periods:", error);
-    this.loadingStateFuturePeriods[this.currentGovernance] = "error";
-  }
-});
+    } catch (error) {
+      console.error("[ContractStore] Error fetching future periods:", error);
+      this.loadingStateFuturePeriods[this.currentGovernance] = "error";
+    }
+  });
 
   public setGovernance = flow(function* (
     this: ContractStore,
@@ -305,7 +305,7 @@ class ContractStore {
     try {
       this.loadingStateUpvotes[key] = "loading";
 
-      const response: { upvotes: Upvote[] } = yield fetchJson<{upvotes: Upvote[];}>(
+      const response: { upvotes: Upvote[] } = yield fetchJson<{ upvotes: Upvote[]; }>(
         `/api/upvotes?proposalHash=${proposalHash}&contractVotingIndex=${contractVotingIndex}`
       );
 
@@ -320,138 +320,138 @@ class ContractStore {
   });
 
   public createProposal = action((
-      contract_period_index: number,
-      level: number,
-      proposal_hash: string,
-      transaction_hash: string,
-      proposer: string,
-      alias: string | undefined,
-      contract_address: string,
-      upvotes: string
-    ): void => {
-      const newProposal: FrontendProposal = {
-        contract_period_index: contract_period_index,
-        level: level,
-        time: new Date().toISOString(),
-        proposal_hash: proposal_hash,
-        transaction_hash: transaction_hash,
-        proposer: proposer,
-        alias: alias,
-        contract_address: contract_address,
-        upvotes: upvotes,
-      };
+    contract_period_index: number,
+    level: number,
+    proposal_hash: string,
+    transaction_hash: string,
+    proposer: string,
+    alias: string | undefined,
+    contract_address: string,
+    upvotes: string
+  ): void => {
+    const newProposal: FrontendProposal = {
+      contract_period_index: contract_period_index,
+      level: level,
+      time: new Date().toISOString(),
+      proposal_hash: proposal_hash,
+      transaction_hash: transaction_hash,
+      proposer: proposer,
+      alias: alias,
+      contract_address: contract_address,
+      upvotes: upvotes,
+    };
 
-      const current: FrontendPeriod | undefined = this.currentPeriod[this.currentGovernance!];
-      if (!current) return;
+    const current: FrontendPeriod | undefined = this.currentPeriod[this.currentGovernance!];
+    if (!current) return;
 
-      const proposals = current.proposals || observable.array([]);
-      proposals.push(newProposal);
+    const proposals = current.proposals || observable.array([]);
+    proposals.push(newProposal);
 
-      this.createUpvote(
-        level,
-        proposal_hash,
-        proposer,
-        alias,
-        upvotes,
-        transaction_hash,
-        contract_address,
-        contract_period_index,
-        false
-      );
-    }
+    this.createUpvote(
+      level,
+      proposal_hash,
+      proposer,
+      alias,
+      upvotes,
+      transaction_hash,
+      contract_address,
+      contract_period_index,
+      false
+    );
+  }
   );
 
   public createUpvote = action((
-      level: number,
-      proposal_hash: string,
-      baker: string,
-      alias: string | undefined,
-      voting_power: string,
-      transaction_hash: string,
-      contract_address: string,
-      contract_period_index: number,
-      addToProposal: boolean = true
-    ): void => {
-      const newUpvote: Upvote = {
-        level: level,
-        time: new Date().toISOString(),
-        proposal_hash: proposal_hash,
-        baker: baker,
-        alias: alias,
-        voting_power: parseInt(voting_power),
-        transaction_hash: transaction_hash,
-        contract_address: contract_address,
-        contract_period_index: contract_period_index,
-      };
+    level: number,
+    proposal_hash: string,
+    baker: string,
+    alias: string | undefined,
+    voting_power: string,
+    transaction_hash: string,
+    contract_address: string,
+    contract_period_index: number,
+    addToProposal: boolean = true
+  ): void => {
+    const newUpvote: Upvote = {
+      level: level,
+      time: new Date().toISOString(),
+      proposal_hash: proposal_hash,
+      baker: baker,
+      alias: alias,
+      voting_power: parseInt(voting_power),
+      transaction_hash: transaction_hash,
+      contract_address: contract_address,
+      contract_period_index: contract_period_index,
+    };
 
-      const key: string = `${proposal_hash} - ${contract_period_index}`;
-      let upvotes: Upvote[] | undefined = this.upvotes[key];
-      if (!upvotes) upvotes = observable.array([]);
+    const key: string = `${proposal_hash} - ${contract_period_index}`;
+    let upvotes: Upvote[] | undefined = this.upvotes[key];
+    if (!upvotes) upvotes = observable.array([]);
 
-      upvotes.push(newUpvote);
-      this.upvotes[key] = upvotes;
+    upvotes.push(newUpvote);
+    this.upvotes[key] = upvotes;
 
-      if (!addToProposal) return;
+    if (!addToProposal) return;
 
-      const proposals: FrontendPeriod | undefined = this.currentPeriod[this.currentGovernance!];
-      if (!proposals) return;
+    const proposals: FrontendPeriod | undefined = this.currentPeriod[this.currentGovernance!];
+    if (!proposals) return;
 
-      proposals.proposals?.forEach((proposal) => {
-        if (proposal.proposal_hash === proposal_hash) {
-          proposal.upvotes = (
-            BigInt(proposal.upvotes) + BigInt(voting_power)
-          ).toString();
-        }
-      });
-    }
+    proposals.proposals?.forEach((proposal) => {
+      if (proposal.proposal_hash === proposal_hash) {
+        proposal.upvotes = (
+          BigInt(proposal.upvotes) + BigInt(voting_power)
+        ).toString();
+      }
+    });
+  }
   );
 
   public createVote = action((
-      proposal_hash: string,
-      baker: string,
-      alias: string | undefined,
-      voting_power: string,
-      vote: VoteOption,
-      level: number,
-      transaction_hash: string,
-      contract_address: string,
-      contract_period_index: number
-    ): void => {
-      const newVote: Vote = {
-        proposal_hash: proposal_hash,
-        baker: baker,
-        alias: alias,
-        voting_power: parseInt(voting_power),
-        vote: vote,
-        time: new Date().toISOString(),
-        level: level,
-        transaction_hash: transaction_hash,
-        contract_address: contract_address,
-      };
+    proposal_hash: string,
+    baker: string,
+    alias: string | undefined,
+    voting_power: string,
+    vote: VoteOption,
+    level: number,
+    transaction_hash: string,
+    contract_address: string,
+    contract_period_index: number
+  ): void => {
+    const newVote: Vote = {
+      proposal_hash: proposal_hash,
+      baker: baker,
+      alias: alias,
+      voting_power: parseInt(voting_power),
+      vote: vote,
+      time: new Date().toISOString(),
+      level: level,
+      transaction_hash: transaction_hash,
+      contract_address: contract_address,
+    };
 
-      const key: string = `${contract_address} - ${proposal_hash} - ${contract_period_index}`;
-      let votes: Vote[] | undefined = this.votes[key];
-      if (!votes) votes = observable.array([]);
+    const key: string = `${contract_address} - ${proposal_hash} - ${contract_period_index}`;
+    let votes: Vote[] | undefined = this.votes[key];
+    if (!votes) votes = observable.array([]);
 
-      votes.push(newVote);
-      this.votes[key] = votes;
+    votes.push(newVote);
+    this.votes[key] = votes;
 
-      const promotion: Promotion | undefined = this.currentPeriod[this.currentGovernance!]?.promotion;
-      if (promotion && promotion.proposal_hash === proposal_hash) {
-        switch (vote) {
-          case "yea":
-            promotion.yea_voting_power += parseInt(voting_power);
-            break;
-          case "nay":
-            promotion.nay_voting_power += parseInt(voting_power);
-            break;
-          case "pass":
-            promotion.pass_voting_power += parseInt(voting_power);
-            break;
-        }
-        promotion.total_voting_power += parseInt(voting_power);
+    const promotion: Promotion | undefined = this.currentPeriod[this.currentGovernance!]?.promotion;
+    if (promotion && promotion.proposal_hash === proposal_hash) {
+      switch (vote) {
+        case "yea":
+          promotion.yea_voting_power += parseInt(voting_power);
+          break;
+        case "nay":
+          promotion.nay_voting_power += parseInt(voting_power);
+          break;
+        case "pass":
+          promotion.pass_voting_power += parseInt(voting_power);
+          break;
       }
+      promotion.total_voting_power += parseInt(voting_power);
     }
+  }
   );
 }
 

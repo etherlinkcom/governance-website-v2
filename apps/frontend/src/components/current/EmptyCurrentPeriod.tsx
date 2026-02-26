@@ -2,14 +2,14 @@ import { Box, Typography } from "@mui/material";
 import { FrontendPeriod } from "@/types/api";
 import { PeriodDateAndLevels } from "@/components/shared/PeriodDateAndLevels";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
-import { SubmitProposalButton } from "./SubmitProposalModal";
+import { SubmitProposalButton } from "./SubmitProposalButton";
 import { GovernanceType } from "@trilitech/types";
 
 interface EmptyCurrentPeriodProps {
   currentPeriod: FrontendPeriod;
 }
 
-export const EmptyCurrentPeriod = ({currentPeriod}: EmptyCurrentPeriodProps) => {
+export const EmptyCurrentPeriod = ({ currentPeriod }: EmptyCurrentPeriodProps) => {
 
   return (
     <Box sx={{ p: 3, height: 600 }}>
@@ -23,8 +23,8 @@ export const EmptyCurrentPeriod = ({currentPeriod}: EmptyCurrentPeriodProps) => 
           mb: 3,
         }}
       >
-          <PeriodDateAndLevels period={currentPeriod} />
-        <Box sx={{width: { xs: "100%", sm: "auto" }, mt: { xs: 2, sm: 0 }}}>
+        <PeriodDateAndLevels period={currentPeriod} />
+        <Box sx={{ width: { xs: "100%", sm: "auto" }, mt: { xs: 2, sm: 0 } }}>
           <TimeRemaining currentPeriod={currentPeriod} />
         </Box>
       </Box>

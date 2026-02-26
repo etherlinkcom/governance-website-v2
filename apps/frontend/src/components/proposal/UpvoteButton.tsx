@@ -55,7 +55,15 @@ export const UpvoteButton = observer(({ proposalHash, contractVotingIndex, sx }:
     }
   };
 
-  if (!isCurrentPeriod || !walletStore?.hasVotingPower || hasAlreadyUpvoted) return null;
+  const canUpvoteOnContract: boolean = walletStore?.canActOn(contract?.contract_address || "") ?? false;
+
+  if (
+    !contract ||
+    !isCurrentPeriod ||
+    !walletStore?.hasVotingPower ||
+    hasAlreadyUpvoted ||
+    !canUpvoteOnContract
+  ) return null;
 
   return (
     <Button
