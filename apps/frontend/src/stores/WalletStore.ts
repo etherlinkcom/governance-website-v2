@@ -77,6 +77,10 @@ export class WalletStore {
     return this.votingPower?.votingAmount ? formatNumber(this.votingPower.votingAmount) : '0';
   }
 
+  get hasOwnVotingPower(): boolean {
+    return this.votingPower?.ownAmount ? this.votingPower.ownAmount.isGreaterThan(0) : false;
+  }
+
   get hasVotingPower(): boolean {
     return this.votingPower?.votingAmount ? this.votingPower.votingAmount.isGreaterThan(0) : false;
   }

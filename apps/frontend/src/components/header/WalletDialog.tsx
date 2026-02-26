@@ -12,6 +12,7 @@ import { EllipsisBox } from "@/components/shared/EllipsisBox";
 import { getWalletStore } from "@/stores/WalletStore";
 import { observer } from "mobx-react-lite";
 import { VotingRightsButton } from "./VotingRightsButton";
+import { ClaimVotingRightsButton } from "./ClaimVotingRightsButton";
 
 interface WalletDialogProps {
   open: boolean;
@@ -93,7 +94,11 @@ export const WalletDialog = observer(({ open, onClose, onDisconnect }: WalletDia
       </DialogContent>
 
       <DialogActions sx={{ display: "flex", gap: 1, p: 2, flexDirection: { xs: "column", sm: "row" } }}>
-        <VotingRightsButton />
+        {walletStore.hasOwnVotingPower ? (
+          <VotingRightsButton />
+        ) : (
+          <ClaimVotingRightsButton sx={{ width: { xs: "100%", sm: "auto" } }} />
+        )}
         <Button onClick={onDisconnect} variant="outlined" sx={{ width: { xs: "100%", sm: "auto" } }}>
           Disconnect
         </Button>
