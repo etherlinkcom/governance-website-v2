@@ -37,11 +37,11 @@ export class WalletStore {
   constructor() {
     this.wallet = new BeaconWallet({
       name: 'Etherlink Governance',
-        colorMode: ColorMode.DARK,
-        iconUrl: '/favicon.ico',
-        preferredNetwork: process.env.NEXT_PUBLIC_NETWORK_TYPE === "mainnet" ?
-          "mainnet" as NetworkType :
-          "ghostnet" as NetworkType,
+      colorMode: ColorMode.DARK,
+      iconUrl: '/favicon.ico',
+      preferredNetwork: process.env.NEXT_PUBLIC_NETWORK_TYPE === "mainnet" ?
+        NetworkType.MAINNET :
+        NetworkType.SHADOWNET
     });
     this.Tezos.setWalletProvider(this.wallet);
     makeAutoObservable(this);
@@ -86,7 +86,7 @@ export class WalletStore {
       return [key, value ? {
         votingAmount: formatNumber(value.votingAmount || 0),
         votingPercent: value.votingPercent ? value.votingPercent.toPrecision(2) : '0',
-      }: {
+      } : {
         votingAmount: '--',
         votingPercent: '--',
       }];
@@ -137,7 +137,7 @@ export class WalletStore {
     if (!this._address) return;
     const mutez = await this.Tezos.tz.getBalance(this._address);
     runInAction(() => {
-      this.balance = mutez.toNumber() / 1_000_000;
+      this.balance = mutez.toNumber();
     });
   }
 
@@ -158,7 +158,7 @@ export class WalletStore {
       try {
         const response: Response = await fetch(`${this.tzktApiUrl}/voting/periods/current`);
         if (response.ok) {
-          const data: {totalVotingPower?: number} = await response.json();
+          const data: { totalVotingPower?: number } = await response.json();
           totalVotingPower = new BigNumber(data.totalVotingPower ?? 0);
         }
       } catch (error) {
@@ -169,37 +169,37 @@ export class WalletStore {
       runInAction(() => this.delegates.clear());
 
       if (delegates.length > 0) {
-      await Promise.allSettled(
-        delegates.map(async (delegateAddress) => {
-          try {
+        await Promise.allSettled(
+          delegates.map(async (delegateAddress) => {
+            try {
 
-            const response: Response = await fetch(`${this.tzktApiUrl}/voting/periods/current/voters/${delegateAddress}`);
-            if (!response.ok || response.status === 204) {
-              runInAction(() => this.delegates.delete(delegateAddress));
-              return;
+              const response: Response = await fetch(`${this.tzktApiUrl}/voting/periods/current/voters/${delegateAddress}`);
+              if (!response.ok || response.status === 204) {
+                runInAction(() => this.delegates.delete(delegateAddress));
+                return;
+              }
+
+              const data: { votingPower?: number, delegate: { alias?: string } } = await response.json();
+              ownVotingPower = ownVotingPower.plus(data.votingPower ?? 0);
+
+              if (delegateAddress === this._address && delegates.length > 1) return;
+
+              const votingPercent: BigNumber = new BigNumber(data.votingPower ?? 0).div(totalVotingPower).times(100);
+              const delegateVotingPower: VotingPower = {
+                votingAmount: new BigNumber(data.votingPower ?? 0),
+                votingPercent: votingPercent.isNaN() ? null : votingPercent,
+              }
+
+              runInAction(() => {
+                this.delegates.set(data.delegate.alias ?? delegateAddress, delegateVotingPower)
+              });
+
+            } catch (error) {
+              if (delegateAddress === this._address) return;
+              runInAction(() => this.delegates.set(delegateAddress, null));
             }
-
-            const data: { votingPower?: number, delegate: { alias?: string} } = await response.json();
-            ownVotingPower = ownVotingPower.plus(data.votingPower ?? 0);
-
-            if (delegateAddress === this._address && delegates.length > 1) return;
-
-            const votingPercent: BigNumber = new BigNumber(data.votingPower ?? 0).div(totalVotingPower).times(100);
-            const delegateVotingPower: VotingPower = {
-              votingAmount: new BigNumber(data.votingPower ?? 0),
-              votingPercent: votingPercent.isNaN() ? null : votingPercent,
-            }
-
-            runInAction(() => {
-              this.delegates.set(data.delegate.alias ?? delegateAddress, delegateVotingPower)
-            });
-
-          } catch (error) {
-            if (delegateAddress === this._address) return;
-            runInAction(() => this.delegates.set(delegateAddress, null));
-          }
-        })
-      );
+          })
+        );
       }
 
       runInAction(() => {
@@ -262,7 +262,7 @@ export class WalletStore {
             pool_address: parsed.pool_address,
           };
         }
-      } catch {}
+      } catch { }
 
       const operation = await contract.methodsObject.upvote_proposal(sequencerProposal ?? proposal).send();
       const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
@@ -287,7 +287,7 @@ export class WalletStore {
 
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.new_proposal({
-        sequencer_pk:sequencerPublicKey,
+        sequencer_pk: sequencerPublicKey,
         pool_address: poolAddress,
       }).send();
 
