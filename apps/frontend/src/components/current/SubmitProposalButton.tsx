@@ -34,7 +34,7 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
     if (!input.trim()) return "Bytes input is required";
     if (input.length <= 65) return "Bytes must be longer than 65 characters";
     if (input.length % 2 !== 0) return "Bytes length must be even";
-    if (!/^[0-9a-f]+$/.test(input)) return "Must be valid hex (0-9, a-f only)";
+    if (!/^[0-9a-fA-F]+$/.test(input)) return "Must be valid hex (0-9, a-f, A-F only)";
     return null;
   };
 
@@ -162,7 +162,7 @@ export const SubmitProposalButton = observer(({ contractAddress, governanceType,
         aria-hidden="false"
       >
         <DialogTitle>
-          Submit {isSequencer ? "Sequencer" : "Proposal"}
+          Submit Proposal
         </DialogTitle>
         <DialogContent>
           <Box
