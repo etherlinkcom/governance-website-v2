@@ -5,13 +5,19 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  SxProps,
+  Theme,
 } from "@mui/material";
 import { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { getWalletStore } from "@/stores/WalletStore";
 import { validateAddress, ValidationResult } from "@tezos-x/octez.js-utils";
 
-export const ClaimVotingRightsButton = observer(() => {
+interface ClaimVotingRightsButtonProps {
+  sx?: SxProps<Theme>;
+}
+
+export const ClaimVotingRightsButton = observer(({ sx }: ClaimVotingRightsButtonProps) => {
   const walletStore = getWalletStore();
   const [open, setOpen] = useState(false);
   const [claimInput, setClaimInput] = useState("");
@@ -39,15 +45,15 @@ export const ClaimVotingRightsButton = observer(() => {
       ? "Revoking..."
       : "Claiming..."
     : isDelegate
-    ? "Revoke"
-    : "Claim";
+      ? "Revoke"
+      : "Claim";
 
   return (
     <>
       <Button
         onClick={() => setOpen(true)}
         variant="outlined"
-        sx={{ width: { xs: "100%", sm: "auto" } }}
+        sx={{ width: "100%", ...sx }}
       >
         Claim Voting Rights
       </Button>

@@ -8,9 +8,12 @@ import { VoteOption } from '@trilitech/types';
 import toast from 'react-hot-toast';
 import { TransactionOperationConfirmation } from '@/types/api';
 import { fetchJson } from '@/lib/fetchJson';
+import { DelegationRule, fetchDelegationsForAddress } from "@/lib/delegationUtils";
 
+import { contractStore } from './ContractStore';
 
-export type VotingPower = {
+type VotingPower = {
+  ownAmount: BigNumber | null;
   votingAmount: BigNumber | null;
   votingPercent?: BigNumber | null;
 }
@@ -27,6 +30,7 @@ export class WalletStore {
   private balance: number = 0;
   private votingPower: VotingPower | null = null;
   private delegates = new Map<string, VotingPower | null>();
+  public canVoteOnAddresses = new Set<string>();
   private voting: boolean = false;
 
   private Tezos = new TezosToolkit(process.env.NEXT_PUBLIC_RPC_URL || "https://rpc.tzkt.io/mainnet");
@@ -37,11 +41,11 @@ export class WalletStore {
   constructor() {
     this.wallet = new BeaconWallet({
       name: 'Etherlink Governance',
-        colorMode: ColorMode.DARK,
-        iconUrl: '/favicon.ico',
-        preferredNetwork: process.env.NEXT_PUBLIC_NETWORK_TYPE === "mainnet" ?
-          "mainnet" as NetworkType :
-          "ghostnet" as NetworkType,
+      colorMode: ColorMode.DARK,
+      iconUrl: '/favicon.ico',
+      preferredNetwork: process.env.NEXT_PUBLIC_NETWORK_TYPE === "mainnet" ?
+        NetworkType.MAINNET :
+        NetworkType.SHADOWNET
     });
     this.Tezos.setWalletProvider(this.wallet);
     makeAutoObservable(this);
@@ -73,6 +77,10 @@ export class WalletStore {
     return this.votingPower?.votingAmount ? formatNumber(this.votingPower.votingAmount) : '0';
   }
 
+  get hasOwnVotingPower(): boolean {
+    return this.votingPower?.ownAmount ? this.votingPower.ownAmount.isGreaterThan(0) : false;
+  }
+
   get hasVotingPower(): boolean {
     return this.votingPower?.votingAmount ? this.votingPower.votingAmount.isGreaterThan(0) : false;
   }
@@ -86,7 +94,7 @@ export class WalletStore {
       return [key, value ? {
         votingAmount: formatNumber(value.votingAmount || 0),
         votingPercent: value.votingPercent ? value.votingPercent.toPrecision(2) : '0',
-      }: {
+      } : {
         votingAmount: '--',
         votingPercent: '--',
       }];
@@ -108,6 +116,54 @@ export class WalletStore {
     return this.delegates.has(address);
   }
 
+  public canActOn(contractAddress: string): boolean {
+    return this.canVoteOnAddresses.has(contractAddress);
+  }
+
+  private updateCanVoteOnAddresses(delegations: Map<string, DelegationRule>) {
+    this.canVoteOnAddresses.clear();
+    const activeContracts: string[] = Object.values(contractStore['activeContracts'] || {}).map(c => c!.contract_address);
+
+    const ownPower: BigNumber | null | undefined = this.votingPower?.ownAmount;
+    if (ownPower && ownPower.isGreaterThan(0)) {
+      activeContracts.forEach(addr => this.canVoteOnAddresses.add(addr));
+      return;
+    }
+
+    // If not a baker, check if delegates (bakers who assigned rights to this wallet) have rules
+    if (delegations.size === 0) return;
+
+    let hasBakerWithoutRules = false;
+    for (const rule of delegations.values()) {
+      if (!rule.optAddresses || rule.optAddresses.length === 0) {
+        hasBakerWithoutRules = true;
+        break;
+      }
+    }
+
+    if (hasBakerWithoutRules) {
+      // At least one delegate gave full access
+      activeContracts.forEach(addr => this.canVoteOnAddresses.add(addr));
+      return;
+    }
+
+    // Parse the response to see which contracts the connected wallet is able to vote on
+    for (const rule of delegations.values()) {
+      if (rule.isVotingKey) {
+        // Whitelist
+        rule.optAddresses?.forEach(addr => this.canVoteOnAddresses.add(addr));
+      } else {
+        // Blacklist
+        const blocked = new Set(rule.optAddresses || []);
+        activeContracts.forEach(addr => {
+          if (!blocked.has(addr)) {
+            this.canVoteOnAddresses.add(addr);
+          }
+        });
+      }
+    }
+  }
+
   async connect(): Promise<void> {
     await this.wallet.requestPermissions({});
     const address = await this.wallet.getPKH();
@@ -120,12 +176,14 @@ export class WalletStore {
       this.refreshBalance(),
       this.refreshVotingPower(),
     ]);
+    await this.refreshVotingDelegations();
   }
 
   async disconnect(): Promise<void> {
     await this.wallet.clearActiveAccount();
     runInAction(() => {
       this.delegates.clear();
+      this.canVoteOnAddresses.clear();
       this._alias = undefined;
       this._address = null;
       this.balance = 0;
@@ -137,8 +195,18 @@ export class WalletStore {
     if (!this._address) return;
     const mutez = await this.Tezos.tz.getBalance(this._address);
     runInAction(() => {
-      this.balance = mutez.toNumber() / 1_000_000;
+      this.balance = mutez.toNumber();
     });
+  }
+
+  async refreshVotingDelegations(): Promise<void> {
+    if (!this._address) return;
+    try {
+      const rules: Map<string, DelegationRule> = await fetchDelegationsForAddress(this._address);
+      runInAction(() => this.updateCanVoteOnAddresses(rules));
+    } catch (error) {
+      console.error("Failed to fetch voting delegations", error);
+    }
   }
 
   async refreshVotingPower(): Promise<void> {
@@ -158,54 +226,59 @@ export class WalletStore {
       try {
         const response: Response = await fetch(`${this.tzktApiUrl}/voting/periods/current`);
         if (response.ok) {
-          const data: {totalVotingPower?: number} = await response.json();
+          const data: { totalVotingPower?: number } = await response.json();
           totalVotingPower = new BigNumber(data.totalVotingPower ?? 0);
         }
       } catch (error) {
         totalVotingPower = new BigNumber(0);
       }
 
-      let ownVotingPower: BigNumber = new BigNumber(0);
+      let selfPower: BigNumber = new BigNumber(0);
+      let aggregatedVotingPower: BigNumber = new BigNumber(0);
       runInAction(() => this.delegates.clear());
 
       if (delegates.length > 0) {
-      await Promise.allSettled(
-        delegates.map(async (delegateAddress) => {
-          try {
+        await Promise.allSettled(
+          delegates.map(async (delegateAddress) => {
+            try {
 
-            const response: Response = await fetch(`${this.tzktApiUrl}/voting/periods/current/voters/${delegateAddress}`);
-            if (!response.ok || response.status === 204) {
-              runInAction(() => this.delegates.delete(delegateAddress));
-              return;
+              const response: Response = await fetch(`${this.tzktApiUrl}/voting/periods/current/voters/${delegateAddress}`);
+              if (!response.ok || response.status === 204) {
+                runInAction(() => this.delegates.delete(delegateAddress));
+                return;
+              }
+
+              const data: { votingPower?: number, delegate: { alias?: string } } = await response.json();
+              const powerAmount = new BigNumber(data.votingPower ?? 0);
+              aggregatedVotingPower = aggregatedVotingPower.plus(powerAmount);
+
+              if (delegateAddress === this._address) selfPower = powerAmount;
+              if (delegateAddress === this._address && delegates.length > 1) return;
+
+              const votingPercent: BigNumber = powerAmount.div(totalVotingPower).times(100);
+              const delegateVotingPower: VotingPower = {
+                ownAmount: powerAmount,
+                votingAmount: powerAmount,
+                votingPercent: votingPercent.isNaN() ? null : votingPercent,
+              }
+
+              runInAction(() => {
+                this.delegates.set(data.delegate.alias ?? delegateAddress, delegateVotingPower)
+              });
+
+            } catch (error) {
+              if (delegateAddress === this._address) return;
+              runInAction(() => this.delegates.set(delegateAddress, null));
             }
-
-            const data: { votingPower?: number, delegate: { alias?: string} } = await response.json();
-            ownVotingPower = ownVotingPower.plus(data.votingPower ?? 0);
-
-            if (delegateAddress === this._address && delegates.length > 1) return;
-
-            const votingPercent: BigNumber = new BigNumber(data.votingPower ?? 0).div(totalVotingPower).times(100);
-            const delegateVotingPower: VotingPower = {
-              votingAmount: new BigNumber(data.votingPower ?? 0),
-              votingPercent: votingPercent.isNaN() ? null : votingPercent,
-            }
-
-            runInAction(() => {
-              this.delegates.set(data.delegate.alias ?? delegateAddress, delegateVotingPower)
-            });
-
-          } catch (error) {
-            if (delegateAddress === this._address) return;
-            runInAction(() => this.delegates.set(delegateAddress, null));
-          }
-        })
-      );
+          })
+        );
       }
 
       runInAction(() => {
         this.votingPower = {
-          votingAmount: new BigNumber(ownVotingPower),
-          votingPercent: totalVotingPower.isZero() ? null : ownVotingPower.div(totalVotingPower).times(100),
+          ownAmount: selfPower,
+          votingAmount: new BigNumber(aggregatedVotingPower),
+          votingPercent: totalVotingPower.isZero() ? null : aggregatedVotingPower.div(totalVotingPower).times(100),
         };
       });
 
@@ -225,6 +298,7 @@ export class WalletStore {
         this.refreshBalance(),
         this.refreshVotingPower(),
       ]);
+      await this.refreshVotingDelegations();
     }
   }
 
@@ -262,7 +336,7 @@ export class WalletStore {
             pool_address: parsed.pool_address,
           };
         }
-      } catch {}
+      } catch { }
 
       const operation = await contract.methodsObject.upvote_proposal(sequencerProposal ?? proposal).send();
       const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();
@@ -287,7 +361,7 @@ export class WalletStore {
 
       const contract = await this.Tezos.wallet.at(contractAddress);
       const operation = await contract.methodsObject.new_proposal({
-        sequencer_pk:sequencerPublicKey,
+        sequencer_pk: sequencerPublicKey,
         pool_address: poolAddress,
       }).send();
 
@@ -334,6 +408,27 @@ export class WalletStore {
     } catch (error) {
       toast.error(`Error claiming voting rights`);
       console.error(`Error claiming voting rights for ${keyHash}: ${error}`);
+    } finally {
+      this.voting = false;
+    }
+  }
+
+  async proposeVotingKey(votingKey: string, isVotingKey: boolean, optAddresses: string[] | null) {
+    if (this.voting) return;
+    this.voting = true;
+    try {
+      const contract = await this.Tezos.wallet.at(this.delegatesViewContractAddress);
+      const operation = await contract.methodsObject.propose_voting_key({
+        0: votingKey,
+        1: isVotingKey,
+        2: optAddresses
+      }).send();
+      await operation.confirmation();
+      toast.success(`Successfully proposed voting key`);
+      return operation.opHash;
+    } catch (error) {
+      toast.error(`Error proposing voting key`);
+      console.error(`Error proposing voting key for ${votingKey}: ${error}`);
     } finally {
       this.voting = false;
     }

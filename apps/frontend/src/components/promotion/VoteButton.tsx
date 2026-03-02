@@ -22,7 +22,7 @@ interface VoteButtonProps {
   promotionHash: string
 }
 
-export const VoteButton = observer(({isCurrentPeriod= false, contractVotingIndex, promotionHash} : VoteButtonProps) => {
+export const VoteButton = observer(({ isCurrentPeriod = false, contractVotingIndex, promotionHash }: VoteButtonProps) => {
   const [voteModalOpen, setVoteModalOpen] = useState<boolean>(false);
   const [selectedVote, setSelectedVote] = useState<VoteOption>("yea");
   const walletStore = getWalletStore();
@@ -64,8 +64,15 @@ export const VoteButton = observer(({isCurrentPeriod= false, contractVotingIndex
     }
   };
 
+  const canActOnContract: boolean = walletStore?.canActOn(contract?.contract_address || "") ?? false;
 
-  if (!isCurrentPeriod || !walletStore?.hasVotingPower || hasAlreadyVoted) {
+  if (
+    !contract ||
+    !isCurrentPeriod ||
+    !walletStore?.hasVotingPower ||
+    hasAlreadyVoted ||
+    !canActOnContract
+  ) {
     return null;
   }
 
@@ -75,8 +82,8 @@ export const VoteButton = observer(({isCurrentPeriod= false, contractVotingIndex
         variant="contained"
         onClick={() => setVoteModalOpen(true)}
         sx={{ width: { xs: "100%", md: "auto" } }}
-        >
-          Vote
+      >
+        Vote
       </Button>
       <Dialog
         open={voteModalOpen}
