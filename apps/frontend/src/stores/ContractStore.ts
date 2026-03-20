@@ -39,6 +39,7 @@ class ContractStore {
 
   private readonly futurePeriodsCount: number = 10;
   private readonly tzktApiUrl: string = "https://api.tzkt.io/v1";
+  private blockTimeMs: number | null = null;
 
   constructor() {
     makeAutoObservable(this, {
@@ -212,7 +213,13 @@ class ContractStore {
 
       this.loadingStateFuturePeriods[this.currentGovernance] = "loading";
 
-      const tezosBlockTimeInMs: number = 8000;
+      if (!this.blockTimeMs) {
+        const protocol: { constants: { timeBetweenBlocks: number } } = yield fetchJson<{ constants: { timeBetweenBlocks: number } }>(
+          `${this.tzktApiUrl}/protocols/current`
+        );
+        this.blockTimeMs = protocol.constants.timeBetweenBlocks * 1000;
+      }
+      const tezosBlockTimeInMs: number = this.blockTimeMs;
       const contractStartLevel: number = contract.started_at_level;
       const periodLength: number = contract.period_length;
 
