@@ -38,7 +38,8 @@ class ContractStore {
   private loadingStateUpvotes: Partial<Record<string, LoadingState>> = {};
 
   private readonly futurePeriodsCount: number = 10;
-  private readonly tzktApiUrl: string = "https://api.tzkt.io/v1";
+  private readonly tzktApiUrl: string = process.env.NEXT_PUBLIC_TZKT_API_URL || "https://api.tzkt.io/v1";
+  private blockTimeMs: number | null = null;
 
   constructor() {
     makeAutoObservable(this, {
@@ -212,7 +213,17 @@ class ContractStore {
 
       this.loadingStateFuturePeriods[this.currentGovernance] = "loading";
 
-      const tezosBlockTimeInMs: number = 8000;
+      if (!this.blockTimeMs) {
+        try {
+          const protocol: { constants: { timeBetweenBlocks: number } } = yield fetchJson<{ constants: { timeBetweenBlocks: number } }>(
+            `${this.tzktApiUrl}/protocols/current`
+          );
+          this.blockTimeMs = protocol.constants.timeBetweenBlocks * 1000;
+        } catch {
+          this.blockTimeMs = 6000;
+        }
+      }
+      const tezosBlockTimeInMs: number = this.blockTimeMs ?? 6000;
       const contractStartLevel: number = contract.started_at_level;
       const periodLength: number = contract.period_length;
 
@@ -236,7 +247,8 @@ class ContractStore {
           currentTime + ((endLevel - currentLevel[0].level) * tezosBlockTimeInMs)
         );
 
-        futurePeriods.push({ startLevel, endLevel, startDateTime, endDateTime });
+        const contract_voting_index: number = (startLevel - contractStartLevel) / periodLength;
+        futurePeriods.push({ startLevel, endLevel, startDateTime, endDateTime, contract_voting_index });
       }
 
       this.futurePeriods[this.currentGovernance] = futurePeriods;

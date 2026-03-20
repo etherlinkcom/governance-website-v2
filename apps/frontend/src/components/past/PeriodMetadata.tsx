@@ -51,7 +51,7 @@ export const PeriodMetadata = observer(({
     {formatDate(period.startDateTime)} - {formatDate(period.endDateTime)}
   </Typography>
     <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
-      Levels: {period.startLevel.toLocaleString()} -{" "}
+      Period #{period.contract_voting_index} · Levels: {period.startLevel.toLocaleString()} -{" "}
       {period.endLevel.toLocaleString()}
     </Typography>
 
