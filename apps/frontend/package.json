@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "dev:mainnet": "env-cmd -f .env.mainnet next dev",
+    "dev:testnet": "env-cmd -f .env.testnet next dev"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -31,6 +33,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "env-cmd": "^11.0.0",
     "typescript": "^5"
   }
 }
