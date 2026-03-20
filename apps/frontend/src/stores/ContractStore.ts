@@ -214,10 +214,14 @@ class ContractStore {
       this.loadingStateFuturePeriods[this.currentGovernance] = "loading";
 
       if (!this.blockTimeMs) {
-        const protocol: { constants: { timeBetweenBlocks: number } } = yield fetchJson<{ constants: { timeBetweenBlocks: number } }>(
-          `${this.tzktApiUrl}/protocols/current`
-        );
-        this.blockTimeMs = protocol.constants.timeBetweenBlocks * 1000;
+        try {
+          const protocol: { constants: { timeBetweenBlocks: number } } = yield fetchJson<{ constants: { timeBetweenBlocks: number } }>(
+            `${this.tzktApiUrl}/protocols/current`
+          );
+          this.blockTimeMs = protocol.constants.timeBetweenBlocks * 1000;
+        } catch {
+          this.blockTimeMs = 6000;
+        }
       }
       const tezosBlockTimeInMs: number = this.blockTimeMs;
       const contractStartLevel: number = contract.started_at_level;
