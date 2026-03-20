@@ -243,7 +243,8 @@ class ContractStore {
           currentTime + ((endLevel - currentLevel[0].level) * tezosBlockTimeInMs)
         );
 
-        futurePeriods.push({ startLevel, endLevel, startDateTime, endDateTime });
+        const contract_voting_index: number = (startLevel - contractStartLevel) / periodLength;
+        futurePeriods.push({ startLevel, endLevel, startDateTime, endDateTime, contract_voting_index });
       }
 
       this.futurePeriods[this.currentGovernance] = futurePeriods;

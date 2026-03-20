@@ -49,7 +49,7 @@ export const FuturePeriodCard = observer(({ futurePeriod }: FuturePeriodCardProp
           variant="caption"
           color="text.secondary"
         >
-          Levels: {futurePeriod.startLevel.toLocaleString()} - {futurePeriod.endLevel.toLocaleString()}
+          Period #{futurePeriod.contract_voting_index} · Levels: {futurePeriod.startLevel.toLocaleString()} - {futurePeriod.endLevel.toLocaleString()}
         </Typography>
       </Box>
     </Card>

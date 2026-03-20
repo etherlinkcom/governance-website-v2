@@ -22,7 +22,7 @@ export const PeriodDateAndLevels = ({ period }: { period: FrontendPeriod }) => {
         {formatDate(period.endDateTime)}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-        Levels: {period.startLevel.toLocaleString()} -{" "}
+        Period #{period.contract_voting_index} · Levels: {period.startLevel.toLocaleString()} -{" "}
         {period.endLevel.toLocaleString()}
       </Typography>
     </Box>

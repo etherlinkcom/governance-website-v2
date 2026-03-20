@@ -50,7 +50,8 @@ export interface FuturePeriod {
     startDateTime: Date;
     endDateTime: Date;
     startLevel: number;
-    endLevel: number
+    endLevel: number;
+    contract_voting_index: number;
 }
 
 export interface TransactionOperationConfirmation {
