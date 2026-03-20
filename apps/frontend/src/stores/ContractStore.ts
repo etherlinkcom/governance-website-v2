@@ -38,7 +38,7 @@ class ContractStore {
   private loadingStateUpvotes: Partial<Record<string, LoadingState>> = {};
 
   private readonly futurePeriodsCount: number = 10;
-  private readonly tzktApiUrl: string = "https://api.tzkt.io/v1";
+  private readonly tzktApiUrl: string = process.env.NEXT_PUBLIC_TZKT_API_URL || "https://api.tzkt.io/v1";
   private blockTimeMs: number | null = null;
 
   constructor() {
