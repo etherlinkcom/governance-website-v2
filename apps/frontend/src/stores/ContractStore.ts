@@ -223,7 +223,7 @@ class ContractStore {
           this.blockTimeMs = 6000;
         }
       }
-      const tezosBlockTimeInMs: number = this.blockTimeMs;
+      const tezosBlockTimeInMs: number = this.blockTimeMs ?? 6000;
       const contractStartLevel: number = contract.started_at_level;
       const periodLength: number = contract.period_length;
 
