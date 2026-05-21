@@ -43,18 +43,50 @@ const mainnet_contracts: Contract[] = [
   {
     address: "KT1VZVNCNnhUp7s15d9RsdycP7C1iwYhAQ8r",
     type: "slow",
-    active: true
+    active: false
   },
   {
     address: "KT1DxndcFitAbxLdJCN3C1pPivqbC3RJxD1R",
     type: "fast",
-    active: true
+    active: false
   },
   {
     address: "KT1WckZ2uiLfHCfQyNp1mtqeRcC1X6Jg2Qzf",
     type: "sequencer",
+    active: false
+  },
+  // 6.2
+  {
+    address: "KT1NM6cpM5BPTmYPszjv6LRDAMRZXPET9DmH",
+    type: "slow",
+    active: false
+  },
+  {
+    address: "KT1JGCdHEyvE3RkmzR7hRYK7vC42QF6zK34H",
+    type: "fast",
+    active: false
+  },
+  {
+    address: "KT1CSqkafD5ZCHFvmsozrCBeSy2XJQzutJRn",
+    type: "sequencer",
+    active: false
+  },
+  // 6.3
+  {
+    address: "KT19oUVQPnVLuUBYXrBVd46WJnNAMpqkKSwo",
+    type: "fast",
     active: true
   },
+  {
+    address: "KT1AXRU3wLc87WNhLhVGrgqDGubLACUMUgPb",
+    type: "slow",
+    active: true
+  },
+  {
+    address: "KT1VGyd2cRSHoDnxDnSuqGJD3mL8DzcVqX98",
+    type: "sequencer",
+    active: true
+  }
 ];
 
 const testnet_contracts: Contract[] = [
