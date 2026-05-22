@@ -55,22 +55,6 @@ const mainnet_contracts: Contract[] = [
     type: "sequencer",
     active: false
   },
-  // 6.2
-  {
-    address: "KT1NM6cpM5BPTmYPszjv6LRDAMRZXPET9DmH",
-    type: "slow",
-    active: false
-  },
-  {
-    address: "KT1JGCdHEyvE3RkmzR7hRYK7vC42QF6zK34H",
-    type: "fast",
-    active: false
-  },
-  {
-    address: "KT1CSqkafD5ZCHFvmsozrCBeSy2XJQzutJRn",
-    type: "sequencer",
-    active: false
-  },
   // 6.3
   {
     address: "KT19oUVQPnVLuUBYXrBVd46WJnNAMpqkKSwo",
