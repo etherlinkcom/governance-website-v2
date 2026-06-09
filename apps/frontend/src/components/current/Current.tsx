@@ -9,10 +9,12 @@ import { ProposalView } from "@/components/proposal/ProposalView";
 import { PromotionView } from "@/components/promotion/PromotionView";
 import { ComponentLoading } from "../shared/ComponentLoading";
 import { FrontendPeriod } from "@/types/api";
+import { CurrentContractLink } from "../shared/CurrentContractLink";
 
 export const Current = observer(() => {
   const currentPeriod: FrontendPeriod | undefined = contractStore.currentPeriodData;
   const loadingState: LoadingState = contractStore.stateCurrentPeriod;
+  const currentContract = contractStore.currentContract;
 
   if (loadingState === "loading" || !loadingState || !currentPeriod) {
     return (
@@ -36,13 +38,18 @@ export const Current = observer(() => {
 
   return (
     <Box sx={{ width: "100%", mx: "auto" }}>
-          {currentPeriod.proposals && currentPeriod.proposals.length > 0 ? (
-            <ProposalView period={currentPeriod} />
-          ) : currentPeriod.promotion ? (
-            <PromotionView period={currentPeriod} />
-          ) : (
-            <EmptyCurrentPeriod currentPeriod={currentPeriod} />
-          )}
+      {currentContract && (
+        <Box sx={{ px: 3, pb: 1 }}>
+          <CurrentContractLink contract={currentContract} />
+        </Box>
+      )}
+      {currentPeriod.proposals && currentPeriod.proposals.length > 0 ? (
+        <ProposalView period={currentPeriod} />
+      ) : currentPeriod.promotion ? (
+        <PromotionView period={currentPeriod} />
+      ) : (
+        <EmptyCurrentPeriod currentPeriod={currentPeriod} />
+      )}
     </Box>
   );
 });
