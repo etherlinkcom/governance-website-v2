@@ -69,8 +69,15 @@ const mainnet_contracts: Contract[] = [
   {
     address: "KT1VGyd2cRSHoDnxDnSuqGJD3mL8DzcVqX98",
     type: "sequencer",
+    active: false
+  },
+  // 6.4
+  {
+    address: "KT1DkQFmACvsUtnx8B4jirnp2CRi1cWSiELw",
+    type: "sequencer",
     active: true
   }
+
 ];
 
 const testnet_contracts: Contract[] = [
