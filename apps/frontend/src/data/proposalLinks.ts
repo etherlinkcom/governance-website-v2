@@ -56,7 +56,7 @@ export const allLinkData: LinkData[] = [
     title: 'Announcing Etherlink 6.1: a bugfix proposal for FA token deposits',
   },
   {
-    payloadKey: '0x007a6ac98660fa68cab09abfb3a59be93ccf4a5d47aeb44a00ffb0a3babdba448a',
+    payloadKey: '007a6ac98660fa68cab09abfb3a59be93ccf4a5d47aeb44a00ffb0a3babdba448a',
     href: 'https://medium.com/@etherlink/announcing-ganesha-a-7th-upgrade-proposal-for-etherlink-mainnet-ae0a3af93aba',
     title: 'Announcing Ganesha: A 7th Upgrade Proposal for Etherlink Mainnet',
   },
