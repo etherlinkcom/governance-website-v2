@@ -55,4 +55,9 @@ export const allLinkData: LinkData[] = [
     href: 'https://medium.com/@etherlink/announcing-etherlink-6-1-a-bugfix-proposal-for-fa-token-deposits-2cc08ffd6fad',
     title: 'Announcing Etherlink 6.1: a bugfix proposal for FA token deposits',
   },
+  {
+    payloadKey: '007a6ac98660fa68cab09abfb3a59be93ccf4a5d47aeb44a00ffb0a3babdba448a',
+    href: 'https://medium.com/@etherlink/announcing-ganesha-a-7th-upgrade-proposal-for-etherlink-mainnet-ae0a3af93aba',
+    title: 'Announcing Ganesha: A 7th Upgrade Proposal for Etherlink Mainnet',
+  },
 ];
