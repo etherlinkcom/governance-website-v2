@@ -29,6 +29,15 @@ export const PromotionVotingStatsPanel = ({
   contractAndConfig,
 }: PromotionVotingStatsPanelProps) => {
   const theme = useTheme();
+  const totalCastVotingPower =
+    (promotion.yea_voting_power || 0) +
+    (promotion.nay_voting_power || 0) +
+    (promotion.pass_voting_power || 0);
+
+  const getCastVotePercent = (votingPower: number) =>
+    totalCastVotingPower > 0
+      ? ((votingPower / totalCastVotingPower) * 100).toFixed(2)
+      : "0.00";
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -43,27 +52,13 @@ export const PromotionVotingStatsPanel = ({
       <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between" }}>
         <Typography sx={{ color: `${theme.palette.success.main} !important` }}>
           Yea:{" "}
-          {(
-            (promotion.yea_voting_power / period.totalVotingPower) *
-            100
-          ).toFixed(0)}
-          %
+          {getCastVotePercent(promotion.yea_voting_power || 0)}%
         </Typography>
         <Typography sx={{ color: `${theme.palette.error.main} !important` }}>
-          Nay:{" "}
-          {(
-            (promotion.nay_voting_power / period.totalVotingPower) *
-            100
-          ).toFixed(0)}
-          %
+          Nay: {getCastVotePercent(promotion.nay_voting_power || 0)}%
         </Typography>
         <Typography sx={{ color: `${theme.palette.warning.main} !important` }}>
-          Pass:{" "}
-          {(
-            (promotion.pass_voting_power / period.totalVotingPower) *
-            100
-          ).toFixed(0)}
-          %
+          Pass: {getCastVotePercent(promotion.pass_voting_power || 0)}%
         </Typography>
       </Box>
     </Box>
