@@ -92,6 +92,8 @@ export const ProposalView = observer(({ period, onClose }: ProposalViewProps) =>
             <ProposalCard
               key={proposal.proposal_hash}
               proposal={proposal}
+              contractAddress={period.contract}
+              isCurrentPeriod={isCurrentPeriod}
               contractVotingIndex={period.contract_voting_index}
               expanded={expandedHash === proposal.proposal_hash}
               onChange={() =>
