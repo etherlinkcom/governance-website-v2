@@ -38,17 +38,19 @@ export const Current = observer(() => {
 
   return (
     <Box sx={{ width: "100%", mx: "auto" }}>
-      {currentContract && (
-        <Box sx={{ px: 3, pb: 1 }}>
-          <CurrentContractLink contract={currentContract} />
-        </Box>
-      )}
       {currentPeriod.proposals && currentPeriod.proposals.length > 0 ? (
         <ProposalView period={currentPeriod} />
       ) : currentPeriod.promotion ? (
         <PromotionView period={currentPeriod} />
       ) : (
-        <EmptyCurrentPeriod currentPeriod={currentPeriod} />
+        <>
+          {currentContract && (
+            <Box sx={{ px: 3, pb: 1 }}>
+              <CurrentContractLink contract={currentContract} />
+            </Box>
+          )}
+          <EmptyCurrentPeriod currentPeriod={currentPeriod} />
+        </>
       )}
     </Box>
   );
