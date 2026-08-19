@@ -12,6 +12,8 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { HashDisplay } from "@/components/shared/HashDisplay";
 import { EllipsisBox } from "@/components/shared/EllipsisBox";
+import { CopyButton } from "@/components/shared/CopyButton";
+import { CopyCommandButton } from "@/components/shared/CopyCommandButton";
 import { UpvotersTable } from "./UpvotersTable";
 import { FrontendProposal } from "@/types/api";
 import { UpvoteButton } from "./UpvoteButton";
@@ -20,6 +22,8 @@ import { LearnMoreAndUpvotes } from "./LearnMoreAndUpvotes";
 
 interface ProposalCardProps {
   proposal: FrontendProposal;
+  contractAddress: string;
+  isCurrentPeriod: boolean;
   contractVotingIndex: number;
   expanded: boolean;
   onChange: () => void;
@@ -27,10 +31,18 @@ interface ProposalCardProps {
 
 export const ProposalCard = observer(({
   proposal,
+  contractAddress,
+  isCurrentPeriod,
   contractVotingIndex,
   expanded,
   onChange,
 }: ProposalCardProps) => {
+
+  const hashArg = proposal.proposal_hash.startsWith("0x")
+    ? proposal.proposal_hash
+    : `0x${proposal.proposal_hash}`;
+  // octez-client upvote command; <voting_key> is a placeholder for the voter to edit
+  const upvoteCommand = `octez-client call ${contractAddress} from <baking_key or voting_key> \\\n  --entrypoint "upvote_proposal" --arg "${hashArg}" \\\n  --burn-cap 0.11`;
 
   return (
     <Accordion expanded={expanded} onChange={onChange}>
@@ -66,13 +78,20 @@ export const ProposalCard = observer(({
           <EllipsisBox sx={{
             maxWidth: {xs: '100%', md: '70%'},
           }}>
-            <HashDisplay
-              hash={proposal.proposal_hash}
-              sx={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}/>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+              <HashDisplay
+                hash={proposal.proposal_hash}
+                sx={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}/>
+              <CopyButton
+                text={proposal.proposal_hash}
+                message="Proposal hash copied"
+                sx={{ color: "primary.main" }}
+              />
+            </Box>
             <Typography
               variant="subtitle2"
               sx={{
@@ -98,6 +117,14 @@ export const ProposalCard = observer(({
               >
                 {proposal.alias || proposal.proposer}
               </Link>
+              {isCurrentPeriod && (
+                <CopyCommandButton
+                  command={upvoteCommand}
+                  label="Copy upvote command"
+                  message="Upvote command copied"
+                  sx={{ fontSize: "inherit", ml: 2 }}
+                />
+              )}
             </Typography>
 
             {proposal.time && (

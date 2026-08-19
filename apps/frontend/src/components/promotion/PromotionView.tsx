@@ -10,6 +10,7 @@ import { PromotionVotingStatsPanel } from "@/components/promotion/PeriodVotingSt
 import { LearnMoreButton } from "@/components/shared/LearnMoreButton";
 import { TimeRemaining } from "@/components/current/TimeRemaining";
 import { CopyButton } from "@/components/shared/CopyButton";
+import { CopyCommandButton } from "@/components/shared/CopyCommandButton";
 import { VoteButton } from "@/components/promotion/VoteButton";
 import { ModalCloseButton } from "../shared/ModalCloseButton";
 
@@ -21,6 +22,8 @@ interface PromotionViewProps {
 export const PromotionView = observer(({ period, onClose }: PromotionViewProps) => {
     const contract = contractStore.getContract(period.contract);
     const isCurrentPeriod: boolean = contractStore.currentPeriodData?.contract_voting_index === period.contract_voting_index;
+    // octez-client vote command; <voting_key> and the "yea" option are placeholders for the voter to edit
+    const voteCommand = `octez-client call ${period.contract} from <baking_key or voting_key> \\\n  --entrypoint "vote" --arg '"yea"' \\\n  --burn-cap 0.11`;
 
     return (
       <Box
@@ -92,13 +95,27 @@ export const PromotionView = observer(({ period, onClose }: PromotionViewProps) 
         >
           <Box sx={{ width: { xs: "100%", md: "70%" } }}>
             <Typography>Candidate:</Typography>
-            <EllipsisBox sx={{ maxWidth: "100%" }}>
-              <HashDisplay hash={period.promotion?.proposal_hash || ""} />
-            </EllipsisBox>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <EllipsisBox sx={{ maxWidth: "100%" }}>
+                <HashDisplay hash={period.promotion?.proposal_hash || ""} />
+              </EllipsisBox>
+              <CopyButton
+                text={period.promotion?.proposal_hash || ""}
+                message="Candidate hash copied"
+                sx={{ color: "primary.main" }}
+              />
+              {isCurrentPeriod && (
+                <CopyCommandButton
+                  command={voteCommand}
+                  label="Copy vote command"
+                  message="Vote command copied"
+                />
+              )}
+            </Box>
           </Box>
 
 
-          <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", sm: "row" }, width: { xs: "100%", md: "auto" } }}>
+          <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", sm: "row" }, alignItems: "center", width: { xs: "100%", md: "auto" } }}>
             <VoteButton
               isCurrentPeriod={isCurrentPeriod}
               contractVotingIndex={period.contract_voting_index}

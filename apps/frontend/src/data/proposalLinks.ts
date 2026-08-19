@@ -60,4 +60,9 @@ export const allLinkData: LinkData[] = [
     href: 'https://medium.com/@etherlink/announcing-ganesha-a-7th-upgrade-proposal-for-etherlink-mainnet-ae0a3af93aba',
     title: 'Announcing Ganesha: A 7th Upgrade Proposal for Etherlink Mainnet',
   },
+  {
+    payloadKey: '008c903318dfc0016de771f981069498f7774f3c35ffcc3f2dce63f5a3b6d03df6',
+    href: 'https://forum.tezosagora.org/t/etherlink-7-0-ganesha-resubmission-via-fast-governance-on-wednesday-august-19th/7159',
+    title: 'Etherlink 7.0 (Ganesha) — resubmission via Fast governance on Wednesday, August 19th',
+  },
 ];
