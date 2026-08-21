@@ -336,7 +336,9 @@ export class WalletStore {
             pool_address: parsed.pool_address,
           };
         }
-      } catch { }
+      } catch {
+        sequencerProposal = undefined;
+      }
 
       const operation = await contract.methodsObject.upvote_proposal(sequencerProposal ?? proposal).send();
       const confirmation: TransactionOperationConfirmation | undefined = await operation.confirmation();

@@ -12,7 +12,9 @@ export function parseSequencerKey(str: string): SequencerKey | null {
         sequencerPublicKey: obj.sequencer_pk,
       };
     }
-  } catch {}
+  } catch {
+    return null;
+  }
   return null;
 }
 
