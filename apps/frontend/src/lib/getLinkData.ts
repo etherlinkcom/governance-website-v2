@@ -13,6 +13,8 @@ export function parseSequencerKey(str: string): SequencerKey | null {
       };
     }
   } catch {
+    // Explicitly handle JSON parsing failures to prevent swallowed exceptions
+    // returning null securely signals a malformed payload
     return null;
   }
   return null;
@@ -31,6 +33,7 @@ export function getLinkData(hash: PayloadKey) {
           entry.payloadKey.sequencerPublicKey === parsed.sequencer_pk
         );
       } catch {
+        // Prevent swallowed exceptions by explicitly returning false on malformed JSON structures
         return false;
       }
     }
