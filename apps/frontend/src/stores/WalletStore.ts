@@ -337,6 +337,8 @@ export class WalletStore {
           };
         }
       } catch {
+        // Explicitly handle JSON parsing failures to prevent swallowed exceptions 
+        // and safely fall back to the original proposal payload
         sequencerProposal = undefined;
       }
 
