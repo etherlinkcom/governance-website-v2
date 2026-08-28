@@ -135,9 +135,14 @@ export class Database {
       AND periods.contract_voting_index = proposals.contract_period_index
     WHERE contracts.governance_type = ?
       AND contracts.active = 1
-    ORDER BY periods.level_end DESC, periods.contract_voting_index DESC
-    LIMIT 1`,
-      [governanceType]
+      AND periods.level_end = (
+        SELECT MAX(p2.level_end)
+        FROM periods p2
+        JOIN contracts c2 ON p2.contract_address = c2.contract_address
+        WHERE c2.governance_type = ? AND c2.active = 1
+      )
+    ORDER BY periods.level_end DESC, periods.contract_voting_index DESC`,
+      [governanceType, governanceType]
     );
 
     if (rows.length === 0) {
