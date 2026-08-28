@@ -7,6 +7,11 @@ import {
 } from "@trilitech/types";
 import { FrontendPeriod } from "@/types/api";
 
+// Proposal hashes to hide from the UI (spam/duplicate submissions).
+const HIDDEN_PROPOSALS = new Set([
+  "00cc22b3577a818286f433b9a06a0e94324c50c3a8166dc7eab10ae5879ca470b4",
+]);
+
 export class Database {
   private connection: mysql.Connection | null = null;
 
@@ -264,7 +269,7 @@ export class Database {
         periodsMap.set(periodKey, period);
       }
 
-      if (row.proposal_hash) {
+      if (row.proposal_hash && !HIDDEN_PROPOSALS.has(row.proposal_hash)) {
         const period = periodsMap.get(periodKey)!;
 
         if (!period.proposals) period.proposals = [];
