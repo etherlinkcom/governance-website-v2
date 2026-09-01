@@ -3,24 +3,34 @@ import { PayloadKey, SequencerKey, allLinkData } from '@/data/proposalLinks';
 export function parseSequencerKey(str: string): SequencerKey | null {
   try {
     const obj = JSON.parse(str);
-    if (obj && typeof obj === 'object' && obj.poolAddress && obj.sequencerPublicKey) {
-      return obj as SequencerKey;
+    
+    if (obj && typeof obj === 'object') {
+      if (obj.poolAddress && obj.sequencerPublicKey) {
+        return obj as SequencerKey;
+      }
+      
+      if (obj.pool_address && obj.sequencer_pk) {
+        return {
+          poolAddress: obj.pool_address,
+          sequencerPublicKey: obj.sequencer_pk,
+        };
+      }
     }
-    if (obj && typeof obj === 'object' && obj.pool_address && obj.sequencer_pk) {
-      return {
-        poolAddress: obj.pool_address,
-        sequencerPublicKey: obj.sequencer_pk,
-      };
-    }
-  } catch {}
+  } catch {
+    // Explicitly handle JSON parsing failures to prevent swallowed exceptions
+    // returning null securely signals a malformed payload
+    return null;
+  }
+  
   return null;
 }
 
 export function getLinkData(hash: PayloadKey) {
-  return allLinkData.find(entry => {
+  return allLinkData.find((entry) => {
     if (typeof entry.payloadKey === 'string' && typeof hash === 'string') {
       return entry.payloadKey === hash;
     }
+    
     if (typeof entry.payloadKey === 'object' && typeof hash === 'string') {
       try {
         const parsed = JSON.parse(hash);
@@ -29,9 +39,11 @@ export function getLinkData(hash: PayloadKey) {
           entry.payloadKey.sequencerPublicKey === parsed.sequencer_pk
         );
       } catch {
+        // Prevent swallowed exceptions by explicitly returning false on malformed JSON structures
         return false;
       }
     }
+    
     return false;
   });
 }
