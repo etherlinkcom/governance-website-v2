@@ -46,6 +46,14 @@ npm run start           # Build and run production server
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`: MySQL database
 - `PORT`: API port (default `8080`)
 
+## Data Sources
+
+| Source | What the indexer gets |
+|---|---|
+| **Contract storage** (read via TzKT `/contracts/{address}/storage`) | Contract settings (start level, period length, quorums, upvote limit); period index at a level; winning proposal hash for promotion periods |
+| **TzKT API** | Contract transactions (proposals, upvotes, votes); block dates and levels; Tezos voting periods; baker voting power and alias; live events over SignalR |
+| **Tezos RPC** (`RPC_URL`) | Total voting power at a level; `get_voting_state` view on the governance contract (is this a promotion period?); `list_voters` view on the delegation contract (`DELEGATE_VIEW_CONTRACT`) to find who a voting key votes for |
+
 ## Components
 
 ```mermaid
@@ -61,13 +69,35 @@ flowchart LR
   rpc["Tezos RPC"]
   db[("MySQL")]
 
-  sched --> routes
-  routes --> gci
-  routes --> tl
-  tzkt -->|REST| gci
-  rpc -->|contract storage| gci
-  tzkt -->|SignalR| tl
-  gci --> dbc
-  tl --> dbc
-  dbc --> db
+  sched -->|1| routes
+  routes -->|2| gci
+  routes -->|3| tl
+  tzkt -->|4| gci
+  rpc -->|5| gci
+  tzkt -->|6| tl
+  tl -->|7| gci
+  gci -->|8| dbc
+  tl -->|9| dbc
+  dbc -->|10| db
 ```
+
+1. Cloud Scheduler calls the indexer's routes every 10 minutes.
+2. `/index-active` (or `/index-all`) runs `GovernanceContractIndexer` to catch up on history.
+3. `/start-listener` starts `TzktListener` if it isn't already running.
+4. The indexer reads from TzKT over REST:
+   - Contract storage: settings (start level, period length, quorums, upvote limit)
+   - Contract storage: period index at a given level
+   - Contract storage: winning proposal hash for promotion periods
+   - Contract transactions (proposals, upvotes, votes)
+   - Block dates and levels
+   - Tezos voting periods
+   - Baker voting power and alias
+5. The indexer reads from the Tezos RPC:
+   - Total voting power at a level
+   - `get_voting_state` view on the governance contract (is this a promotion period?)
+   - `list_voters` view on the delegation contract (who a voting key votes for)
+6. TzKT pushes new blocks and contract transactions to the listener over SignalR.
+7. The listener reuses the indexer's lookups (voting power, voters, period index) to build each record.
+8. The indexer saves periods, proposals, promotions, upvotes and votes.
+9. The listener saves new proposals, upvotes and votes, and updates periods when a new one starts.
+10. `Database.ts` writes to MySQL as upserts, so running both paths is safe.
