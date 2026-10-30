@@ -3,6 +3,8 @@
 ## Overview
 A Node.js service that indexes Tezos governance data into MySQL. It runs an Express API for triggering indexing, plus a live listener for new blockchain events.
 
+Data is updated two ways: the live listener writes new proposals, upvotes and votes within seconds, and a scheduled `/index-active` call (every 10 min) re-reads the current period from TzKT to fill in anything the listener missed. Writes are upserts, so overlap is safe.
+
 ## Core Features
 - **Database Management**: MySQL migrations for the governance data schema
 - **Real-time Indexing**: SignalR listener for live events from the TzKT API
@@ -43,3 +45,29 @@ npm run start           # Build and run production server
 - `DELEGATE_VIEW_CONTRACT`: voting rights delegation contract
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`: MySQL database
 - `PORT`: API port (default `8080`)
+
+## Components
+
+```mermaid
+flowchart LR
+  sched["Cloud Scheduler<br/>every 10 min"]
+  subgraph indexer["Indexer (Express)"]
+    routes["Routes<br/>/index-active /index-all<br/>/start-listener /stop-listener"]
+    gci["GovernanceContractIndexer<br/>history + catch-up"]
+    tl["TzktListener<br/>live events"]
+    dbc["db/Database.ts<br/>pool + migrations"]
+  end
+  tzkt["TzKT API"]
+  rpc["Tezos RPC"]
+  db[("MySQL")]
+
+  sched --> routes
+  routes --> gci
+  routes --> tl
+  tzkt -->|REST| gci
+  rpc -->|contract storage| gci
+  tzkt -->|SignalR| tl
+  gci --> dbc
+  tl --> dbc
+  dbc --> db
+```

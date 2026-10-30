@@ -36,3 +36,31 @@ npm run start           # Run production server
 - `NEXT_PUBLIC_POSTHOG_KEY` / `NEXT_PUBLIC_POSTHOG_HOST`: PostHog analytics
 - `NEXT_PUBLIC_DISPLAY_IN_TEZ`: show amounts in tez
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`: MySQL database filled by the indexer
+
+## Data Flow
+
+```mermaid
+flowchart LR
+  subgraph browser["Browser"]
+    ui["Components"]
+    cs["ContractStore<br/>(MobX)"]
+    ws["WalletStore<br/>(MobX)"]
+  end
+  subgraph server["Next.js API routes"]
+    contracts["/api/contracts"]
+    curp["/api/[governance]/currentPeriod"]
+    pastp["/api/[governance]/pastPeriods"]
+    votes["/api/votes"]
+    upvotes["/api/upvotes"]
+    dbc["lib/database.ts"]
+  end
+  db[("MySQL<br/>filled by indexer")]
+  chain["Tezos governance contracts"]
+
+  ui --> cs
+  ui --> ws
+  cs --> contracts & curp & pastp & votes & upvotes
+  contracts & curp & pastp & votes & upvotes --> dbc
+  dbc --> db
+  ws -->|"Octez.js<br/>signed operations"| chain
+```
