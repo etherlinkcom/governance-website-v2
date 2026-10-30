@@ -36,3 +36,38 @@ npm run start           # Run production server
 - `NEXT_PUBLIC_POSTHOG_KEY` / `NEXT_PUBLIC_POSTHOG_HOST`: PostHog analytics
 - `NEXT_PUBLIC_DISPLAY_IN_TEZ`: show amounts in tez
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`: MySQL database filled by the indexer
+
+## Data Flow
+
+```mermaid
+flowchart LR
+  subgraph browser["Browser"]
+    ui["Components"]
+    cs["ContractStore<br/>(MobX)"]
+    ws["WalletStore<br/>(MobX)"]
+  end
+  subgraph server["Next.js API routes"]
+    contracts["/api/contracts"]
+    curp["/api/[governance]/currentPeriod"]
+    pastp["/api/[governance]/pastPeriods"]
+    votes["/api/votes"]
+    upvotes["/api/upvotes"]
+    dbc["lib/database.ts"]
+  end
+  db[("MySQL<br/>filled by indexer")]
+  chain["Tezos governance contracts"]
+
+  ui -->|1| cs
+  cs -->|2| contracts & curp & pastp & votes & upvotes
+  contracts & curp & pastp & votes & upvotes -->|3| dbc
+  dbc -->|4| db
+  ui -->|5| ws
+  ws -->|6| chain
+```
+
+1. Components ask `ContractStore` for contracts, periods, votes and upvotes.
+2. `ContractStore` calls the matching Next.js API route.
+3. Each API route uses `lib/database.ts` to run its query.
+4. `lib/database.ts` reads from the MySQL database that the indexer fills.
+5. When a user votes, upvotes, proposes or manages voting rights, components call `WalletStore`.
+6. `WalletStore` uses Octez.js to have the wallet sign and send the operation straight to the governance contract. It shows on the site once the indexer saves it.
