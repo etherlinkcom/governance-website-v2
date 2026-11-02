@@ -3,14 +3,14 @@ import { GovernanceContractIndexer } from './GovernanceContractIndexer';
 import { logger } from './utils/logger';
 import { Contract, TzktTransactionEvent, TzktContractStorageHistory, Voter, TzktApiHead, TzktContractStorage, PromotionContext, ContractConfig, OperationsPayload} from './types';
 import { Period, Proposal, Upvote, Vote, Promotion, ContractAndConfig } from 'packages/types';
-import { Database } from './db/Database';
+import { Database, sharedDatabase } from './db/Database';
 
 export class TzktListener {
   private contracts: Contract[];
   private contract_configs: Record<string, ContractAndConfig> = {};
   private connection!: HubConnection;
   private governance_contract_indexer: GovernanceContractIndexer = new GovernanceContractIndexer();
-  private database: Database = new Database();
+  private database: Database = sharedDatabase;
   private readonly trackedFunctions: string[] = ['new_proposal', 'upvote_proposal', 'vote'];
   private readonly eventsUrl: string = process.env.TZKT_API_URL + '/ws';
 
@@ -32,7 +32,12 @@ export class TzktListener {
       .build();
 
     this.connection.on('head', (head: TzktApiHead) => {
-      logger.info('[TzktListener] on "head" event');
+      logger.info(`[TzktListener] on "head" event (type=${head.type}, state=${head.state}, hasData=${!!head.data})`);
+      // ponytail: just log and skip messages with no block until we know what they are (reorgs may need handling)
+      if (!head.data) {
+        logger.warn(`[TzktListener] head message without block data: ${JSON.stringify(head)}`);
+        return;
+      }
       logger.info(`[TzktListener] New block received: Level ${head.data.level}`);
       this.handleBlock(head.data);
     });

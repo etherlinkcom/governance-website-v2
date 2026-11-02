@@ -5,7 +5,7 @@ import { LRUCache } from "./utils/LRUCache";
 
 import { Contract as TaquitoContract, TezosToolkit } from '@tezos-x/octez.js';
 import { HistoricalRpcClient } from "./utils/HistoricalRpcClient";
-import { Database } from "./db/Database";
+import { Database, sharedDatabase } from "./db/Database";
 
 type PeriodIndexToPeriod = {
     [period_index: number]: Period
@@ -17,7 +17,7 @@ export class GovernanceContractIndexer {
     rpc_url: string = process.env.RPC_URL || "https://rpc.tzkt.io/mainnet";
     delegate_view_contract: string =  process.env.DELEGATE_VIEW_CONTRACT || 'KT1Ut6kfrTV9tK967tDYgQPMvy9t578iN7iH';
     cache: LRUCache<any> = new LRUCache();
-    database: Database = new Database();
+    database: Database = sharedDatabase;
     tezos: TezosToolkit = new TezosToolkit(this.rpc_url);
 
     constructor() {}
