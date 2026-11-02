@@ -32,7 +32,12 @@ export class TzktListener {
       .build();
 
     this.connection.on('head', (head: TzktApiHead) => {
-      logger.info('[TzktListener] on "head" event');
+      logger.info(`[TzktListener] on "head" event (type=${head.type}, state=${head.state}, hasData=${!!head.data})`);
+      // ponytail: just log and skip messages with no block until we know what they are (reorgs may need handling)
+      if (!head.data) {
+        logger.warn(`[TzktListener] head message without block data: ${JSON.stringify(head)}`);
+        return;
+      }
       logger.info(`[TzktListener] New block received: Level ${head.data.level}`);
       this.handleBlock(head.data);
     });

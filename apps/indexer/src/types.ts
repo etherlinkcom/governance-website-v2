@@ -178,8 +178,8 @@ export interface Voter {
 }
 
 export type TzktApiHead = {
-  type: 1;
-  data: {
+  type: number; // TzKT: 0 = subscribed (state only), 1 = data, 2 = reorg (state only)
+  data?: {
     chain: 'mainnet';
     chainId: string;
     cycle: number;
