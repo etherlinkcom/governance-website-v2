@@ -3,14 +3,14 @@ import { GovernanceContractIndexer } from './GovernanceContractIndexer';
 import { logger } from './utils/logger';
 import { Contract, TzktTransactionEvent, TzktContractStorageHistory, Voter, TzktApiHead, TzktContractStorage, PromotionContext, ContractConfig, OperationsPayload} from './types';
 import { Period, Proposal, Upvote, Vote, Promotion, ContractAndConfig } from 'packages/types';
-import { Database } from './db/Database';
+import { Database, sharedDatabase } from './db/Database';
 
 export class TzktListener {
   private contracts: Contract[];
   private contract_configs: Record<string, ContractAndConfig> = {};
   private connection!: HubConnection;
   private governance_contract_indexer: GovernanceContractIndexer = new GovernanceContractIndexer();
-  private database: Database = new Database();
+  private database: Database = sharedDatabase;
   private readonly trackedFunctions: string[] = ['new_proposal', 'upvote_proposal', 'vote'];
   private readonly eventsUrl: string = process.env.TZKT_API_URL + '/ws';
 

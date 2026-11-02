@@ -23,7 +23,7 @@ export class Database {
       connectTimeout: 60000,
       keepAliveInitialDelay: 0,
       idleTimeout: 300000,
-      maxIdle: 10,
+      maxIdle: 2, // below connectionLimit so idle connections close after idleTimeout
     };
 
   constructor() {}
@@ -473,3 +473,6 @@ export class Database {
       return rows.length > 0 ? rows[0] : null;
   }
 }
+
+// One pool for the whole process. A new Database per request leaked a pool every /index-active call.
+export const sharedDatabase = new Database();
