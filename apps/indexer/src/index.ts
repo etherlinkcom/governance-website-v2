@@ -7,22 +7,39 @@ import { all_contracts } from "./contracts";
 import { GovernanceContractIndexer } from "./GovernanceContractIndexer";
 import { logger } from "./utils/logger";
 import { Contract } from './types';
+import { listenerProblems } from "./health";
 
 const app = express();
 const port = process.env.PORT || 8080;
 
 let listener: TzktListener | null = null;
 
-// TODO initialize db and run migrations here
+async function startListener(): Promise<void> {
+  listener = new TzktListener(all_contracts.filter((contract: Contract) => contract.active));
+  try {
+    await listener.start();
+  } catch (err) {
+    logger.error("[Indexer] Listener failed to start", err);
+    listener = null; // so the next /start-listener call retries
+  }
+}
 
 app.get("/start-listener", (_req: Request, res: Response) => {
   if (listener) {
     logger.info(`[Indexer] Listener already running`);
     return res.status(200).send("Listener already running");
   }
-  listener = new TzktListener(all_contracts.filter((contract: Contract) => contract.active));
-  listener.start()
+  startListener();
   res.send("TzKT Listener started");
+});
+
+app.get("/health", (_req: Request, res: Response) => {
+  const problems = listenerProblems(listener);
+  if (problems.length) {
+    logger.warn(`[Health] Unhealthy: ${problems.join("; ")}`);
+    return res.status(503).json({ ok: false, problems });
+  }
+  res.json({ ok: true });
 });
 
 app.get("/stop-listener", (_req: Request, res: Response) => {
@@ -64,4 +81,5 @@ app.get("/index-all", async (req: Request, res: Response) => {
 
 app.listen(port, () => {
   logger.info(`[Indexer] Indexer API listening on port ${port}\nNetwork: ${process.env.NETWORK}\nDatabase: ${process.env.DB_NAME}`);
+  startListener();
 });
