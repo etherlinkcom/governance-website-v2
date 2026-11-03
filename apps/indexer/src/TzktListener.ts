@@ -113,6 +113,10 @@ export class TzktListener {
     logger.info(`[TzktListener] processOperation(type=${transaction_event.type}, id=${transaction_event.id})`);
     const contract: Contract | undefined = this.contracts.find(c => c.address === transaction_event.target.address);
     if (!contract) return;
+    if (transaction_event.status !== 'applied') {
+      logger.info(`[TzktListener] Skipping ${transaction_event.status} transaction ${transaction_event.hash}`);
+      return;
+    }
 
     const entrypoint: string = transaction_event.parameter!.entrypoint;
     if (this.trackedFunctions.includes(entrypoint)) this.handleContractFunction(transaction_event, entrypoint);
