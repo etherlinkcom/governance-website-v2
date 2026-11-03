@@ -13,6 +13,7 @@ export class TzktListener {
   private database: Database = sharedDatabase;
   private readonly trackedFunctions: string[] = ['new_proposal', 'upvote_proposal', 'vote'];
   private readonly eventsUrl: string = process.env.TZKT_API_URL + '/ws';
+  public lastHeadAt: Date | null = null;
 
   constructor(contracts: Contract[]) {
     logger.info(`[TzktListener] constructor(contracts=${contracts.map(c => c.address).join(',')})`);
@@ -32,6 +33,7 @@ export class TzktListener {
       .build();
 
     this.connection.on('head', (head: TzktApiHead) => {
+      this.lastHeadAt = new Date();
       logger.info(`[TzktListener] on "head" event (type=${head.type}, state=${head.state}, hasData=${!!head.data})`);
       // ponytail: just log and skip messages with no block until we know what they are (reorgs may need handling)
       if (!head.data) {
@@ -399,6 +401,10 @@ export class TzktListener {
       total_voting_power: 0
     };
     await this.database.upsertPromotions([promotion_record]);
+  }
+
+  public isConnected(): boolean {
+    return this.connection?.state === HubConnectionState.Connected;
   }
 
   public async stop(): Promise<void> {
