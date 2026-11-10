@@ -70,4 +70,9 @@ export const allLinkData: LinkData[] = [
     href: 'https://forum.tezosagora.org/t/announcing-etherlink-7-1-a-security-upgrade-proposal/7166',
     title: 'Announcing Etherlink 7.1: A Security Upgrade Proposal',
   },
+  {
+    payloadKey: '00e65e70dcbb99681c8a75eb1425b24ae8114a2f79f665ed8ecba905ab5285f595',
+    href: 'https://forum.tezosagora.org/t/etherlink-7-3-undisclosed-security-upgrade-via-fast-governance-on-tuesday-november-10th/7226',
+    title: 'Etherlink 7.3 — undisclosed security upgrade via Fast governance on Tuesday, November 10th',
+  },
 ];
