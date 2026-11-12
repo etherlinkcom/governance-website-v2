@@ -70,7 +70,7 @@ export class GovernanceContractIndexer {
             active: contract.active || false,
         }
 
-        const txParams: Record<string, string> = { 'limit': '10000', 'target': contract.address };
+        const txParams: Record<string, string> = { 'limit': '10000', 'target': contract.address, 'status': 'applied' };
         if (last_processed_period !== null) {
             txParams['level.ge'] = String(last_processed_period.level_start - 1);
         }
