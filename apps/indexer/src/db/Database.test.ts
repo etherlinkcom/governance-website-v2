@@ -21,18 +21,18 @@ test('idle connections can be released', () => {
 });
 
 // Old contracts stayed active = 1 in the DB forever, because only indexed contracts get their flag written.
-test('deactivateContractsExcept switches off every contract not in the active list', async () => {
+test('deactivateContracts switches off the given contracts', async () => {
   const db: any = new Database();
   const calls: { sql: string; params: string[] }[] = [];
   db.getPool = async () => ({
     execute: async (sql: string, params: string[]) => { calls.push({ sql, params }); return [{ affectedRows: 4 }]; },
   });
 
-  assert.equal(await db.deactivateContractsExcept(['KT1A', 'KT1B']), 4);
-  assert.match(calls[0].sql, /SET active = 0 .* NOT IN \(\?, \?\)/);
+  assert.equal(await db.deactivateContracts(['KT1A', 'KT1B']), 4);
+  assert.match(calls[0].sql, /SET active = 0 WHERE active = 1 AND contract_address IN \(\?, \?\)/);
   assert.deepEqual(calls[0].params, ['KT1A', 'KT1B']);
 
-  // An empty list must not switch everything off.
-  assert.equal(await db.deactivateContractsExcept([]), 0);
+  // An empty list (testnet) must not send invalid SQL.
+  assert.equal(await db.deactivateContracts([]), 0);
   assert.equal(calls.length, 1);
 });

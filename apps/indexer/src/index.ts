@@ -58,10 +58,9 @@ app.get("/index-active", async (req: Request, res: Response) => {
     logger.info(`[Indexer] Indexing all contracts. Indexing from start: ${indexFromStart}`);
     const indexer = new GovernanceContractIndexer();
     await indexer.initialize();
-    const active_contracts = all_contracts.filter(c => c.active);
-    await indexer.indexContracts(active_contracts, indexFromStart);
-    const switched_off = await sharedDatabase.deactivateContractsExcept(active_contracts.map(c => c.address));
+    const switched_off = await sharedDatabase.deactivateContracts(all_contracts.filter(c => !c.active).map(c => c.address));
     if (switched_off) logger.info(`[Indexer] Marked ${switched_off} old contracts inactive`);
+    await indexer.indexContracts(all_contracts.filter(c => c.active), indexFromStart);
     res.send("Indexer ran on active contracts");
   } catch (err) {
     logger.error("[Indexer] Failed to index active contracts", err);
