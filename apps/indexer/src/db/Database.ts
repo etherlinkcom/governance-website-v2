@@ -411,6 +411,16 @@ export class Database {
     }
   }
 
+  // Old contracts are never indexed again, so nothing else switches their DB flag off.
+  async deactivateContractsExcept(active_addresses: string[]): Promise<number> {
+    if (active_addresses.length === 0) return 0; // NOT IN () is invalid SQL, and would switch everything off
+    const { affectedRows } = await this.upsert(
+      `UPDATE contracts SET active = 0 WHERE active = 1 AND contract_address NOT IN (${active_addresses.map(() => '?').join(', ')})`,
+      active_addresses
+    );
+    return affectedRows;
+  }
+
   async upsertPeriods(periods: Period[]): Promise<void> {
     logger.info(`[Database] upsertPeriods(${periods.length} periods)`);
     for (const period of periods) {

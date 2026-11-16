@@ -8,6 +8,7 @@ import { GovernanceContractIndexer } from "./GovernanceContractIndexer";
 import { logger } from "./utils/logger";
 import { Contract } from './types';
 import { listenerProblems } from "./health";
+import { sharedDatabase } from "./db/Database";
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -57,7 +58,10 @@ app.get("/index-active", async (req: Request, res: Response) => {
     logger.info(`[Indexer] Indexing all contracts. Indexing from start: ${indexFromStart}`);
     const indexer = new GovernanceContractIndexer();
     await indexer.initialize();
-    await indexer.indexContracts(all_contracts.filter(c => c.active), indexFromStart);
+    const active_contracts = all_contracts.filter(c => c.active);
+    await indexer.indexContracts(active_contracts, indexFromStart);
+    const switched_off = await sharedDatabase.deactivateContractsExcept(active_contracts.map(c => c.address));
+    if (switched_off) logger.info(`[Indexer] Marked ${switched_off} old contracts inactive`);
     res.send("Indexer ran on active contracts");
   } catch (err) {
     logger.error("[Indexer] Failed to index active contracts", err);
